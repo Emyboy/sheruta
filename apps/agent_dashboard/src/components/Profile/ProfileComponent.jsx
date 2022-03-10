@@ -1,7 +1,6 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import Layout from '../Layout/Layout'
 import { useParams } from 'react-router-dom'
 import PageNotFound from '../../pages/PageNotFound'
 import { Tab, Tabs } from 'react-bootstrap'
@@ -132,17 +131,17 @@ export default function ProfileComponent({ _user_id, standalone }) {
 															</button>
 															<ul className="dropdown-menu dropdown-menu-end">
 																<li>
-																	<a className="dropdown-item" href="#">
+																	<a className="dropdown-item" href="#c">
 																		Action
 																	</a>
 																</li>
 																<li>
-																	<a className="dropdown-item" href="#">
+																	<a className="dropdown-item" href="#c">
 																		Another action
 																	</a>
 																</li>
 																<li>
-																	<a className="dropdown-item" href="#">
+																	<a className="dropdown-item" href="#c">
 																		Something else here
 																	</a>
 																</li>

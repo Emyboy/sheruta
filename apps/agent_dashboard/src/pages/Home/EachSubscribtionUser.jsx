@@ -8,6 +8,7 @@ export default function EachSubscribtionUser({ sub }) {
 	if (!user) {
 		return
 	}
+	console.log('EACH SUB USER ---', user);
 	return (
 		<div className="pb-4">
 			<div className="d-flex align-items-center">

@@ -3,6 +3,7 @@ import AliceService from '../../services/AliceService'
 import EachContact from './EachContact'
 
 export default function ContactList({ user_id, userData }) {
+	console.log('EACH CONTACT ---', { user_id, userData })
 	const [user] = useState(userData || null)
 	const [data, setData] = useState([])
 
