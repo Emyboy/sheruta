@@ -21,7 +21,7 @@ export default function EachSubscribtionUser({ sub }) {
 				<div className="flex-grow-1">
 					<h5 className="font-size-15 mb-1">
 						<a href="#c" className="text-dark pr-2">
-							{user?.first_name.split(' ')[0]} {user.last_name}
+							{user?.first_name?.split(' ')[0]} {user.last_name}
 						</a>
 					</h5>
 					<span className="text-muted">{user.username}</span><br />

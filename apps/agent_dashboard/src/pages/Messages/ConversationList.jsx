@@ -19,8 +19,8 @@ export default function ConversationList() {
 
 					<div className="flex-grow-1">
 						<h5 className="font-size-16 mb-1">
-							<a href="#" className="text-dark">
-								{user?.first_name.split()[0]}{' '}
+							<a href="#c" className="text-dark">
+								{user?.first_name?.split()[0]}{' '}
 								<i className="mdi mdi-circle text-success align-middle font-size-10 ms-1"></i>
 							</a>
 						</h5>
@@ -39,16 +39,16 @@ export default function ConversationList() {
 								<i className="bx bx-dots-horizontal-rounded"></i>
 							</button> */}
 							<div className="dropdown-menu dropdown-menu-end">
-								<a className="dropdown-item" href="#">
+								<a className="dropdown-item" href="#c">
 									Profile
 								</a>
-								<a className="dropdown-item" href="#">
+								<a className="dropdown-item" href="#c">
 									Edit
 								</a>
-								<a className="dropdown-item" href="#">
+								<a className="dropdown-item" href="#c">
 									Add Contact
 								</a>
-								<a className="dropdown-item" href="#">
+								<a className="dropdown-item" href="#c">
 									Setting
 								</a>
 							</div>
