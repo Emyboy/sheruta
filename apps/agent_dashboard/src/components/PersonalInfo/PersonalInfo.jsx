@@ -1,4 +1,5 @@
 import axios from 'axios'
+import moment from 'moment'
 import React, { useCallback, useEffect, useState } from 'react'
 
 export default function PersonalInfo({ userData, user_id }) {
@@ -70,6 +71,18 @@ export default function PersonalInfo({ userData, user_id }) {
 						<tr>
 							<th scope="row">Religion</th>
 							<td>{data?.religion?.toUpperCase()}</td>
+						</tr>
+						<tr>
+							<th scope="row" style={{ width: '250px' }}>
+								Joined
+							</th>
+							<td>{moment(user?.created_at).fromNow()}</td>
+						</tr>
+						<tr>
+							<th scope="row" style={{ width: '250px' }}>
+								Last Seen
+							</th>
+							<td>{moment(user?.last_seen).fromNow()}</td>
 						</tr>
 					</tbody>
 				</table>

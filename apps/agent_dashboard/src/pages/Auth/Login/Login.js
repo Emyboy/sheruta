@@ -13,6 +13,7 @@ export default function Login() {
 		password: null,
 		identifier: null,
 	})
+	const [passwordInputType, setPasswordInputType] = useState('password')
 
 	const handleSubmit = (e) => {
 		e.preventDefault()
@@ -97,7 +98,7 @@ export default function Login() {
 
 											<div className="form-floating form-floating-custom mb-4 auth-pass-inputgroup">
 												<input
-													type="password"
+													type={passwordInputType}
 													className="form-control pe-5"
 													id="password-input"
 													placeholder="Enter Password"
@@ -107,6 +108,13 @@ export default function Login() {
 												/>
 
 												<button
+													onClick={() =>
+														setPasswordInputType(
+															passwordInputType === 'password'
+																? 'text'
+																: 'password'
+														)
+													}
 													type="button"
 													className="btn btn-link position-absolute h-100 end-0 top-0"
 													id="password-addon"

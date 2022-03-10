@@ -16,6 +16,21 @@ export const getAllCategories = () => (dispatch) => {
 			console.log('error ---', err)
 		})
 }
+export const getAllBlogCategories = () => (dispatch) => {
+	axios(process.env.REACT_APP_API_URL + '/blog-categories')
+		.then((res) => {
+			console.log('GOT BLOGS ---', res.data)
+			dispatch({
+				type: 'SET_VIEW_STATE',
+				payload: {
+					blog_categories: res.data,
+				},
+			})
+		})
+		.catch((err) => {
+			console.log('error ---', err)
+		})
+}
 export const getAllAmenities = () => (dispatch) => {
 	axios(process.env.REACT_APP_API_URL + '/amenities')
 		.then((res) => {

@@ -5,10 +5,9 @@ import { Modal } from 'react-bootstrap'
 import { useDispatch } from 'react-redux'
 import { getPendingAgents } from '../../redux/actions/agent.action'
 import AgentService from '../../services/AgentService'
-import axios from 'axios'
-import Cookies from 'js-cookie'
 
 export default function EachAgent({ data }) {
+	console.log('data --', data)
 	const user = data?.users_permissions_user
 	const [openReject, setOpenReject] = useState(false)
 	const [loading, setLoading] = useState(false)
@@ -18,10 +17,16 @@ export default function EachAgent({ data }) {
 	const handleReject = async (e) => {
 		e.preventDefault()
 		setLoading(true)
+		console.log('ABOUT TO REJECT --', {
+			user: user?.id,
+			agent: data?.agent?.id,
+			reason,
+		})
 		try {
 			const res = await AgentService.rejectPendingAgent(
 				user?.id,
-				data?.agent?.id
+				data?.agent?.id,
+				reason
 			)
 			console.log('RES --', res)
 			notification.success({ message: 'Rejection sent' })
@@ -29,21 +34,6 @@ export default function EachAgent({ data }) {
 				dispatch(getPendingAgents())
 				setOpenReject(false)
 				setLoading(false)
-				await axios(
-					process.env.REACT_APP_API_URL + `/notifications/sheruta/create`,
-					{
-						method: 'POST',
-						data: {
-							user: user?.id,
-							heading: 'Agent account rejected',
-							actionURL: null,
-							body: `Your request to join us as an agent was rejected because <b>${reason}</b><br />You will have to fill out the form again. But this time with the correct data.`,
-						},
-						headers: {
-							authorization: `Bearer ${Cookies.get('token')}`,
-						},
-					}
-				)
 			}
 		} catch (error) {
 			setLoading(false)
@@ -56,16 +46,16 @@ export default function EachAgent({ data }) {
 	const acceptAgentRequest = async () => {
 		setLoading(true)
 		try {
-			const res = await AgentService.acceptPendingAgent(user?.id);
+			const res = await AgentService.acceptPendingAgent(user?.id)
 			console.log(res)
-			if(res){
+			if (res) {
 				setLoading(false)
-				dispatch(getPendingAgents());
-				notification.success({ message: "Accepted"})
+				dispatch(getPendingAgents())
+				notification.success({ message: 'Accepted' })
 			}
 		} catch (error) {
 			setLoading(false)
-			notification.error({ message: "Error, please try again"})
+			notification.error({ message: 'Error, please try again' })
 			return Promise.reject(error)
 		}
 	}
@@ -90,12 +80,12 @@ export default function EachAgent({ data }) {
 						/>
 						<div className="d-flex">
 							<button disabled={loading} className="btn btn-success mt-3 w-100">
-								{loading ? 'Loading...' : 'Sent'}
+								{loading ? 'Loading...' : 'Send'}
 							</button>
 							<button
 								disabled={loading}
 								type="button"
-								className="btn text-danger mt-3 w-50"
+								className="btn text-danger mt-3 w-50 fw-bold"
 								onClick={() => setOpenReject(false)}
 							>
 								Cancel

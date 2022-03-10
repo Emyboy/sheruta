@@ -89,9 +89,11 @@ export default function ProfileComponent({ _user_id, standalone }) {
 																<p className="text-muted font-size-13 mb-0">
 																	@{_user?.username}
 																</p>
-																<span className="badge bg-success m-2">
-																	Verified
-																</span>
+																{_user?.is_verified && (
+																	<span className="badge bg-success m-2">
+																		Verified
+																	</span>
+																)}
 															</div>
 														</div>
 													</div>

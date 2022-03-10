@@ -120,7 +120,6 @@ import { AiFillCheckCircle } from 'react-icons/ai';
 export default function EachLog({ log }) {
 	const [showLogs, setShowLogs] = useState(false)
 	const [showProfile, setShowProfile] = useState(false)
-	console.log('LOG --', log)
 	const user = log?.users_permissions_user
 	return (
 		<div className="pb-2 pt-2 border-bottom">

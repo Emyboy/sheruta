@@ -9,7 +9,8 @@ const initialState = {
 	states: [],
 	subscriptions: [],
 	paymentTypes: [],
-	notifications: []
+	notifications: [],
+	blog_categories: []
 }
 
 const ViewReducer =  (state = initialState, { type, payload }) => {

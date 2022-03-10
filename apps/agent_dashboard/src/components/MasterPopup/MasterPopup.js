@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getAgentProperties } from '../../redux/actions/agent.action'
 import {
 	getAllAmenities,
+	getAllBlogCategories,
 	getAllCategories,
 	getAllNotifications,
 	getAllService,
@@ -27,6 +28,7 @@ export default function MasterPopup() {
 		dispatch(getAllStates())
 		dispatch(paymentTypes())
 		dispatch(getAllService())
+		dispatch(getAllBlogCategories())
 	}, [dispatch])
 
 	useEffect(() => {

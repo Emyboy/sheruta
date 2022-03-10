@@ -21,10 +21,10 @@ export default function EachSubscribtionUser({ sub }) {
 				<div className="flex-grow-1">
 					<h5 className="font-size-15 mb-1">
 						<a href="#c" className="text-dark pr-2">
-							{user?.first_name} {user.last_name}
+							{user?.first_name.split(' ')[0]} {user.last_name}
 						</a>
 					</h5>
-					<span className="text-muted">{user.email}</span><br />
+					<span className="text-muted">{user.username}</span><br />
 					<small>{moment(sub.created_at).fromNow()}</small>
 				</div>
 				<div className="flex-shrink-0 text-end">
