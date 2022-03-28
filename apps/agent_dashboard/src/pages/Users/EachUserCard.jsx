@@ -73,6 +73,7 @@ export default function EachUserCard({ user }) {
 						alt=""
 						width="60"
 						className=" rounded-circle img-thumbnail"
+						loading="lazy"
 					/>
 					<div className="flex-1 ms-3">
 						<h5 className="font-size-15 mb-1">

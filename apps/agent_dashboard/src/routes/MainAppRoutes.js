@@ -23,6 +23,7 @@ import Notifications from '../pages/Notification/Notification'
 import EditProperty from '../pages/Properties/EditProperty'
 import Agents from '../pages/Agents/Agents'
 import Messages from '../pages/Messages/Messages'
+import RedFlags from '../pages/RedFlags/RedFlags'
 
 export default function MainAppRoutes() {
 	const { user } = useSelector((state) => state.auth)
@@ -46,6 +47,7 @@ export default function MainAppRoutes() {
 								<Route path="/analytics" element={<Analyticss />} />
 								<Route path="/users" element={<Users />} />
 								<Route path="/email" element={<Email />} />
+								<Route path="/reports" element={<RedFlags />} />
 							</>
 						) : (
 							<>

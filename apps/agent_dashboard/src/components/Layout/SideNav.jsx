@@ -17,6 +17,7 @@ import { HiOutlineUserGroup } from 'react-icons/hi'
 import { FaPeopleCarry } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { logoutAgent } from '../../redux/actions/auth.action'
+import { AiOutlineFlag } from 'react-icons/ai';
 
 const EachNav = ({ Icon, title, route, count, active, onClick }) => {
 	return (
@@ -67,7 +68,7 @@ export default function SideNav({ pageName }) {
 											className="metismenu list-unstyled mm-show"
 											id="side-menu"
 										>
-											{parseInt(user.id) ==
+											{parseInt(user?.id) ==
 												parseInt(process.env.REACT_APP_ADMIN_ID) && (
 												<>
 													<li className="menu-title" data-key="t-menu">
@@ -115,6 +116,12 @@ export default function SideNav({ pageName }) {
 														route="/email"
 														Icon={<FiMail />}
 														active={pageName === 'email'}
+													/>
+													<EachNav
+														title="Red Flags"
+														route="/reports"
+														Icon={<AiOutlineFlag />}
+														active={pageName === 'reports'}
 													/>
 												</>
 											)}

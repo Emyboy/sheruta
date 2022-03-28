@@ -25,7 +25,7 @@ export default function EachSubscribtionUser({ sub }) {
 							{user?.first_name?.split(' ')[0]} {user.last_name}
 						</a>
 					</h5>
-					<span className="text-muted">{user.username}</span><br />
+					<span className="text-muted">@{user.username}</span><br />
 					<small>{moment(sub.created_at).fromNow()}</small>
 				</div>
 				<div className="flex-shrink-0 text-end">
