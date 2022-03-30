@@ -1,6 +1,7 @@
 import React from 'react'
 import Layout from '../../components/Layout/Layout'
 import EachTopCard from './EachTopCard'
+import UserFeedback from './UserFeedback/UserFeedback'
 import UserSubscriptionList from './UserSubscriptionList/UserSubscriptionList'
 
 export default function Home() {
@@ -14,7 +15,7 @@ export default function Home() {
 						<div className="page-title-right">
 							<ol className="breadcrumb m-0">
 								<li className="breadcrumb-item">
-									<a href='#c'>Dashboard</a>
+									<a href="#c">Dashboard</a>
 								</li>
 								<li className="breadcrumb-item active">Welcome !</li>
 							</ol>
@@ -44,9 +45,15 @@ export default function Home() {
 				/>
 			</div>
 			<div>
-				<h1>Home</h1>
-				<div className="col-xl-4">
-					<UserSubscriptionList />
+				<hr />
+				<div className="row">
+					<div className="col-xl-4">
+						<UserSubscriptionList />
+					</div>
+					<div className="col-xl-4">
+						<UserFeedback />
+					</div>
+					
 				</div>
 			</div>
 		</Layout>
