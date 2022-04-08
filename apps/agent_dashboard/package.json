@@ -32,7 +32,6 @@
 		"redux": "^4.1.2",
 		"redux-logger": "^3.0.6",
 		"redux-thunk": "^2.4.1",
-		"sheruta_kit": "*",
 		"uuid": "^8.3.2",
 		"web-vitals": "^0.2.4",
 		"workbox-background-sync": "^5.1.4",
