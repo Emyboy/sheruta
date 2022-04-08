@@ -35,8 +35,7 @@ export default function UserSubscriptionList() {
 										style={{ padding: '0px 16px' }}
 									>
 										{subscriptions &&
-											subscriptions
-												.filter((x) => x.status === 'success')
+											subscriptions?.filter((x) => x.status === 'success')
 												.sort(
 													(a, b) =>
 														new Date(b.created_at) - new Date(a.created_at)

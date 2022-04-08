@@ -23,7 +23,7 @@ export default function EachConversation({ data }) {
 		}
 	}, [])
 	useEffect(async () => {
-		setCount(messages.filter((x) => x.conversation?.id === data?.id).length)
+		setCount(messages?.filter((x) => x?.conversation?.id === data?.id)?.length)
 	}, [messages])
 	return (
 		<li className={`${count > 0 && 'active'}`}>

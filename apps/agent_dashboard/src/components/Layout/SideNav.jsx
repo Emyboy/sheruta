@@ -145,7 +145,7 @@ export default function SideNav({ pageName }) {
 												route="/notifications"
 												Icon={<BiBell />}
 												active={pageName === 'notifications'}
-												count={notifications.filter((x) => !x.seen).length}
+												count={notifications?.filter((x) => !x.seen).length}
 											/>
 
 											{process.env.NODE_ENV === 'development' && (

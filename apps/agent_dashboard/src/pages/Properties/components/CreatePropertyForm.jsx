@@ -147,7 +147,7 @@ export default function CreatePropertyForm({ data }) {
 		if(image_urls.length === img_limit){
 			sendToDB()
 		}
-		imageFiles.filter(x => typeof x !== 'string').map((file, i) => {
+		imageFiles?.filter(x => typeof x !== 'string')?.map((file, i) => {
 				var uploadTask = storage
 					.child(
 						`images/properties/${agent.id}/${data ? data?.uid : uid}/image_${i}`
@@ -205,7 +205,7 @@ export default function CreatePropertyForm({ data }) {
 
 	const handleUpdate = (e) => {
 		e.preventDefault()
-		image_urls = imageFiles.filter(x => typeof x === 'string')
+		image_urls = imageFiles?.filter(x => typeof x === 'string')
 		handleSubmit(e)
 	}
 
@@ -532,7 +532,7 @@ export default function CreatePropertyForm({ data }) {
 															onClick={() => {
 																if (_amenities.includes(val?.id)) {
 																	setAmenities(
-																		_amenities.filter((x) => x !== val?.id)
+																		_amenities?.filter((x) => x !== val?.id)
 																	)
 																} else {
 																	setAmenities([..._amenities, val?.id])
@@ -576,7 +576,7 @@ export default function CreatePropertyForm({ data }) {
 								files={imageFiles}
 								onChange={(e) => setImageFiles([...imageFiles, e])}
 								removeFile={(e) => {
-									setImageFiles(imageFiles.filter((x) => x !== e))
+									setImageFiles(imageFiles?.filter((x) => x !== e))
 								}}
 								uid={data ? data?.uid : uid}
 							/>
