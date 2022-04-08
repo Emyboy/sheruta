@@ -221,7 +221,7 @@ export default function Header() {
 								<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
 							</svg>
 							<span className="badge bg-danger rounded-pill">
-								{notifications.filter((x) => !x.seen).length}
+								{notifications?.filter((x) => !x.seen).length}
 							</span>
 						</button>
 						<div
@@ -266,7 +266,7 @@ export default function Header() {
 													// style={{ padding: '0px' }}
 												>
 													
-													{notifications.filter(x => !x.seen).map((val, i) => {
+													{notifications?.filter(x => !x.seen).map((val, i) => {
 														return <EachNotificationSM key={`not-${i}`} data={val} />
 													})}
 												</div>
