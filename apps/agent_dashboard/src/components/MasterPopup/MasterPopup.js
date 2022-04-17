@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getAgentProperties } from '../../redux/actions/agent.action'
+import { getAgentDetails, getAgentProperties } from '../../redux/actions/agent.action'
 import {
 	getAllAmenities,
 	getAllBlogCategories,
@@ -41,11 +41,12 @@ export default function MasterPopup() {
 			localStorage.removeItem('state')
 		}
 	}, [agent, dispatch, user?.id]);
-
+	
 	useEffect(() => {
 		if(!token){
-			dispatch(logoutAgent())
+			return dispatch(logoutAgent())
 		}
+		dispatch(getAgentDetails())
 	},[dispatch, token])
 
 	return <div></div>

@@ -10,7 +10,7 @@ import { storage } from '../../../Firebase'
 import firebase from 'firebase'
 import { v4 as Uid } from 'uuid'
 import { useEffect } from 'react'
-import { Modal } from 'react-bootstrap'
+import { Alert, Modal } from 'react-bootstrap'
 import { Progress } from 'antd'
 import { Navigate } from 'react-router-dom'
 import { notification } from 'antd'
@@ -88,6 +88,7 @@ export default function CreatePropertyForm({ data }) {
 			agent: agent.id,
 			state: agent?.state,
 			country: agent?.country,
+			location_keyword: agent?.location_keyword
 		}
 		try {
 			const res = data
@@ -143,11 +144,13 @@ export default function CreatePropertyForm({ data }) {
 		setMessage('Uploading Image')
 		setLoading(true)
 		setShowModal(true)
-		
-		if(image_urls.length === img_limit){
+
+		if (image_urls.length === img_limit) {
 			sendToDB()
 		}
-		imageFiles?.filter(x => typeof x !== 'string')?.map((file, i) => {
+		imageFiles
+			?.filter((x) => typeof x !== 'string')
+			?.map((file, i) => {
 				var uploadTask = storage
 					.child(
 						`images/properties/${agent.id}/${data ? data?.uid : uid}/image_${i}`
@@ -185,14 +188,14 @@ export default function CreatePropertyForm({ data }) {
 						// Handle successful uploads on complete
 						// For instance, get the download URL: https://firebasestorage.googleapis.com/...
 						uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-							image_urls.push(downloadURL);
+							image_urls.push(downloadURL)
 							// image_urls.splice(i, 1);
-							if(data){
+							if (data) {
 								// setImageFiles([...imageFiles, downloadURL]);
-								if(imageFiles.length === img_limit){
-									sendToDB();
+								if (imageFiles.length === img_limit) {
+									sendToDB()
 								}
-							}else {
+							} else {
 								if (image_urls.length === img_limit) {
 									sendToDB()
 								}
@@ -200,12 +203,12 @@ export default function CreatePropertyForm({ data }) {
 						})
 					}
 				)
-		})
+			})
 	}
 
 	const handleUpdate = (e) => {
 		e.preventDefault()
-		image_urls = imageFiles?.filter(x => typeof x === 'string')
+		image_urls = imageFiles?.filter((x) => typeof x === 'string')
 		handleSubmit(e)
 	}
 
@@ -247,6 +250,26 @@ export default function CreatePropertyForm({ data }) {
 						<p className="card-title-desc">Fill all information below</p>
 					</div>
 					<div className="card-body">
+						<Alert variant="success" className="row justify-content-between align-items-center">
+							<div className="col-md-5">
+								<Alert.Heading className="text-black">Important!</Alert.Heading>
+								<p>
+									Your location is set to{' '}
+									<strong>{agent?.location_keyword?.name}</strong> in{' '}
+									<strong>{agent?.state?.name}</strong> state.
+								</p>
+								<p>
+									Any flat you post will be under{' '}
+									<strong>{agent?.location_keyword?.name}</strong> automatically
+								</p>
+							</div>
+							<div className='col-md-2'>
+								{/* //Todo - Route this to account settings */}
+								<button className="btn text-success fw-bold border-success">
+									Change this.
+								</button>
+							</div>
+						</Alert>
 						<form onSubmit={data ? handleUpdate : handleSubmit}>
 							<div className="row">
 								<div className="col-sm-6">

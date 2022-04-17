@@ -11,11 +11,21 @@ export const loginAgent = (data) => (dispatch) => {
 		method: 'POST',
 	})
 		.then((res) => {
-			console.log('USER FOUND ---', res.data.user)
 			if (
 				res.data.user.role.name === 'Agent' ||
 				res.data.user.role.name === 'Sheruta'
 			) {
+				Cookies.set('token', res.data.jwt, { expires: 7 })
+				if(res.data.user.role.name === 'Sheruta'){
+					dispatch({
+						type: 'SET_AUTH_STATE',
+						payload: {
+							user: res.data.user,
+							jwt: res.data.jwt,
+							loading: false,
+						},
+					})
+				}
 				const token = res.data.jwt
 				axios(process.env.REACT_APP_API_URL + '/agents/me', {
 					headers: {
@@ -24,7 +34,6 @@ export const loginAgent = (data) => (dispatch) => {
 				})
 					.then((agentData) => {
 						console.log('FOUND AGENT --', agentData)
-						Cookies.set('token', res.data.jwt, { expires: 7 })
 						dispatch({
 							type: 'SET_AUTH_STATE',
 							payload: {

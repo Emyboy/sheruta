@@ -41,3 +41,18 @@ export const getPendingAgents = () => async dispatch => {
 		return Promise.reject(error)
 	}
 }
+
+export const getAgentDetails = () => async dispatch => {
+	try {
+		const res = await AgentService.getAgentData();
+		console.log('THE AGENT --', res.data)
+		dispatch({
+			type: "SET_AUTH_STATE",
+			payload: {
+				agent: res.data[0]
+			}
+		})
+	} catch (error) {
+		return Promise.resolve(error)
+	}
+}

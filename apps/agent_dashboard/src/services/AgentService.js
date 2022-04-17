@@ -37,4 +37,15 @@ export default class {
 		})
 		return res
 	}
+
+	static async getAgentData() {
+		const res = axios(API_URL + `/agents/me`, {
+			headers: {
+				authorization: `Bearer ${Cookies.get('token')}`,
+			},
+		})
+		return res
+	}
+
+
 }
