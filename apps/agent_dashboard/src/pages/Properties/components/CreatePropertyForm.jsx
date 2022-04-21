@@ -365,6 +365,7 @@ export default function CreatePropertyForm({ data }) {
 														// props.state.location,
 														className: 'border text-black',
 														onChange: (e) => {
+															console.log(e)
 															setLocation(e.label)
 															setGoogleLocation(e)
 														},
