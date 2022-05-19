@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getAgentDetails, getAgentProperties } from '../../redux/actions/agent.action'
+import {
+	getAgentDetails,
+	getAgentProperties,
+} from '../../redux/actions/agent.action'
 import {
 	getAllAmenities,
 	getAllBlogCategories,
 	getAllCategories,
+	getAllInspections,
 	getAllNotifications,
 	getAllService,
 	getAllStates,
@@ -14,11 +18,14 @@ import {
 } from '../../redux/actions/view.action'
 import Cookies from 'js-cookie'
 import { logoutAgent } from '../../redux/actions/auth.action'
-import { getAllConversations, getUnreadMessageCount } from '../../redux/actions/messages.action'
+import {
+	getAllConversations,
+	getUnreadMessageCount,
+} from '../../redux/actions/messages.action'
 
 export default function MasterPopup() {
-	const dispatch = useDispatch();
-	const token = Cookies.get('token');
+	const dispatch = useDispatch()
+	const token = Cookies.get('token')
 	const { agent, user } = useSelector((state) => state.auth)
 	useEffect(() => {
 		dispatch(getAllAmenities())
@@ -33,21 +40,22 @@ export default function MasterPopup() {
 
 	useEffect(() => {
 		if (agent) {
+			dispatch(getAllInspections(agent?.id))
 			dispatch(getAgentProperties(agent?.id))
 			dispatch(getAllNotifications(user?.id))
 			dispatch(getAllConversations(user?.id))
 			dispatch(getUnreadMessageCount(user?.id))
-		}else {
+		} else {
 			localStorage.removeItem('state')
 		}
-	}, [agent, dispatch, user?.id]);
-	
+	}, [agent, dispatch, user?.id])
+
 	useEffect(() => {
-		if(!token){
+		if (!token) {
 			return dispatch(logoutAgent())
 		}
 		dispatch(getAgentDetails())
-	},[dispatch, token])
+	}, [dispatch, token])
 
 	return <div></div>
 }

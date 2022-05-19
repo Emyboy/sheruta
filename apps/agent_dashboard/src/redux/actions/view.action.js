@@ -1,4 +1,5 @@
 import axios from 'axios'
+import InspectionService from '../../services/InspectionService'
 import NotificationService from '../../services/NotificationsService'
 import SubscriptionService from '../../services/SubscriptionService'
 
@@ -126,4 +127,18 @@ export const getAllNotifications = (user_id) => async (dispatch) => {
 				notifications: list.data,
 			}
 		})
+}
+
+export const getAllInspections = (agent_id) => async dispatch => {
+	try {
+		const res = await InspectionService.getAllAgentInspection(agent_id);
+		dispatch({
+			type: 'SET_VIEW_STATE',
+			payload: {
+				inspections: res.data
+			}
+		})
+	} catch (error) {
+		return Promise.reject(error)
+	}
 }

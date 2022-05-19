@@ -24,6 +24,7 @@ import EditProperty from '../pages/Properties/EditProperty'
 import Agents from '../pages/Agents/Agents'
 import Messages from '../pages/Messages/Messages'
 import RedFlags from '../pages/RedFlags/RedFlags'
+import Inspections from '../pages/Inspections/Inspections'
 
 export default function MainAppRoutes() {
 	const { user } = useSelector((state) => state.auth)
@@ -53,6 +54,7 @@ export default function MainAppRoutes() {
 							<>
 								<Route path="/" element={<Properties />} />
 								<Route path="/messages" element={<Messages />} />
+								<Route path="/inspections" element={<Inspections />} />
 							</>
 						)}
 						<Route path="/properties" element={<Properties />} />

@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fi'
 import { BiUser, BiBuildings, BiBell } from 'react-icons/bi'
 import { RiChat3Line } from 'react-icons/ri'
-import { IoAnalyticsSharp } from 'react-icons/io5'
+import { IoAnalyticsSharp, IoCalendarClearOutline } from 'react-icons/io5'
 import { IoMdAdd } from 'react-icons/io'
 import { HiOutlineUserGroup } from 'react-icons/hi'
 import { FaPeopleCarry } from 'react-icons/fa'
@@ -158,9 +158,9 @@ export default function SideNav({ pageName }) {
 													</li>
 
 													<EachNav
-														title="Join Paddy"
-														route="/"
-														Icon={<HiOutlineUserGroup />}
+														title="Inspections"
+														route="/inspections"
+														Icon={<IoCalendarClearOutline />}
 													/>
 													<EachNav
 														title="Chat"
