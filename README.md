@@ -1,1 +1,0 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/d5d03359-824e-47fe-94be-e9a085a7ea48/deploy-status)](https://app.netlify.com/sites/sheruta-dashboard/deploys)

@@ -257,7 +257,7 @@ export default function EachInspection({ data }) {
 							<>
 								<Link
 									state={data}
-                                    to={`/inspections/${data?.id}`}
+								to={`/inspections/${data?.id}`}
 									onClick={() => handleButtonClick('accept')}
 									disabled={loading}
 									className="btn btn-lg text-primary waves-effect waves-light addtask-btn"
@@ -265,7 +265,7 @@ export default function EachInspection({ data }) {
 									data-bs-target=".bs-example-modal-lg"
 									data-id="#complete-task"
 								>
-									<i className="mdi mdi-eye me-1"></i> View Details
+									<i className="mdi mdi-eye me-1"></i> Show Users
 								</Link>
 							</>
 						)}
