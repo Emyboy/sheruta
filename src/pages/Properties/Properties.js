@@ -41,7 +41,7 @@ export default function Properties() {
 				{properties.map((val, i) => {
 					return (
 						<div className="col-xl-3 col-sm-4 col-lg-6" key={`prop-${i}`}>
-							<EachProperty data={val} />
+							<EachProperty val={val} />
 						</div>
 					)
 				})}

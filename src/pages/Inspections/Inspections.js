@@ -23,7 +23,7 @@ export default function Inspections() {
 				<div className="col-md-6">
 					<div className="d-flex flex-wrap align-items-center justify-content-end gap-2 mb-3">
 						<div>
-							<ul className="nav nav-pills">
+							{/* <ul className="nav nav-pills">
 								<li className="nav-item">
 									<a
 										className="nav-link active"
@@ -37,20 +37,20 @@ export default function Inspections() {
 										<i className="bx bx-grid-alt"></i>
 									</a>
 								</li>
-							</ul>
+							</ul> */}
 						</div>
-						<div>
+						{/* <div>
 							<a href="#" className="btn btn-secondary">
 								<i className="bx bx-plus me-1"></i> Add New
 							</a>
-						</div>
+						</div> */}
 					</div>
 				</div>
 			</div>
 			<div className="row">
 				{inspections.map((val, i) => {
 					return (
-						<div className="col-sm-12 col-md-4" key={`inspection-${i}`}>
+						<div className="col-sm-12 col-md-6" key={`inspection-${i}`}>
 							<EachInspection data={val} />
 						</div>
 					)

@@ -14,9 +14,9 @@ export default function Header() {
 	const [showProfileOptions, setShowProfileOptions] = useState(false)
 	const toggleSideNav = () => {
 		setShowNav(!showNav)
-	}
-	const dispatch = useDispatch()
+	};
 	const { user } = useSelector((state) => state.auth)
+	const dispatch = useDispatch()
 	const { notifications } = useSelector((state) => state.view)
 	let body = document.querySelector('body')
 
@@ -50,7 +50,10 @@ export default function Header() {
 
 	useEffect(() => {
 		_setMode(mode)
-	}, [])
+	}, []);
+
+	const isAdmin =
+		parseInt(user?.id) === parseInt(process.env.REACT_APP_ADMIN_ID)
 
 	return (
 		<header id="page-topbar">
@@ -265,10 +268,16 @@ export default function Header() {
 													className="simplebar-content"
 													// style={{ padding: '0px' }}
 												>
-													
-													{notifications?.filter(x => !x.seen).map((val, i) => {
-														return <EachNotificationSM key={`not-${i}`} data={val} />
-													})}
+													{notifications
+														?.filter((x) => !x.seen)
+														.map((val, i) => {
+															return (
+																<EachNotificationSM
+																	key={`not-${i}`}
+																	data={val}
+																/>
+															)
+														})}
 												</div>
 											</div>
 										</div>
@@ -358,14 +367,18 @@ export default function Header() {
 							}`}
 							style={{ left: '-5rem' }}
 						>
-							<Link className="dropdown-item" to={`/user/${user?.id}`}>
-								<i className="mdi mdi-face-profile font-size-16 align-middle me-1"></i>{' '}
-								Profile
-							</Link>
-							<a className="dropdown-item" href="auth-lock-screen.html">
-								<i className="mdi mdi-lock font-size-16 align-middle me-1"></i>{' '}
-								Lock screen
-							</a>
+							{isAdmin && (
+								<>
+									<Link className="dropdown-item" to={`/user/${user?.id}`}>
+										<i className="mdi mdi-face-profile font-size-16 align-middle me-1"></i>{' '}
+										Profile
+									</Link>
+									<a className="dropdown-item" href="auth-lock-screen.html">
+										<i className="mdi mdi-lock font-size-16 align-middle me-1"></i>{' '}
+										Lock screen
+									</a>
+								</>
+							)}
 							<div className="dropdown-divider"></div>
 							<Link
 								className="dropdown-item"

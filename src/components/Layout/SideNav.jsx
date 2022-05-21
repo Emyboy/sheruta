@@ -41,11 +41,14 @@ const EachNav = ({ Icon, title, route, count, active, onClick }) => {
 export default function SideNav({ pageName }) {
 	const dispatch = useDispatch()
 	const { user } = useSelector((state) => state.auth)
-	const { notifications } = useSelector((state) => state.view)
+	const { notifications, inspections } = useSelector((state) => state.view)
 
 	if (!user) {
 		return null
 	}
+
+	const isAdmin = parseInt(user?.id) === parseInt(process.env.REACT_APP_ADMIN_ID)
+
 	return (
 		<div className="vertical-menu mm-active">
 			<div data-simplebar="init" className="h-100 mm-show">
@@ -68,8 +71,7 @@ export default function SideNav({ pageName }) {
 											className="metismenu list-unstyled mm-show"
 											id="side-menu"
 										>
-											{parseInt(user?.id) ==
-												parseInt(process.env.REACT_APP_ADMIN_ID) && (
+											{isAdmin && (
 												<>
 													<li className="menu-title" data-key="t-menu">
 														Admin
@@ -161,30 +163,39 @@ export default function SideNav({ pageName }) {
 														title="Inspections"
 														route="/inspections"
 														Icon={<IoCalendarClearOutline />}
+														count={
+															inspections?.filter(
+																(x) => x?.status === 'pending'
+															)?.length
+														}
 													/>
-													<EachNav
+													{/* <EachNav
 														title="Chat"
 														route="/messages"
 														Icon={<RiChat3Line />}
 														count={44}
-													/>
+													/> */}
 												</>
 											)}
 											<li className="menu-title mt-2" data-key="t-components">
 												Account
 											</li>
 
-											<EachNav
-												title="Profile"
-												route={`/user/${user?.id}`}
-												Icon={<BiUser />}
-												active={pageName === 'profile'}
-											/>
-											<EachNav
-												title="Settings"
-												route="/"
-												Icon={<FiSettings />}
-											/>
+											{isAdmin && (
+												<>
+													<EachNav
+														title="Profile"
+														route={`/user/${user?.id}`}
+														Icon={<BiUser />}
+														active={pageName === 'profile'}
+													/>
+													<EachNav
+														title="Settings"
+														route="/"
+														Icon={<FiSettings />}
+													/>
+												</>
+											)}
 											<EachNav
 												title="Logout"
 												route="/"

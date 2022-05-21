@@ -3,8 +3,10 @@ import MomentHelper from '../../helpers/MomentHelper'
 import { Modal } from 'react-bootstrap'
 import InspectionService from '../../services/InspectionService'
 import { useDispatch, useSelector } from 'react-redux'
-import { getAllInspections } from '../../redux/actions/view.action';
-import  { Link } from 'react-router-dom'
+import { getAllInspections } from '../../redux/actions/view.action'
+import { Link } from 'react-router-dom'
+import { AiFillPhone } from 'react-icons/ai'
+import toast from 'react-hot-toast'
 
 export const renderInspectionStatus = (status) => {
 	switch (status) {
@@ -39,6 +41,7 @@ export default function EachInspection({ data }) {
 	const [loading, setLoading] = useState(false)
 	const dispatch = useDispatch()
 	const { agent } = useSelector((state) => state.auth)
+	const [showUsers, setShowUsers] = useState(false)
 
 	const takeAction = async () => {
 		setLoading(true)
@@ -51,9 +54,12 @@ export default function EachInspection({ data }) {
 			if (res.data) {
 				dispatch(getAllInspections(agent?.id))
 				setLoading(false)
+				setShowReason(false)
+				toast.success('Your message was sent')
 			}
 			console.log('RES --', res.data)
 		} catch (error) {
+			toast.error("Error, please try again")
 			setLoading(false)
 			return Promise.reject(error)
 		}
@@ -67,6 +73,56 @@ export default function EachInspection({ data }) {
 
 	return (
 		<div className="card task-box" id="cmptask-2">
+			<Modal show={showUsers} size="lg" onHide={() => setShowUsers(false)}>
+				<Modal.Body>
+					<div className="text-center">
+						<h3>Users</h3>
+						<h6>Reach out to users to make sure they are on schedule.</h6>
+					</div>
+					<hr />
+					{[...data.guests, data?.owner].map((val, i) => {
+						return (
+							<div className="card border-bottom-3 border-gray border">
+								<div className="container-fluid">
+									<div className="row">
+										<div className="col-3 col-sm-3 d-flex justify-content-end">
+											<img
+												src={val?.avatar_url}
+												alt="User Pics"
+												class="avatar-lg rounded-circle img-thumbnail"
+											/>
+										</div>
+										<div className="col-7 col-md-6">
+											<h5>{val?.first_name}</h5>
+											<h6>
+												<strong>Budget: </strong>₦
+												{window.formatedPrice.format(val?.budget)}
+											</h6>
+										</div>
+										<a
+											href={`tel:${val?.phone_number}`}
+											className="btn text-success"
+											style={{
+												position: 'absolute',
+												left: '80%',
+												width: '50px',
+											}}
+										>
+											<AiFillPhone size={30} />
+										</a>
+									</div>
+								</div>
+							</div>
+						)
+					})}
+					<button
+						className="btn btn-lg w-100 text-danger"
+						onClick={() => setShowUsers(false)}
+					>
+						Close
+					</button>
+				</Modal.Body>
+			</Modal>
 			<Modal show={showReason} size="lg">
 				<Modal.Body className="text-center">
 					<h3>
@@ -255,18 +311,12 @@ export default function EachInspection({ data }) {
 						)}
 						{data?.status === 'ongoing' && (
 							<>
-								<Link
-									state={data}
-								to={`/inspections/${data?.id}`}
-									onClick={() => handleButtonClick('accept')}
-									disabled={loading}
+								<span
+									onClick={() => setShowUsers(true)}
 									className="btn btn-lg text-primary waves-effect waves-light addtask-btn"
-									data-bs-toggle="modal"
-									data-bs-target=".bs-example-modal-lg"
-									data-id="#complete-task"
 								>
 									<i className="mdi mdi-eye me-1"></i> Show Users
-								</Link>
+								</span>
 							</>
 						)}
 					</div>

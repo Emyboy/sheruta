@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
 import { DeleteFirebaseImage } from '../../../services/FirebaseService'
 import PropertyService from '../../../services/PropertyService'
-import { Modal } from 'react-bootstrap'
+import { Modal, OverlayTrigger } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
-export default function EachProperty({ data }) {
+export default function EachProperty({ val }) {
+	const [data, setData] = useState(val)
 	const [deleted, setDeleted] = useState(false)
 	const [askDelete, setAskDelete] = useState(false)
 	const [deleteLoading, setDeleteLoading] = useState(false)
+
 	const handleDelete = async () => {
 		try {
 			setDeleteLoading(true)
@@ -23,7 +26,27 @@ export default function EachProperty({ data }) {
 			setDeleted(true)
 		} catch (error) {
 			setDeleteLoading(false)
+			toast.error('Error, please try again')
 			console.log('ERROR --', error)
+			return Promise.reject(error)
+		}
+	}
+
+	const toggleAvailability = async () => {
+		setDeleteLoading(true)
+		try {
+			const res = await PropertyService.toggleAvailability(
+				!data?.is_available,
+				data?.id
+			)
+			console.log(res.data)
+			if (res.data) {
+				setData(res.data)
+				setDeleteLoading(false)
+			}
+		} catch (error) {
+			toast.error('Error, please try again')
+			setDeleteLoading(false)
 			return Promise.reject(error)
 		}
 	}
@@ -98,6 +121,9 @@ export default function EachProperty({ data }) {
 							</h5>
 						</div>
 					</div>
+					{!data?.is_available && (
+						<h6 className="text-danger">Click Unavailable to make Available</h6>
+					)}
 					<p className="text-muted mb-0 mt-4">
 						<div className="d-flex flex-wrap gap-2">
 							<Link to={`/properties/edit/${data?.id}`}>
@@ -114,6 +140,17 @@ export default function EachProperty({ data }) {
 								className="btn btn-danger waves-effect btn-label waves-light ml-4"
 							>
 								<i className="bx bx-trash label-icon"></i> Delete
+							</button>
+
+							<button
+								disabled={deleteLoading}
+								onClick={() => toggleAvailability()}
+								type="button"
+								className={`btn btn-${
+									data?.is_available ? 'success' : 'danger'
+								} waves-effect waves-light ml-4`}
+							>
+								{data?.is_available ? 'Available' : 'Unavailable'}
 							</button>
 						</div>
 					</p>

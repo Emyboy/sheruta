@@ -67,4 +67,17 @@ export default class PropertyService {
 		const res = await axios(API_URL + `/properties/${property_id}`)
 		return res
 	}
+
+	static async toggleAvailability(is_available, property_id) {
+		const res = await axios(API_URL + `/properties/${property_id}`, {
+			method: 'PUT',
+			headers: {
+				authorization: `Bearer ${Cookies.get('token')}`
+			},
+			data: {
+				is_available
+			}
+		})
+		return res
+	}
 }
