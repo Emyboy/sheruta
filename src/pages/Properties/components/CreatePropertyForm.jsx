@@ -23,7 +23,7 @@ export default function CreatePropertyForm({ data }) {
 	const { categories, amenities, status, paymentTypes, services } = useSelector(
 		(state) => state.view
 	)
-	const { agent } = useSelector((state) => state.auth)
+	const { agent, user } = useSelector((state) => state.auth)
 	const [imageFiles, setImageFiles] = useState(data ? data?.image_urls : [])
 	const [name, setName] = useState(data ? data?.name : null)
 	const [bedroom, setBedroom] = useState(data ? data?.bedroom : null)
@@ -88,7 +88,8 @@ export default function CreatePropertyForm({ data }) {
 			agent: agent.id,
 			state: agent?.state,
 			country: agent?.country,
-			location_keyword: agent?.location_keyword
+			location_keyword: agent?.location_keyword,
+			agent_profile: user?.id
 		}
 		try {
 			const res = data
