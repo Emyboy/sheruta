@@ -16,10 +16,10 @@ import { Navigate } from 'react-router-dom'
 import { notification } from 'antd'
 import { DeleteFirebaseImage } from '../../../services/FirebaseService'
 
-const uid = Uid()
 const img_limit = 4
 
 export default function CreatePropertyForm({ data }) {
+	const uid = Uid()
 	const { categories, amenities, status, paymentTypes, services } = useSelector(
 		(state) => state.view
 	)
