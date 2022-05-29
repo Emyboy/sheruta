@@ -1,6 +1,7 @@
 import axios from 'axios'
 import AgentService from '../../services/AgentService'
 import store from '../store/store'
+import { logoutAgent } from './auth.action';
 
 export const getAgentProperties = (agent_id) => (dispatch) => {
 	axios(
@@ -53,6 +54,7 @@ export const getAgentDetails = () => async dispatch => {
 			}
 		})
 	} catch (error) {
+		dispatch(logoutAgent())
 		return Promise.resolve(error)
 	}
 }

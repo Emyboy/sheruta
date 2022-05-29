@@ -173,9 +173,10 @@ export default function EachInspection({ data }) {
 					<h5 className="font-size-14">
 						<a className="text-dark" id="task-name">
 							{
+								data?.date ?
 								new Date(data?.date)
 									.toDateString()
-									.split(new Date().getFullYear())[0]
+									.split(new Date().getFullYear())[0]: 'No Date Set'
 							}
 						</a>
 					</h5>
