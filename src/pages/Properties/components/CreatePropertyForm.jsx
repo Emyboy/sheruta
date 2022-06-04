@@ -15,6 +15,9 @@ import { Progress } from 'antd'
 import { Navigate } from 'react-router-dom'
 import { notification } from 'antd'
 import { DeleteFirebaseImage } from '../../../services/FirebaseService'
+import CurrencyInput from 'react-currency-input-field'
+import Global from '../../../Global';
+import ReactQuill from 'react-quill'
 
 const img_limit = 4
 
@@ -89,7 +92,7 @@ export default function CreatePropertyForm({ data }) {
 			state: agent?.state,
 			country: agent?.country,
 			location_keyword: agent?.location_keyword,
-			agent_profile: user?.id
+			agent_profile: user?.id,
 		}
 		try {
 			const res = data
@@ -117,6 +120,16 @@ export default function CreatePropertyForm({ data }) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault()
+
+		if(bedroom == 0 || !bedroom){
+			notification.error({ message: "Bedroom can't be empty or zero" })
+			return;
+		}
+		if(bedroom == 0 || !bedroom){
+			notification.error({ message: "Bedroom can't be empty or zero" });
+			return;
+		}
+
 		if (imageFiles.length !== img_limit) {
 			notification.error({ message: `Please add ${img_limit} images` })
 			return
@@ -251,7 +264,10 @@ export default function CreatePropertyForm({ data }) {
 						<p className="card-title-desc">Fill all information below</p>
 					</div>
 					<div className="card-body">
-						<Alert variant="success" className="row justify-content-between align-items-center">
+						<Alert
+							variant="success"
+							className="row justify-content-between align-items-center"
+						>
 							<div className="col-md-5">
 								<Alert.Heading className="text-black">Important!</Alert.Heading>
 								<p>
@@ -264,7 +280,7 @@ export default function CreatePropertyForm({ data }) {
 									<strong>{agent?.location_keyword?.name}</strong> automatically
 								</p>
 							</div>
-							<div className='col-md-2'>
+							<div className="col-md-2">
 								{/* //Todo - Route this to account settings */}
 								<button className="btn text-success fw-bold border-success">
 									Change this.
@@ -275,7 +291,7 @@ export default function CreatePropertyForm({ data }) {
 							<div className="row">
 								<div className="col-sm-6">
 									<div className="mb-3">
-										<label for="title">Title</label>
+										<label htmlFor="title">Title</label>
 										<input
 											required
 											maxLength={90}
@@ -291,7 +307,7 @@ export default function CreatePropertyForm({ data }) {
 									<div className="row">
 										<div className="col-md-4">
 											<div className="mb-3">
-												<label for="bedrooms">Bedrooms</label>
+												<label htmlFor="bedrooms">Bedrooms</label>
 												<input
 													required
 													id="bedroom"
@@ -305,7 +321,7 @@ export default function CreatePropertyForm({ data }) {
 										</div>
 										<div className="col-md-4">
 											<div className="mb-3">
-												<label for="sittingroom">Sitting Rooms</label>
+												<label htmlFor="sittingroom">Sitting Rooms</label>
 												<input
 													required
 													id="sittingroom"
@@ -321,7 +337,7 @@ export default function CreatePropertyForm({ data }) {
 										</div>
 										<div className="col-md-4">
 											<div className="mb-3">
-												<label for="toilet">Toilets</label>
+												<label htmlFor="toilet">Toilets</label>
 												<input
 													required
 													id="toilet"
@@ -335,7 +351,7 @@ export default function CreatePropertyForm({ data }) {
 										</div>
 										<div className="col-md-4">
 											<div className="mb-3">
-												<label for="bathroom">Bathrooms</label>
+												<label htmlFor="bathroom">Bathrooms</label>
 												<input
 													required
 													id="bathroom"
@@ -355,7 +371,7 @@ export default function CreatePropertyForm({ data }) {
 									<div className="row">
 										<div className="col-md-12">
 											<div className="mb-3">
-												<label for="bathrooms">Area</label>
+												<label htmlFor="bathrooms">Area</label>
 												<GooglePlacesAutocomplete
 													apiKey={process.env.REACT_APP_GOOGLE_PLACES_API_KEY}
 													apiOptions={{
@@ -386,64 +402,110 @@ export default function CreatePropertyForm({ data }) {
 									<div className="row">
 										<div className="col-md-6">
 											<div className="mb-3">
-												<label for="bathrooms">Rent</label>
-												<input
-													required
-													id="price"
-													name="price"
-													type="number"
-													className="form-control"
-													value={price}
-													onChange={(e) => setPrice(parseInt(e.target.value))}
-												/>
+												<label htmlFor="rent">Rent</label>
+												<div className="input-group mb-3">
+													<div className="input-group-prepend">
+														<span
+															className="input-group-text"
+															id="basic-addon1"
+														>
+															{Global.currency}
+														</span>
+													</div>
+													<CurrencyInput
+														id="rent"
+														name="rent"
+														required
+														placeholder="Ex. 300,000"
+														defaultValue={price}
+														decimalsLimit={2}
+														className="form-control"
+														onValueChange={(value, name) =>
+															setPrice(parseInt(value))
+														}
+													/>
+												</div>
 											</div>
 										</div>
 										<div className="col-md-6">
 											<div className="mb-3">
-												<label for="bathrooms">Agency Fee</label>
-												<input
-													required
-													id="price"
-													name="price"
-													type="number"
-													className="form-control"
-													value={agency_fee}
-													onChange={(e) =>
-														setAgencyFee(parseInt(e.target.value))
-													}
-												/>
+												<label htmlFor="agency_fee">Agency Fee</label>
+												<div className="input-group mb-3">
+													<div className="input-group-prepend">
+														<span
+															className="input-group-text"
+															id="basic-addon1"
+														>
+															{Global.currency}
+														</span>
+													</div>
+													<CurrencyInput
+														id="agency_fee"
+														name="agency_fee"
+														required
+														placeholder="Ex. 300,000"
+														defaultValue={agency_fee}
+														decimalsLimit={2}
+														className="form-control"
+														onValueChange={(value, name) =>
+															setAgencyFee(parseInt(value))
+														}
+													/>
+												</div>
 											</div>
 										</div>
 										<div className="col-md-6">
 											<div className="mb-3">
-												<label for="bathrooms">Caution Fee</label>
-												<input
-													required
-													id="price"
-													name="price"
-													type="number"
-													className="form-control"
-													value={caution_fee}
-													onChange={(e) =>
-														setCautionFee(parseInt(e.target.value))
-													}
-												/>
+												<label htmlFor="bathrooms">Caution Fee</label>
+												<div className="input-group mb-3">
+													<div className="input-group-prepend">
+														<span
+															className="input-group-text"
+															id="basic-addon1"
+														>
+															{Global.currency}
+														</span>
+													</div>
+													<CurrencyInput
+														id="caution_fee"
+														name="caution_fee"
+														required
+														placeholder="Ex. 300,000"
+														defaultValue={caution_fee}
+														decimalsLimit={2}
+														className="form-control"
+														onValueChange={(value, name) =>
+															setCautionFee(parseInt(value))
+														}
+													/>
+												</div>
 											</div>
 										</div>
 										<div className="col-md-6">
 											<div className="mb-3">
-												<label for="bathrooms">Legal Fee</label>
-												<input
-													required
-													id="price"
-													name="price"
-													type="number"
-													className="form-control"
-													value={legal_fee}
-													onChange={(e) =>
-														setLegalFee(parseInt(e.target.value))
-													}
-												/>
+												<label htmlFor="legal_fee">Legal Fee</label>
+												<div className="input-group mb-3">
+													<div className="input-group-prepend">
+														<span
+															className="input-group-text"
+															id="basic-addon1"
+														>
+															{Global.currency}
+														</span>
+													</div>
+													<CurrencyInput
+														id="legal_fee"
+														name="legal_fee"
+														required
+														placeholder="Ex. 300,000"
+														defaultValue={legal_fee}
+														decimalsLimit={2}
+														className="form-control"
+														onValueChange={(value, name) =>
+															setLegalFee(parseInt(value))
+														}
+													/>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -577,10 +639,10 @@ export default function CreatePropertyForm({ data }) {
 										</div>
 									</div>
 									<div className="mb-3">
-										<label for="productdesc">
+										<label htmlFor="description">
 											Tell us about this apartment
 										</label>
-										<textarea
+										{/* <textarea
 											className="form-control"
 											required
 											disabled={loading}
@@ -590,6 +652,23 @@ export default function CreatePropertyForm({ data }) {
 											showCount
 											value={description}
 											onChange={(e) => setDescription(e.target.value)}
+										/> */}
+										<ReactQuill
+											theme="snow"
+											id="description"
+											// toolbar={['bold', 'italic', 'underline', 'strike']}
+											modules={{
+												toolbar: [
+												[{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+													['bold', 'italic'],
+													['', ''],
+													['blockquote', 'code-block'],
+												],
+											}}
+											style={{ height: '200px'}}
+											placeholder={"Start typing here..."}
+											value={description}
+											onChange={(e) => setDescription(e)}
 										/>
 									</div>
 								</div>
