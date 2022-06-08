@@ -125,9 +125,17 @@ export default function CreatePropertyForm({ data }) {
 			notification.error({ message: "Bedroom can't be empty or zero" })
 			return;
 		}
-		if(bedroom == 0 || !bedroom){
-			notification.error({ message: "Bedroom can't be empty or zero" });
-			return;
+		if (sittingroom == 0 || !sittingroom) {
+			notification.error({ message: "Setting Room can't be empty or zero" })
+			return
+		}
+		if (toilet == 0 || !toilet) {
+			notification.error({ message: "Toilets Room can't be empty or zero" })
+			return
+		}
+		if (bathroom == 0 || !bathroom) {
+			notification.error({ message: "Bathrooms Room can't be empty or zero" })
+			return
 		}
 
 		if (imageFiles.length !== img_limit) {
