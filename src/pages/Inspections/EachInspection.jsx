@@ -59,7 +59,7 @@ export default function EachInspection({ data }) {
 			}
 			console.log('RES --', res.data)
 		} catch (error) {
-			toast.error("Error, please try again")
+			toast.error('Error, please try again')
 			setLoading(false)
 			return Promise.reject(error)
 		}
@@ -73,16 +73,16 @@ export default function EachInspection({ data }) {
 
 	return (
 		<div className="card task-box" id="cmptask-2">
-			<Modal show={showUsers} size="lg" onHide={() => setShowUsers(false)}>
+			<Modal show={showUsers}  onHide={() => setShowUsers(false)}>
 				<Modal.Body>
 					<div className="text-center">
 						<h3>Users</h3>
 						<h6>Reach out to users to make sure they are on schedule.</h6>
 					</div>
 					<hr />
-					{[...data.guests, data?.owner].map((val, i) => {
+					{[data?.owner, ...data.guests, ].map((val, i) => {
 						return (
-							<div className="card border-bottom-3 border-gray border">
+							<div className="border-bottom-3 border-gray border pt-3 pb-3">
 								<div className="container-fluid">
 									<div className="row">
 										<div className="col-3 col-sm-3 d-flex justify-content-end">
@@ -94,6 +94,18 @@ export default function EachInspection({ data }) {
 										</div>
 										<div className="col-7 col-md-6">
 											<h5>{val?.first_name}</h5>
+											{val?.id === data?.owner?.id && (
+												<span
+													className="badge bg-success"
+													style={{
+														position: 'absolute',
+														top: '-10px',
+														left: '-90px',
+													}}
+												>
+													Group Admin
+												</span>
+											)}
 											<h6>
 												<strong>Budget: </strong>₦
 												{window.formatedPrice.format(val?.budget)}
@@ -116,7 +128,7 @@ export default function EachInspection({ data }) {
 						)
 					})}
 					<button
-						className="btn btn-lg w-100 text-danger"
+						className="btn btn-lg w-100 text-danger mt-5"
 						onClick={() => setShowUsers(false)}
 					>
 						Close
@@ -172,12 +184,11 @@ export default function EachInspection({ data }) {
 				<div>
 					<h5 className="font-size-14">
 						<a className="text-dark" id="task-name">
-							{
-								data?.date ?
-								new Date(data?.date)
-									.toDateString()
-									.split(new Date().getFullYear())[0]: 'No Date Set'
-							}
+							{data?.date
+								? new Date(data?.date)
+										.toDateString()
+										.split(new Date().getFullYear())[0]
+								: 'No Date Set'}
 						</a>
 					</h5>
 					<p className="text-muted">

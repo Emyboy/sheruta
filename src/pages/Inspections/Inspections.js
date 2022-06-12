@@ -50,7 +50,10 @@ export default function Inspections() {
 			<div className="row">
 				{inspections.map((val, i) => {
 					return (
-						<div className="col-sm-12 col-md-6" key={`inspection-${i}`}>
+						<div
+							className="col-sm-12 col-md-4 col-lg-6 col-xl-4"
+							key={`inspection-${i}`}
+						>
 							<EachInspection data={val} />
 						</div>
 					)
