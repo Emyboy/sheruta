@@ -80,7 +80,7 @@ export default function EachInspection({ data }) {
 						<h6>Reach out to users to make sure they are on schedule.</h6>
 					</div>
 					<hr />
-					{[data?.owner, ...data.guests, ].map((val, i) => {
+					{[data?.owner, ...data.guests].map((val, i) => {
 						return (
 							<div className="border-bottom-3 border-gray border pt-3 pb-3">
 								<div className="container-fluid">
