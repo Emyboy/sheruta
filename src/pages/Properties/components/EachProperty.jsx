@@ -114,7 +114,7 @@ export default function EachProperty({ val }) {
 							<h5 className="my-0">
 								<span className="me-2">
 									<small>
-										₦ {window.formatedPrice.format(data.price)}
+										₦ {window.formattedPrice.format(data.price)}
 									</small>
 								</span>{' '}
 								<b className="badge badge-sm bg-primary">

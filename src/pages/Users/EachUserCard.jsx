@@ -99,7 +99,7 @@ export default function EachUserCard({ user }) {
 					</p>
 					<p className="text-muted mb-0 mt-2">
 						<i className="mdi mdi-send font-size-15 align-middle pe-2 text-primary"></i>
-						N {window.formatedPrice.format(user?.budget)}
+						N {window.formattedPrice.format(user?.budget)}
 					</p>
 				</div>
 			</div>

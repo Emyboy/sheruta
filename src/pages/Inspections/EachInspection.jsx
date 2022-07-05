@@ -108,7 +108,7 @@ export default function EachInspection({ data }) {
 											)}
 											<h6>
 												<strong>Budget: </strong>₦
-												{window.formatedPrice.format(val?.budget)}
+												{window.formattedPrice.format(val?.budget)}
 											</h6>
 										</div>
 										<a
@@ -292,7 +292,7 @@ export default function EachInspection({ data }) {
 				<div className="text-end">
 					<p className="mb-0 text-muted">Total Group Budget</p>
 					<h5 className="font-size-15 mb-1" id="task-budget">
-						₦ {window.formatedPrice.format(calculateGroupBudget(data))}
+						₦ {window.formattedPrice.format(calculateGroupBudget(data))}
 					</h5>
 				</div>
 				<div className="text-center d-grid mt-4">
