@@ -4,6 +4,7 @@ import PropertyService from '../../../services/PropertyService'
 import { Modal, OverlayTrigger } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import moment from 'moment'
 
 export default function EachProperty({ val }) {
 	const [data, setData] = useState(val)
@@ -15,13 +16,15 @@ export default function EachProperty({ val }) {
 		try {
 			setDeleteLoading(true)
 			const res = await PropertyService.deleteProperty(data?.id)
-			res.data.image_urls.map((_, i) => {
+			console.log('THE RES --', res.data)
+			res?.data[0]?.image_urls?.map((_, i) => {
 				DeleteFirebaseImage(
 					`images/properties/${data?.agent.id}/${data?.uid}/image_${i}`
 				)
 			})
 			if (res) {
 				setDeleteLoading(false)
+				toast.success("Deleted 👍🏽")
 			}
 			setDeleted(true)
 		} catch (error) {
@@ -106,16 +109,20 @@ export default function EachProperty({ val }) {
 				<div className="p-3">
 					<div className=" justify-content-between align-items-end mt-4">
 						<div>
-							<h5 className="mb-3 text-truncate">
+							<h5 className="mb-2 text-truncate">
 								<a href="#c" className="text-dark fw-700">
+									{process.env.NODE_ENV != 'production' && `#${data?.id}`}{' '}
 									{data?.name}
 								</a>
 							</h5>
+							<small className="mb-3 text-truncate">
+								<a href="#c" className="text-dark fw-700">
+									{moment(data?.created_at).fromNow()}
+								</a>
+							</small>
 							<h5 className="my-0">
 								<span className="me-2">
-									<small>
-										₦ {window.formattedPrice.format(data.price)}
-									</small>
+									<small>₦ {window.formattedPrice.format(data.price)}</small>
 								</span>{' '}
 								<b className="badge badge-sm bg-primary">
 									{data?.categorie?.name}
