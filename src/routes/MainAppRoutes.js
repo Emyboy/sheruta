@@ -40,7 +40,7 @@ export default function MainAppRoutes() {
 					</Routes>
 				) : (
 					<Routes>
-						{user?.id === parseInt(process.env.REACT_APP_ADMIN_ID) ? (
+						{user?.role?.id == 3  ? (
 							<>
 								<Route path="/" element={<Home />} />
 								<Route path="/agents" element={<Agents />} />
