@@ -47,7 +47,7 @@ export default function SideNav({ pageName }) {
 		return null
 	}
 
-	const isAdmin = parseInt(user?.id) === parseInt(process.env.REACT_APP_ADMIN_ID)
+	const isAdmin = parseInt(user?.role?.id) === 4
 
 	return (
 		<div className="vertical-menu mm-active">
