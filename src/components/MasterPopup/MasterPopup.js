@@ -9,6 +9,7 @@ import {
 	getAllBlogCategories,
 	getAllCategories,
 	getAllInspections,
+	getAllLocationKeywords,
 	getAllNotifications,
 	getAllService,
 	getAllStates,
@@ -36,10 +37,11 @@ export default function MasterPopup() {
 		dispatch(paymentTypes())
 		dispatch(getAllService())
 		dispatch(getAllBlogCategories())
+		dispatch(getAllLocationKeywords())
 	}, [dispatch])
 
 	useEffect(() => {
-		if (agent) {
+		if (agent && user) {
 			dispatch(getAllInspections(agent?.id))
 			dispatch(getAgentProperties(agent?.id))
 			dispatch(getAllNotifications(user?.id))
@@ -48,7 +50,7 @@ export default function MasterPopup() {
 		} else {
 			localStorage.removeItem('state')
 		}
-	}, [agent, dispatch, user?.id])
+	}, [agent, dispatch, user])
 
 	useEffect(() => {
 		if (!token) {

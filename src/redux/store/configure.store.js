@@ -8,7 +8,7 @@ import indexReducer from '../reducers/root.reducer'
 
 //dotenv.config();
 let isProd = process.env.NODE_ENV === 'production';
-const middleware = isProd ? [thunk] : [thunk, logger];
+const middleware = isProd ? [thunk] : [thunk];
 
 const configureStore = (settings = {}) =>
 	createStore(

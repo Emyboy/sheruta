@@ -11,7 +11,8 @@ const initialState = {
 	paymentTypes: [],
 	notifications: [],
 	blog_categories: [],
-	inspections: []
+	inspections: [],
+	location_keywords: [],
 }
 
 const ViewReducer =  (state = initialState, { type, payload }) => {

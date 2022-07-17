@@ -9,7 +9,7 @@ export default function EachTopCard({
 	badge_text,
 	api_route,
 }) {
-	const [count, setCount] = useState(null)
+	const [count, setCount] = useState("NaN")
 
 	const getCount = useCallback(async () => {
 		console.log('GETTING')

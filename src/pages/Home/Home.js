@@ -26,7 +26,8 @@ export default function Home() {
 			<div className="row">
 				<EachTopCard
 					api_route="/property-requests/count"
-					heading={'Requests'}
+					heading={'P2P Requests'}
+					sub_heading="List of p2p flats"
 				/>
 				<EachTopCard
 					api_route="/users/count/?confirmed=true"
@@ -39,9 +40,24 @@ export default function Home() {
 					sub_heading={'Active subscriptions'}
 				/>
 				<EachTopCard
+					api_route={`/users/count/?role=3`}
+					heading={'Agents'}
+					sub_heading={'List of active agents'}
+				/>
+				<EachTopCard
+					api_route={`/properties/count/?is_available=true`}
+					heading={'Properties'}
+					sub_heading={'List of available properties'}
+				/>
+				<EachTopCard
 					api_route={`/conversations/count`}
 					heading={'Conversations'}
 					sub_heading={'List of conversation'}
+				/>
+				<EachTopCard
+					api_route={`/property-inspections/count`}
+					heading={'Inspections'}
+					sub_heading={'List of active inspection'}
 				/>
 			</div>
 			<div>
@@ -53,7 +69,6 @@ export default function Home() {
 					<div className="col-xl-4">
 						<UserFeedback />
 					</div>
-					
 				</div>
 			</div>
 		</Layout>

@@ -142,3 +142,17 @@ export const getAllInspections = (agent_id) => async dispatch => {
 		return Promise.reject(error)
 	}
 }
+
+export const getAllLocationKeywords = (agent_id) => async dispatch => {
+	try {
+		const res = await axios(process.env.REACT_APP_API_URL+`/location-keywords`)
+		dispatch({
+			type: 'SET_VIEW_STATE',
+			payload: {
+				location_keywords: res.data
+			}
+		})
+	} catch (error) {
+		return Promise.reject(error)
+	}
+}
