@@ -146,18 +146,18 @@ export default function CreatePropertyForm({ data }) {
 			notification.error({ message: `Please select a type` })
 			return
 		}
-		if (!statu) {
-			notification.error({ message: `Please select a status` })
-			return
-		}
+		// if (!statu) {
+		// 	notification.error({ message: `Please select a status` })
+		// 	return
+		// }
 		if (!payment_type) {
 			notification.error({ message: `Please select a payment type` })
 			return
 		}
-		if (!service) {
-			notification.error({ message: `Please select a service` })
-			return
-		}
+		// if (!service) {
+		// 	notification.error({ message: `Please select a service` })
+		// 	return
+		// }
 		if (_amenities.length === 0) {
 			notification.error({ message: `Please select a at least one amenities` })
 			return
