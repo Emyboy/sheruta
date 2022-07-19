@@ -73,13 +73,13 @@ export default function CreatePropertyForm({ data }) {
 			toilet,
 			price,
 			description,
-			statu,
+			statu: 5,
 			sittingroom,
 			image_urls,
 			google_location,
 			location,
 			payment_type,
-			service,
+			service: 5,
 			used,
 			categorie,
 			// state,
@@ -544,7 +544,7 @@ export default function CreatePropertyForm({ data }) {
 										</div>
 									</div>
 
-									<div className="mb-3">
+									{/* <div className="mb-3">
 										<label className="control-label">Status</label>
 										<div className="card-body p-0  pb-2">
 											<div className="d-flex flex-wrap gap-2">
@@ -566,9 +566,9 @@ export default function CreatePropertyForm({ data }) {
 												})}
 											</div>
 										</div>
-									</div>
+									</div> */}
 									<div className="mb-3">
-										<label className="control-label">Payment Type</label>
+										<label className="control-label">Rent Payment</label>
 										<div className="card-body p-0  pb-2">
 											<div className="d-flex flex-wrap gap-2">
 												{paymentTypes.map((val) => {
@@ -590,7 +590,7 @@ export default function CreatePropertyForm({ data }) {
 											</div>
 										</div>
 									</div>
-									<div className="mb-3">
+									{/* <div className="mb-3">
 										<label className="control-label">Service</label>
 										<div className="card-body p-0  pb-2">
 											<div className="d-flex flex-wrap gap-2">
@@ -612,7 +612,7 @@ export default function CreatePropertyForm({ data }) {
 												})}
 											</div>
 										</div>
-									</div>
+									</div> */}
 									<div className="mb-3">
 										<label className="control-label">
 											Amenities (Select multiple)

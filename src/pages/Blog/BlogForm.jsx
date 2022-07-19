@@ -252,7 +252,7 @@ export default function BlogForm() {
 										required
 										rows={6}
 										onChange={(e) => setDescription(e.target.value)}
-										maxLength="140"
+										maxLength="130"
 									/>
 								</div>
 							</div>
