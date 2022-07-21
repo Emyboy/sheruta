@@ -23,6 +23,7 @@ import {
 	getAllConversations,
 	getUnreadMessageCount,
 } from '../../redux/actions/messages.action'
+import VerifyProfilePopup from '../Popups/VerifyProfilePopup'
 
 export default function MasterPopup() {
 	const dispatch = useDispatch()
@@ -59,5 +60,5 @@ export default function MasterPopup() {
 		dispatch(getAgentDetails())
 	}, [dispatch, token])
 
-	return <div></div>
+	return <>{user && <VerifyProfilePopup />}</>
 }
