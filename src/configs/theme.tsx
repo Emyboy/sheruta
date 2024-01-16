@@ -20,3 +20,7 @@ export const theme = extendTheme({
 		background: '#fafafa'
 	},
 })
+
+export const NAV_HEIGHT = '60PX';
+export const SIDE_NAV_WIDTH = '250px'
+export const CONTAINER_MAX_WIDTH = '1100px';
