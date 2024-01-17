@@ -5,12 +5,16 @@ import React from 'react'
 type Props = {}
 
 export default function MainContainer({ children }: any) {
-    return (
-        <Box flex={1} height={'100%'} maxW={{
-            base: '95vw',
-            lg: CONTAINER_MAX_WIDTH
-        }}>
-            {children}
-        </Box>
-    )
+	return (
+		<Box
+			flex={1}
+			height={'100%'}
+			maxW={{
+				base: '95vw',
+				lg: CONTAINER_MAX_WIDTH,
+			}}
+		>
+			{children}
+		</Box>
+	)
 }

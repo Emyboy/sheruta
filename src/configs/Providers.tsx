@@ -7,9 +7,7 @@ import { theme } from './theme'
 export function Providers({ children }: { children: React.ReactNode }) {
 	return (
 		<ChakraProvider theme={theme}>
-			<Box bg='background'>
-				{children}
-			</Box>
+			<Box bg="background">{children}</Box>
 		</ChakraProvider>
 	)
 }

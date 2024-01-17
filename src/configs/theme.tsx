@@ -17,10 +17,10 @@ export const theme = extendTheme({
 		text_muted: '#9D9F9F',
 		gray: '#6E7272',
 
-		background: '#fafafa'
+		background: '#fafafa',
 	},
 })
 
-export const NAV_HEIGHT = '60PX';
+export const NAV_HEIGHT = '60PX'
 export const SIDE_NAV_WIDTH = '250px'
-export const CONTAINER_MAX_WIDTH = '1100px';
+export const CONTAINER_MAX_WIDTH = '1100px'

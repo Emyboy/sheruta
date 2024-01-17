@@ -7,29 +7,33 @@ import React from 'react'
 
 type Props = {}
 
-export default function HomePage({ }: Props) {
-    return (
-        <>
-            <MainHeader />
-            <MainPageBody>
-                <ThreeColumnLayout>
-                    <VStack>
-                        <MainLeftNav />
-                    </VStack>
-                    <VStack pt={5}>
-                        {
-                            new Array(20).fill(null).map(_ => {
-                                return <Box mb='30px' p='20px' bg='white' key={Math.random()} width={'full'}>
-                                    <div>HomePage</div>
-                                </Box>
-                            })
-                        }
-                    </VStack>
-                    <VStack pt={5}>
-
-                    </VStack>
-                </ThreeColumnLayout>
-            </MainPageBody>
-        </>
-    )
+export default function HomePage({}: Props) {
+	return (
+		<>
+			<MainHeader />
+			<MainPageBody>
+				<ThreeColumnLayout>
+					<VStack>
+						<MainLeftNav />
+					</VStack>
+					<VStack pt={5}>
+						{new Array(20).fill(null).map((_) => {
+							return (
+								<Box
+									mb="30px"
+									p="20px"
+									bg="white"
+									key={Math.random()}
+									width={'full'}
+								>
+									<div>HomePage</div>
+								</Box>
+							)
+						})}
+					</VStack>
+					<VStack pt={5}></VStack>
+				</ThreeColumnLayout>
+			</MainPageBody>
+		</>
+	)
 }

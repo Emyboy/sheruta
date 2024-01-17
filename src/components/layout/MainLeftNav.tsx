@@ -4,10 +4,10 @@ import React from 'react'
 
 type Props = {}
 
-export default function MainLeftNav({ }: Props) {
-    return (
-        <Box bg='white' w='full' minH={`calc(100vh - ${NAV_HEIGHT})`} mx={5}>
-            How va
-        </Box>
-    )
+export default function MainLeftNav({}: Props) {
+	return (
+		<Box bg="white" w="full" minH={`calc(100vh - ${NAV_HEIGHT})`} mx={5}>
+			How va
+		</Box>
+	)
 }
