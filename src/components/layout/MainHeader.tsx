@@ -12,6 +12,7 @@ import MainContainer from './MainContainer'
 import { BODY_WIDTH, DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import { BiBell, BiHome, BiPlus, BiSearchAlt, BiSun } from 'react-icons/bi'
 import Link from 'next/link'
+import MainTooltip from '../atoms/MainTooltip'
 
 type Props = {}
 
@@ -126,7 +127,7 @@ const EachNav = ({
 	onClick?: () => void
 }) => {
 	return (
-		<Tooltip label={label} color="dark" bg="white" px={5} py={2} rounded={'lg'}>
+		<MainTooltip label={label}>
 			<Button
 				onClick={onClick ? onClick : () => {}}
 				p="0px"
@@ -142,8 +143,9 @@ const EachNav = ({
 					color: active ? 'brand' : 'dark_lighter',
 				}}
 				_hover={{
-					bg: 'dark',
-					color: 'white',
+					// bg: 'dark',
+					color: 'dark',
+					borderColor: 'dark',
 					_dark: {
 						color: 'brand',
 						borderColor: 'brand',
@@ -152,6 +154,6 @@ const EachNav = ({
 			>
 				<Icon size={25} />
 			</Button>
-		</Tooltip>
+		</MainTooltip>
 	)
 }
