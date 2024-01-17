@@ -13,14 +13,25 @@ export const theme = extendTheme({
 		brand_light: '#63f2b1',
 		brand_lighter: '#cdfee2',
 
+		//accent
+		accent_lighter: '#f9fee7',
+		accent_light: '#f0fccb',
+		accent: '#e4faa8',
+		accent_dark: '#93cd15',
+		accent_darker: '#3b5314',
+
 		text_color: '#404444',
 		text_muted: '#9D9F9F',
+
 		gray: '#6E7272',
+		border_color: '#E3E3E3',
 
 		background: '#fafafa',
 	},
 })
 
-export const NAV_HEIGHT = '60PX'
+export const NAV_HEIGHT = '70px'
 export const SIDE_NAV_WIDTH = '250px'
+export const BODY_WIDTH = '600px'
 export const CONTAINER_MAX_WIDTH = '1100px'
+export const DEFAULT_PADDING = '15px'
