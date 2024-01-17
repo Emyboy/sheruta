@@ -28,16 +28,19 @@ export default function ThreeColumnLayout({ children }: Props) {
 						position={'sticky'}
 						top={0}
 						alignItems={'flex-start'}
+						w="full"
 					>
-						<Flex
-							gap={4}
-							alignItems={'center'}
-							h={NAV_HEIGHT}
-							maxH={NAV_HEIGHT}
-						>
-							<img src="/icon_green.png" alt="sheruta ng" width={30} />
-							<img src="/logo_text_white.png" alt="sheruta ng" width={130} />
-						</Flex>
+						<Link href="/">
+							<Flex
+								gap={4}
+								alignItems={'center'}
+								h={NAV_HEIGHT}
+								maxH={NAV_HEIGHT}
+							>
+								<img src="/icon_green.png" alt="sheruta ng" width={30} />
+								<img src="/logo_text_white.png" alt="sheruta ng" width={130} />
+							</Flex>
+						</Link>
 						{/* @ts-ignore */}
 						{children[0]}
 					</Flex>

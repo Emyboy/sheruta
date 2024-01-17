@@ -33,5 +33,5 @@ export const theme = extendTheme({
 export const NAV_HEIGHT = '70px'
 export const SIDE_NAV_WIDTH = '250px'
 export const BODY_WIDTH = '600px'
-export const CONTAINER_MAX_WIDTH = '1100px'
+export const CONTAINER_MAX_WIDTH = '1200px'
 export const DEFAULT_PADDING = '15px'

@@ -10,7 +10,14 @@ import {
 	Text,
 } from '@chakra-ui/react'
 import React from 'react'
-import { BiDotsHorizontalRounded, BiLocationPlus } from 'react-icons/bi'
+import {
+	BiBarChart,
+	BiDotsHorizontalRounded,
+	BiLocationPlus,
+	BiMessageRoundedDetail,
+	BiPhone,
+} from 'react-icons/bi'
+import MainTooltip from '../atoms/MainTooltip'
 
 type Props = {}
 
@@ -102,6 +109,84 @@ export default function EachRequest({ }: Props) {
 					</Badge>
 				</Flex>
 				<EachRequestImages />
+				<Flex alignItems={'center'} justifyContent={'space-between'}>
+					<Flex gap={DEFAULT_PADDING}>
+						<MainTooltip label='Call me' placement='top'>
+							<Button
+								px={0}
+								bg="none"
+								color="text_muted"
+								display={'flex'}
+								gap={1}
+								fontWeight={'light'}
+								_hover={{
+									color: 'brand',
+									bg: 'none',
+									_dark: {
+										color: 'brand'
+									}
+								}}
+								_dark={{
+									color: 'dark_lighter'
+								}}
+							>
+								<BiPhone size={25} /> 35
+							</Button>
+						</MainTooltip>
+						<MainTooltip label='Ask questions' placement='top'>
+							<Button
+								px={0}
+								bg="none"
+								color="text_muted"
+								display={'flex'}
+								gap={1}
+								fontWeight={'light'}
+								_hover={{
+									color: 'brand',
+									bg: 'none',
+									_dark: {
+										color: 'brand'
+									}
+								}}
+								_dark={{
+									color: 'dark_lighter'
+								}}
+							>
+								<BiMessageRoundedDetail size={25} /> 35
+							</Button>
+						</MainTooltip>
+						<MainTooltip label='Impressions' placement='top'>
+							<Button
+								px={0}
+								bg="none"
+								color="text_muted"
+								display={'flex'}
+								gap={1}
+								fontWeight={'light'}
+								_hover={{
+									color: 'brand',
+									bg: 'none',
+									_dark: {
+										color: 'brand'
+									}
+								}}
+								_dark={{
+									color: 'dark_lighter'
+								}}
+							>
+								<BiBarChart size={25} /> 135
+							</Button>
+						</MainTooltip>
+					</Flex>
+					<Flex _dark={{
+						color: 'dark_lighter'
+					}}>
+						<Text fontSize={'lg'} fontWeight={'bold'}>
+							₦500,000
+						</Text>{' '}
+						<Text>/month</Text>
+					</Flex>
+				</Flex>
 			</Flex>
 		</Box>
 	)
@@ -110,22 +195,22 @@ export default function EachRequest({ }: Props) {
 const EachRequestImages = () => {
 	return (
 		<Flex h="300px" gap={DEFAULT_PADDING}>
-			<Box position={'relative'} overflow={'hidden'} rounded='md'>
+			<Box position={'relative'} overflow={'hidden'} rounded="md">
 				<Image
 					src={'/samples/2.png'}
 					alt="shared space"
 					position={'relative'}
 				/>
 			</Box>
-			<Flex flexDirection={'column'} gap={DEFAULT_PADDING} w='150px' flex={1}>
-				<Box position={'relative'} overflow={'hidden'} rounded='md' bg="dark">
+			<Flex flexDirection={'column'} gap={DEFAULT_PADDING} w="150px" flex={1}>
+				<Box position={'relative'} overflow={'hidden'} rounded="md" bg="dark">
 					<Image
 						src={'/samples/4.png'}
 						alt="shared space"
 						position={'relative'}
 					/>
 				</Box>
-				<Box position={'relative'} overflow={'hidden'} rounded='md' bg="dark">
+				<Box position={'relative'} overflow={'hidden'} rounded="md" bg="dark">
 					<Image
 						src={'/samples/9.png'}
 						alt="shared space"
