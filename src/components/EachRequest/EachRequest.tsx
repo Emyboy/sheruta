@@ -26,7 +26,7 @@ export default function EachRequest({}: Props) {
 		<Box
 			borderBottom={'1px'}
 			borderColor={'border_color'}
-			p={DEFAULT_PADDING}
+			py={DEFAULT_PADDING}
 			bg="white"
 			_dark={{
 				bg: 'dark',
