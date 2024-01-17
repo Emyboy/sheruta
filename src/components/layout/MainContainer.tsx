@@ -10,8 +10,9 @@ export default function MainContainer({ children }: any) {
 			flex={1}
 			height={'100%'}
 			maxW={{
-				base: '95vw',
-				lg: CONTAINER_MAX_WIDTH,
+				base: '100vw',
+				lg: '95vw',
+				xl: CONTAINER_MAX_WIDTH,
 			}}
 		>
 			{children}

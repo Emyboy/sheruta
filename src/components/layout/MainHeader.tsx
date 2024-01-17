@@ -23,8 +23,11 @@ export default function MainHeader({}: Props) {
 			justifyContent={'center'}
 			h={NAV_HEIGHT}
 			position={'fixed'}
-			left={0}
+			// left={0}
 			right={0}
+			w={{
+				md: `calc(100% - 60px)`,
+			}}
 			top={0}
 			zIndex={90}
 		>

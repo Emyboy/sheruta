@@ -10,7 +10,7 @@ import React from 'react'
 
 type Props = {}
 
-export default function HomePage({ }: Props) {
+export default function HomePage({}: Props) {
 	return (
 		<>
 			<MainHeader />
@@ -24,7 +24,7 @@ export default function HomePage({ }: Props) {
 							return <EachRequest key={Math.random()} />
 						})}
 					</VStack>
-					<Flex >
+					<Flex>
 						<MainRightNav />
 					</Flex>
 				</ThreeColumnLayout>

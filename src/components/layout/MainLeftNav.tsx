@@ -1,5 +1,5 @@
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
-import { Box, Divider, Flex, Text } from '@chakra-ui/react'
+import { Box, Divider, Flex, Hide, Text, Icon } from '@chakra-ui/react'
 import React from 'react'
 import {
 	BiCalendarAlt,
@@ -15,10 +15,17 @@ export default function MainLeftNav({}: Props) {
 	return (
 		<Flex
 			flexDirection={'column'}
-			w={`calc(100% - ${DEFAULT_PADDING})`}
+			w={{
+				lg: `calc(100% - ${DEFAULT_PADDING})`,
+				md: '60px',
+			}}
 			minH={`calc(100vh - ${NAV_HEIGHT})`}
 			gap={`calc(${DEFAULT_PADDING})`}
 			py={DEFAULT_PADDING}
+			alignItems={{
+				lg: 'flex-start',
+				bse: 'center',
+			}}
 		>
 			<EachNav Icon={BiRocket} label="Get Started" />
 			<EachNav Icon={BiCalendarAlt} label="Inspections" />
@@ -39,8 +46,19 @@ const EachNav = ({ Icon, label }: { Icon: any; label: string }) => {
 	return (
 		<Flex
 			alignItems={'center'}
+			justifyContent={{
+				md: 'center',
+				lg: 'flex-start',
+			}}
 			gap={DEFAULT_PADDING}
-			p={DEFAULT_PADDING}
+			p={{
+				lg: DEFAULT_PADDING,
+				md: `calc(${DEFAULT_PADDING} - 10px)`,
+			}}
+			h={{
+				md: '60px',
+				lg: 'auto',
+			}}
 			rounded={'md'}
 			color="dark_light"
 			_hover={{
@@ -57,7 +75,9 @@ const EachNav = ({ Icon, label }: { Icon: any; label: string }) => {
 			}}
 		>
 			<Icon size={25} />
-			<Text fontSize={'lg'}>{label}</Text>
+			<Hide below="lg">
+				<Text fontSize={'lg'}>{label}</Text>
+			</Hide>
 		</Flex>
 	)
 }

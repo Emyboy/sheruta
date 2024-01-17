@@ -21,7 +21,7 @@ import MainTooltip from '../atoms/MainTooltip'
 
 type Props = {}
 
-export default function EachRequest({ }: Props) {
+export default function EachRequest({}: Props) {
 	return (
 		<Box
 			borderBottom={'1px'}
@@ -111,7 +111,7 @@ export default function EachRequest({ }: Props) {
 				<EachRequestImages />
 				<Flex alignItems={'center'} justifyContent={'space-between'}>
 					<Flex gap={DEFAULT_PADDING}>
-						<MainTooltip label='Call me' placement='top'>
+						<MainTooltip label="Call me" placement="top">
 							<Button
 								px={0}
 								bg="none"
@@ -123,17 +123,17 @@ export default function EachRequest({ }: Props) {
 									color: 'brand',
 									bg: 'none',
 									_dark: {
-										color: 'brand'
-									}
+										color: 'brand',
+									},
 								}}
 								_dark={{
-									color: 'dark_lighter'
+									color: 'dark_lighter',
 								}}
 							>
 								<BiPhone size={25} /> 35
 							</Button>
 						</MainTooltip>
-						<MainTooltip label='Ask questions' placement='top'>
+						<MainTooltip label="Ask questions" placement="top">
 							<Button
 								px={0}
 								bg="none"
@@ -145,17 +145,17 @@ export default function EachRequest({ }: Props) {
 									color: 'brand',
 									bg: 'none',
 									_dark: {
-										color: 'brand'
-									}
+										color: 'brand',
+									},
 								}}
 								_dark={{
-									color: 'dark_lighter'
+									color: 'dark_lighter',
 								}}
 							>
 								<BiMessageRoundedDetail size={25} /> 35
 							</Button>
 						</MainTooltip>
-						<MainTooltip label='Impressions' placement='top'>
+						<MainTooltip label="Engagements" placement="top">
 							<Button
 								px={0}
 								bg="none"
@@ -167,20 +167,22 @@ export default function EachRequest({ }: Props) {
 									color: 'brand',
 									bg: 'none',
 									_dark: {
-										color: 'brand'
-									}
+										color: 'brand',
+									},
 								}}
 								_dark={{
-									color: 'dark_lighter'
+									color: 'dark_lighter',
 								}}
 							>
 								<BiBarChart size={25} /> 135
 							</Button>
 						</MainTooltip>
 					</Flex>
-					<Flex _dark={{
-						color: 'dark_lighter'
-					}}>
+					<Flex
+						_dark={{
+							color: 'dark_lighter',
+						}}
+					>
 						<Text fontSize={'lg'} fontWeight={'bold'}>
 							₦500,000
 						</Text>{' '}
@@ -194,15 +196,22 @@ export default function EachRequest({ }: Props) {
 
 const EachRequestImages = () => {
 	return (
-		<Flex h="300px" gap={DEFAULT_PADDING}>
-			<Box position={'relative'} overflow={'hidden'} rounded="md">
+		<Flex
+			h={{
+				md: '300px',
+				base: '200px',
+			}}
+			gap={DEFAULT_PADDING}
+		>
+			<Box position={'relative'} overflow={'hidden'} rounded="md" w={'50%'}>
 				<Image
 					src={'/samples/2.png'}
 					alt="shared space"
 					position={'relative'}
+					w="full"
 				/>
 			</Box>
-			<Flex flexDirection={'column'} gap={DEFAULT_PADDING} w="150px" flex={1}>
+			<Flex flexDirection={'column'} gap={DEFAULT_PADDING} w={'50%'} flex={1}>
 				<Box position={'relative'} overflow={'hidden'} rounded="md" bg="dark">
 					<Image
 						src={'/samples/4.png'}
