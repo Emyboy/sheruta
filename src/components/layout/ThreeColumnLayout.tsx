@@ -1,6 +1,7 @@
 import { BODY_WIDTH, NAV_HEIGHT, SIDE_NAV_WIDTH } from '@/configs/theme'
 import { Box, Flex, Hide, Link } from '@chakra-ui/react'
 import React from 'react'
+import MainBodyContent from './MainBodyContent'
 
 type Props = {
 	children: React.ReactNode
@@ -59,17 +60,10 @@ export default function ThreeColumnLayout({ children }: Props) {
 						</Flex>
 					</Box>
 				</Hide>
-				<Box
-					pt={NAV_HEIGHT}
-					pb={5}
-					maxW={{
-						xl: BODY_WIDTH,
-						lg: `calc(${BODY_WIDTH} - 50px)`,
-					}}
-				>
+				<MainBodyContent pt={NAV_HEIGHT} pb={5}>
 					{/* @ts-ignore */}
 					{children[1]}
-				</Box>
+				</MainBodyContent>
 				<Hide below="lg">
 					<Box
 						minW={SIDE_NAV_WIDTH}
