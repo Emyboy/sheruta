@@ -28,6 +28,16 @@ export const theme = extendTheme({
 
 		background: '#fafafa',
 	},
+	components: {
+		Button: {
+			// Configure hover styles for all buttons
+			baseStyle: {
+				_hover: {
+					backgroundColor: 'none',
+				},
+			},
+		},
+	},
 })
 
 export const NAV_HEIGHT = '70px'

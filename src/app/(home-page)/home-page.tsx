@@ -10,7 +10,7 @@ import React from 'react'
 
 type Props = {}
 
-export default function HomePage({ }: Props) {
+export default function HomePage({}: Props) {
 	return (
 		<>
 			<MainHeader />
@@ -20,7 +20,7 @@ export default function HomePage({ }: Props) {
 						<MainLeftNav />
 					</Flex>
 					<Flex flexDirection={'column'} gap={0}>
-						{new Array(25).fill(null).map((_) => {
+						{new Array(9).fill(null).map((_) => {
 							return <EachRequest key={Math.random()} />
 						})}
 					</Flex>

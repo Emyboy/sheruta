@@ -11,7 +11,7 @@ export default function MainBodyContent(props: Props) {
 	const value = {
 		xl: BODY_WIDTH,
 		lg: `calc(${BODY_WIDTH} - 50px)`,
-		base: '100vw'
+		base: '100vw',
 	}
 	return (
 		<Flex

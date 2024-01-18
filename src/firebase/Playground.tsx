@@ -10,7 +10,7 @@ import {
 	getDoc,
 	where,
 } from 'firebase/firestore'
-import { db } from '@/configs/firebase'
+import { db } from '@/firebase'
 
 type Props = {
 	theList: any[]

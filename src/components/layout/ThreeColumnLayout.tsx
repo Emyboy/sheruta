@@ -1,17 +1,24 @@
-import { BODY_WIDTH, NAV_HEIGHT, SIDE_NAV_WIDTH } from '@/configs/theme'
-import { Box, Flex, Hide, Link } from '@chakra-ui/react'
-import React from 'react'
+'use client'
+import { NAV_HEIGHT, SIDE_NAV_WIDTH } from '@/configs/theme'
+import { Box, Button, Flex, Hide, Link, useColorMode } from '@chakra-ui/react'
+import React, { useState } from 'react'
 import MainBodyContent from './MainBodyContent'
+
+import AuthPopup from '../popups/AuthPopup'
 
 type Props = {
 	children: React.ReactNode
 }
 
 export default function ThreeColumnLayout({ children }: Props) {
+	const [showLogin, setShowLogin] = useState(false)
+	const { colorMode } = useColorMode()
+
 	return (
 		<>
+			{showLogin && <AuthPopup isOpen onClose={() => setShowLogin(false)} />}
 			<Flex w="full">
-				<Hide below="md">
+				<Hide below="lg">
 					<Box
 						// minW={SIDE_NAV_WIDTH}
 						flex={1}
@@ -35,7 +42,7 @@ export default function ThreeColumnLayout({ children }: Props) {
 							}}
 							w={{
 								xl: 'full',
-								lg: '250px',
+								lg: 'full',
 							}}
 						>
 							<Link href="/">
@@ -47,11 +54,19 @@ export default function ThreeColumnLayout({ children }: Props) {
 								>
 									<img src="/icon_green.png" alt="sheruta ng" width={30} />
 									<Hide below="lg">
-										<img
-											src="/logo_text_white.png"
-											alt="sheruta ng"
-											width={130}
-										/>
+										{colorMode === 'dark' ? (
+											<img
+												src="/logo_text_white.png"
+												alt="sheruta ng"
+												width={130}
+											/>
+										) : (
+											<img
+												src="/logo_text_black.png"
+												alt="sheruta ng"
+												width={130}
+											/>
+										)}
 									</Hide>
 								</Flex>
 							</Link>
@@ -85,9 +100,8 @@ export default function ThreeColumnLayout({ children }: Props) {
 								maxH={NAV_HEIGHT}
 								justifyContent={'flex-end'}
 							>
-								<Link
+								<Button
 									rounded={'md'}
-									href="/"
 									px="30px"
 									py="10px"
 									border={'1px'}
@@ -108,10 +122,10 @@ export default function ThreeColumnLayout({ children }: Props) {
 									}}
 								>
 									Upload
-								</Link>
-								<Link
+								</Button>
+								<Button
 									rounded={'md'}
-									href="/"
+									onClick={() => setShowLogin(true)}
 									px="30px"
 									py="10px"
 									border={'1px'}
@@ -128,7 +142,7 @@ export default function ThreeColumnLayout({ children }: Props) {
 									}}
 								>
 									Login
-								</Link>
+								</Button>
 							</Flex>
 							{/* @ts-ignore */}
 							{children[2]}

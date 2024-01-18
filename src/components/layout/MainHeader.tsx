@@ -1,16 +1,16 @@
 'use client'
-import {
-	Box,
-	Button,
-	Flex,
-	Image,
-	Tooltip,
-	useColorMode,
-} from '@chakra-ui/react'
+import { Button, Flex, useColorMode } from '@chakra-ui/react'
 import React from 'react'
 import MainContainer from './MainContainer'
-import { BODY_WIDTH, DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
-import { BiBell, BiHome, BiPlus, BiSearchAlt, BiSun } from 'react-icons/bi'
+import { NAV_HEIGHT } from '@/configs/theme'
+import {
+	BiBell,
+	BiHome,
+	BiPlus,
+	BiSearchAlt,
+	BiSun,
+	BiUserPlus,
+} from 'react-icons/bi'
 import Link from 'next/link'
 import MainTooltip from '../atoms/MainTooltip'
 import MainBodyContent from './MainBodyContent'
@@ -18,7 +18,7 @@ import MainBodyContent from './MainBodyContent'
 type Props = {}
 
 export default function MainHeader({}: Props) {
-	const { colorMode, toggleColorMode } = useColorMode()
+	const { toggleColorMode } = useColorMode()
 	return (
 		<Flex
 			justifyContent={'center'}
@@ -45,10 +45,15 @@ export default function MainHeader({}: Props) {
 						borderColor: 'dark_light',
 					}}
 				>
-					<MainBodyContent flexDirection={'row'} alignItems={'center'} justifyContent={'space-between'}>
+					<MainBodyContent
+						flexDirection={'row'}
+						alignItems={'center'}
+						justifyContent={'space-between'}
+					>
 						<EachNav label="Home" Icon={BiHome} active />
 						<EachNav label="Post Request" Icon={BiPlus} />
 						<EachNav label="Notifications" Icon={BiBell} />
+						<EachNav label="Matches" Icon={BiUserPlus} />
 						<EachNav label="Search" Icon={BiSearchAlt} />
 						{process.env.NODE_ENV !== 'production' && (
 							<EachNav
