@@ -9,7 +9,11 @@ import {
 	useToast,
 } from '@chakra-ui/react'
 import React, { useEffect } from 'react'
-import { BiLogoFacebookCircle, BiLogoGooglePlus } from 'react-icons/bi'
+import {
+	BiLogoFacebookCircle,
+	BiLogoGoogle,
+	BiLogoGooglePlus,
+} from 'react-icons/bi'
 import MainModal from '../atoms/MainModal'
 import {
 	GoogleAuthProvider,
@@ -17,6 +21,8 @@ import {
 	signInWithPopup,
 } from 'firebase/auth'
 import { auth } from '@/firebase'
+import AuthService from '@/firebase/service/auth/auth.firebase'
+import { RegisterDTO } from '@/firebase/service/auth/auth.types'
 
 interface Props extends Partial<ModalProps> {
 	isOpen: boolean
@@ -31,17 +37,34 @@ export default function AuthPopup(props: Props) {
 	const loginWithGoogle = async () => {
 		const provider = new GoogleAuthProvider()
 		signInWithPopup(auth, provider)
-			.then((result) => {
-				const credential = GoogleAuthProvider.credentialFromResult(result)
-				const token = credential?.accessToken
+			.then(async (result) => {
+				// const credential = GoogleAuthProvider.credentialFromResult(result)
 				const user = result.user
-				console.log({
-					user,
-					token,
-					credential,
-				})
+
+				let data: RegisterDTO = {
+					displayName: user.displayName || '',
+					email: user.email || '',
+					photoURL: user.photoURL || null,
+					providerId: 'google',
+					uid: user.uid,
+					phoneNumber: user.phoneNumber,
+				}
+
+				console.log('READY TO SEND::', user)
+
+				if (!data.displayName || !data.email || !data.uid) {
+					return toast({
+						title: 'Error: Please try another email',
+						status: 'error',
+					})
+				}
+
+				let theUser = await AuthService.loginUser(data)
+
+				console.log('LOGIN DETAILS::', theUser)
 			})
 			.catch((error) => {
+				console.log('USER CREATED::', error)
 				toast({ title: 'Error, please try again', status: 'error' })
 				// console.log(error)
 				// const errorCode = error.code
@@ -51,14 +74,14 @@ export default function AuthPopup(props: Props) {
 			})
 	}
 
-	useEffect(() => {
-		onAuthStateChanged(auth, (user) => {
-			if (user) {
-				console.log('USER FOUND::', user)
-			} else {
-			}
-		})
-	}, [])
+	// useEffect(() => {
+	// 	onAuthStateChanged(auth, (user) => {
+	// 		if (user) {
+	// 			console.log('USER FOUND::', user)
+	// 		} else {
+	// 		}
+	// 	})
+	// }, [])
 
 	return (
 		<MainModal isOpen={isOpen} onClose={onClose}>
@@ -70,7 +93,7 @@ export default function AuthPopup(props: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<EachSocial
 					label="Login with Google"
-					Icon={BiLogoGooglePlus}
+					Icon={BiLogoGoogle}
 					onClick={loginWithGoogle}
 				/>
 				<EachSocial

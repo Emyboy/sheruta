@@ -1,14 +1,29 @@
-export interface RegisterDTO {
-	uid: string
-	providerId: string
-	photoURL: string
-	phoneNumber?: string | null | number
+import { z } from 'zod'
+
+export const RegisterDTOSchema = z.object({
+	uid: z.string(),
+	providerId: z.string(),
+	photoURL: z.string().nullable(),
+	phoneNumber: z.string().nullable(),
+	email: z.string(),
+	displayName: z.string(),
+})
+
+export type RegisterDTO = z.infer<typeof RegisterDTOSchema>
+
+export type AuthUserDTO = {
+	_id: string
+	first_name: string
+	last_name: string
 	email: string
-	displayName: string
+	providerId: 'google' | 'facebook'
+	avatar_url: string | null
+	account_status: 'active' | 'suspended'
+	last_seen: object
 }
 
 export interface AuthUser {
-	id: string
+	_id: string
 	first_name: string
 	last_name: string
 	email: string

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react'
 
 interface AuthState {
 	user: AuthUser | null
-    user_info: UserInfo | null
+	user_info: UserInfo | null
 }
 
 interface AuthContextProps {
