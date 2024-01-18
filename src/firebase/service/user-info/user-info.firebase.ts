@@ -1,5 +1,7 @@
+import { DocumentData, doc, getDoc } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { UserInfoDTO } from './user-info.types'
+import { db } from '@/firebase'
 
 export default class UserInfoService {
 	static async create({
@@ -18,6 +20,7 @@ export default class UserInfoService {
 				_user_id,
 				_user_ref,
 				whatsapp_phone_number: null,
+				credits: 300,
 			}
 			let result = await SherutaDB.create({
 				collection_name: DBCollectionName.userInfos,
@@ -26,6 +29,15 @@ export default class UserInfoService {
 			})
 
 			return result
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async get(user_id: string): Promise<DocumentData | undefined> {
+		try {
+			let result = await getDoc(doc(db, DBCollectionName.userInfos, user_id))
+			return result.data()
 		} catch (error) {
 			return Promise.reject(error)
 		}

@@ -1,9 +1,10 @@
-import { DocumentReference } from "firebase/firestore"
+import { DocumentReference } from 'firebase/firestore'
 
 export interface UserInfo {
 	id: string
 	user_id: string
 	primary_phone_number: string
+	credits: number
 }
 
 export interface UserInfoDTO {
@@ -12,4 +13,5 @@ export interface UserInfoDTO {
 	gender: 'male' | 'female' | null
 	primary_phone_number: null | string
 	whatsapp_phone_number: null
+	credits: number
 }

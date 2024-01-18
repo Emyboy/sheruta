@@ -15,7 +15,13 @@ export default function MainRightNav({}: Props) {
 		>
 			<Flex
 				p={DEFAULT_PADDING}
-				bg="dark_light"
+				bg="white"
+				border={'1px'}
+				borderColor={'border_color'}
+				_dark={{
+					bg: 'dark',
+					borderColor: 'dark_light',
+				}}
 				rounded={'xl'}
 				flexDirection={'column'}
 				gap={DEFAULT_PADDING}

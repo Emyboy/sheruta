@@ -1,4 +1,6 @@
+'use client'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
 import { Box, Divider, Flex, Hide, Text, Icon } from '@chakra-ui/react'
 import React from 'react'
 import {
@@ -12,6 +14,7 @@ import {
 type Props = {}
 
 export default function MainLeftNav({}: Props) {
+	const { logout } = useAuthContext()
 	return (
 		<Flex
 			flexDirection={'column'}
@@ -37,14 +40,23 @@ export default function MainLeftNav({}: Props) {
 					bg: 'dark_light',
 				}}
 			/>
-			<EachNav Icon={BiLogInCircle} label="Logout" />
+			<EachNav Icon={BiLogInCircle} label="Logout" onClick={logout} />
 		</Flex>
 	)
 }
 
-const EachNav = ({ Icon, label }: { Icon: any; label: string }) => {
+const EachNav = ({
+	Icon,
+	label,
+	onClick,
+}: {
+	Icon: any
+	label: string
+	onClick?: () => void
+}) => {
 	return (
 		<Flex
+			onClick={onClick}
 			alignItems={'center'}
 			justifyContent={{
 				md: 'center',

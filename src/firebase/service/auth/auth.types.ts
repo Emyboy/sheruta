@@ -28,4 +28,5 @@ export interface AuthUser {
 	last_name: string
 	email: string
 	providerId: string
+	avatar_url: string
 }

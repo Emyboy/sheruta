@@ -1,15 +1,11 @@
 import { DocumentData, doc, getDoc, serverTimestamp } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import {
-	AuthUser,
-	AuthUserDTO,
-	RegisterDTO,
-	RegisterDTOSchema,
-} from './auth.types'
+import { AuthUserDTO, RegisterDTO, RegisterDTOSchema } from './auth.types'
 import { db } from '@/firebase'
 import UserInfoService from '../user-info/user-info.firebase'
 import UserSettingsService from '../user-settings/user-settings.firebase'
 import FlatShareProfileService from '../flat-share-profile/flat-share-profile.firebase'
+import UserSecretsService from '../user-secrets/user-secrets.firebase'
 
 export default class AuthService {
 	static async loginUser(data: RegisterDTO): Promise<DocumentData | undefined> {
@@ -55,11 +51,11 @@ export default class AuthService {
 				data: userData,
 			})
 
-			let _user = await getDoc(doc(db, DBCollectionName.users, data.uid));
+			let _user = await getDoc(doc(db, DBCollectionName.users, data.uid))
 
 			await FlatShareProfileService.create({
 				_user_id: data.uid,
-				_user_ref: _user.ref
+				_user_ref: _user.ref,
 			})
 
 			await UserInfoService.create({
@@ -71,6 +67,11 @@ export default class AuthService {
 			await UserSettingsService.create({
 				_user_ref: _user.ref,
 				_user_id: data.uid,
+			})
+
+			await UserSecretsService.create({
+				_user_id: data.uid,
+				_user_ref: _user.ref,
 			})
 
 			let user = await this.getUser(data.uid)
@@ -87,11 +88,16 @@ export default class AuthService {
 			const docSnap = await getDoc(docRef)
 
 			if (docSnap.exists()) {
-				console.log('Document data:', docSnap.data())
-				return docSnap.data()
+				let user_info = await UserInfoService.get(user_id)
+				let user_settings = await UserSettingsService.get(user_id)
+				let flat_share_profile = await FlatShareProfileService.get(user_id)
+				return {
+					user: docSnap.data(),
+					user_info,
+					user_settings,
+					flat_share_profile,
+				}
 			} else {
-				// docSnap.data() will be undefined in this case
-				console.log('No such document!')
 				return null
 			}
 		} catch (error) {

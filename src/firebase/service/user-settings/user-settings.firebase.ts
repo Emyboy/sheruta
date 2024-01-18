@@ -1,4 +1,6 @@
+import { doc, getDoc } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
+import { db } from '@/firebase'
 
 export default class UserSettingsService {
 	static defaultSettings = {
@@ -26,6 +28,15 @@ export default class UserSettingsService {
 			})
 
 			return result
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async get(user_id: string) {
+		try {
+			let result = await getDoc(doc(db, DBCollectionName.userSettings, user_id))
+			return result.data()
 		} catch (error) {
 			return Promise.reject(error)
 		}

@@ -1,22 +1,20 @@
 'use client'
 import { NAV_HEIGHT, SIDE_NAV_WIDTH } from '@/configs/theme'
 import { Box, Button, Flex, Hide, Link, useColorMode } from '@chakra-ui/react'
-import React, { useState } from 'react'
+import React from 'react'
 import MainBodyContent from './MainBodyContent'
 
 import AuthPopup from '../popups/AuthPopup'
+import RightColumnHeader from './RightColumnHeader'
 
 type Props = {
 	children: React.ReactNode
 }
 
 export default function ThreeColumnLayout({ children }: Props) {
-	const [showLogin, setShowLogin] = useState(false)
 	const { colorMode } = useColorMode()
-
 	return (
 		<>
-			{showLogin && <AuthPopup isOpen onClose={() => setShowLogin(false)} />}
 			<Flex w="full">
 				<Hide below="lg">
 					<Box
@@ -93,57 +91,8 @@ export default function ThreeColumnLayout({ children }: Props) {
 						}}
 					>
 						<Box minH={`calc(100vh)`} position={'sticky'} top={0}>
-							<Flex
-								gap={4}
-								alignItems={'center'}
-								h={NAV_HEIGHT}
-								maxH={NAV_HEIGHT}
-								justifyContent={'flex-end'}
-							>
-								<Button
-									rounded={'md'}
-									px="30px"
-									py="10px"
-									border={'1px'}
-									color={'dark_light'}
-									borderColor={'dark_lighter'}
-									bg="white"
-									_dark={{
-										bg: 'dark',
-										color: 'dark_lighter',
-									}}
-									_hover={{
-										color: 'dark',
-										borderColor: 'dark',
-										_dark: {
-											color: 'dark_lighter',
-											borderColor: 'dark_lighter',
-										},
-									}}
-								>
-									Upload
-								</Button>
-								<Button
-									rounded={'md'}
-									onClick={() => setShowLogin(true)}
-									px="30px"
-									py="10px"
-									border={'1px'}
-									color={'white'}
-									borderColor={'dark_lighter'}
-									bg="dark"
-									_hover={{
-										bg: 'brand_darker',
-										color: 'accent',
-									}}
-									_dark={{
-										borderColor: 'brand',
-										color: 'brand',
-									}}
-								>
-									Login
-								</Button>
-							</Flex>
+							<RightColumnHeader />
+
 							{/* @ts-ignore */}
 							{children[2]}
 						</Box>
