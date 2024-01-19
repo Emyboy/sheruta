@@ -27,10 +27,12 @@ export default function MainBackHeader({ heading, subHeading }: Props) {
 				onClick={() => router.back()}
 			/>
 			<Flex flexDirection={'column'} maxW={'full'}>
-				<Text isTruncated>The heading</Text>
-				<Text isTruncated fontSize={'sm'} color="text_muted">
-					The sub heading
-				</Text>
+				{heading && <>
+					<Text isTruncated>{heading}</Text>
+					<Text isTruncated fontSize={'sm'} color="text_muted">
+						{subHeading}
+					</Text>
+				</>}
 			</Flex>
 		</Flex>
 	)

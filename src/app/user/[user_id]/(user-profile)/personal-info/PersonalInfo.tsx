@@ -1,7 +1,13 @@
 import { Flex } from '@chakra-ui/react'
 import React from 'react'
 import EachPersonalInfo from './EachPersonalInfo'
-import { BiBriefcase, BiLogoFacebook, BiLogoInstagramAlt, BiLogoLinkedinSquare, BiLogoTwitter } from 'react-icons/bi'
+import {
+	BiBriefcase,
+	BiLogoFacebook,
+	BiLogoInstagramAlt,
+	BiLogoLinkedinSquare,
+	BiLogoTwitter,
+} from 'react-icons/bi'
 import MainSection from '@/components/atoms/MainSection'
 import MainTooltip from '@/components/atoms/MainTooltip'
 import { DEFAULT_PADDING } from '@/configs/theme'
@@ -56,16 +62,14 @@ const EachSocialMedia = ({ Icon, label }: { Icon: any; label: string }) => {
 				border={'1px'}
 				rounded={'md'}
 				borderColor={'border_color'}
-				_hover={{
-					
-				}}
+				_hover={{}}
 				_dark={{
 					borderColor: 'dark_light',
 					color: 'dark_lighter',
 					_hover: {
 						color: 'brand',
-						borderColor: 'brand'
-					}
+						borderColor: 'brand',
+					},
 				}}
 				cursor={'pointer'}
 				alignItems={'center'}
