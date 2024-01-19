@@ -18,9 +18,9 @@ import { usePathname } from 'next/navigation'
 type Props = {}
 
 export default function MainHeader({}: Props) {
-	const pathname = usePathname();
-	const { toggleColorMode } = useColorMode();
-	
+	const pathname = usePathname()
+	const { toggleColorMode } = useColorMode()
+
 	return (
 		<Flex
 			justifyContent={'center'}
@@ -41,16 +41,32 @@ export default function MainHeader({}: Props) {
 					<MainIconBtn label="Home" Icon={BiHome} active={pathname === '/'} />
 				</Link>
 				<Link href={`/request`}>
-					<MainIconBtn label="Post Request" Icon={BiPlus} active={pathname.includes('request')} />
+					<MainIconBtn
+						label="Post Request"
+						Icon={BiPlus}
+						active={pathname.includes('request')}
+					/>
 				</Link>
 				<Link href={`/notifications`}>
-					<MainIconBtn label="Notifications" Icon={BiBell} active={pathname === '/notifications'} />
+					<MainIconBtn
+						label="Notifications"
+						Icon={BiBell}
+						active={pathname === '/notifications'}
+					/>
 				</Link>
-				<Link href={`/match`}>
-					<MainIconBtn label="Matches" Icon={BiUserPlus} />
+				<Link href={`/matches`}>
+					<MainIconBtn
+						label="Matches"
+						Icon={BiUserPlus}
+						active={pathname.includes('matches')}
+					/>
 				</Link>
 				<Link href={`/search`}>
-					<MainIconBtn label="Search" Icon={BiSearchAlt} />
+					<MainIconBtn
+						label="Search"
+						Icon={BiSearchAlt}
+						active={pathname.includes('search')}
+					/>
 				</Link>
 				{process.env.NODE_ENV !== 'production' && (
 					<MainIconBtn

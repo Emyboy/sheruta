@@ -1,10 +1,10 @@
 import MainContainer from '@/components/layout/MainContainer'
-import MainHeader from '@/components/layout/MainHeader'
-import MainLeftNav from '@/components/layout/MainLeftNav'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { Flex } from '@chakra-ui/react'
 import React from 'react'
-import NotificationsPage from './notifications-page'
+import SearchPage from './search-page'
+import MainHeader from '@/components/layout/MainHeader'
+import SearchPageFilter from './(components)/SearchPageFilter'
 
 type Props = {}
 
@@ -14,9 +14,9 @@ export default function page({}: Props) {
 			<MainContainer>
 				<ThreeColumnLayout header={<MainHeader />}>
 					<Flex flexDirection={'column'} w="full">
-						<MainLeftNav />
+						<SearchPageFilter />
 					</Flex>
-					<NotificationsPage />
+					<SearchPage />
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

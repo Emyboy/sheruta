@@ -4,21 +4,18 @@ import MainLeftNav from '@/components/layout/MainLeftNav'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { Flex } from '@chakra-ui/react'
 import React from 'react'
-import NotificationsPage from './notifications-page'
 
 type Props = {}
 
 export default function page({}: Props) {
-	return (
-		<Flex justifyContent={'center'}>
-			<MainContainer>
-				<ThreeColumnLayout header={<MainHeader />}>
-					<Flex flexDirection={'column'} w="full">
-						<MainLeftNav />
-					</Flex>
-					<NotificationsPage />
-				</ThreeColumnLayout>
-			</MainContainer>
-		</Flex>
-	)
+	return <Flex justifyContent={'center'}>
+		<MainContainer>
+			<ThreeColumnLayout header={<MainHeader />}>
+				<Flex flexDirection={'column'} w="full">
+					<MainLeftNav />
+				</Flex>
+				<h1>Matches Page</h1>
+			</ThreeColumnLayout>
+		</MainContainer>
+	</Flex>
 }
