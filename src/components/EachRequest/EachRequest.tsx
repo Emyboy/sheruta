@@ -182,6 +182,7 @@ export default function EachRequest({}: Props) {
 						_dark={{
 							color: 'dark_lighter',
 						}}
+						alignItems={'center'}
 					>
 						<Text fontSize={'lg'} fontWeight={'bold'}>
 							₦500,000

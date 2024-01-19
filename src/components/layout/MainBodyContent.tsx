@@ -16,11 +16,11 @@ export default function MainBodyContent(props: Props) {
 	return (
 		<Flex
 			flex={1}
-			id="body"
+			id="body-content"
 			flexDirection={'column'}
 			minW={value}
 			maxW={value}
-			px={DEFAULT_PADDING}
+			// px={DEFAULT_PADDING}
 			{...props}
 		>
 			{children}

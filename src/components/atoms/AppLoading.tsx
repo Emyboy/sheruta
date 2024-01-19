@@ -31,7 +31,7 @@ export default function AppLoading({}: Props) {
 		>
 			<Flex flexDir={'column'} alignItems={'center'} gap={7}>
 				<Image src="/icon_green.png" alt="brand" width={80} height={80} />
-				<Spinner color="dark_lighter" size='sm' />
+				<Spinner color="dark_lighter" size="sm" />
 			</Flex>
 		</Flex>
 	)

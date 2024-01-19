@@ -3,26 +3,28 @@ import { NAV_HEIGHT, SIDE_NAV_WIDTH } from '@/configs/theme'
 import { Box, Button, Flex, Hide, Link, useColorMode } from '@chakra-ui/react'
 import React from 'react'
 import MainBodyContent from './MainBodyContent'
-
+import NextLink from 'next/link'
 import AuthPopup from '../popups/AuthPopup'
 import RightColumnHeader from './RightColumnHeader'
+import MainContainer from './MainContainer'
 
 type Props = {
 	children: React.ReactNode
+	header: React.ReactNode
 }
 
-export default function ThreeColumnLayout({ children }: Props) {
+export default function ThreeColumnLayout({ children, header }: Props) {
 	const { colorMode } = useColorMode()
 	return (
 		<>
 			<Flex w="full">
 				<Hide below="lg">
 					<Box
+						zIndex={100}
 						// minW={SIDE_NAV_WIDTH}
 						flex={1}
 						borderRight={'1px'}
 						borderColor={'border_color'}
-						zIndex={100}
 						bg="white"
 						_dark={{
 							bg: 'dark',
@@ -43,7 +45,7 @@ export default function ThreeColumnLayout({ children }: Props) {
 								lg: 'full',
 							}}
 						>
-							<Link href="/">
+							<NextLink href="/">
 								<Flex
 									gap={4}
 									alignItems={'center'}
@@ -67,23 +69,48 @@ export default function ThreeColumnLayout({ children }: Props) {
 										)}
 									</Hide>
 								</Flex>
-							</Link>
+							</NextLink>
 							{/* @ts-ignore */}
 							{children[0]}
 						</Flex>
 					</Box>
 				</Hide>
 				<MainBodyContent pt={NAV_HEIGHT} pb={5}>
+					<Flex
+						zIndex={50}
+						justifyContent={'center'}
+						h={NAV_HEIGHT}
+						position={'fixed'}
+						// left={0}
+						right={0}
+						w={{
+							md: `calc(100% - 60px)`,
+							lg: 'full',
+						}}
+						top={0}
+					>
+						<MainContainer
+							display={'flex'}
+							justifyContent={'center'}
+							bg="white"
+							alignItems={'center'}
+							borderBottom={'1px'}
+							borderColor={'border_color'}
+							_dark={{ borderColor: 'dark_light', bg: 'dark' }}
+						>
+							<MainBodyContent>{header}</MainBodyContent>
+						</MainContainer>
+					</Flex>
 					{/* @ts-ignore */}
 					{children[1]}
 				</MainBodyContent>
 				<Hide below="lg">
 					<Box
+						zIndex={100}
 						minW={SIDE_NAV_WIDTH}
 						flex={1}
 						borderLeft={'1px'}
 						borderColor={'border_color'}
-						zIndex={100}
 						bg="white"
 						_dark={{
 							bg: 'dark',

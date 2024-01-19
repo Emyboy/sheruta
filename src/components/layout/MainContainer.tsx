@@ -1,10 +1,11 @@
 import { CONTAINER_MAX_WIDTH } from '@/configs/theme'
-import { Box } from '@chakra-ui/react'
+import { Box, BoxProps } from '@chakra-ui/react'
 import React from 'react'
 
-type Props = {}
+interface Props extends BoxProps {}
 
-export default function MainContainer({ children }: any) {
+export default function MainContainer(props: Props) {
+	const { children } = props
 	return (
 		<Box
 			flex={1}
@@ -14,6 +15,7 @@ export default function MainContainer({ children }: any) {
 				lg: '95vw',
 				xl: CONTAINER_MAX_WIDTH,
 			}}
+			{...props}
 		>
 			{children}
 		</Box>
