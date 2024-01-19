@@ -1,9 +1,10 @@
 import { Flex } from '@chakra-ui/react'
 import React from 'react'
 import ProfileHero from './ProfileHero'
-import { DEFAULT_PADDING } from '@/configs/theme'
 import MainSection from '@/components/atoms/MainSection'
 import ProfileAboutMe from './ProfileAboutMe'
+import PersonalInfo from './personal-info/PersonalInfo'
+import EachRequest from '@/components/EachRequest/EachRequest'
 
 type Props = {}
 
@@ -16,11 +17,11 @@ export default function UserProfilePage({}: Props) {
 			<MainSection heading="About me">
 				<ProfileAboutMe />
 			</MainSection>
-			<MainSection>
-				<ProfileHero />
-			</MainSection>
-			<MainSection>
-				<ProfileHero />
+			<PersonalInfo />
+			<MainSection heading="My Postings" borderBottom={0}>
+				<EachRequest />
+				<EachRequest />
+				<EachRequest />
 			</MainSection>
 		</Flex>
 	)

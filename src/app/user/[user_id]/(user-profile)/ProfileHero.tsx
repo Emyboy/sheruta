@@ -2,11 +2,11 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import Image from 'next/image'
 import React from 'react'
-import { BiSolidBadgeCheck, BiSolidLocationPlus } from 'react-icons/bi'
+import { BiBriefcase, BiSolidBadgeCheck, BiSolidLocationPlus } from 'react-icons/bi'
 
 type Props = {}
 
-export default function ProfileHero({}: Props) {
+export default function ProfileHero({ }: Props) {
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'60%'}>
 			<Box
@@ -42,7 +42,10 @@ export default function ProfileHero({}: Props) {
 						<BiSolidBadgeCheck size={25} />
 					</Flex>
 				</Flex>
-				<Text color="text_muted">Software Developer</Text>
+				<Flex alignItems={'center'} gap={1} color="text_muted">
+					<BiBriefcase />
+					<Text as='span' color="text_muted">Software Developer</Text>
+				</Flex>
 				<Flex alignItems={'center'} gap={1} color="text_muted">
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>

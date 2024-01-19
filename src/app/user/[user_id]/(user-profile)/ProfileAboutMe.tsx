@@ -1,5 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { Flex, Text } from '@chakra-ui/react'
+import { Badge, Flex, Text } from '@chakra-ui/react'
 import React from 'react'
 
 type Props = {}
@@ -13,9 +13,24 @@ export default function ProfileAboutMe({}: Props) {
 				accusamus repudiandae unde laborum tenetur eius soluta eos deserunt qui
 				tempore officiis.
 			</Text>
-            <Flex>
-
-            </Flex>
+			<Flex flexWrap={'wrap'} gap={2}>
+				{new Array(14).fill(null).map((_) => {
+					return (
+						<Badge
+							key={Math.random()}
+							bg="border_color"
+							px={3}
+							rounded={'md'}
+							_dark={{
+								color: 'border_color',
+								bg: 'dark_light',
+							}}
+						>
+							New f
+						</Badge>
+					)
+				})}
+			</Flex>
 		</Flex>
 	)
 }
