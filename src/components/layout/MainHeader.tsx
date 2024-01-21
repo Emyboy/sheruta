@@ -4,10 +4,10 @@ import React from 'react'
 import {
 	BiBell,
 	BiHome,
+	BiMessageRoundedDetail,
 	BiPlus,
 	BiSearchAlt,
 	BiSun,
-	BiUserPlus,
 } from 'react-icons/bi'
 import MainBodyContent from './MainBodyContent'
 import MainIconBtn from '../atoms/MainIconBtn'
@@ -54,11 +54,11 @@ export default function MainHeader({}: Props) {
 						active={pathname === '/notifications'}
 					/>
 				</Link>
-				<Link href={`/matches`}>
+				<Link href={`/messages`}>
 					<MainIconBtn
-						label="Matches"
-						Icon={BiUserPlus}
-						active={pathname.includes('matches')}
+						label="Messages"
+						Icon={BiMessageRoundedDetail}
+						active={pathname.includes('messages')}
 					/>
 				</Link>
 				<Link href={`/search`}>

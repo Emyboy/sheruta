@@ -20,6 +20,7 @@ export default function ThreeColumnLayout({ children, header }: Props) {
 			<Flex w="full">
 				<Hide below="lg">
 					<Box
+						id="left-nav"
 						zIndex={100}
 						// minW={SIDE_NAV_WIDTH}
 						flex={1}
