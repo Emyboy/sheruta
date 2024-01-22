@@ -8,7 +8,7 @@ import { useParams } from 'next/navigation'
 
 type Props = {}
 
-export default function ConversationList({}: Props) {
+export default function ConversationList({ }: Props) {
 	const params = useParams()
 
 	return (
@@ -27,7 +27,7 @@ export default function ConversationList({}: Props) {
 		>
 			{new Array(6).fill(null).map((_: any, index: any) => {
 				return (
-					<Link href={`/messages/${index}`}>
+					<Link href={`/messages/${crypto.randomUUID() + Date.now()}`}>
 						<EachConversation
 							key={Math.random()}
 							active={params?.message_id == index}

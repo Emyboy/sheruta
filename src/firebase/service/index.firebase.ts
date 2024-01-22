@@ -1,9 +1,8 @@
 import {
-	DocumentData,
-	DocumentReference,
 	addDoc,
 	collection,
 	doc,
+	getDoc,
 	serverTimestamp,
 	setDoc,
 } from 'firebase/firestore'
@@ -27,6 +26,10 @@ export default class SherutaDB {
 			...data.data,
 			...this.defaults,
 		})
+		let result = await getDoc(
+			doc(db, data.collection_name, data.document_id as string),
+		)
+		return result
 	}
 
 	static async update(data: createDTO) {
@@ -45,4 +48,7 @@ export const DBCollectionName = {
 
 	flatShareProfile: 'flat_share_profiles',
 	flatShareRequests: 'flat_share_requests',
+
+	messages: 'messages',
+	conversations: 'conversations',
 }
