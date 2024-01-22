@@ -1,6 +1,6 @@
 'use client'
 import { Flex } from '@chakra-ui/react'
-import React from 'react'
+import React, { useState } from 'react'
 import EachConversation from './EachConversation'
 import { DEFAULT_PADDING, NAV_HEIGHT, SIDE_NAV_WIDTH } from '@/configs/theme'
 import Link from 'next/link'
@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation'
 type Props = {}
 
 export default function ConversationList({ }: Props) {
+
 	const params = useParams()
 
 	return (
@@ -26,11 +27,11 @@ export default function ConversationList({ }: Props) {
 			}}
 		>
 			{new Array(6).fill(null).map((_: any, index: any) => {
+				let id = crypto.randomUUID() + Date.now();
 				return (
-					<Link href={`/messages/${crypto.randomUUID() + Date.now()}`}>
+					<Link href={`/messages/${id}`} key={Math.random()}>
 						<EachConversation
-							key={Math.random()}
-							active={params?.message_id == index}
+							active={params?.message_id == id}
 						/>
 					</Link>
 				)

@@ -117,7 +117,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 				let userData = await AuthService.getUser(user.uid)
 				setAuthState({ ...userData })
 				setAppState({ app_loading: false })
-				console.log('USER FOUND::', user)
 			} else {
 				setAppState({ app_loading: false })
 			}
