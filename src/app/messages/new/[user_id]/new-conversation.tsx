@@ -42,7 +42,7 @@ export default function NewConversation() {
 				const guestSnapshot = await getDocs(qGuest)
 
 				// console.log({ owner: ownerSnapshot.empty, guest: guestSnapshot.empty })
-				if (ownerSnapshot.empty && guestSnapshot.empty) {
+				if (ownerSnapshot.empty || guestSnapshot.empty) {
 					// create new conversation
 					let _guest = await getDoc(
 						doc(db, DBCollectionName.users, user_id as string),
@@ -51,16 +51,26 @@ export default function NewConversation() {
 						doc(db, DBCollectionName.users, user?._id as string),
 					)
 
-					let theID = crypto.randomUUID() + Date.now()
+					let theID = _guest.id + `-and-` + _user.id
 					await ConversationsService.create({
-						conversation_id: _guest.id + `&` + _user.id,
+						conversation_id: theID,
 						guest_ref: _guest.ref,
 						owner_ref: _user.ref,
 					})
 
 					router.push(`/messages/${theID}`)
 				} else {
-					// get the conversation and redirect
+					let list: any = []
+					if (!ownerSnapshot.empty) {
+						ownerSnapshot.forEach((conv) => list.push(conv))
+						router.push(`/messages/${list[0].id}`)
+					} else if (!guestSnapshot.empty) {
+						guestSnapshot.forEach((conv) => list.push(conv))
+						router.push(`/messages/${list[0].id}`)
+					} else {
+						router.push('/')
+					}
+					console.log('THE LIST::', list)
 				}
 			})()
 		}

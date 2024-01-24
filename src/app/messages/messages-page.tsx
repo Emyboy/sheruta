@@ -1,12 +1,13 @@
 'use client'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Flex } from '@chakra-ui/react'
+import { Flex, Text } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import EachConversationLoading from './components/EachConversationLoading'
 import {
+	DocumentData,
 	collection,
 	getDoc,
 	getDocs,
@@ -20,6 +21,10 @@ import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import Link from 'next/link'
 import EachConversation from './components/EachConversation'
+import { ConversationData } from '@/firebase/service/conversations/conversations.types'
+import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
+import { BiSolidMessageSquareEdit } from 'react-icons/bi'
+import { DEFAULT_PADDING } from '@/configs/theme'
 
 type Props = {}
 
@@ -31,45 +36,8 @@ export default function MessagesPage({}: Props) {
 	useEffect(() => {
 		if (user) {
 			;(async () => {
-				const conversationsCollection = collection(
-					db,
-					DBCollectionName.conversations,
-				)
-
-				const q = query(
-					conversationsCollection,
-					where('participants_ids', 'array-contains', user?._id),
-					limit(10),
-					orderBy('updatedAt', 'desc'),
-				)
-
-				const conversationsSnapshot = await getDocs(q)
-
-				const conversationsWithParticipants = conversationsSnapshot.docs.map(
-					async (doc) => {
-						const conversationData: any = { ...doc.data(), _id: doc.id }
-						const participantRefs = conversationData?.participants_refs
-
-						const participantsPromises = participantRefs.map(
-							(participantRef: any) => getDoc(participantRef),
-						)
-
-						const participantDocs = await Promise.all(participantsPromises)
-						const participants = participantDocs.map((participantDoc) =>
-							participantDoc.data(),
-						)
-
-						return {
-							...conversationData,
-							participants,
-						}
-					},
-				)
-
-				const conversationsWithParticipantsData = await Promise.all(
-					conversationsWithParticipants,
-				)
-
+				const conversationsWithParticipantsData =
+					await ConversationsService.forUser(user._id)
 				setConversations(conversationsWithParticipantsData)
 			})()
 		}
@@ -95,17 +63,29 @@ export default function MessagesPage({}: Props) {
 								return <EachConversationLoading key={Math.random()} />
 							})}
 						{conversations &&
-							conversations.map((_: any, index: any) => {
-								let id = crypto.randomUUID() + Date.now()
+							conversations.map((val: ConversationData, index: any) => {
 								return (
-									<Link href={`/messages/${id}`} key={Math.random()}>
-										<EachConversation data={_} />
+									<Link href={`/messages/${val._id}`} key={Math.random()}>
+										<EachConversation data={val as any} />
 										{/* <Divider bg='border_color' _dark={{
 									bg: 'dark_light'
 								}} /> */}
 									</Link>
 								)
 							})}
+						{conversations && conversations.length === 0 ? (
+							<Flex
+								color="dark_light"
+								gap={DEFAULT_PADDING}
+								minH={'80vh'}
+								justifyContent={'center'}
+								flexDir={'column'}
+								alignItems={'center'}
+							>
+								<BiSolidMessageSquareEdit size={90} />
+								<Text fontSize={'xl'}>{`You don't have any conversation`}</Text>
+							</Flex>
+						) : null}
 					</>
 				</ThreeColumnLayout>
 			</MainContainer>

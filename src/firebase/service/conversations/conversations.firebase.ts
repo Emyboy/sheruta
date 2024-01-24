@@ -1,6 +1,18 @@
-import { DocumentReference } from 'firebase/firestore'
+import {
+	DocumentData,
+	DocumentReference,
+	collection,
+	doc,
+	getDoc,
+	getDocs,
+	limit,
+	orderBy,
+	query,
+	where,
+} from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { ConversationsDTO } from './conversations.types'
+import { ConversationData, ConversationsDTO } from './conversations.types'
+import { db } from '@/firebase'
 
 export default class ConversationsService {
 	static async create({
@@ -35,6 +47,74 @@ export default class ConversationsService {
 
 				return result
 			}
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async get(conversation_id: string): Promise<ConversationData | null> {
+		try {
+			console.log('GETTING::', conversation_id)
+			let _conversation = await getDoc(
+				doc(db, DBCollectionName.conversations, conversation_id as string),
+			)
+			console.log('THE CONVERSATION::', _conversation.data())
+			const conversationData: DocumentData | undefined = _conversation.data()
+
+			const participantRefs: DocumentReference[] =
+				conversationData?.participants_refs
+
+			const participantPromises = participantRefs.map((participantRef) =>
+				getDoc(participantRef),
+			)
+
+			const participantDocs = await Promise.all(participantPromises)
+			const participants = participantDocs.map((doc) => doc.data())
+
+			conversationData ? (conversationData.participants = participants) : null
+			return conversationData as ConversationData | null
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async forUser(user_id: string) {
+		try {
+			const conversationsCollection = collection(
+				db,
+				DBCollectionName.conversations,
+			)
+			const q = query(
+				conversationsCollection,
+				where('participants_ids', 'array-contains', user_id),
+				limit(10),
+				orderBy('updatedAt', 'desc'),
+			)
+
+			const conversationsSnapshot = await getDocs(q)
+
+			const allConversations = conversationsSnapshot.docs.map(async (doc) => {
+				const conversationData: any = { ...doc.data(), _id: doc.id }
+				const participantRefs = conversationData?.participants_refs
+
+				const participantsPromises = participantRefs.map(
+					(participantRef: any) => getDoc(participantRef),
+				)
+
+				const participantDocs = await Promise.all(participantsPromises)
+				const participants = participantDocs.map((participantDoc) =>
+					participantDoc.data(),
+				)
+
+				return {
+					...conversationData,
+					participants,
+				}
+			})
+
+			const result = await Promise.all(allConversations)
+
+			return result
 		} catch (error) {
 			return Promise.reject(error)
 		}

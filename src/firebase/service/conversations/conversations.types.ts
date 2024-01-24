@@ -19,4 +19,8 @@ export interface ConversationData {
 	owner_id: string
 	participants: AuthUser[]
 	updatedAt: Timestamp
+	createdAt: Timestamp
+	participants_ids: string[]
+	owner_ref: DocumentReference
+	participants_refs: DocumentReference[]
 }

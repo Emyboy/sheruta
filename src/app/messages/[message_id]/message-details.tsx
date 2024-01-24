@@ -3,7 +3,7 @@ import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { Box, Flex } from '@chakra-ui/react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import MainBodyContent from '@/components/layout/MainBodyContent'
 import MessageInput from '../components/MessageInput'
@@ -11,14 +11,41 @@ import MessageList from '../MessageList'
 import MessagesService from '@/firebase/service/messages/messages.firebase'
 import { useParams } from 'next/navigation'
 import MainLeftNav from '@/components/layout/MainLeftNav'
+import { ConversationData } from '@/firebase/service/conversations/conversations.types'
+import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
 
 type Props = {}
 
 export default function MessageDetails({}: Props) {
+	const { message_id } = useParams()
+	const [conversation, setConversation] = useState<null | ConversationData>(
+		null,
+	)
+
+	useEffect(() => {
+		;(async () => {
+			if (message_id) {
+				try {
+					let conversationData = await ConversationsService.get(
+						message_id as string,
+					)
+					console.log('CONVERSATION', conversationData)
+					setConversation(conversationData as ConversationData)
+				} catch (error) {
+					console.error('Error fetching conversation and participants:', error)
+				}
+			}
+		})()
+	}, [])
+
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
-				<ThreeColumnLayout header={<MainBackHeader />}>
+				<ThreeColumnLayout
+					header={
+						<MainBackHeader isLoading={!conversation} heading="Person name" />
+					}
+				>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
