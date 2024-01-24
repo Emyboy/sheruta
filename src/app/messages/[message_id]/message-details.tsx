@@ -13,10 +13,14 @@ import { useParams } from 'next/navigation'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
 import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
+import { useAuthContext } from '@/context/auth.context'
+import moment from 'moment'
 
 type Props = {}
 
 export default function MessageDetails({}: Props) {
+	const { authState } = useAuthContext()
+	const { user } = authState
 	const { message_id } = useParams()
 	const [conversation, setConversation] = useState<null | ConversationData>(
 		null,
@@ -38,12 +42,24 @@ export default function MessageDetails({}: Props) {
 		})()
 	}, [])
 
+	const theGuest = conversation?.participants.find(
+		(participant) => participant._id !== user?._id,
+	)
+
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
 				<ThreeColumnLayout
 					header={
-						<MainBackHeader isLoading={!conversation} heading="Person name" />
+						<MainBackHeader
+							image_url={theGuest?.avatar_url}
+							isLoading={!conversation ? true : false}
+							heading={theGuest?.first_name}
+							subHeading={
+								'Last seen: ' +
+								moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
+							}
+						/>
 					}
 				>
 					<Flex flexDirection={'column'} w="full">

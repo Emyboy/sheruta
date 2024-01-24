@@ -58,7 +58,6 @@ export default class ConversationsService {
 			let _conversation = await getDoc(
 				doc(db, DBCollectionName.conversations, conversation_id as string),
 			)
-			console.log('THE CONVERSATION::', _conversation.data())
 			const conversationData: DocumentData | undefined = _conversation.data()
 
 			const participantRefs: DocumentReference[] =
