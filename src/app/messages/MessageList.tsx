@@ -10,21 +10,21 @@ import { useParams } from 'next/navigation'
 
 type Props = {}
 
-export default function MessageList({ }: Props) {
+export default function MessageList({}: Props) {
 	const [messageList, setMessageList] = useState<any[]>([])
-	const params = useParams();
+	const params = useParams()
 
 	useEffect(() => {
 		let messageRef = collection(db, DBCollectionName.messages)
 		onSnapshot(messageRef, (snapshot) => {
-			let list: any[] = [];
-			snapshot.docs.forEach(docs => {
-				if(docs.id === params.message_id){
+			let list: any[] = []
+			snapshot.docs.forEach((docs) => {
+				if (docs.id === params.message_id) {
 					list.push({ id: docs.id, ...docs.data() })
 				}
 			})
-			console.log("UPDATE WAS MADE: ", list);
-		});
+			console.log('UPDATE WAS MADE: ', list)
+		})
 		// onSnapshot(doc(db, DBCollectionName.messages, params.message_id as string), (doc) => {
 		// 	const source = doc.metadata.hasPendingWrites ? "Local" : "Server";
 		// 	console.log(source, " data: ", doc.data());

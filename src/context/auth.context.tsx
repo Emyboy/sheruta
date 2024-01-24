@@ -17,12 +17,13 @@ import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import { useToast } from '@chakra-ui/react'
 import { useAppContext } from './app.context'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
 interface AuthState {
 	user: AuthUser | null
 	user_info: UserInfo | null
 	user_settings: null
-	flat_share_profile: null
+	flat_share_profile: null | FlatShareProfileData
 	auth_loading?: boolean
 }
 

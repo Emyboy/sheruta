@@ -23,20 +23,20 @@ export default class MessagesService {
 			let _user = await getDoc(doc(db, DBCollectionName.users, uid as string))
 			let _conversation = await getDoc(
 				doc(db, DBCollectionName.conversations, conversation_id),
-			);
+			)
 			let _guest = await getDoc(doc(db, DBCollectionName.users, recipient_id))
 
-			let theConversation: DocumentData;
+			let theConversation: DocumentData
 
 			if (!_conversation.exists()) {
 				console.log('NO CONVERSATION')
 				theConversation = await ConversationsService.create({
 					guest_ref: _guest.ref,
 					owner_ref: _user.ref,
-					conversation_id
+					conversation_id,
 				})
 			} else {
-				theConversation = _conversation;
+				theConversation = _conversation
 			}
 
 			let data: DirectMessageDTO = {
@@ -47,10 +47,10 @@ export default class MessagesService {
 				_receiver_ref: _guest.ref,
 				_conversation_id: theConversation.id as string,
 				_conversation_ref: theConversation.ref,
-			};
+			}
 
 			if (hasEmptyValue(data)) {
-				return Promise.reject("no or invalid data")
+				return Promise.reject('no or invalid data')
 			}
 
 			// console.log("OUTCOME::", {
@@ -65,11 +65,10 @@ export default class MessagesService {
 				data,
 				document_id: crypto.randomUUID() + Date.now(),
 			})
-			
+
 			return Promise.resolve(result)
 		} catch (error) {
 			return Promise.reject(error)
 		}
-	};
-
+	}
 }

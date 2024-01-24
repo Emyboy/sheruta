@@ -6,13 +6,15 @@ import ProfileAboutMe from './ProfileAboutMe'
 import PersonalInfo from './personal-info/PersonalInfo'
 import EachRequest from '@/components/EachRequest/EachRequest'
 
-type Props = {}
+type Props = {
+	data: any
+}
 
-export default function UserProfilePage({}: Props) {
+export default function UserProfilePage({ data }: Props) {
 	return (
 		<Flex flexDir={'column'}>
 			<MainSection>
-				<ProfileHero />
+				<ProfileHero data={data} />
 			</MainSection>
 			<MainSection heading="About me">
 				<ProfileAboutMe />

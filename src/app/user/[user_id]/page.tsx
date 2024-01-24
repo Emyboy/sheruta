@@ -5,10 +5,16 @@ import MainContainer from '@/components/layout/MainContainer'
 import { Flex } from '@chakra-ui/react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
+import AuthService from '@/firebase/service/auth/auth.firebase'
+import PageNotFound from '@/components/PageNotFound'
 
-type Props = {}
+export default async function page(props: any) {
+	const { params } = props
+	const { user_id } = params
 
-export default function page({}: Props) {
+	let user = await AuthService.getUser(user_id)
+	// console.log('DATA::', user)
+
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
@@ -16,7 +22,7 @@ export default function page({}: Props) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					<UserProfilePage />
+					{user ? <UserProfilePage data={user} /> : <PageNotFound />}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

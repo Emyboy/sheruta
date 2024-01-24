@@ -1,4 +1,4 @@
-import { DocumentReference } from 'firebase/firestore';
+import { DocumentReference } from 'firebase/firestore'
 
 export interface DirectMessageDTO {
 	_conversation_id: string

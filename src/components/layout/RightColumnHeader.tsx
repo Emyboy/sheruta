@@ -10,7 +10,7 @@ import { FaCoins } from 'react-icons/fa'
 export default function RightColumnHeader() {
 	const [showLogin, setShowLogin] = useState(false)
 	const { authState } = useAuthContext()
-	const { user, user_info } = authState
+	const { user, user_info, flat_share_profile } = authState
 
 	if (user) {
 		return (
@@ -30,7 +30,7 @@ export default function RightColumnHeader() {
 							<Text color="gold" as="span">
 								<FaCoins />
 							</Text>
-							{user_info?.credits}
+							{flat_share_profile?.credits}
 						</Text>
 					</Flex>
 					<Avatar src={user.avatar_url} />

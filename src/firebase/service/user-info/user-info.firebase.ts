@@ -15,12 +15,11 @@ export default class UserInfoService {
 	}) {
 		try {
 			let data: UserInfoDTO = {
-				gender: null,
-				primary_phone_number: phone_number,
 				_user_id,
 				_user_ref,
+				gender: null,
+				primary_phone_number: phone_number,
 				whatsapp_phone_number: null,
-				credits: 300,
 			}
 			let result = await SherutaDB.create({
 				collection_name: DBCollectionName.userInfos,
