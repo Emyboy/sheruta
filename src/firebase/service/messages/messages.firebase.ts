@@ -7,29 +7,47 @@ import { DirectMessageDTO } from './messages.types'
 import { hasEmptyValue } from '@/utils/index.utils'
 
 export default class MessagesService {
-	static async sendDM({
-		message,
-		conversation_id,
-		recipient_id,
-	}: {
+	static async sendDM(req: {
 		message: string
 		conversation_id: string
 		recipient_id: string
+		user_id: string
 	}) {
+		const {
+			message,
+			conversation_id,
+			recipient_id,
+			user_id
+		} = req;
 		try {
-			console.log('INCOMING::', { message, conversation_id, recipient_id })
-			let auth = await getAuth()
-			let uid = await auth.currentUser?.uid
-			let _user = await getDoc(doc(db, DBCollectionName.users, uid as string))
+			console.log('ENDING:;', {
+				message,
+				conversation_id,
+				recipient_id,
+				user_id
+			})
+			if (hasEmptyValue(req)) {
+				return Promise.reject('no or invalid data')
+			}
+			let _user = await getDoc(doc(db, DBCollectionName.users, user_id))
 			let _conversation = await getDoc(
 				doc(db, DBCollectionName.conversations, conversation_id),
 			)
 			let _guest = await getDoc(doc(db, DBCollectionName.users, recipient_id))
 
-			let theConversation: DocumentData
+			let theConversation: DocumentData;
+
+			console.log('SENDING::', {
+				_guest: _guest.data(),
+				_user: _user.data(),
+				_conversation: _conversation.data(),
+				message,
+				conversation_id,
+				recipient_id,
+				user_id
+			})
 
 			if (!_conversation.exists()) {
-				console.log('NO CONVERSATION')
 				theConversation = await ConversationsService.create({
 					guest_ref: _guest.ref,
 					owner_ref: _user.ref,
@@ -41,12 +59,13 @@ export default class MessagesService {
 
 			let data: DirectMessageDTO = {
 				message_text: message,
-				_sender_id: uid as string,
+				_sender_id: user_id,
 				_sender_ref: _user.ref,
 				_receiver_id: _guest.id,
 				_receiver_ref: _guest.ref,
 				_conversation_id: theConversation.id as string,
 				_conversation_ref: theConversation.ref,
+				seen: false
 			}
 
 			if (hasEmptyValue(data)) {

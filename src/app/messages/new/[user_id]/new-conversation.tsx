@@ -1,4 +1,6 @@
 'use client'
+
+//! DELETE THIS FILE
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
@@ -19,6 +21,7 @@ import { useAuthContext } from '@/context/auth.context'
 import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
 import { useRouter } from 'next13-progressbar'
 import MainLeftNav from '@/components/layout/MainLeftNav'
+import { generateConversationID } from '@/firebase/service/conversations/conversation.utils'
 
 export default function NewConversation() {
 	const params = useParams()
@@ -51,7 +54,10 @@ export default function NewConversation() {
 						doc(db, DBCollectionName.users, user?._id as string),
 					)
 
-					let theID = _guest.id + `-and-` + _user.id
+					let theID = generateConversationID({
+						guest_id: _guest.id,
+						owner_id: _user.id,
+					})
 					await ConversationsService.create({
 						conversation_id: theID,
 						guest_ref: _guest.ref,

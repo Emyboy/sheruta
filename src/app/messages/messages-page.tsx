@@ -6,18 +6,6 @@ import React, { useEffect, useState } from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import EachConversationLoading from './components/EachConversationLoading'
-import {
-	DocumentData,
-	collection,
-	getDoc,
-	getDocs,
-	limit,
-	orderBy,
-	query,
-	where,
-} from 'firebase/firestore'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import Link from 'next/link'
 import EachConversation from './components/EachConversation'
@@ -65,7 +53,10 @@ export default function MessagesPage({}: Props) {
 						{conversations &&
 							conversations.map((val: ConversationData, index: any) => {
 								return (
-									<Link href={`/messages/${val._id}`} key={Math.random()}>
+									<Link
+										href={`/messages/${val.participants.find((x) => x._id !== user?._id)?._id}`}
+										key={Math.random()}
+									>
 										<EachConversation data={val as any} />
 										{/* <Divider bg='border_color' _dark={{
 									bg: 'dark_light'

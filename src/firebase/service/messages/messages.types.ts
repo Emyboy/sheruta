@@ -8,4 +8,5 @@ export interface DirectMessageDTO {
 	_receiver_id: string
 	_receiver_ref: DocumentReference
 	message_text: string
+	seen: boolean
 }

@@ -13,6 +13,7 @@ import {
 import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { ConversationData, ConversationsDTO } from './conversations.types'
 import { db } from '@/firebase'
+import { generateConversationID } from './conversation.utils'
 
 export default class ConversationsService {
 	static async create({
@@ -25,13 +26,20 @@ export default class ConversationsService {
 		conversation_id: string
 	}) {
 		try {
+			// let isOwner = await this.get(
+			// 	generateConversationID({
+			// 		owner_id: owner_ref.id,
+			// 		guest_id: guest_ref.id,
+			// 	}),
+			// )
+			// let isGuest = await this.get(
+			// 	generateConversationID({
+			// 		guest_id: owner_ref.id,
+			// 		owner_id: guest_ref.id,
+			// 	}),
+			// )
+
 			if (guest_ref?.id && owner_ref?.id) {
-				// let data: ConversationsDTO = {
-				// 	owner_ref,
-				// 	owner_id: owner_ref.id,
-				// 	guest_ref,
-				// 	guest_id: guest_ref.id,
-				// }
 				let data: ConversationsDTO = {
 					owner_ref,
 					owner_id: owner_ref.id,
@@ -54,11 +62,15 @@ export default class ConversationsService {
 
 	static async get(conversation_id: string): Promise<ConversationData | null> {
 		try {
-			console.log('GETTING::', conversation_id)
 			let _conversation = await getDoc(
 				doc(db, DBCollectionName.conversations, conversation_id as string),
 			)
-			const conversationData: DocumentData | undefined = _conversation.data()
+
+			if (!_conversation.exists()) {
+				return null
+			}
+
+			const conversationData: DocumentData | undefined = { ..._conversation.data(), _id: _conversation.id}
 
 			const participantRefs: DocumentReference[] =
 				conversationData?.participants_refs

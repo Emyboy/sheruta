@@ -2,7 +2,7 @@
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex } from '@chakra-ui/react'
+import { Box, Flex, useToast } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import MainBodyContent from '@/components/layout/MainBodyContent'
@@ -15,32 +15,55 @@ import { ConversationData } from '@/firebase/service/conversations/conversations
 import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import moment from 'moment'
+import { AuthUser } from '@/firebase/service/auth/auth.types'
+import { generateConversationID } from '@/firebase/service/conversations/conversation.utils'
 
 type Props = {}
 
-export default function MessageDetails({}: Props) {
+export default function MessageDetails({ }: Props) {
 	const { authState } = useAuthContext()
 	const { user } = authState
 	const { message_id } = useParams()
 	const [conversation, setConversation] = useState<null | ConversationData>(
 		null,
 	)
+	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
-		;(async () => {
-			if (message_id) {
-				try {
-					let conversationData = await ConversationsService.get(
-						message_id as string,
-					)
-					console.log('CONVERSATION', conversationData)
-					setConversation(conversationData as ConversationData)
-				} catch (error) {
-					console.error('Error fetching conversation and participants:', error)
+		; (async () => {
+			if (message_id && user) {
+				setLoading(true)
+				let isOwner = await ConversationsService.get(
+					generateConversationID({
+						owner_id: message_id as string,
+						guest_id: user._id,
+					}),
+				)
+				let isGuest = await ConversationsService.get(
+					generateConversationID({
+						guest_id: message_id as string,
+						owner_id: user._id,
+					}),
+				)
+
+				if (isGuest) {
+					setLoading(false)
+					return setConversation(isGuest)
+				} else if (isOwner) {
+					setLoading(false)
+					return setConversation(isOwner)
+				} else {
+					setLoading(false)
 				}
+
+				setLoading(false)
 			}
 		})()
-	}, [])
+	}, [user])
+
+	useEffect(() => {
+		console.log('THE CONVERSATION::', conversation)
+	}, [conversation])
 
 	const theGuest = conversation?.participants.find(
 		(participant) => participant._id !== user?._id,
@@ -52,12 +75,14 @@ export default function MessageDetails({}: Props) {
 				<ThreeColumnLayout
 					header={
 						<MainBackHeader
-							image_url={theGuest?.avatar_url}
-							isLoading={!conversation ? true : false}
-							heading={theGuest?.first_name}
+							image_url={theGuest?.avatar_url || null}
+							isLoading={loading}
+							heading={theGuest?.first_name || ''}
 							subHeading={
-								'Last seen: ' +
-								moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
+								theGuest
+									? 'Last seen: ' +
+									moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
+									: null
 							}
 						/>
 					}
@@ -65,27 +90,47 @@ export default function MessageDetails({}: Props) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					<MessageSection />
+					{conversation && <MessageSection
+						guest={theGuest as AuthUser}
+						conversation={conversation as ConversationData}
+						isLoading={loading}
+					/>}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
 	)
 }
 
-const MessageSection = () => {
-	const params = useParams()
+const MessageSection = ({
+	guest,
+	conversation,
+	isLoading,
+}: {
+	guest: AuthUser
+	conversation: ConversationData
+	isLoading: boolean
+}) => {
+	const { authState } = useAuthContext();
+	const { user } = authState;
+	const toast = useToast();
+
 	const handleSubmit = async (message: string) => {
-		MessagesService.sendDM({
-			message,
-			conversation_id: params?.message_id as string,
-			recipient_id: `SrqotDsbOxcGA7lzhUEzFXDYgz63`,
-		})
+		try {
+			await MessagesService.sendDM({
+				message,
+				conversation_id: conversation._id,
+				recipient_id: guest._id,
+				user_id: user?._id as string,
+			});
+		} catch (error) {
+			toast({ title: "error, please try again", status: "error" });
+		}
 	}
 
 	return (
 		<>
 			<Box p={DEFAULT_PADDING}>
-				<MessageList />
+				<MessageList isLoading={isLoading} conversation={conversation} />
 				<Flex
 					zIndex={50}
 					justifyContent={'center'}
