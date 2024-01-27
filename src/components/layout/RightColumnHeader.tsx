@@ -1,15 +1,15 @@
 'use client'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
-import { Avatar, Button, Flex, Text, VStack } from '@chakra-ui/react'
-import React, { useState } from 'react'
-import AuthPopup from '../popups/AuthPopup'
+import { Avatar, Button, Flex, Text } from '@chakra-ui/react'
+import React from 'react'
 import { useAuthContext } from '@/context/auth.context'
 import Link from 'next/link'
 import { FaCoins } from 'react-icons/fa'
+import { useAppContext } from '@/context/app.context'
 
 export default function RightColumnHeader() {
-	const [showLogin, setShowLogin] = useState(false)
 	const { authState } = useAuthContext()
+	const { setAppState } = useAppContext();
 	const { user, flat_share_profile } = authState
 
 	if (user) {
@@ -41,7 +41,6 @@ export default function RightColumnHeader() {
 
 	return (
 		<>
-			{showLogin && <AuthPopup isOpen onClose={() => setShowLogin(false)} />}
 			<Flex
 				gap={4}
 				alignItems={'center'}
@@ -74,7 +73,7 @@ export default function RightColumnHeader() {
 				</Button>
 				<Button
 					rounded={'md'}
-					onClick={() => setShowLogin(true)}
+					onClick={() => setAppState({ show_login: true })}
 					px="30px"
 					py="10px"
 					border={'1px'}

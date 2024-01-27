@@ -7,6 +7,7 @@ import { AuthContextProvider } from '@/context/auth.context'
 import AppLoading from '@/components/atoms/AppLoading'
 import { AppContextProvider } from '@/context/app.context'
 import { Next13ProgressBar } from 'next13-progressbar'
+import MasterPopup from '@/components/popups/MasterPopup'
 
 export function Providers({ children }: { children: React.ReactNode }) {
 	return (
@@ -21,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 						}}
 						minH={'100vh'}
 					>
+						<MasterPopup />
 						<AppLoading />
 						<Next13ProgressBar
 							height="4px"

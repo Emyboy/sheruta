@@ -1,6 +1,6 @@
 import { getAuth } from 'firebase/auth'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { DocumentData, doc, getDoc } from 'firebase/firestore'
+import { DocumentData, doc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase'
 import ConversationsService from '../conversations/conversations.firebase'
 import { DirectMessageDTO } from './messages.types'
@@ -15,12 +15,6 @@ export default class MessagesService {
 	}) {
 		const { message, conversation_id, recipient_id, user_id } = req
 		try {
-			console.log('ENDING:;', {
-				message,
-				conversation_id,
-				recipient_id,
-				user_id,
-			})
 			if (hasEmptyValue(req)) {
 				return Promise.reject('no or invalid data')
 			}
@@ -32,15 +26,15 @@ export default class MessagesService {
 
 			let theConversation: DocumentData
 
-			console.log('SENDING::', {
-				_guest: _guest.data(),
-				_user: _user.data(),
-				_conversation: _conversation.data(),
-				message,
-				conversation_id,
-				recipient_id,
-				user_id,
-			})
+			// console.log('SENDING::', {
+			// 	_guest: _guest.data(),
+			// 	_user: _user.data(),
+			// 	_conversation: _conversation.data(),
+			// 	message,
+			// 	conversation_id,
+			// 	recipient_id,
+			// 	user_id,
+			// })
 
 			if (!_conversation.exists()) {
 				theConversation = await ConversationsService.create({
@@ -79,6 +73,12 @@ export default class MessagesService {
 				data,
 				document_id: crypto.randomUUID() + Date.now(),
 			})
+
+			SherutaDB.update({
+				collection_name: DBCollectionName.conversations,
+				data: { updatedAt: serverTimestamp() },
+				document_id: conversation_id
+			});
 
 			return Promise.resolve(result)
 		} catch (error) {

@@ -5,6 +5,7 @@ import {
 	getDoc,
 	serverTimestamp,
 	setDoc,
+	updateDoc,
 } from 'firebase/firestore'
 import { db } from '..'
 
@@ -33,10 +34,16 @@ export default class SherutaDB {
 	}
 
 	static async update(data: createDTO) {
-		const docRef = await addDoc(collection(db, data.collection_name), {
-			...data,
-			...this.defaults,
-		})
+		const ref = doc(db, data.collection_name, data.document_id);
+		await updateDoc(ref, {
+			...data.data,
+			updatedAt: serverTimestamp()
+		});
+
+		// fetching the updated value;
+		const docRef = doc(db, data.collection_name, data.document_id);
+		const docSnap = await getDoc(docRef);
+		return docSnap;
 	}
 }
 
