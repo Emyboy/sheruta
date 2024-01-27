@@ -41,7 +41,7 @@ export default class AuthService {
 				// phone_number: data.phoneNumber,
 				account_status: 'active',
 				avatar_url: data.photoURL,
-				last_seen: serverTimestamp(),
+				last_seen: new Date().toISOString(),
 				providerId: data.providerId as 'google',
 			}
 
@@ -51,7 +51,7 @@ export default class AuthService {
 				data: userData,
 			})
 
-			let _user = await getDoc(doc(db, DBCollectionName.users, data.uid))
+			let _user = await getDoc(doc(db, DBCollectionName.users, data.uid));
 
 			await FlatShareProfileService.create({
 				_user_id: data.uid,
