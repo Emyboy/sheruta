@@ -70,7 +70,10 @@ export default class ConversationsService {
 				return null
 			}
 
-			const conversationData: DocumentData | undefined = { ..._conversation.data(), _id: _conversation.id}
+			const conversationData: DocumentData | undefined = {
+				..._conversation.data(),
+				_id: _conversation.id,
+			}
 
 			const participantRefs: DocumentReference[] =
 				conversationData?.participants_refs

@@ -13,18 +13,13 @@ export default class MessagesService {
 		recipient_id: string
 		user_id: string
 	}) {
-		const {
-			message,
-			conversation_id,
-			recipient_id,
-			user_id
-		} = req;
+		const { message, conversation_id, recipient_id, user_id } = req
 		try {
 			console.log('ENDING:;', {
 				message,
 				conversation_id,
 				recipient_id,
-				user_id
+				user_id,
 			})
 			if (hasEmptyValue(req)) {
 				return Promise.reject('no or invalid data')
@@ -35,7 +30,7 @@ export default class MessagesService {
 			)
 			let _guest = await getDoc(doc(db, DBCollectionName.users, recipient_id))
 
-			let theConversation: DocumentData;
+			let theConversation: DocumentData
 
 			console.log('SENDING::', {
 				_guest: _guest.data(),
@@ -44,7 +39,7 @@ export default class MessagesService {
 				message,
 				conversation_id,
 				recipient_id,
-				user_id
+				user_id,
 			})
 
 			if (!_conversation.exists()) {
@@ -65,7 +60,7 @@ export default class MessagesService {
 				_receiver_ref: _guest.ref,
 				_conversation_id: theConversation.id as string,
 				_conversation_ref: theConversation.ref,
-				seen: false
+				seen: false,
 			}
 
 			if (hasEmptyValue(data)) {

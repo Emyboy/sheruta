@@ -20,7 +20,7 @@ import { generateConversationID } from '@/firebase/service/conversations/convers
 
 type Props = {}
 
-export default function MessageDetails({ }: Props) {
+export default function MessageDetails({}: Props) {
 	const { authState } = useAuthContext()
 	const { user } = authState
 	const { message_id } = useParams()
@@ -30,7 +30,7 @@ export default function MessageDetails({ }: Props) {
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
-		; (async () => {
+		;(async () => {
 			if (message_id && user) {
 				setLoading(true)
 				let isOwner = await ConversationsService.get(
@@ -61,9 +61,9 @@ export default function MessageDetails({ }: Props) {
 		})()
 	}, [user])
 
-	useEffect(() => {
-		console.log('THE CONVERSATION::', conversation)
-	}, [conversation])
+	// useEffect(() => {
+	// 	console.log('THE CONVERSATION::', conversation)
+	// }, [conversation])
 
 	const theGuest = conversation?.participants.find(
 		(participant) => participant._id !== user?._id,
@@ -81,7 +81,7 @@ export default function MessageDetails({ }: Props) {
 							subHeading={
 								theGuest
 									? 'Last seen: ' +
-									moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
+										moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
 									: null
 							}
 						/>
@@ -90,11 +90,13 @@ export default function MessageDetails({ }: Props) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{conversation && <MessageSection
-						guest={theGuest as AuthUser}
-						conversation={conversation as ConversationData}
-						isLoading={loading}
-					/>}
+					{conversation && (
+						<MessageSection
+							guest={theGuest as AuthUser}
+							conversation={conversation as ConversationData}
+							isLoading={loading}
+						/>
+					)}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
@@ -110,9 +112,9 @@ const MessageSection = ({
 	conversation: ConversationData
 	isLoading: boolean
 }) => {
-	const { authState } = useAuthContext();
-	const { user } = authState;
-	const toast = useToast();
+	const { authState } = useAuthContext()
+	const { user } = authState
+	const toast = useToast()
 
 	const handleSubmit = async (message: string) => {
 		try {
@@ -121,9 +123,9 @@ const MessageSection = ({
 				conversation_id: conversation._id,
 				recipient_id: guest._id,
 				user_id: user?._id as string,
-			});
+			})
 		} catch (error) {
-			toast({ title: "error, please try again", status: "error" });
+			toast({ title: 'error, please try again', status: 'error' })
 		}
 	}
 
