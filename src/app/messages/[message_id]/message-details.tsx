@@ -124,6 +124,11 @@ const MessageSection = ({
 				recipient_id: guest._id,
 				user_id: user?._id as string,
 			})
+			let theEnd = document.querySelector('#end');
+			if (theEnd) {
+				console.log('HERE WE GO')
+				theEnd.scrollIntoView({ behavior: 'smooth' });
+			}
 		} catch (error) {
 			toast({ title: 'error, please try again', status: 'error' })
 		}

@@ -46,14 +46,14 @@ export default function MessageList({ isLoading, conversation }: Props) {
 				// console.log(sortedMessages)
 			})
 
-			return () => unsubscribe()
 
-			// const querySnapshot = await getDocs(q)
-			// const sortedMessages = querySnapshot.docs.map((doc) => ({
-			// 	id: doc.id,
-			// 	...doc.data(),
-			// }))
-			// setMessageList(sortedMessages)
+			// let theEnd = document.querySelector('#end');
+			// if (theEnd) {
+			// 	console.log('HERE WE GO')
+			// 	theEnd.scrollIntoView({ behavior: 'smooth' });
+			// }
+
+			return () => unsubscribe()
 		})()
 	}, [])
 
@@ -63,6 +63,7 @@ export default function MessageList({ isLoading, conversation }: Props) {
 				messageList.map((message: DirectMessageData, index) => {
 					return <EachMessageBobble key={Math.random()} message={message} />
 				})}
+				
 		</Flex>
 	)
 }

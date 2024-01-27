@@ -23,7 +23,10 @@ export default function EachMessageBobble({ message }: Props) {
             width={'auto'}
         >
             <div></div>
-            <Text rounded={'md'} p={DEFAULT_PADDING} bg={isUserOwn ? 'dark_light' : 'dark'}>{message.message_text}</Text>
+            <Flex rounded={'md'} p={DEFAULT_PADDING} bg={isUserOwn ? 'dark_light' : 'dark'}>
+                <Text >{message.message_text}</Text>
+            </Flex>
+            
         </Flex>
     )
 }

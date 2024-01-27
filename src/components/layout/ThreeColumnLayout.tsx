@@ -102,8 +102,12 @@ export default function ThreeColumnLayout({ children, header }: Props) {
 							<MainBodyContent>{header}</MainBodyContent>
 						</MainContainer>
 					</Flex>
-					{/* @ts-ignore */}
-					{children[1]}
+					{<>
+						{/* @ts-ignore */}
+						{children[1]}
+						<div id='end'></div>
+					</>
+					}
 				</MainBodyContent>
 				<Hide below="lg">
 					<Box

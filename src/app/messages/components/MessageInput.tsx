@@ -16,6 +16,7 @@ export default function MessageInput({ onSubmit }: Props) {
 		if (message) {
 			onSubmit(message)
 		}
+		setMessage('')
 	}
 
 	return (
@@ -30,6 +31,7 @@ export default function MessageInput({ onSubmit }: Props) {
 				onChange={(e) => setMessage(e.target.value)}
 				style={{ border: '0px', outline: 'none', flex: 1, background: 'none' }}
 				placeholder="Type your message.."
+				value={message}
 			/>
 			<Button
 				variant={'ghost'}
