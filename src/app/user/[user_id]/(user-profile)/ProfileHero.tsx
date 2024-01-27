@@ -76,7 +76,7 @@ export default function ProfileHero({ data }: Props) {
 				</Flex>
 				<Flex gap={DEFAULT_PADDING}>
 					<Button>Call Me</Button>
-					<Link href={`/messages/new/${_user._id}`}>
+					<Link href={`/messages/${_user._id}`}>
 						<Button>
 							<BiMessageRoundedDetail size={25} />
 						</Button>

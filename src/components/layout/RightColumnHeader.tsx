@@ -8,9 +8,9 @@ import Link from 'next/link'
 import { FaCoins } from 'react-icons/fa'
 
 export default function RightColumnHeader() {
-	const [showLogin, setShowLogin] = useState(false);
-	const { authState } = useAuthContext();
-	const { user, flat_share_profile } = authState;
+	const [showLogin, setShowLogin] = useState(false)
+	const { authState } = useAuthContext()
+	const { user, flat_share_profile } = authState
 
 	if (user) {
 		return (

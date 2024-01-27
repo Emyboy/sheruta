@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react'
 interface AppState {
 	app_loading: boolean
 	show_left_nav: boolean
+	show_login: boolean
 }
 
 interface AppContextProps {
@@ -23,6 +24,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({
 	const [state, setState] = useState<AppState>({
 		app_loading: true,
 		show_left_nav: true,
+		show_login: false,
 	})
 
 	const setAppState = (newState: Partial<AppState>): void => {

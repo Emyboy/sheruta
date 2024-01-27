@@ -13,25 +13,26 @@ import React from 'react'
 import { BiLogoFacebookCircle, BiLogoGoogle } from 'react-icons/bi'
 import MainModal from '../atoms/MainModal'
 import { useAuthContext } from '@/context/auth.context'
+import { useAppContext } from '@/context/app.context'
 
-interface Props extends Partial<ModalProps> {
-	isOpen: boolean
-	onClose: () => void
-	children?: any
-}
+interface Props {}
 
 export default function AuthPopup(props: Props) {
 	const { loginWithGoogle } = useAuthContext()
-	const { isOpen, onClose } = props
 	const { authState } = useAuthContext()
 	const { user, auth_loading } = authState
+	const { appState, setAppState } = useAppContext()
+	const { show_login } = appState
 
 	if (user) {
 		return null
 	}
 
 	return (
-		<MainModal isOpen={isOpen} onClose={onClose}>
+		<MainModal
+			isOpen={show_login}
+			onClose={() => setAppState({ show_login: false })}
+		>
 			<Center mb={DEFAULT_PADDING}>
 				<Text fontSize={'x-large'} fontWeight={'bold'}>
 					Login / Signup
@@ -70,7 +71,7 @@ export default function AuthPopup(props: Props) {
 						// _hover={{
 						//     bg: 'none'
 						// }}
-						onClick={onClose}
+							onClick={() => setAppState({ show_login: false })}
 					>
 						Cancel
 					</Button>

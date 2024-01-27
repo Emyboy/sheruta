@@ -31,13 +31,13 @@ export default function MessageList({ isLoading, conversation }: Props) {
 
 	useEffect(() => {
 		;(async () => {
-			const messagesRef = collection(db, DBCollectionName.messages);
+			const messagesRef = collection(db, DBCollectionName.messages)
 			const q = query(
 				messagesRef,
 				where('_conversation_id', '==', conversation_id),
 				orderBy('createdAt', 'asc'),
 				limit(30),
-			);
+			)
 			const unsubscribe = onSnapshot(q, (querySnapshot) => {
 				const sortedMessages = querySnapshot.docs.map((doc) => ({
 					id: doc.id,

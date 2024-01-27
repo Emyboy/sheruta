@@ -10,7 +10,7 @@ import React from 'react'
 
 type Props = {}
 
-export default function HomePage({ }: Props) {
+export default function HomePage({}: Props) {
 	return (
 		<>
 			<MainPageBody>
@@ -30,8 +30,12 @@ export default function HomePage({ }: Props) {
 							my={DEFAULT_PADDING}
 							rounded={'lg'}
 						>
-							<Text fontWeight={'bold'} fontSize={'xx-large'}>Join the community</Text>
-							<Button colorScheme='' px={30} bg='dark'>Login</Button>
+							<Text fontWeight={'bold'} fontSize={'xx-large'}>
+								Join the community
+							</Text>
+							<Button colorScheme="" px={30} bg="dark">
+								Login
+							</Button>
 						</Flex>
 						{new Array(9).fill(null).map((_) => {
 							return <EachRequest key={Math.random()} />

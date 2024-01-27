@@ -51,7 +51,7 @@ export default class AuthService {
 				data: userData,
 			})
 
-			let _user = await getDoc(doc(db, DBCollectionName.users, data.uid));
+			let _user = await getDoc(doc(db, DBCollectionName.users, data.uid))
 
 			await FlatShareProfileService.create({
 				_user_id: data.uid,
