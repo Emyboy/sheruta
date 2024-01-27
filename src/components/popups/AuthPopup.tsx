@@ -71,7 +71,7 @@ export default function AuthPopup(props: Props) {
 						// _hover={{
 						//     bg: 'none'
 						// }}
-							onClick={() => setAppState({ show_login: false })}
+						onClick={() => setAppState({ show_login: false })}
 					>
 						Cancel
 					</Button>

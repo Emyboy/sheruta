@@ -77,8 +77,8 @@ export default class MessagesService {
 			SherutaDB.update({
 				collection_name: DBCollectionName.conversations,
 				data: { updatedAt: serverTimestamp() },
-				document_id: conversation_id
-			});
+				document_id: conversation_id,
+			})
 
 			return Promise.resolve(result)
 		} catch (error) {

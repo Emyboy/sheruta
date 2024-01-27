@@ -34,16 +34,16 @@ export default class SherutaDB {
 	}
 
 	static async update(data: createDTO) {
-		const ref = doc(db, data.collection_name, data.document_id);
+		const ref = doc(db, data.collection_name, data.document_id)
 		await updateDoc(ref, {
 			...data.data,
-			updatedAt: serverTimestamp()
-		});
+			updatedAt: serverTimestamp(),
+		})
 
 		// fetching the updated value;
-		const docRef = doc(db, data.collection_name, data.document_id);
-		const docSnap = await getDoc(docRef);
-		return docSnap;
+		const docRef = doc(db, data.collection_name, data.document_id)
+		const docSnap = await getDoc(docRef)
+		return docSnap
 	}
 }
 

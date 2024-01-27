@@ -9,7 +9,7 @@ import { useAppContext } from '@/context/app.context'
 
 export default function RightColumnHeader() {
 	const { authState } = useAuthContext()
-	const { setAppState } = useAppContext();
+	const { setAppState } = useAppContext()
 	const { user, flat_share_profile } = authState
 
 	if (user) {

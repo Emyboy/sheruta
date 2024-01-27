@@ -1,12 +1,10 @@
 'use client'
 import { Flex } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
-import MessageContainer from './components/MessageContainer/MessageContainer'
+
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import {
 	collection,
-	doc,
-	getDocs,
 	limit,
 	onSnapshot,
 	orderBy,
@@ -17,7 +15,8 @@ import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { useParams } from 'next/navigation'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
-import { DirectMessageDTO } from '@/firebase/service/messages/messages.types'
+import { DirectMessageData } from '@/firebase/service/messages/messages.types'
+import EachMessageBobble from './EachMessageBobble'
 
 type Props = {
 	isLoading?: boolean
@@ -61,9 +60,8 @@ export default function MessageList({ isLoading, conversation }: Props) {
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING} pb={NAV_HEIGHT}>
 			{messageList &&
-				messageList.map((mgs: DirectMessageDTO, index) => {
-					// return <MessageContainer key={Math.random()} />
-					return <p key={Math.random()}>{mgs.message_text}</p>
+				messageList.map((message: DirectMessageData, index) => {
+					return <EachMessageBobble key={Math.random()} message={message} />
 				})}
 		</Flex>
 	)

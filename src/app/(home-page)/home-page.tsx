@@ -13,9 +13,9 @@ import React from 'react'
 
 type Props = {}
 
-export default function HomePage({ }: Props) {
-	const { setAppState } = useAppContext();
-	const { authState } = useAuthContext();
+export default function HomePage({}: Props) {
+	const { setAppState } = useAppContext()
+	const { authState } = useAuthContext()
 
 	return (
 		<>
@@ -25,8 +25,8 @@ export default function HomePage({ }: Props) {
 						<MainLeftNav />
 					</Flex>
 					<Flex flexDirection={'column'} gap={0} px={DEFAULT_PADDING}>
-						{
-							!authState?.user && <Flex
+						{!authState?.user && (
+							<Flex
 								justifyContent={'center'}
 								alignItems={'center'}
 								flexDir={'column'}
@@ -40,11 +40,16 @@ export default function HomePage({ }: Props) {
 								<Text fontWeight={'bold'} fontSize={'xx-large'}>
 									Join the community
 								</Text>
-								<Button colorScheme="" px={30} bg="dark" onClick={() => setAppState({ show_login: true })}>
+								<Button
+									colorScheme=""
+									px={30}
+									bg="dark"
+									onClick={() => setAppState({ show_login: true })}
+								>
 									Login
 								</Button>
 							</Flex>
-						}
+						)}
 						{new Array(9).fill(null).map((_) => {
 							return <EachRequest key={Math.random()} />
 						})}
