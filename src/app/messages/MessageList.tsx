@@ -26,7 +26,14 @@ type Props = {
 export default function MessageList({ isLoading, conversation }: Props) {
 	const [messageList, setMessageList] = useState<any[]>([])
 	const params = useParams()
-	const conversation_id = conversation._id
+	const conversation_id = conversation._id;
+
+	let goDown = () => {
+		let theEnd = document.querySelector('#end');
+		if (theEnd) {
+			theEnd.scrollIntoView({ behavior: 'smooth' });
+		}
+	}
 
 	useEffect(() => {
 		;(async () => {
@@ -44,18 +51,20 @@ export default function MessageList({ isLoading, conversation }: Props) {
 				}))
 				setMessageList(sortedMessages)
 				// console.log(sortedMessages)
+				goDown()
 			})
 
 
-			// let theEnd = document.querySelector('#end');
-			// if (theEnd) {
-			// 	console.log('HERE WE GO')
-			// 	theEnd.scrollIntoView({ behavior: 'smooth' });
-			// }
 
 			return () => unsubscribe()
 		})()
 	}, [])
+
+	useEffect(() => {
+		if(messageList && messageList.length > 4) {
+			goDown();
+		}
+	},[messageList])
 
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING} pb={NAV_HEIGHT}>
