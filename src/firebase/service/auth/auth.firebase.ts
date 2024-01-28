@@ -14,7 +14,6 @@ export default class AuthService {
 			let userExists = await this.getUser(data.uid)
 
 			if (userExists) {
-				console.log('USER EXIST::', userExists)
 				return userExists
 			}
 

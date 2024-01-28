@@ -13,6 +13,13 @@ export function getRandomNumber(min: number, max: number): number {
 	}
 	const randomDecimal = Math.random()
 	const randomNumber = Math.floor(randomDecimal * (max - min + 1) + min)
-
 	return randomNumber
+}
+
+export function formatPrice(digit: number): string {
+	const formatter = new Intl.NumberFormat('en-US', {
+		style: 'decimal',
+		minimumFractionDigits: 0,
+	})
+	return formatter.format(digit)
 }

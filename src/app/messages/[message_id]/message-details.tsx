@@ -19,6 +19,8 @@ import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { generateConversationID } from '@/firebase/service/conversations/conversation.utils'
 import LoginCard from '@/components/atoms/LoginCard'
 import { BiSolidMessageSquareDetail } from 'react-icons/bi'
+import CreditInfo from '@/components/info/CreditInfo'
+import { creditTable } from '@/constants'
 
 type Props = {}
 
@@ -31,34 +33,40 @@ export default function MessageDetails({}: Props) {
 	)
 	const [loading, setLoading] = useState(true)
 
+	const getConversation = async () => {
+		if (user) {
+			setLoading(true)
+			let isOwner = await ConversationsService.get(
+				generateConversationID({
+					owner_id: message_id as string,
+					guest_id: user._id,
+				}),
+			)
+			let isGuest = await ConversationsService.get(
+				generateConversationID({
+					guest_id: message_id as string,
+					owner_id: user._id,
+				}),
+			)
+
+			if (isGuest) {
+				setLoading(false)
+				return setConversation(isGuest)
+			} else if (isOwner) {
+				setLoading(false)
+				return setConversation(isOwner)
+			} else {
+				setLoading(false)
+			}
+
+			setLoading(false)
+		}
+	}
+
 	useEffect(() => {
 		;(async () => {
 			if (message_id && user) {
-				setLoading(true)
-				let isOwner = await ConversationsService.get(
-					generateConversationID({
-						owner_id: message_id as string,
-						guest_id: user._id,
-					}),
-				)
-				let isGuest = await ConversationsService.get(
-					generateConversationID({
-						guest_id: message_id as string,
-						owner_id: user._id,
-					}),
-				)
-
-				if (isGuest) {
-					setLoading(false)
-					return setConversation(isGuest)
-				} else if (isOwner) {
-					setLoading(false)
-					return setConversation(isOwner)
-				} else {
-					setLoading(false)
-				}
-
-				setLoading(false)
+				getConversation()
 			}
 		})()
 	}, [user])
@@ -92,6 +100,7 @@ export default function MessageDetails({}: Props) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
+					{<CreditInfo credit={creditTable.CONVERSATION} />}
 					{!user && <LoginCard Icon={BiSolidMessageSquareDetail} />}
 					{conversation && user && (
 						<MessageSection

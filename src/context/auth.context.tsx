@@ -107,7 +107,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 				setAuthState({ ...(theUser as any), auth_loading: false })
 			})
 			.catch((error) => {
-				console.log('USER CREATED::', error)
+				console.log('LOGIN ERROR::', error)
 				toast({ title: 'Error, please try again', status: 'error' })
 			})
 	}
