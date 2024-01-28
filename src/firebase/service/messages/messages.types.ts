@@ -1,4 +1,4 @@
-import { DocumentReference } from 'firebase/firestore'
+import { DocumentReference, Timestamp } from 'firebase/firestore'
 
 export interface DirectMessageDTO {
 	_conversation_id: string
@@ -20,4 +20,6 @@ export interface DirectMessageData {
 	_receiver_ref: DocumentReference
 	message_text: string
 	seen: boolean
+	createdAt: Timestamp
+	updatedAt: Timestamp
 }

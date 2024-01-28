@@ -17,6 +17,8 @@ import { useAuthContext } from '@/context/auth.context'
 import moment from 'moment'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { generateConversationID } from '@/firebase/service/conversations/conversation.utils'
+import LoginCard from '@/components/atoms/LoginCard'
+import { BiSolidMessageSquareDetail } from 'react-icons/bi'
 
 type Props = {}
 
@@ -90,7 +92,8 @@ export default function MessageDetails({}: Props) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{conversation && (
+					{!user && <LoginCard Icon={BiSolidMessageSquareDetail} />}
+					{conversation && user && (
 						<MessageSection
 							guest={theGuest as AuthUser}
 							conversation={conversation as ConversationData}
@@ -124,11 +127,6 @@ const MessageSection = ({
 				recipient_id: guest._id,
 				user_id: user?._id as string,
 			})
-			let theEnd = document.querySelector('#end');
-			if (theEnd) {
-				console.log('HERE WE GO')
-				theEnd.scrollIntoView({ behavior: 'smooth' });
-			}
 		} catch (error) {
 			toast({ title: 'error, please try again', status: 'error' })
 		}

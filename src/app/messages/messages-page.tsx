@@ -11,8 +11,13 @@ import Link from 'next/link'
 import EachConversation from './components/EachConversation'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
 import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
-import { BiSolidMessageSquareEdit } from 'react-icons/bi'
+import {
+	BiSolidMessageSquareDetail,
+	BiSolidMessageSquareEdit,
+} from 'react-icons/bi'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import MainHeader from '@/components/layout/MainHeader'
+import LoginCard from '@/components/atoms/LoginCard'
 
 type Props = {}
 
@@ -34,19 +39,14 @@ export default function MessagesPage({}: Props) {
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
-				<ThreeColumnLayout
-					header={
-						<MainBackHeader
-							heading="Conversations"
-							subHeading="List of all your previous conversations"
-						/>
-					}
-				>
+				<ThreeColumnLayout header={<MainHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
 					<>
+						{!user && <LoginCard Icon={BiSolidMessageSquareDetail} />}
 						{!conversations &&
+							user &&
 							new Array(9).fill(null).map((_: any) => {
 								return <EachConversationLoading key={Math.random()} />
 							})}

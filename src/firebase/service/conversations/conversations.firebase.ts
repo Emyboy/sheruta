@@ -13,7 +13,6 @@ import {
 import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { ConversationData, ConversationsDTO } from './conversations.types'
 import { db } from '@/firebase'
-import { generateConversationID } from './conversation.utils'
 
 export default class ConversationsService {
 	static async create({

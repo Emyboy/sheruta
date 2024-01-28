@@ -6,3 +6,13 @@ export const hasEmptyValue = (obj: any): boolean => {
 	}
 	return false
 }
+
+export function getRandomNumber(min: number, max: number): number {
+	if (min > max) {
+		throw new Error('Minimum value must be less than or equal to maximum value')
+	}
+	const randomDecimal = Math.random()
+	const randomNumber = Math.floor(randomDecimal * (max - min + 1) + min)
+
+	return randomNumber
+}

@@ -8,6 +8,7 @@ import {
 	updateDoc,
 } from 'firebase/firestore'
 import { db } from '..'
+import moment from 'moment'
 
 interface createDTO {
 	collection_name: string
@@ -19,13 +20,14 @@ export default class SherutaDB {
 	static defaults = {
 		createdAt: serverTimestamp(),
 		updatedAt: serverTimestamp(),
+		deleteDate: moment().add(2, 'months').toDate(),
 	}
 
 	static async create(data: createDTO): Promise<any> {
 		console.log('SENDING TO DB::', data)
 		setDoc(doc(db, data.collection_name, data.document_id), {
-			...data.data,
 			...this.defaults,
+			...data.data,
 		})
 		let result = await getDoc(
 			doc(db, data.collection_name, data.document_id as string),
