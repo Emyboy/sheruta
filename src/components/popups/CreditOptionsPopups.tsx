@@ -68,7 +68,7 @@ export const CreditOptions = () => {
 				newCredit: Number(credit),
 				user_id: authState.user?._id as string,
 			})
-			if(update){
+			if (update) {
 				setAuthState({ flat_share_profile: update })
 			}
 			// }

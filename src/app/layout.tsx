@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from '../configs/Providers'
 import 'react-loading-skeleton/dist/skeleton.css'
+import 'react-horizontal-scrolling-menu/dist/styles.css';
 
 export const metadata: Metadata = {
 	title: 'Sheruta NG',

@@ -1,11 +1,11 @@
 'use client'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
 import { Box, Button, Flex, Text } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { FaCoins } from 'react-icons/fa'
-import { CreditOptions } from '../popups/CreditOptionsPopups'
+import { CreditOptions } from '../../popups/CreditOptionsPopups'
+import { formatPrice } from '@/utils/index.utils'
 
 type Props = {
 	credit: number
@@ -14,7 +14,7 @@ type Props = {
 export default function CreditInfo({ credit }: Props) {
 	const { authState } = useAuthContext()
 	const [ready, setReady] = useState(false)
-	
+
 	if (
 		authState.flat_share_profile &&
 		Number(authState.flat_share_profile?.credits) < credit
@@ -75,12 +75,12 @@ export default function CreditInfo({ credit }: Props) {
 					fontWeight={'bold'}
 					gap={2}
 				>
-					<FaCoins color="gold" /> {credit} credits required
+					<FaCoins color="gold" /> {formatPrice(credit)} credits required
 				</Flex>
 				<Button>
 					Use
 					<Flex alignItems={'center'} gap={1} ml={4}>
-						<FaCoins color="gold" /> {credit}
+						<FaCoins color="gold" /> {formatPrice(credit)}
 					</Flex>
 				</Button>
 			</Flex>

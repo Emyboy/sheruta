@@ -19,7 +19,7 @@ import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { generateConversationID } from '@/firebase/service/conversations/conversation.utils'
 import LoginCard from '@/components/atoms/LoginCard'
 import { BiSolidMessageSquareDetail } from 'react-icons/bi'
-import CreditInfo from '@/components/info/CreditInfo'
+import CreditInfo from '@/components/info/CreditInfo/CreditInfo'
 import { creditTable } from '@/constants'
 
 type Props = {}

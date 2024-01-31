@@ -61,7 +61,7 @@ export default class FlatShareProfileService {
 	}: {
 		newCredit: number
 		user_id: string
-		}): Promise<FlatShareProfileData | null> {
+	}): Promise<FlatShareProfileData | null> {
 		try {
 			let result = (await SherutaDB.get({
 				collection_name: DBCollectionName.flatShareProfile,
@@ -74,9 +74,9 @@ export default class FlatShareProfileService {
 					data: { credits: result?.credits + newCredit },
 					document_id: user_id,
 				})
-				return update as FlatShareProfileData;
-			}else {
-				return null;
+				return update as FlatShareProfileData
+			} else {
+				return null
 			}
 		} catch (error) {
 			return Promise.reject(error)

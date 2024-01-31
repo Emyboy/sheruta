@@ -6,6 +6,7 @@ import { useAuthContext } from '@/context/auth.context'
 import Link from 'next/link'
 import { FaCoins } from 'react-icons/fa'
 import { useAppContext } from '@/context/app.context'
+import { formatPrice } from '@/utils/index.utils'
 
 export default function RightColumnHeader() {
 	const { authState } = useAuthContext()
@@ -30,7 +31,7 @@ export default function RightColumnHeader() {
 							<Text color="gold" as="span">
 								<FaCoins />
 							</Text>
-							{flat_share_profile?.credits}
+							{formatPrice(flat_share_profile?.credits || 0)}
 						</Text>
 					</Flex>
 					<Avatar src={user.avatar_url} />

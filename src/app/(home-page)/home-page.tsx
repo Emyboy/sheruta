@@ -9,6 +9,10 @@ import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Flex } from '@chakra-ui/react'
 import React from 'react'
+// import HomeTabs from './HomeTabs';
+import dynamic from 'next/dynamic';
+
+const HomeTabs = dynamic(() => import('./HomeTabs'), { ssr: false });
 
 type Props = {}
 
@@ -21,6 +25,7 @@ export default function HomePage({}: Props) {
 						<MainLeftNav />
 					</Flex>
 					<Flex flexDir={'column'}>
+						<HomeTabs />
 						<JoinTheCommunity />
 						<Flex flexDirection={'column'} gap={0}>
 							{new Array(9).fill(null).map((_, index: number) => {
