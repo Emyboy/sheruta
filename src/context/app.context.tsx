@@ -5,6 +5,7 @@ interface AppState {
 	app_loading: boolean
 	show_left_nav: boolean
 	show_login: boolean
+	show_credit: boolean
 }
 
 interface AppContextProps {
@@ -25,6 +26,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({
 		app_loading: true,
 		show_left_nav: true,
 		show_login: false,
+		show_credit: false,
 	})
 
 	const setAppState = (newState: Partial<AppState>): void => {

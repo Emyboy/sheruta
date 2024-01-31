@@ -1,6 +1,14 @@
-import { DocumentReference, doc, getDoc } from 'firebase/firestore'
+import {
+	DocumentData,
+	DocumentReference,
+	doc,
+	getDoc,
+} from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { FlatShareProfileDTO } from './flat-share-profile.types'
+import {
+	FlatShareProfileDTO,
+	FlatShareProfileData,
+} from './flat-share-profile.types'
 import { db } from '@/firebase'
 
 export default class FlatShareProfileService {
@@ -42,6 +50,34 @@ export default class FlatShareProfileService {
 				doc(db, DBCollectionName.flatShareProfile, user_id),
 			)
 			return result.data()
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async updateCredit({
+		newCredit,
+		user_id,
+	}: {
+		newCredit: number
+		user_id: string
+		}): Promise<FlatShareProfileData | null> {
+		try {
+			let result = (await SherutaDB.get({
+				collection_name: DBCollectionName.flatShareProfile,
+				document_id: user_id,
+			})) as FlatShareProfileData
+
+			if (result && newCredit) {
+				let update = await SherutaDB.update({
+					collection_name: DBCollectionName.flatShareProfile,
+					data: { credits: result?.credits + newCredit },
+					document_id: user_id,
+				})
+				return update as FlatShareProfileData;
+			}else {
+				return null;
+			}
 		} catch (error) {
 			return Promise.reject(error)
 		}

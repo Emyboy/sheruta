@@ -8,6 +8,14 @@ import AppLoading from '@/components/atoms/AppLoading'
 import { AppContextProvider } from '@/context/app.context'
 import { Next13ProgressBar } from 'next13-progressbar'
 import MasterPopup from '@/components/popups/MasterPopup'
+import dynamic from 'next/dynamic'
+
+const CreditOptionsPopups = dynamic(
+	() => import('@/components/popups/CreditOptionsPopups'),
+	{
+		ssr: false, // Only load on the client-side
+	},
+)
 
 export function Providers({ children }: { children: React.ReactNode }) {
 	return (
@@ -22,6 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 						}}
 						minH={'100vh'}
 					>
+						<CreditOptionsPopups />
 						<MasterPopup />
 						<AppLoading />
 						<Next13ProgressBar

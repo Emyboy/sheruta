@@ -36,6 +36,7 @@ export default class SherutaDB {
 	}
 
 	static async update(data: createDTO) {
+		console.log('UPDATING DB::', data)
 		const ref = doc(db, data.collection_name, data.document_id)
 		await updateDoc(ref, {
 			...data.data,
@@ -45,7 +46,24 @@ export default class SherutaDB {
 		// fetching the updated value;
 		const docRef = doc(db, data.collection_name, data.document_id)
 		const docSnap = await getDoc(docRef)
-		return docSnap
+		return docSnap.data()
+	}
+
+	static async get({
+		document_id,
+		collection_name,
+	}: {
+		document_id: string
+		collection_name: string
+	}) {
+		const docRef = doc(db, collection_name, document_id)
+		const docSnap = await getDoc(docRef)
+
+		if (docSnap.exists()) {
+			return docSnap.data()
+		} else {
+			return null
+		}
 	}
 }
 

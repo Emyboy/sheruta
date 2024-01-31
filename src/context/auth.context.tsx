@@ -29,7 +29,7 @@ interface AuthState {
 
 interface AuthContextProps {
 	authState: AuthState
-	setAuthState: (state: AuthState) => void
+	setAuthState: (state: Partial<AuthState>) => void
 	getUser: () => AuthUser | null
 	createUser: (user: RegisterDTO) => void
 	logout: () => void

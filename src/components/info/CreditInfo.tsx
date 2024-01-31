@@ -1,10 +1,11 @@
 'use client'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
-import { Button, Flex, Text } from '@chakra-ui/react'
-import React from 'react'
+import { Box, Button, Flex, Text } from '@chakra-ui/react'
+import React, { useState } from 'react'
 import { FaCoins } from 'react-icons/fa'
-import CreditOptionsPopups from '../popups/CreditOptionsPopups'
+import { CreditOptions } from '../popups/CreditOptionsPopups'
 
 type Props = {
 	credit: number
@@ -12,14 +13,21 @@ type Props = {
 
 export default function CreditInfo({ credit }: Props) {
 	const { authState } = useAuthContext()
-
+	const [ready, setReady] = useState(false)
+	
 	if (
 		authState.flat_share_profile &&
 		Number(authState.flat_share_profile?.credits) < credit
 	) {
+		if (ready) {
+			return (
+				<Box p={DEFAULT_PADDING}>
+					<CreditOptions />
+				</Box>
+			)
+		}
 		return (
 			<>
-				<CreditOptionsPopups isOpen onClose={() => {}} />
 				<Flex justifyContent={'center'} alignItems={'center'} w="full">
 					<Flex
 						maxW={`calc(100% - ${DEFAULT_PADDING})`}
@@ -37,7 +45,7 @@ export default function CreditInfo({ credit }: Props) {
 						justifyContent={'space-between'}
 					>
 						<Text>You do not have enough credits of {credit}</Text>
-						<Button>Buy Credit</Button>
+						<Button onClick={() => setReady(true)}>Buy Credit</Button>
 					</Flex>
 				</Flex>
 			</>
