@@ -26,16 +26,6 @@ export default class MessagesService {
 
 			let theConversation: DocumentData
 
-			// console.log('SENDING::', {
-			// 	_guest: _guest.data(),
-			// 	_user: _user.data(),
-			// 	_conversation: _conversation.data(),
-			// 	message,
-			// 	conversation_id,
-			// 	recipient_id,
-			// 	user_id,
-			// })
-
 			if (!_conversation.exists()) {
 				theConversation = await ConversationsService.create({
 					guest_ref: _guest.ref,
@@ -60,13 +50,6 @@ export default class MessagesService {
 			if (hasEmptyValue(data)) {
 				return Promise.reject('no or invalid data')
 			}
-
-			// console.log("OUTCOME::", {
-			// 	theConversation,
-			// 	_guest: _guest.data(),
-			// 	_user: _user.data(),
-			// 	data,
-			// });
 
 			let result = await SherutaDB.create({
 				collection_name: DBCollectionName.messages,

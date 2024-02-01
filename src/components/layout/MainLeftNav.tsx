@@ -40,7 +40,7 @@ export default function MainLeftNav({}: Props) {
 					bg: 'dark_light',
 				}}
 			/>
-			<a href='/'>
+			<a href="/">
 				<EachNav Icon={BiLogInCircle} label="Logout" onClick={logout} />
 			</a>
 		</Flex>
