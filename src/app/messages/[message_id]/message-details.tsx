@@ -144,7 +144,7 @@ export default function MessageDetails({}: Props) {
 								<Spinner color="brand" />
 							</Flex>
 						)}
-						{!loading && !conversation && (
+						{!loading && !conversation && user?._id !== message_id && (
 							<CreditInfo
 								credit={creditTable.CONVERSATION}
 								onUse={createNewConversation}
