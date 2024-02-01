@@ -47,7 +47,9 @@ export default function EachMessageBobble({ message }: Props) {
 					alignItems={'center'}
 				>
 					<Text>
-						{moment(message.createdAt.toDate().toISOString()).fromNow()}
+						{message?.createdAt
+							? moment(message?.createdAt?.toDate()?.toISOString())?.fromNow()
+							: 'just now'}
 					</Text>
 					<Box color={message.seen ? 'blue.400' : ''}>
 						{isUserOwn && (

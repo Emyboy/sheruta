@@ -2,7 +2,7 @@
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex, useToast } from '@chakra-ui/react'
+import { Box, Flex, Spinner, useToast } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import MainBodyContent from '@/components/layout/MainBodyContent'
@@ -21,10 +21,14 @@ import LoginCard from '@/components/atoms/LoginCard'
 import { BiSolidMessageSquareDetail } from 'react-icons/bi'
 import CreditInfo from '@/components/info/CreditInfo/CreditInfo'
 import { creditTable } from '@/constants'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 
 type Props = {}
 
 export default function MessageDetails({}: Props) {
+	const toast = useToast()
 	const { authState } = useAuthContext()
 	const { user } = authState
 	const { message_id } = useParams()
@@ -71,9 +75,39 @@ export default function MessageDetails({}: Props) {
 		})()
 	}, [user])
 
-	// useEffect(() => {
-	// 	console.log('THE CONVERSATION::', conversation)
-	// }, [conversation])
+	const createNewConversation = async () => {
+		if (
+			(authState.flat_share_profile?.credits as number) >=
+				creditTable.CONVERSATION &&
+			user?._id !== message_id
+		) {
+			try {
+				setLoading(true)
+				let _owner = await getDoc(
+					doc(db, DBCollectionName.users, user?._id as string),
+				)
+				let _guest = await getDoc(
+					doc(db, DBCollectionName.users, message_id as string),
+				)
+
+				await ConversationsService.create({
+					conversation_id: generateConversationID({
+						guest_id: message_id as string,
+						owner_id: user?._id as string,
+					}),
+					guest_ref: _guest.ref,
+					owner_ref: _owner.ref,
+				})
+
+				getConversation()
+			} catch (error) {
+				setLoading(false)
+				toast({ title: 'Error, please try again', status: 'error' })
+			}
+		} else {
+			alert("You don't have enough credit")
+		}
+	}
 
 	const theGuest = conversation?.participants.find(
 		(participant) => participant._id !== user?._id,
@@ -100,15 +134,31 @@ export default function MessageDetails({}: Props) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{<CreditInfo credit={creditTable.CONVERSATION} />}
-					{!user && <LoginCard Icon={BiSolidMessageSquareDetail} />}
-					{conversation && user && (
-						<MessageSection
-							guest={theGuest as AuthUser}
-							conversation={conversation as ConversationData}
-							isLoading={loading}
-						/>
-					)}
+					<Flex flexDirection={'column'}>
+						{user && loading && !conversation && (
+							<Flex
+								justifyContent={'center'}
+								minH={`calc(96vh - ${NAV_HEIGHT})`}
+								alignItems={'center'}
+							>
+								<Spinner color="brand" />
+							</Flex>
+						)}
+						{!loading && !conversation && (
+							<CreditInfo
+								credit={creditTable.CONVERSATION}
+								onUse={createNewConversation}
+							/>
+						)}
+						{!user && <LoginCard Icon={BiSolidMessageSquareDetail} />}
+						{conversation && user && (
+							<MessageSection
+								guest={theGuest as AuthUser}
+								conversation={conversation as ConversationData}
+								isLoading={loading}
+							/>
+						)}
+					</Flex>
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

@@ -9,9 +9,10 @@ import { formatPrice } from '@/utils/index.utils'
 
 type Props = {
 	credit: number
+	onUse: () => void
 }
 
-export default function CreditInfo({ credit }: Props) {
+export default function CreditInfo({ credit, onUse }: Props) {
 	const { authState } = useAuthContext()
 	const [ready, setReady] = useState(false)
 
@@ -77,7 +78,7 @@ export default function CreditInfo({ credit }: Props) {
 				>
 					<FaCoins color="gold" /> {formatPrice(credit)} credits required
 				</Flex>
-				<Button>
+				<Button onClick={onUse}>
 					Use
 					<Flex alignItems={'center'} gap={1} ml={4}>
 						<FaCoins color="gold" /> {formatPrice(credit)}

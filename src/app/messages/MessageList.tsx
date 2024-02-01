@@ -16,7 +16,7 @@ import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { useParams } from 'next/navigation'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
 import { DirectMessageData } from '@/firebase/service/messages/messages.types'
-import EachMessageBobble from './EachMessageBobble'
+import EachMessageBobble from './components/EachMessageBobble'
 
 type Props = {
 	isLoading?: boolean

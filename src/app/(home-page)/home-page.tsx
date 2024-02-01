@@ -10,9 +10,9 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { Flex } from '@chakra-ui/react'
 import React from 'react'
 // import HomeTabs from './HomeTabs';
-import dynamic from 'next/dynamic';
+import dynamic from 'next/dynamic'
 
-const HomeTabs = dynamic(() => import('./HomeTabs'), { ssr: false });
+const HomeTabs = dynamic(() => import('./HomeTabs'), { ssr: false })
 
 type Props = {}
 

@@ -1,6 +1,4 @@
 import {
-	addDoc,
-	collection,
 	doc,
 	getDoc,
 	serverTimestamp,
@@ -25,14 +23,14 @@ export default class SherutaDB {
 
 	static async create(data: createDTO): Promise<any> {
 		console.log('SENDING TO DB::', data)
-		setDoc(doc(db, data.collection_name, data.document_id), {
+		await setDoc(doc(db, data.collection_name, data.document_id), {
 			...this.defaults,
 			...data.data,
 		})
 		let result = await getDoc(
 			doc(db, data.collection_name, data.document_id as string),
 		)
-		return result
+		return result.data()
 	}
 
 	static async update(data: createDTO) {
