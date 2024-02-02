@@ -12,7 +12,7 @@ export interface DirectMessageDTO {
 }
 
 export interface DirectMessageData {
-	id: string;
+	id: string
 	_conversation_id: string
 	_conversation_ref: DocumentReference
 	_sender_ref: DocumentReference

@@ -68,4 +68,15 @@ export default class MessagesService {
 			return Promise.reject(error)
 		}
 	}
+
+	static async deleteMessage(document_id: string) {
+		try {
+			await SherutaDB.delete({
+				collection_name: DBCollectionName.messages,
+				document_id,
+			})
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
 }

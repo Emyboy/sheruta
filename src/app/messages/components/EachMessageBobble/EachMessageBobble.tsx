@@ -1,29 +1,46 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
+import MessagesService from '@/firebase/service/messages/messages.firebase'
 import { DirectMessageData } from '@/firebase/service/messages/messages.types'
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
-import moment from 'moment'
-import React, { useState } from 'react'
-import { BiCheck, BiCheckDouble } from 'react-icons/bi'
-import EachMessageOption from './EachMessageOption'
+import {
+	Button,
+	Divider,
+	Flex,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
+	Text,
+	useToast,
+} from '@chakra-ui/react'
+import React from 'react'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { BiCopy, BiDotsVertical, BiFlag, BiTrash } from 'react-icons/bi'
 
 type Props = {
 	message: DirectMessageData
 }
 
 export default function EachMessageBobble({ message }: Props) {
+	const toast = useToast()
 	const { authState } = useAuthContext()
 	const user = authState.user
 	const isUserOwn = message._sender_id === user?._id
-	const [showOptions, setShowOptions] = useState(false)
+
+	const handleCopy = () => {
+		toast({ title: `Message copied` })
+	}
+
+	const handleDelete = async () => {
+		try {
+			await MessagesService.deleteMessage(message.id)
+		} catch (error) {
+			toast({ title: `Error deleting message`, status: 'error' })
+		}
+	}
 
 	return (
 		<>
-			<EachMessageOption
-				messageData={message}
-				isOpen={showOptions}
-				onClose={() => setShowOptions(false)}
-			/>
 			<Flex
 				justifyContent={'space-between'}
 				flexDir={isUserOwn ? 'row' : 'row-reverse'}
@@ -31,8 +48,8 @@ export default function EachMessageBobble({ message }: Props) {
 				width={'full'}
 			>
 				<div></div>
+
 				<Flex
-					onClick={() => setShowOptions(true)}
 					_hover={{
 						shadow: 'xl',
 					}}
@@ -54,30 +71,38 @@ export default function EachMessageBobble({ message }: Props) {
 					>
 						{message.message_text}
 					</Text>
-					{/* <Flex
-					fontSize={'xs'}
-					color="text_muted"
-					minW={!isUserOwn ? '' : '7rem'}
-					justifyContent={'space-between'}
-					alignItems={'center'}
-				>
-					<Text>
-						{message?.createdAt
-							? moment(message?.createdAt?.toDate()?.toISOString())?.fromNow()
-							: 'just now'}
-					</Text>
-					<Box color={message.seen ? 'blue.400' : ''}>
-						{isUserOwn && (
-							<>
-								{message.seen ? (
-									<BiCheckDouble size={20} />
-								) : (
-									<BiCheck size={20} />
+					<Flex justifyContent={'flex-end'} color={'text_muted'}>
+						<Menu>
+							<MenuButton
+								as={Button}
+								size={'xs'}
+								bg="none"
+								color="dark_lighter"
+							>
+								<BiDotsVertical />
+							</MenuButton>
+							<MenuList bg="dark" zIndex={200}>
+								<CopyToClipboard
+									text={message.message_text}
+									onCopy={handleCopy}
+								>
+									<MenuItem icon={<BiCopy size={20} />}>Copy</MenuItem>
+								</CopyToClipboard>
+								{/* <MenuItem icon={<BiFlag size={20} />}>Report</MenuItem> */}
+								{isUserOwn && (
+									<>
+										<Divider />
+										<MenuItem
+											icon={<BiTrash size={20} />}
+											onClick={handleDelete}
+										>
+											Delete
+										</MenuItem>
+									</>
 								)}
-							</>
-						)}
-					</Box>
-				</Flex> */}
+							</MenuList>
+						</Menu>
+					</Flex>
 				</Flex>
 			</Flex>
 		</>

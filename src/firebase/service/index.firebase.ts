@@ -1,4 +1,5 @@
 import {
+	deleteDoc,
 	doc,
 	getDoc,
 	serverTimestamp,
@@ -61,6 +62,22 @@ export default class SherutaDB {
 			return docSnap.data()
 		} else {
 			return null
+		}
+	}
+
+	static async delete({
+		collection_name,
+		document_id,
+	}: {
+		collection_name: string
+		document_id: string
+	}): Promise<boolean> {
+		try {
+			const docRef = doc(db, collection_name, document_id)
+			await deleteDoc(docRef)
+			return Promise.resolve(true)
+		} catch (error) {
+			return Promise.reject(error)
 		}
 	}
 }
