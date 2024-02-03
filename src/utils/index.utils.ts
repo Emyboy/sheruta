@@ -16,6 +16,10 @@ export function getRandomNumber(min: number, max: number): number {
 	return randomNumber
 }
 
+export function generateNumberFromRange(min: number, max: number): number {
+	return Math.floor(Math.random() * (max - min) + min)
+}
+
 export function formatPrice(digit: number): string {
 	const formatter = new Intl.NumberFormat('en-US', {
 		style: 'decimal',

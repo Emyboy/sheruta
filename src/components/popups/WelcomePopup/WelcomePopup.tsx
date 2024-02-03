@@ -1,0 +1,48 @@
+'use client'
+import { useAuthContext } from '@/context/auth.context'
+import { Modal, ModalBody, ModalContent, ModalOverlay } from '@chakra-ui/react'
+import React, { useState } from 'react'
+import WelcomeMessage from './WelcomeMessage'
+import ProfileConfig from './ProfileConfig'
+import OnboardingForm from './OnboardingForm'
+
+export default function WelcomePopup() {
+	const { authState } = useAuthContext()
+	const { flat_share_profile, user, user_info } = authState
+	const [step, setStep] = useState(0)
+
+	if (!flat_share_profile || !user || !user_info) {
+		return null
+	}
+
+	const next = () => {
+		setStep(step + 1)
+	}
+
+	return (
+		<>
+			<Modal isOpen onClose={() => {}}>
+				<ModalOverlay />
+				<ModalContent
+					shadow={'xl'}
+					border={'1px'}
+					borderColor={'dark_light'}
+					bg={'white'}
+					_dark={{
+						bg: 'dark',
+					}}
+				>
+					<ModalBody>
+						{
+							[
+								<WelcomeMessage next={next} />,
+								<ProfileConfig next={next} />,
+								<OnboardingForm next={next} />,
+							][step]
+						}
+					</ModalBody>
+				</ModalContent>
+			</Modal>
+		</>
+	)
+}

@@ -25,7 +25,7 @@ type PaymentHook = () => [PaymentState, PaymentActions]
 
 const usePayment: PaymentHook = () => {
 	const toast = useToast()
-    const { authState, setAuthState } = useAuthContext()
+	const { authState, setAuthState } = useAuthContext()
 	const [paymentState, setPaymentState] = useState<PaymentState>({
 		isLoading: false,
 	})
@@ -44,9 +44,9 @@ const usePayment: PaymentHook = () => {
 				user_id,
 			})
 			setPaymentState({ isLoading: false })
-            if (result) {
-                setAuthState({ flat_share_profile: result })
-            }
+			if (result) {
+				setAuthState({ flat_share_profile: result })
+			}
 			return result
 		} catch (error) {
 			toast({ title: 'Error, please try again', status: 'error' })
@@ -69,9 +69,9 @@ const usePayment: PaymentHook = () => {
 				user_id,
 			})
 			setPaymentState({ isLoading: false })
-            if (result) {
-                setAuthState({ flat_share_profile: result })
-            }
+			if (result) {
+				setAuthState({ flat_share_profile: result })
+			}
 			return result
 		} catch (error) {
 			toast({ title: 'Error, please try again', status: 'error' })

@@ -19,7 +19,7 @@ import usePayment from '@/hooks/usePayment'
 
 type Props = {}
 
-export default function CreditOptionsPopups({ }: Props) {
+export default function CreditOptionsPopups({}: Props) {
 	const { appState, setAppState } = useAppContext()
 	const { show_credit } = appState
 
@@ -61,7 +61,7 @@ export const CreditOptions = () => {
 	}
 
 	const onSuccess = (reference: any) => {
-		; (async () => {
+		;(async () => {
 			if (reference) {
 				await paymentActions.incrementCredit({
 					amount: Number(credit),

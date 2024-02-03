@@ -30,7 +30,7 @@ type Props = {}
 
 export default function MessageDetails({}: Props) {
 	const toast = useToast()
-	const [_, paymentActions] = usePayment();
+	const [_, paymentActions] = usePayment()
 	const { authState } = useAuthContext()
 	const { user } = authState
 	const { message_id } = useParams()
@@ -103,7 +103,7 @@ export default function MessageDetails({}: Props) {
 
 				await paymentActions.decrementCredit({
 					amount: creditTable.CONVERSATION,
-					user_id: user?._id as string
+					user_id: user?._id as string,
 				})
 
 				getConversation()
