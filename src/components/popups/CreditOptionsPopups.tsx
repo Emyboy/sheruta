@@ -2,7 +2,6 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { formatPrice } from '@/utils/index.utils'
 import {
 	Flex,
@@ -16,11 +15,11 @@ import {
 import React, { useEffect, useState } from 'react'
 import { usePaystackPayment } from 'next-paystack'
 import { HookConfig } from 'react-paystack/dist/types'
+import usePayment from '@/hooks/usePayment'
 
 type Props = {}
 
-export default function CreditOptionsPopups({}: Props) {
-	const [selectedCredit, setSelectedCredit] = useState(0)
+export default function CreditOptionsPopups({ }: Props) {
 	const { appState, setAppState } = useAppContext()
 	const { show_credit } = appState
 
@@ -46,7 +45,8 @@ export default function CreditOptionsPopups({}: Props) {
 }
 
 export const CreditOptions = () => {
-	const { authState, setAuthState } = useAuthContext()
+	const [_, paymentActions] = usePayment()
+	const { authState } = useAuthContext()
 	const [credit, setCredit] = useState(0)
 
 	const config: HookConfig = {
@@ -61,17 +61,13 @@ export const CreditOptions = () => {
 	}
 
 	const onSuccess = (reference: any) => {
-		;(async () => {
-			console.log(reference)
-			// if (reference.status === "success" && reference.message === "Approved"){
-			let update = await FlatShareProfileService.updateCredit({
-				newCredit: Number(credit),
-				user_id: authState.user?._id as string,
-			})
-			if (update) {
-				setAuthState({ flat_share_profile: update })
+		; (async () => {
+			if (reference) {
+				await paymentActions.incrementCredit({
+					amount: Number(credit),
+					user_id: authState.user?._id as string,
+				})
 			}
-			// }
 		})()
 	}
 

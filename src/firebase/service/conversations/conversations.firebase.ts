@@ -25,19 +25,6 @@ export default class ConversationsService {
 		conversation_id: string
 	}) {
 		try {
-			// let isOwner = await this.get(
-			// 	generateConversationID({
-			// 		owner_id: owner_ref.id,
-			// 		guest_id: guest_ref.id,
-			// 	}),
-			// )
-			// let isGuest = await this.get(
-			// 	generateConversationID({
-			// 		guest_id: owner_ref.id,
-			// 		owner_id: guest_ref.id,
-			// 	}),
-			// )
-
 			if (guest_ref?.id && owner_ref?.id) {
 				let data: ConversationsDTO = {
 					owner_ref,

@@ -24,11 +24,13 @@ import { creditTable } from '@/constants'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import usePayment from '@/hooks/usePayment'
 
 type Props = {}
 
 export default function MessageDetails({}: Props) {
 	const toast = useToast()
+	const [_, paymentActions] = usePayment();
 	const { authState } = useAuthContext()
 	const { user } = authState
 	const { message_id } = useParams()
@@ -97,6 +99,11 @@ export default function MessageDetails({}: Props) {
 					}),
 					guest_ref: _guest.ref,
 					owner_ref: _owner.ref,
+				})
+
+				await paymentActions.decrementCredit({
+					amount: creditTable.CONVERSATION,
+					user_id: user?._id as string
 				})
 
 				getConversation()

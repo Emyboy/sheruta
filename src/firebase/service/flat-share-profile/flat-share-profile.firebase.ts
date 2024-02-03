@@ -55,7 +55,7 @@ export default class FlatShareProfileService {
 		}
 	}
 
-	static async updateCredit({
+	static async incrementCredit({
 		newCredit,
 		user_id,
 	}: {
@@ -77,6 +77,34 @@ export default class FlatShareProfileService {
 				return update as FlatShareProfileData
 			} else {
 				return null
+			}
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async decrementCredit({
+		user_id,
+		amount,
+	}: {
+		user_id: string
+		amount: number
+	}): Promise<FlatShareProfileData | null> {
+		try {
+			let result = (await SherutaDB.get({
+				collection_name: DBCollectionName.flatShareProfile,
+				document_id: user_id,
+			})) as FlatShareProfileData
+
+			if (result && amount && result?.credits >= amount) {
+				let update = await SherutaDB.update({
+					collection_name: DBCollectionName.flatShareProfile,
+					data: { credits: result?.credits - amount },
+					document_id: user_id,
+				})
+				return update as FlatShareProfileData
+			} else {
+				return Promise.reject(null)
 			}
 		} catch (error) {
 			return Promise.reject(error)
