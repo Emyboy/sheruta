@@ -11,23 +11,25 @@ type Props = {
 export default function ProfileConfig({ next }: Props) {
 	const [seeking, setSeeking] = useState<null | boolean>(null)
 	return (
-		<VStack py={DEFAULT_PADDING} spacing={10}>
+		<VStack p={DEFAULT_PADDING} spacing={10}>
 			<VStack>
 				<Text fontSize={'xl'} fontWeight={'bold'}>
 					What are you looking for?
 				</Text>
 			</VStack>
-			<Flex w="full" justifyContent={'space-between'} gap={5}>
+			<Flex w="full" justifyContent={'space-around'} gap={20}>
 				<EachConfig
+					subHeading={`Choose if you're an apartment or space provider.`}
 					onClick={() => setSeeking(false)}
 					active={seeking === false}
 					heading="Host"
 					img_url="/assets/ai/11.jpeg"
 				/>
 				<EachConfig
+					subHeading={`Choose if you are an apartment or space seeker.`}
 					onClick={() => setSeeking(true)}
 					active={seeking === true}
-					heading="Guest"
+					heading="Seeker"
 					img_url="/assets/ai/22.jpeg"
 				/>
 			</Flex>
@@ -49,14 +51,18 @@ const EachConfig = ({
 	active,
 	heading,
 	onClick,
+	subHeading,
 }: {
 	img_url: string
 	active: boolean
 	heading: string
 	onClick: () => void
+	subHeading: string
 }) => {
 	return (
 		<Flex
+			cursor={'pointer'}
+			userSelect={'none'}
 			onClick={onClick}
 			justifyContent={'center'}
 			alignItems={'center'}
@@ -67,6 +73,7 @@ const EachConfig = ({
 				p="3px"
 				rounded={'full'}
 				position={'relative'}
+				mb={1}
 			>
 				<Box
 					h={20}
@@ -94,11 +101,19 @@ const EachConfig = ({
 					</Flex>
 				)}
 			</Box>
-			<Text color={active ? 'white' : 'dark_lighter'} fontSize={'xl'} fontWeight={'bold'}>
+			<Text
+				color={active ? 'white' : 'dark_lighter'}
+				fontSize={'xl'}
+				fontWeight={'bold'}
+			>
 				{heading}
 			</Text>
-			<Text textAlign={'center'} color={active ? 'white' : 'dark_lighter'} fontSize={'md'}>
-				I have to do it the way you want it.
+			<Text
+				textAlign={'center'}
+				color={active ? 'white' : 'dark_lighter'}
+				fontSize={'sm'}
+			>
+				{subHeading}
 			</Text>
 		</Flex>
 	)

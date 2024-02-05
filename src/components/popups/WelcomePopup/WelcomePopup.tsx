@@ -21,7 +21,7 @@ export default function WelcomePopup() {
 
 	return (
 		<>
-			<Modal isOpen onClose={() => {}}>
+			<Modal isOpen onClose={() => {}} size="lg">
 				<ModalOverlay />
 				<ModalContent
 					shadow={'xl'}
@@ -32,7 +32,7 @@ export default function WelcomePopup() {
 						bg: 'dark',
 					}}
 				>
-					<ModalBody>
+					<ModalBody p={0}>
 						{
 							[
 								<WelcomeMessage next={next} />,

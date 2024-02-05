@@ -2,7 +2,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Team, teams } from '@/data/team.data'
 import { generateNumberFromRange } from '@/utils/index.utils'
-import { Avatar, Button, Flex, Text, VStack } from '@chakra-ui/react'
+import { Avatar, Button, Text, VStack } from '@chakra-ui/react'
 import React from 'react'
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 export default function WelcomeMessage({ next }: Props) {
 	let theTeam: Team = teams[generateNumberFromRange(0, teams.length)]
 	return (
-		<VStack spacing={DEFAULT_PADDING} py={DEFAULT_PADDING}>
+		<VStack spacing={DEFAULT_PADDING} p={DEFAULT_PADDING}>
 			<VStack spacing={0}>
 				<Avatar src={theTeam?.avatar_url} bg="dark" size={'xl'} mb="5px" />
 				<Text textAlign={'center'} fontWeight={'bold'}>
