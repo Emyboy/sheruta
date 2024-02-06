@@ -110,4 +110,23 @@ export default class FlatShareProfileService {
 			return Promise.reject(error)
 		}
 	}
+
+	static async update({
+		document_id,
+		data,
+	}: {
+		document_id: string
+		data: Partial<FlatShareProfileData>
+	}): Promise<FlatShareProfileData> {
+		try {
+			let result = await SherutaDB.update({
+				collection_name: DBCollectionName.flatShareProfile,
+				data,
+				document_id,
+			})
+			return result as FlatShareProfileData
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
 }

@@ -34,7 +34,12 @@ export default function OnboardingForm({}: Props) {
 					>{`We're just confirming the information we have.`}</Text>
 				</VStack>
 				<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-					<Flex justifyContent={'flex-start'} flexDir={'column'} w="full" gap={2}>
+					<Flex
+						justifyContent={'flex-start'}
+						flexDir={'column'}
+						w="full"
+						gap={2}
+					>
 						<Text color={'text_muted'} fontSize={'sm'}>
 							First Name
 						</Text>
@@ -46,7 +51,12 @@ export default function OnboardingForm({}: Props) {
 							placeholder="Ex. Jane"
 						/>
 					</Flex>
-					<Flex justifyContent={'flex-start'} flexDir={'column'} w="full" gap={2}>
+					<Flex
+						justifyContent={'flex-start'}
+						flexDir={'column'}
+						w="full"
+						gap={2}
+					>
 						<Text color={'text_muted'} fontSize={'sm'}>
 							Last Name
 						</Text>
@@ -60,7 +70,12 @@ export default function OnboardingForm({}: Props) {
 					</Flex>
 				</Flex>
 				<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-					<Flex justifyContent={'flex-start'} flexDir={'column'} w="full" gap={2}>
+					<Flex
+						justifyContent={'flex-start'}
+						flexDir={'column'}
+						w="full"
+						gap={2}
+					>
 						<Text color={'text_muted'} fontSize={'sm'}>
 							Phone Number
 						</Text>
@@ -74,7 +89,12 @@ export default function OnboardingForm({}: Props) {
 							onChange={(e) => setPhoneNumber(parseInt(e.target.value))}
 						/>
 					</Flex>
-					<Flex justifyContent={'flex-start'} flexDir={'column'} w="full" gap={2}>
+					<Flex
+						justifyContent={'flex-start'}
+						flexDir={'column'}
+						w="full"
+						gap={2}
+					>
 						<Text color={'text_muted'} fontSize={'sm'}>
 							Gender
 						</Text>
@@ -97,18 +117,16 @@ export default function OnboardingForm({}: Props) {
 							background: 'none',
 							border: '1px solid #313E3D',
 						}}
-						prefix='₦ '
+						prefix="₦ "
 						id="input-example"
 						name="input-name"
 						placeholder="Please enter a number"
 						defaultValue={1000}
 						decimalsLimit={2}
-						onValueChange={(value) =>
-							setBudget(parseInt(value as string))
-						}
+						onValueChange={(value) => setBudget(parseInt(value as string))}
 					/>
 				</Flex>
-				<Button w="full" bg="brand" colorScheme="" type='submit'>
+				<Button w="full" bg="brand" colorScheme="" type="submit">
 					Finish
 				</Button>
 			</VStack>

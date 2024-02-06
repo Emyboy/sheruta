@@ -1,4 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import useCommon from '@/hooks/useApp'
 import { Box, Button, Flex, Text, VStack } from '@chakra-ui/react'
 import Image from 'next/image'
 import React, { useState } from 'react'
@@ -9,7 +12,29 @@ type Props = {
 }
 
 export default function ProfileConfig({ next }: Props) {
-	const [seeking, setSeeking] = useState<null | boolean>(null)
+	const { authState, setAuthState } = useAuthContext();
+	const { user } = authState;
+	const [seeking, setSeeking] = useState<null | boolean>(null);
+	const { CommonState: { loading }, setCommonState } = useCommon();
+
+	const handleUpdate = async () => {
+		try {
+			setCommonState({ loading: true })
+			let result = await FlatShareProfileService.update({
+				data: {
+					seeking
+				},
+				document_id: user?._id as string
+			});
+			
+			setAuthState({ flat_share_profile: result })
+			setCommonState({ loading: false })
+			next();
+		} catch (error) {
+			setCommonState({ loading: false })
+		}
+	}
+
 	return (
 		<VStack p={DEFAULT_PADDING} spacing={10}>
 			<VStack>
@@ -34,11 +59,12 @@ export default function ProfileConfig({ next }: Props) {
 				/>
 			</Flex>
 			<Button
+				isLoading={loading}
 				isDisabled={seeking === null}
 				bg="brand"
 				w="full"
 				colorScheme=""
-				onClick={next}
+				onClick={handleUpdate}
 			>
 				Continue
 			</Button>
