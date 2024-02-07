@@ -24,7 +24,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({
 }) => {
 	const [state, setState] = useState<AppState>({
 		app_loading: true,
-		show_left_nav: true,
+		show_left_nav: false,
 		show_login: false,
 		show_credit: false,
 	})

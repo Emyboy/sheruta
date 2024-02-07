@@ -143,6 +143,7 @@ const Drawer = () => {
 				</Flex>
 			</Box>
 			{show_left_nav && <Box
+				className='overlay'
 				onClick={() => setAppState({ show_left_nav: false })}
 				position={'fixed'}
 				top={0}
@@ -150,6 +151,7 @@ const Drawer = () => {
 				right={0}
 				bottom={0}
 				zIndex={80}
+				opacity={0.4}
 			/>}
 		</>
 	)
