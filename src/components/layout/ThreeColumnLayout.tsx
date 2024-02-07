@@ -1,10 +1,9 @@
 'use client'
 import { NAV_HEIGHT, SIDE_NAV_WIDTH } from '@/configs/theme'
-import { Box, Button, Flex, Hide, Link, useColorMode } from '@chakra-ui/react'
+import { Box, Flex, Hide, Link, useColorMode } from '@chakra-ui/react'
 import React from 'react'
 import MainBodyContent from './MainBodyContent'
 import NextLink from 'next/link'
-import AuthPopup from '../popups/AuthPopup'
 import RightColumnHeader from './RightColumnHeader'
 import MainContainer from './MainContainer'
 
