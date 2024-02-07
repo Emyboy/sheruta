@@ -132,6 +132,7 @@ export default function MessageDetails({}: Props) {
 							subHeading={
 								theGuest
 									? 'Last seen: ' +
+										// moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
 										moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
 									: null
 							}

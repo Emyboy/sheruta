@@ -1,4 +1,4 @@
-import { FieldValue } from 'firebase/firestore'
+import { FieldValue, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
 
 export const RegisterDTOSchema = z.object({
@@ -20,7 +20,7 @@ export type AuthUserDTO = {
 	providerId: 'google' | 'facebook'
 	avatar_url: string | null
 	account_status: 'active' | 'suspended'
-	last_seen: FieldValue
+	last_seen: Timestamp
 }
 
 export interface AuthUser {
@@ -30,5 +30,5 @@ export interface AuthUser {
 	email: string
 	providerId: string
 	avatar_url: string
-	last_seen: FieldValue
+	last_seen: Timestamp
 }

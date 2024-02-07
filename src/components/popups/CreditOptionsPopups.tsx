@@ -57,7 +57,7 @@ export const CreditOptions = () => {
 		firstname: authState.user?.first_name,
 		lastname: authState.user?.last_name,
 		label: 'Sheruta credit purchase',
-		phone: authState.user_info?.primary_phone_number,
+		phone: authState.user_info?.primary_phone_number as any,
 	}
 
 	const onSuccess = (reference: any) => {

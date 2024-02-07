@@ -30,7 +30,7 @@ interface AuthState {
 interface AuthContextProps {
 	authState: AuthState
 	setAuthState: (state: Partial<AuthState>) => void
-	getAuthDependencies: () => void;
+	getAuthDependencies: () => void
 	createUser: (user: RegisterDTO) => void
 	logout: () => void
 	loginWithGoogle: () => void
@@ -60,9 +60,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 			console.log('GETTING AUTH DEPENDENCIES')
 			let userData = await AuthService.getUser(state.user._id)
 			setAuthState({ ...userData })
-			return userData;
+			return userData
 		} else {
-			return Promise.reject("User not found")
+			return Promise.reject('User not found')
 		}
 	}
 

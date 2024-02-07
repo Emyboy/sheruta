@@ -15,9 +15,15 @@ export default function WelcomePopup() {
 		return null
 	}
 
-	const { first_name, last_name } = user;
+	const { first_name, last_name } = user
 
-	if (first_name && last_name && flat_share_profile.budget && flat_share_profile.seeking !== null && user_info.primary_phone_number) {
+	if (
+		first_name &&
+		last_name &&
+		flat_share_profile.budget &&
+		flat_share_profile.seeking !== null &&
+		user_info.primary_phone_number
+	) {
 		return null
 	}
 
@@ -27,7 +33,7 @@ export default function WelcomePopup() {
 
 	return (
 		<>
-			<Modal isOpen onClose={() => { }} size="lg">
+			<Modal isOpen onClose={() => {}} size="lg">
 				<ModalOverlay />
 				<ModalContent
 					shadow={'xl'}
@@ -41,9 +47,9 @@ export default function WelcomePopup() {
 					<ModalBody p={0}>
 						{
 							[
-								<WelcomeMessage next={next} />,
-								<ProfileConfig next={next} />,
-								<OnboardingForm next={next} />,
+								<WelcomeMessage next={next} key={Math.random()} />,
+								<ProfileConfig next={next} key={Math.random()} />,
+								<OnboardingForm next={next} key={Math.random()} />,
 							][step]
 						}
 					</ModalBody>

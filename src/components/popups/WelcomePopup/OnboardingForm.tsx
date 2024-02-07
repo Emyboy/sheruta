@@ -6,7 +6,6 @@ import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import UserService from '@/firebase/service/user/user.firebase'
 import useCommon from '@/hooks/useApp'
 import { Button, Flex, Input, Select, Text, VStack } from '@chakra-ui/react'
-import { serverTimestamp } from 'firebase/firestore'
 import React, { useState } from 'react'
 import CurrencyInput from 'react-currency-input-field'
 
@@ -14,7 +13,7 @@ type Props = {
 	next: () => void
 }
 
-export default function OnboardingForm({ }: Props) {
+export default function OnboardingForm({}: Props) {
 	const {
 		CommonState: { loading },
 		setCommonState,
@@ -32,7 +31,10 @@ export default function OnboardingForm({ }: Props) {
 		try {
 			e.preventDefault()
 			if (!budget || !gender) {
-				return showToast({ message: "Budget and gender are required", status: 'info' })
+				return showToast({
+					message: 'Budget and gender are required',
+					status: 'info',
+				})
 			}
 			setCommonState({ loading: true })
 			await UserService.update({
@@ -40,7 +42,6 @@ export default function OnboardingForm({ }: Props) {
 				data: {
 					first_name: firstName,
 					last_name: lastName,
-					last_seen: serverTimestamp(),
 				},
 			})
 			await FlatShareProfileService.update({
@@ -53,7 +54,7 @@ export default function OnboardingForm({ }: Props) {
 				document_id: user?._id as string,
 				data: {
 					primary_phone_number: String(phoneNumber),
-					gender
+					gender,
 				},
 			})
 			await getAuthDependencies()
@@ -186,7 +187,13 @@ export default function OnboardingForm({ }: Props) {
 						onValueChange={(value) => setBudget(parseInt(value as string))}
 					/>
 				</Flex>
-				<Button w="full" bg="brand" colorScheme="" type="submit" isLoading={loading}>
+				<Button
+					w="full"
+					bg="brand"
+					colorScheme=""
+					type="submit"
+					isLoading={loading}
+				>
 					Finish
 				</Button>
 			</VStack>

@@ -21,9 +21,8 @@ export default class UserService {
 		}
 	}
 
-	static async get(user_id:string) {
+	static async get(user_id: string) {
 		try {
-			
 		} catch (error) {
 			return Promise.reject(error)
 		}

@@ -1,12 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
-import {
-	Box,
-	Button,
-	Center,
-	Flex,
-	Spinner,
-	Text,
-} from '@chakra-ui/react'
+import { Box, Button, Center, Flex, Spinner, Text } from '@chakra-ui/react'
 import React from 'react'
 import { BiLogoFacebookCircle, BiLogoGoogle } from 'react-icons/bi'
 import MainModal from '../atoms/MainModal'

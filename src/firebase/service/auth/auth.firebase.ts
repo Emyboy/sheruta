@@ -41,7 +41,7 @@ export default class AuthService {
 				// phone_number: data.phoneNumber,
 				account_status: 'active',
 				avatar_url: data.photoURL,
-				last_seen: serverTimestamp(),
+				last_seen: serverTimestamp() as any,
 				providerId: data.providerId as 'google',
 			}
 
