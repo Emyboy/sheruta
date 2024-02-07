@@ -15,13 +15,19 @@ export default function WelcomePopup() {
 		return null
 	}
 
+	const { first_name, last_name } = user;
+
+	if (first_name && last_name && flat_share_profile.budget && flat_share_profile.seeking !== null && user_info.primary_phone_number) {
+		return null
+	}
+
 	const next = () => {
 		setStep(step + 1)
 	}
 
 	return (
 		<>
-			<Modal isOpen onClose={() => {}} size="lg">
+			<Modal isOpen onClose={() => { }} size="lg">
 				<ModalOverlay />
 				<ModalContent
 					shadow={'xl'}

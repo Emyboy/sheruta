@@ -20,4 +20,12 @@ export default class UserService {
 			return Promise.reject(error)
 		}
 	}
+
+	static async get(user_id:string) {
+		try {
+			
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
 }

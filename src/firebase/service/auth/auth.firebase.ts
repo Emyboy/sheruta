@@ -6,6 +6,7 @@ import UserInfoService from '../user-info/user-info.firebase'
 import UserSettingsService from '../user-settings/user-settings.firebase'
 import FlatShareProfileService from '../flat-share-profile/flat-share-profile.firebase'
 import UserSecretsService from '../user-secrets/user-secrets.firebase'
+import UserService from '../user/user.firebase'
 
 export default class AuthService {
 	static async loginUser(data: RegisterDTO): Promise<DocumentData | undefined> {

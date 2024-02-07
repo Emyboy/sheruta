@@ -20,7 +20,7 @@ export default function OnboardingForm({ }: Props) {
 		setCommonState,
 		showToast,
 	} = useCommon()
-	const { authState, getUser } = useAuthContext()
+	const { authState, getAuthDependencies } = useAuthContext()
 	const { user } = authState
 	const [firstName, setFirstName] = useState(user?.first_name)
 	const [lastName, setLastName] = useState(user?.last_name)
@@ -56,7 +56,7 @@ export default function OnboardingForm({ }: Props) {
 					gender
 				},
 			})
-			getUser()
+			await getAuthDependencies()
 			showToast({
 				message: 'Changes saved 🎉',
 				status: 'success',

@@ -30,7 +30,7 @@ interface AuthState {
 interface AuthContextProps {
 	authState: AuthState
 	setAuthState: (state: Partial<AuthState>) => void
-	getUser: () => AuthUser | null
+	getAuthDependencies: () => void;
 	createUser: (user: RegisterDTO) => void
 	logout: () => void
 	loginWithGoogle: () => void
@@ -55,8 +55,15 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 		auth_loading: false,
 	})
 
-	const getUser = (): AuthUser | null => {
-		return state.user
+	const getAuthDependencies = async (): Promise<any> => {
+		if (state.user) {
+			console.log('GETTING AUTH DEPENDENCIES')
+			let userData = await AuthService.getUser(state.user._id)
+			setAuthState({ ...userData })
+			return userData;
+		} else {
+			return Promise.reject("User not found")
+		}
 	}
 
 	const setAuthState = (newState: Partial<AuthState>): void => {
@@ -129,7 +136,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 			value={{
 				authState: state,
 				setAuthState,
-				getUser,
+				getAuthDependencies,
 				createUser,
 				logout,
 				loginWithGoogle,
