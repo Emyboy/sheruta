@@ -11,6 +11,7 @@ import { Flex } from '@chakra-ui/react'
 import React from 'react'
 // import HomeTabs from './HomeTabs';
 import dynamic from 'next/dynamic'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 
 const HomeTabs = dynamic(() => import('./HomeTabs'), { ssr: false })
 
@@ -44,6 +45,7 @@ export default function HomePage({}: Props) {
 						<MainRightNav />
 					</Flex>
 				</ThreeColumnLayout>
+				<MobileNavFooter />
 			</MainPageBody>
 		</>
 	)

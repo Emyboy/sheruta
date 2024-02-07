@@ -20,7 +20,7 @@ export default function OnboardingForm({}: Props) {
 		showToast,
 	} = useCommon()
 	const { authState, getAuthDependencies } = useAuthContext()
-	const { user } = authState
+	const { user, flat_share_profile } = authState
 	const [firstName, setFirstName] = useState(user?.first_name)
 	const [lastName, setLastName] = useState(user?.last_name)
 	const [budget, setBudget] = useState<number | null>(null)
@@ -32,7 +32,7 @@ export default function OnboardingForm({}: Props) {
 			e.preventDefault()
 			if (!budget || !gender) {
 				return showToast({
-					message: 'Budget and gender are required',
+					message: `${flat_share_profile?.seeking ? 'Budget' : 'Rent'} and gender are required`,
 					status: 'info',
 				})
 			}
@@ -167,7 +167,7 @@ export default function OnboardingForm({}: Props) {
 				</Flex>
 				<Flex justifyContent={'flex-start'} flexDir={'column'} w="full" gap={2}>
 					<Text color={'text_muted'} fontSize={'sm'}>
-						Budget
+						{flat_share_profile?.seeking ? 'Budget' : 'Rent'}
 					</Text>
 					<CurrencyInput
 						style={{
@@ -179,9 +179,9 @@ export default function OnboardingForm({}: Props) {
 							border: '1px solid #313E3D',
 						}}
 						prefix="₦ "
-						id="input-example"
+						id="input-name"
 						name="input-name"
-						placeholder="Please enter a budget"
+						placeholder="Please enter a figure"
 						defaultValue={budget as number}
 						decimalsLimit={2}
 						onValueChange={(value) => setBudget(parseInt(value as string))}

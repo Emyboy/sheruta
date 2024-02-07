@@ -18,14 +18,14 @@ import MobileHeader from './MobileHeader'
 
 type Props = {}
 
-export default function MainHeader({ }: Props) {
+export default function MainHeader({}: Props) {
 	const pathname = usePathname()
 	const { toggleColorMode } = useColorMode()
 
 	return (
 		<>
 			<MobileHeader />
-			<Hide below='md'>
+			<Hide below="lg">
 				<Flex
 					justifyContent={'center'}
 					h="full"
@@ -42,7 +42,11 @@ export default function MainHeader({ }: Props) {
 						px={DEFAULT_PADDING}
 					>
 						<Link href={`/`}>
-							<MainIconBtn label="Home" Icon={BiHome} active={pathname === '/'} />
+							<MainIconBtn
+								label="Home"
+								Icon={BiHome}
+								active={pathname === '/'}
+							/>
 						</Link>
 						<Link href={`/request`}>
 							<MainIconBtn
