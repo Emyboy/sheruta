@@ -1,7 +1,12 @@
 'use client'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import UserService from '@/firebase/service/user/user.firebase'
+import useCommon from '@/hooks/useApp'
 import { Button, Flex, Input, Select, Text, VStack } from '@chakra-ui/react'
+import { serverTimestamp } from 'firebase/firestore'
 import React, { useState } from 'react'
 import CurrencyInput from 'react-currency-input-field'
 
@@ -9,16 +14,65 @@ type Props = {
 	next: () => void
 }
 
-export default function OnboardingForm({}: Props) {
-	const { authState } = useAuthContext()
+export default function OnboardingForm({ }: Props) {
+	const {
+		CommonState: { loading },
+		setCommonState,
+		showToast,
+	} = useCommon()
+	const { authState, getUser } = useAuthContext()
 	const { user } = authState
 	const [firstName, setFirstName] = useState(user?.first_name)
 	const [lastName, setLastName] = useState(user?.last_name)
-	const [budget, setBudget] = useState(0)
-	const [phoneNumber, setPhoneNumber] = useState<number | null>(null)
+	const [budget, setBudget] = useState<number | null>(null)
+	const [phoneNumber, setPhoneNumber] = useState<string | null>(null)
+	const [gender, setGender] = useState<any>('')
+
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+		try {
+			e.preventDefault()
+			if (!budget || !gender) {
+				return showToast({ message: "Budget and gender are required", status: 'info' })
+			}
+			setCommonState({ loading: true })
+			await UserService.update({
+				document_id: user?._id as string,
+				data: {
+					first_name: firstName,
+					last_name: lastName,
+					last_seen: serverTimestamp(),
+				},
+			})
+			await FlatShareProfileService.update({
+				document_id: user?._id as string,
+				data: {
+					budget,
+				},
+			})
+			await UserInfoService.update({
+				document_id: user?._id as string,
+				data: {
+					primary_phone_number: String(phoneNumber),
+					gender
+				},
+			})
+			getUser()
+			showToast({
+				message: 'Changes saved 🎉',
+				status: 'success',
+			})
+			setCommonState({ loading: false })
+		} catch (error) {
+			setCommonState({ loading: false })
+			showToast({
+				message: 'Error, please try again',
+				status: 'error',
+			})
+		}
+	}
 
 	return (
-		<form>
+		<form onSubmit={handleSubmit}>
 			<VStack
 				justifyContent={'flex-start'}
 				p={DEFAULT_PADDING}
@@ -44,6 +98,7 @@ export default function OnboardingForm({}: Props) {
 							First Name
 						</Text>
 						<Input
+							onChange={(e) => setFirstName(e.target.value)}
 							required
 							value={firstName}
 							borderColor={'border_color'}
@@ -61,6 +116,7 @@ export default function OnboardingForm({}: Props) {
 							Last Name
 						</Text>
 						<Input
+							onChange={(e) => setLastName(e.target.value)}
 							required
 							value={lastName}
 							borderColor={'border_color'}
@@ -86,7 +142,7 @@ export default function OnboardingForm({}: Props) {
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Ex. +234 12345678"
 							type="number"
-							onChange={(e) => setPhoneNumber(parseInt(e.target.value))}
+							onChange={(e) => setPhoneNumber(e.target.value)}
 						/>
 					</Flex>
 					<Flex
@@ -98,9 +154,13 @@ export default function OnboardingForm({}: Props) {
 						<Text color={'text_muted'} fontSize={'sm'}>
 							Gender
 						</Text>
-						<Select placeholder="Select one" bg="dark">
-							<option value="option2">Male</option>
-							<option value="option3">Female</option>
+						<Select
+							placeholder="Select one"
+							bg="dark"
+							onChange={(e) => setGender(e.target.value)}
+						>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
 						</Select>
 					</Flex>
 				</Flex>
@@ -120,13 +180,13 @@ export default function OnboardingForm({}: Props) {
 						prefix="₦ "
 						id="input-example"
 						name="input-name"
-						placeholder="Please enter a number"
-						defaultValue={1000}
+						placeholder="Please enter a budget"
+						defaultValue={budget as number}
 						decimalsLimit={2}
 						onValueChange={(value) => setBudget(parseInt(value as string))}
 					/>
 				</Flex>
-				<Button w="full" bg="brand" colorScheme="" type="submit">
+				<Button w="full" bg="brand" colorScheme="" type="submit" isLoading={loading}>
 					Finish
 				</Button>
 			</VStack>

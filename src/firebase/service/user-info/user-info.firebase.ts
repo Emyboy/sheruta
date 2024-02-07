@@ -1,6 +1,6 @@
 import { DocumentData, doc, getDoc } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { UserInfoDTO } from './user-info.types'
+import { UserInfo, UserInfoDTO } from './user-info.types'
 import { db } from '@/firebase'
 
 export default class UserInfoService {
@@ -37,6 +37,25 @@ export default class UserInfoService {
 		try {
 			let result = await getDoc(doc(db, DBCollectionName.userInfos, user_id))
 			return result.data()
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async update({
+		data,
+		document_id,
+	}: {
+		document_id: string
+		data: Partial<UserInfo>
+	}): Promise<UserInfo> {
+		try {
+			let result = await SherutaDB.update({
+				collection_name: DBCollectionName.userInfos,
+				data,
+				document_id,
+			})
+			return result as UserInfo
 		} catch (error) {
 			return Promise.reject(error)
 		}

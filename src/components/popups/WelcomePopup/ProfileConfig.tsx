@@ -12,26 +12,34 @@ type Props = {
 }
 
 export default function ProfileConfig({ next }: Props) {
-	const { authState, setAuthState } = useAuthContext();
-	const { user } = authState;
-	const [seeking, setSeeking] = useState<null | boolean>(null);
-	const { CommonState: { loading }, setCommonState } = useCommon();
+	const { authState, setAuthState } = useAuthContext()
+	const { user } = authState
+	const [seeking, setSeeking] = useState<null | boolean>(null)
+	const {
+		CommonState: { loading },
+		setCommonState,
+		showToast,
+	} = useCommon()
 
 	const handleUpdate = async () => {
 		try {
 			setCommonState({ loading: true })
 			let result = await FlatShareProfileService.update({
 				data: {
-					seeking
+					seeking,
 				},
-				document_id: user?._id as string
-			});
-			
+				document_id: user?._id as string,
+			})
+
 			setAuthState({ flat_share_profile: result })
 			setCommonState({ loading: false })
-			next();
+			next()
 		} catch (error) {
 			setCommonState({ loading: false })
+			showToast({
+				message: 'Error, please try again',
+				status: 'error',
+			})
 		}
 	}
 
@@ -42,7 +50,7 @@ export default function ProfileConfig({ next }: Props) {
 					What are you looking for?
 				</Text>
 			</VStack>
-			<Flex w="full" justifyContent={'space-around'} gap={20}>
+			<Flex w="full" justifyContent={'space-around'} gap={10}>
 				<EachConfig
 					subHeading={`Choose if you're an apartment or space provider.`}
 					onClick={() => setSeeking(false)}

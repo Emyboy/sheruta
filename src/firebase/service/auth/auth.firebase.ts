@@ -40,7 +40,7 @@ export default class AuthService {
 				// phone_number: data.phoneNumber,
 				account_status: 'active',
 				avatar_url: data.photoURL,
-				last_seen: new Date().toISOString(),
+				last_seen: serverTimestamp(),
 				providerId: data.providerId as 'google',
 			}
 

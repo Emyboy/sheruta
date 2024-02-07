@@ -4,10 +4,8 @@ import {
 	Button,
 	Center,
 	Flex,
-	ModalProps,
 	Spinner,
 	Text,
-	useToast,
 } from '@chakra-ui/react'
 import React from 'react'
 import { BiLogoFacebookCircle, BiLogoGoogle } from 'react-icons/bi'
