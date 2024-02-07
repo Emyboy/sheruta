@@ -1,5 +1,6 @@
 'use client'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
+import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
 import { Box, Divider, Flex, Hide, Text, Icon } from '@chakra-ui/react'
 import React from 'react'
@@ -13,14 +14,13 @@ import {
 
 type Props = {}
 
-export default function MainLeftNav({}: Props) {
+export default function MainLeftNav({ }: Props) {
 	const { logout } = useAuthContext()
 	return (
 		<Flex
 			flexDirection={'column'}
 			w={{
 				lg: `calc(100% - ${DEFAULT_PADDING})`,
-				md: '60px',
 			}}
 			minH={`calc(100vh - ${NAV_HEIGHT})`}
 			gap={`calc(${DEFAULT_PADDING})`}
@@ -56,23 +56,21 @@ const EachNav = ({
 	label: string
 	onClick?: () => void
 }) => {
+	const { setAppState } = useAppContext()
 	return (
 		<Flex
-			onClick={onClick}
+			onClick={() => {
+				onClick && onClick();
+				setAppState({ show_left_nav: false })
+			}}
 			alignItems={'center'}
 			justifyContent={{
 				md: 'center',
 				lg: 'flex-start',
 			}}
 			gap={DEFAULT_PADDING}
-			p={{
-				lg: DEFAULT_PADDING,
-				md: `calc(${DEFAULT_PADDING} - 10px)`,
-			}}
-			h={{
-				md: '60px',
-				lg: 'auto',
-			}}
+			p={DEFAULT_PADDING}
+			h={'60px'}
 			rounded={'md'}
 			color="dark_light"
 			_hover={{
@@ -89,9 +87,7 @@ const EachNav = ({
 			}}
 		>
 			<Icon size={25} />
-			<Hide below="lg">
-				<Text fontSize={'lg'}>{label}</Text>
-			</Hide>
+			<Text fontSize={'lg'}>{label}</Text>
 		</Flex>
 	)
 }
