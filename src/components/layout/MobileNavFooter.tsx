@@ -14,7 +14,7 @@ import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 
 type Props = {}
 
-export default function MobileNavFooter({ }: Props) {
+export default function MobileNavFooter({}: Props) {
 	const pathname = usePathname()
 	return (
 		<Hide above="lg">
