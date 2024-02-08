@@ -43,6 +43,7 @@ export default function MobileNavFooter({}: Props) {
 						label="Notifications"
 						Icon={BiBell}
 						active={pathname === '/notifications'}
+						hasNotification
 					/>
 				</Link>
 				<Link href={`/request`}>
@@ -57,6 +58,7 @@ export default function MobileNavFooter({}: Props) {
 						label="Messages"
 						Icon={BiMessageRoundedDetail}
 						active={pathname.includes('messages')}
+						hasNotification
 					/>
 				</Link>
 				<Link href={`/search`}>

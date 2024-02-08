@@ -1,7 +1,7 @@
 'use client'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Flex, Text } from '@chakra-ui/react'
+import { Box, Flex, Text } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
@@ -15,9 +15,10 @@ import {
 	BiSolidMessageSquareDetail,
 	BiSolidMessageSquareEdit,
 } from 'react-icons/bi'
-import { DEFAULT_PADDING } from '@/configs/theme'
+import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import MainHeader from '@/components/layout/MainHeader'
 import LoginCard from '@/components/atoms/LoginCard'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 
 type Props = {}
 
@@ -50,20 +51,24 @@ export default function MessagesPage({}: Props) {
 							new Array(9).fill(null).map((_: any) => {
 								return <EachConversationLoading key={Math.random()} />
 							})}
-						{conversations &&
-							conversations.map((val: ConversationData, index: any) => {
-								return (
-									<Link
-										href={`/messages/${val.participants.find((x) => x._id !== user?._id)?._id}`}
-										key={Math.random()}
-									>
-										<EachConversation data={val as any} />
-										{/* <Divider bg='border_color' _dark={{
+						{
+							<Box pb={NAV_HEIGHT}>
+								{conversations &&
+									conversations.map((val: ConversationData, index: any) => {
+										return (
+											<Link
+												href={`/messages/${val.participants.find((x) => x._id !== user?._id)?._id}`}
+												key={Math.random()}
+											>
+												<EachConversation data={val as any} />
+												{/* <Divider bg='border_color' _dark={{
 									bg: 'dark_light'
 								}} /> */}
-									</Link>
-								)
-							})}
+											</Link>
+										)
+									})}
+							</Box>
+						}
 						{conversations && conversations.length === 0 ? (
 							<Flex
 								color="dark_light"
@@ -80,6 +85,7 @@ export default function MessagesPage({}: Props) {
 					</>
 				</ThreeColumnLayout>
 			</MainContainer>
+			<MobileNavFooter />
 		</Flex>
 	)
 }

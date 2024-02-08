@@ -14,7 +14,7 @@ import {
 
 type Props = {}
 
-export default function MainLeftNav({ }: Props) {
+export default function MainLeftNav({}: Props) {
 	const { logout } = useAuthContext()
 	return (
 		<Flex
@@ -60,7 +60,7 @@ const EachNav = ({
 	return (
 		<Flex
 			onClick={() => {
-				onClick && onClick();
+				onClick && onClick()
 				setAppState({ show_left_nav: false })
 			}}
 			alignItems={'center'}

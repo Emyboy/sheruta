@@ -23,7 +23,7 @@ import Link from 'next/link'
 
 type Props = {}
 
-export default function MobileHeader({ }: Props) {
+export default function MobileHeader({}: Props) {
 	const { colorMode } = useColorMode()
 	const { authState, loginWithGoogle } = useAuthContext()
 	const { user, flat_share_profile } = authState
@@ -114,7 +114,7 @@ export default function MobileHeader({ }: Props) {
 
 const Drawer = () => {
 	const { appState, setAppState } = useAppContext()
-	const { show_left_nav } = appState;
+	const { show_left_nav } = appState
 
 	return (
 		<>
@@ -135,35 +135,37 @@ const Drawer = () => {
 					borderColor: 'dark_light',
 				}}
 			>
-				<Flex flexDirection={'column'} w="full" >
+				<Flex flexDirection={'column'} w="full">
 					<NavProfile />
 					<Box px={DEFAULT_PADDING}>
 						<MainLeftNav />
 					</Box>
 				</Flex>
 			</Box>
-			{show_left_nav && <Box
-				className='overlay'
-				onClick={() => setAppState({ show_left_nav: false })}
-				position={'fixed'}
-				top={0}
-				left={0}
-				right={0}
-				bottom={0}
-				zIndex={80}
-				opacity={0.4}
-			/>}
+			{show_left_nav && (
+				<Box
+					className="overlay"
+					onClick={() => setAppState({ show_left_nav: false })}
+					position={'fixed'}
+					top={0}
+					left={0}
+					right={0}
+					bottom={0}
+					zIndex={80}
+					opacity={0.4}
+				/>
+			)}
 		</>
 	)
 }
 
 const NavProfile = () => {
 	const { authState } = useAuthContext()
-	const { setAppState } = useAppContext();
+	const { setAppState } = useAppContext()
 
 	const { user } = authState
 	if (!user) {
-		return null;
+		return null
 	}
 	return (
 		<Link href={`/user/${user._id}`}>
@@ -185,7 +187,13 @@ const NavProfile = () => {
 					<Text textTransform={'capitalize'} isTruncated>
 						{user?.first_name} {user?.last_name[0]}
 					</Text>
-					<Text display={'flex'} fontSize={'sm'} isTruncated gap={2} alignItems={'center'}>
+					<Text
+						display={'flex'}
+						fontSize={'sm'}
+						isTruncated
+						gap={2}
+						alignItems={'center'}
+					>
 						{user?.email}
 					</Text>
 				</Flex>

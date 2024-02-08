@@ -1,19 +1,27 @@
 'use client'
 import React from 'react'
 import MainTooltip from './MainTooltip'
-import { Button } from '@chakra-ui/react'
+import { Box, Button } from '@chakra-ui/react'
 
 type Props = {
 	Icon: any
 	active?: boolean
 	label: string
 	onClick?: () => void
+	hasNotification?: boolean
 }
 
-export default function MainIconBtn({ Icon, active, label, onClick }: Props) {
+export default function MainIconBtn({
+	Icon,
+	active,
+	label,
+	onClick,
+	hasNotification,
+}: Props) {
 	return (
 		<MainTooltip label={label}>
 			<Button
+				position={'relative'}
 				onClick={onClick ? onClick : () => {}}
 				p="0px"
 				h="45px"
@@ -37,6 +45,16 @@ export default function MainIconBtn({ Icon, active, label, onClick }: Props) {
 					},
 				}}
 			>
+				{hasNotification && (
+					<Box
+						p={'6px'}
+						rounded={'full'}
+						bg="red"
+						position={'absolute'}
+						right={-1}
+						top={-1}
+					/>
+				)}
 				<Icon size={25} />
 			</Button>
 		</MainTooltip>
