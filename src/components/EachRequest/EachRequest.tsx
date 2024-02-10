@@ -24,6 +24,10 @@ type Props = {}
 export default function EachRequest({}: Props) {
 	return (
 		<Box
+			fontSize={{
+				md: 'md',
+				base: 'sm'
+			}}
 			borderBottom={'1px'}
 			borderColor={'border_color'}
 			py={DEFAULT_PADDING}
@@ -37,7 +41,10 @@ export default function EachRequest({}: Props) {
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
-					<Avatar src="https://bit.ly/prosper-baba">
+					<Avatar src="https://bit.ly/prosper-baba" size={{
+						md: 'md',
+						base: 'md'
+					}}>
 						<AvatarBadge boxSize="20px" bg="green.500" />
 					</Avatar>
 					<Flex
@@ -59,8 +66,12 @@ export default function EachRequest({}: Props) {
 									},
 								}}
 								bg="none"
+								fontSize={{
+									md: 'xl',
+									base: 'lg'
+								}}
 							>
-								<BiDotsHorizontalRounded size={25} />
+								<BiDotsHorizontalRounded />
 							</Button>
 						</Flex>
 						<Text color="text_muted" fontSize={'sm'}>
@@ -129,8 +140,12 @@ export default function EachRequest({}: Props) {
 								_dark={{
 									color: 'dark_lighter',
 								}}
+								fontSize={{
+									md: 'xl',
+									base: 'lg'
+								}}
 							>
-								<BiPhone size={25} /> 35
+								<BiPhone /> 35
 							</Button>
 						</MainTooltip>
 						<MainTooltip label="Ask questions" placement="top">
@@ -151,8 +166,12 @@ export default function EachRequest({}: Props) {
 								_dark={{
 									color: 'dark_lighter',
 								}}
+								fontSize={{
+									md: 'xl',
+									base: 'lg'
+								}}
 							>
-								<BiMessageRoundedDetail size={25} /> 35
+								<BiMessageRoundedDetail /> 35
 							</Button>
 						</MainTooltip>
 						<MainTooltip label="Engagements" placement="top">
@@ -173,8 +192,12 @@ export default function EachRequest({}: Props) {
 								_dark={{
 									color: 'dark_lighter',
 								}}
+								fontSize={{
+									md: 'xl',
+									base: 'lg'
+								}}
 							>
-								<BiBarChart size={25} /> 135
+								<BiBarChart /> 135
 							</Button>
 						</MainTooltip>
 					</Flex>

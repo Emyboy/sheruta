@@ -7,6 +7,7 @@ import React from 'react'
 import {
 	BiCalendarAlt,
 	BiLogInCircle,
+	BiMessageSquareDetail,
 	BiRocket,
 	BiWallet,
 	BiWrench,
@@ -30,7 +31,7 @@ export default function MainLeftNav({}: Props) {
 				bse: 'center',
 			}}
 		>
-			<EachNav Icon={BiRocket} label="Get Started" />
+			<EachNav Icon={BiMessageSquareDetail} label="Chat rooms" />
 			<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			<EachNav Icon={BiWallet} label="Wallet" />
 			<EachNav Icon={BiWrench} label="Settings" />

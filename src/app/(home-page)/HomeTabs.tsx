@@ -1,11 +1,16 @@
 'use client'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
+import { StateData } from '@/firebase/service/options/states/states.types'
 import useDrag from '@/hooks/useDrag'
 import { Box } from '@chakra-ui/react'
 import React from 'react'
 import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu'
 
-type Props = {}
+type Props = {
+	locations: LocationKeywordData[]
+	states: StateData[]
+}
 type scrollVisibilityApiType = React.ContextType<typeof VisibilityContext>
 
 const elemPrefix = 'test'
@@ -15,7 +20,7 @@ const getItems = () =>
 		.fill(0)
 		.map((_, ind) => ({ id: getId(ind) }))
 
-export default function HomeTabs({}: Props) {
+export default function HomeTabs({ locations, states }: Props) {
 	const [items] = React.useState(getItems)
 
 	const { dragStart, dragStop, dragMove, dragging } = useDrag()

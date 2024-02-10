@@ -1,7 +1,11 @@
 import {
+	collection,
 	deleteDoc,
 	doc,
 	getDoc,
+	getDocs,
+	limit,
+	query,
 	serverTimestamp,
 	setDoc,
 	updateDoc,
@@ -46,6 +50,23 @@ export default class SherutaDB {
 		const docRef = doc(db, data.collection_name, data.document_id)
 		const docSnap = await getDoc(docRef)
 		return docSnap.data()
+	}
+
+	static async getAll({
+		collection_name,
+		_limit = 20,
+	}: {
+		collection_name: string
+		_limit: number
+	}): Promise<any> {
+		const collectionRef = collection(db, collection_name)
+		//@ts-ignore
+		const querySnapshot = await getDocs(collectionRef, limit(_limit))
+		const documents = querySnapshot.docs.map((doc) => ({
+			id: doc.id,
+			...doc.data(),
+		}))
+		return documents
 	}
 
 	static async get({
@@ -93,4 +114,12 @@ export const DBCollectionName = {
 
 	messages: 'messages',
 	conversations: 'conversations',
+
+	// options
+	locationKeyWords: 'location_keywords',
+	states: 'states',
+	services: 'services',
+	habits: 'habits',
+	interests: 'interests',
+	categories: 'categories',
 }

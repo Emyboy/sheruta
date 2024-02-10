@@ -28,7 +28,7 @@ export default function MessageInput({ onSubmit }: Props) {
 			px={DEFAULT_PADDING}
 		>
 			<Textarea
-				as='textarea'
+				as="textarea"
 				resize={'none'}
 				border={'0px'}
 				outline={'none'}
