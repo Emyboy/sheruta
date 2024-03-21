@@ -82,6 +82,7 @@ export default class AuthService {
 		}
 	}
 
+	//todo: DELETE or REPLACE THIS
 	static async getUser(user_id: string): Promise<any | null> {
 		try {
 			const docRef = doc(db, DBCollectionName.users, user_id)

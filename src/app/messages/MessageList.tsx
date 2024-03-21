@@ -1,5 +1,5 @@
 'use client'
-import { Flex } from '@chakra-ui/react'
+import { Flex, Text } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
@@ -17,6 +17,7 @@ import { useParams } from 'next/navigation'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
 import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 import EachMessageBobble from './components/EachMessageBobble/EachMessageBobble'
+import { HiOutlineInformationCircle } from 'react-icons/hi2'
 
 type Props = {
 	isLoading?: boolean
@@ -70,6 +71,29 @@ export default function MessageList({ isLoading, conversation }: Props) {
 				messageList.map((message: DirectMessageData, index) => {
 					return <EachMessageBobble key={Math.random()} message={message} />
 				})}
+			{messageList && messageList.length > 0 ? (
+				<Flex justifyContent={'center'}>
+					<Flex
+						w={'70%'}
+						alignItems={'center'}
+						gap={3}
+						justifyContent={'center'}
+						border={'1px'}
+						rounded={'md'}
+						py="5"
+						borderColor={'border_color'}
+						_dark={{
+							borderColor: 'dark_light',
+							color: 'text_muted',
+						}}
+						mt="5"
+						fontSize={'sm'}
+					>
+						<HiOutlineInformationCircle size={17} />
+						<Text>Tap on any message to see more options</Text>
+					</Flex>
+				</Flex>
+			) : null}
 		</Flex>
 	)
 }

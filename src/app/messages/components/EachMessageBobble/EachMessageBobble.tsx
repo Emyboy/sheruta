@@ -41,70 +41,64 @@ export default function EachMessageBobble({ message }: Props) {
 
 	return (
 		<>
-			<Flex
-				justifyContent={'space-between'}
-				flexDir={isUserOwn ? 'row' : 'row-reverse'}
-				rounded={'md'}
-				width={'full'}
-			>
-				<div></div>
-
-				<Flex
-					_hover={{
-						shadow: 'xl',
-					}}
-					cursor={'pointer'}
-					maxW={'80%'}
-					border={isUserOwn ? '0px' : '1px'}
-					borderColor={'border_color'}
-					_dark={{
-						borderColor: 'dark_light',
-					}}
-					rounded={'lg'}
-					p={DEFAULT_PADDING}
-					bg={isUserOwn ? 'dark_light' : 'dark'}
-					flexDirection={'column'}
-					gap={DEFAULT_PADDING}
+			<Menu>
+				<MenuButton
+					cursor={'auto'}
+					// as={Button}
+					// size={'xs'}
+					// bg="none"
+					// color="dark_lighter"
 				>
-					<Text
-						textAlign={message.message_text.length > 20 ? 'justify' : 'end'}
+					<Flex
+						justifyContent={'space-between'}
+						flexDir={isUserOwn ? 'row' : 'row-reverse'}
+						rounded={'md'}
+						width={'full'}
 					>
-						{message.message_text}
-					</Text>
-					<Flex justifyContent={'flex-end'} color={'text_muted'}>
-						<Menu>
-							<MenuButton
-								as={Button}
-								size={'xs'}
-								bg="none"
-								color="dark_lighter"
+						<div></div>
+
+						<Flex
+							_hover={{
+								shadow: 'xl',
+							}}
+							cursor={'pointer'}
+							maxW={'80%'}
+							border={isUserOwn ? '0px' : '1px'}
+							borderColor={'border_color'}
+							_dark={{
+								borderColor: 'dark_light',
+							}}
+							rounded={'xl'}
+							p={DEFAULT_PADDING}
+							bg={isUserOwn ? 'dark_light' : 'dark'}
+							flexDirection={'column'}
+							// gap={DEFAULT_PADDING}
+						>
+							<Text
+								textAlign={message.message_text.length > 20 ? 'justify' : 'end'}
+								fontSize={'sm'}
 							>
-								<BiDotsVertical />
-							</MenuButton>
-							<MenuList bg="dark" zIndex={200}>
-								<CopyToClipboard
-									text={message.message_text}
-									onCopy={handleCopy}
-								>
-									<MenuItem icon={<BiCopy size={20} />}>Copy</MenuItem>
-								</CopyToClipboard>
-								{/* <MenuItem icon={<BiFlag size={20} />}>Report</MenuItem> */}
-								{isUserOwn && (
-									<>
-										<Divider />
-										<MenuItem
-											icon={<BiTrash size={20} />}
-											onClick={handleDelete}
-										>
-											Delete
-										</MenuItem>
-									</>
-								)}
-							</MenuList>
-						</Menu>
+								{message.message_text}
+							</Text>
+							<Flex justifyContent={'flex-end'} color={'text_muted'}></Flex>
+						</Flex>
 					</Flex>
-				</Flex>
-			</Flex>
+				</MenuButton>
+				<MenuList bg="dark" zIndex={200}>
+					<CopyToClipboard text={message.message_text} onCopy={handleCopy}>
+						<MenuItem icon={<BiCopy size={20} />}>Copy</MenuItem>
+					</CopyToClipboard>
+					{/* <MenuItem icon={<BiFlag size={20} />}>Report</MenuItem> */}
+					{isUserOwn && (
+						<>
+							<Divider />
+							<MenuItem icon={<BiTrash size={20} />} onClick={handleDelete}>
+								Delete
+							</MenuItem>
+						</>
+					)}
+				</MenuList>
+			</Menu>
 		</>
 	)
 }

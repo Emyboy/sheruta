@@ -26,7 +26,7 @@ export default function EachRequest({}: Props) {
 		<Box
 			fontSize={{
 				md: 'md',
-				base: 'sm'
+				base: 'sm',
 			}}
 			borderBottom={'1px'}
 			borderColor={'border_color'}
@@ -41,10 +41,13 @@ export default function EachRequest({}: Props) {
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
-					<Avatar src="https://bit.ly/prosper-baba" size={{
-						md: 'md',
-						base: 'md'
-					}}>
+					<Avatar
+						src="https://bit.ly/prosper-baba"
+						size={{
+							md: 'md',
+							base: 'md',
+						}}
+					>
 						<AvatarBadge boxSize="20px" bg="green.500" />
 					</Avatar>
 					<Flex
@@ -68,7 +71,7 @@ export default function EachRequest({}: Props) {
 								bg="none"
 								fontSize={{
 									md: 'xl',
-									base: 'lg'
+									base: 'lg',
 								}}
 							>
 								<BiDotsHorizontalRounded />
@@ -142,7 +145,7 @@ export default function EachRequest({}: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg'
+									base: 'lg',
 								}}
 							>
 								<BiPhone /> 35
@@ -168,7 +171,7 @@ export default function EachRequest({}: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg'
+									base: 'lg',
 								}}
 							>
 								<BiMessageRoundedDetail /> 35
@@ -194,7 +197,7 @@ export default function EachRequest({}: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg'
+									base: 'lg',
 								}}
 							>
 								<BiBarChart /> 135

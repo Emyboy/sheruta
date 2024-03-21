@@ -4,6 +4,7 @@ import { LocationKeywordData } from '@/firebase/service/options/location-keyword
 import { StateData } from '@/firebase/service/options/states/states.types'
 import useDrag from '@/hooks/useDrag'
 import { Box } from '@chakra-ui/react'
+import Link from 'next/link'
 import React from 'react'
 import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu'
 
@@ -15,31 +16,28 @@ type scrollVisibilityApiType = React.ContextType<typeof VisibilityContext>
 
 const elemPrefix = 'test'
 const getId = (index: number) => `${elemPrefix}${index}`
-const getItems = () =>
-	Array(20)
-		.fill(0)
-		.map((_, ind) => ({ id: getId(ind) }))
 
 export default function HomeTabs({ locations, states }: Props) {
+	const getItems = () =>
+		locations.map((location, index) => ({
+			id: getId(index),
+			name: location.name,
+			slug: location.slug,
+		}))
+
+
 	const [items] = React.useState(getItems)
 
 	const { dragStart, dragStop, dragMove, dragging } = useDrag()
 	const handleDrag =
 		({ scrollContainer }: scrollVisibilityApiType) =>
-		(ev: React.MouseEvent) =>
-			dragMove(ev, (posDiff) => {
-				if (scrollContainer.current) {
-					scrollContainer.current.scrollLeft += posDiff
-				}
-			})
+			(ev: React.MouseEvent) =>
+				dragMove(ev, (posDiff) => {
+					if (scrollContainer.current) {
+						scrollContainer.current.scrollLeft += posDiff
+					}
+				})
 
-	const [selected, setSelected] = React.useState<string>('')
-	// const handleItemClick = (itemId: string) => () => {
-	// 	if (dragging) {
-	// 		return false
-	// 	}
-	// 	setSelected(selected !== itemId ? itemId : '')
-	// }
 
 	return (
 		<Box
@@ -57,9 +55,9 @@ export default function HomeTabs({ locations, states }: Props) {
 				onMouseUp={() => dragStop}
 				onMouseMove={handleDrag}
 			>
-				{items.map(({ id }) => (
-					<Box ml={DEFAULT_PADDING} key={Math.random()}>
-						<EachTab label={id} />
+				{items.map(({ id, name, slug }) => (
+					<Box ml={DEFAULT_PADDING} key={id}>
+						<EachTab label={name} slug={slug} />
 					</Box>
 				))}
 			</ScrollMenu>
@@ -82,21 +80,23 @@ function onWheel(apiObj: scrollVisibilityApiType, ev: React.WheelEvent): void {
 	}
 }
 
-const EachTab = ({ label }: { label: string }) => {
+const EachTab = ({ label, slug }: { label: string; slug: string; }) => {
 	return (
-		<Box
-			userSelect={'none'}
-			rounded={'xl'}
-			border={'1px'}
-			borderColor={'border_color'}
-			_dark={{
-				borderColor: 'dark_light',
-			}}
-			p={DEFAULT_PADDING}
-			w="100%"
-		>
-			{label}
-			{/* <Text>{label}</Text> */}
-		</Box>
+		<Link href={`/search?state=${slug}`}>
+			<Box
+				userSelect={'none'}
+				rounded={'xl'}
+				border={'1px'}
+				borderColor={'border_color'}
+				_dark={{
+					borderColor: 'dark_light',
+				}}
+				p={DEFAULT_PADDING}
+				w="100%"
+			>
+				{label}
+				{/* <Text>{label}</Text> */}
+			</Box>
+		</Link>
 	)
 }

@@ -12,13 +12,12 @@ import React from 'react'
 // import HomeTabs from './HomeTabs';
 import dynamic from 'next/dynamic'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
-import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 import { StateData } from '@/firebase/service/options/states/states.types'
 
 const HomeTabs = dynamic(() => import('./HomeTabs'), { ssr: false })
 
 type Props = {
-	locations: LocationKeywordData[]
+	locations: string;
 	states: StateData[]
 }
 
@@ -31,7 +30,7 @@ export default function HomePage({ locations, states }: Props) {
 						<MainLeftNav />
 					</Flex>
 					<Flex flexDir={'column'}>
-						<HomeTabs locations={locations} states={states} />
+						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
 						<Flex flexDirection={'column'} gap={0}>
 							{new Array(9).fill(null).map((_, index: number) => {

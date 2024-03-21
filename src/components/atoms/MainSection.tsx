@@ -20,16 +20,18 @@ export default function MainSection(props: Props) {
 			gap={DEFAULT_PADDING}
 		>
 			{heading && (
-				<Text
-					fontWeight={'bold'}
-					fontSize={'xl'}
-					color="dark"
-					_dark={{
-						color: 'text_muted',
-					}}
-				>
-					{heading}
-				</Text>
+				<Flex px={props.paddingX == 0 ? DEFAULT_PADDING : 0}>
+					<Text
+						fontWeight={'bold'}
+						fontSize={'xl'}
+						color="dark"
+						_dark={{
+							color: 'text_muted',
+						}}
+					>
+						{heading}
+					</Text>
+				</Flex>
 			)}
 			{children}
 		</Flex>

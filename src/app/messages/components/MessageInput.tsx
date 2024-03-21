@@ -28,6 +28,7 @@ export default function MessageInput({ onSubmit }: Props) {
 			px={DEFAULT_PADDING}
 		>
 			<Textarea
+				rows={2}
 				as="textarea"
 				resize={'none'}
 				border={'0px'}
@@ -39,6 +40,7 @@ export default function MessageInput({ onSubmit }: Props) {
 				value={message}
 			/>
 			<Button
+				type="submit"
 				variant={'ghost'}
 				color={'border_color'}
 				_dark={{ color: 'dark_lighter' }}

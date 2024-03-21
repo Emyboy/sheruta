@@ -7,12 +7,19 @@ import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import PageNotFound from '@/components/PageNotFound'
+import { apiCall } from '@/utils/api.utils'
 
 export default async function page(props: any) {
 	const { params } = props
 	const { user_id } = params
 
-	let user = await AuthService.getUser(user_id)
+	let user = await apiCall({
+		route: '/getProfile',
+		options: {
+			data: { user_id },
+		},
+	})
+	console.log('DATA::', user.data)
 	// console.log('DATA::', user)
 
 	return (
@@ -22,7 +29,7 @@ export default async function page(props: any) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{user ? <UserProfilePage data={user} /> : <PageNotFound />}
+					{user ? <UserProfilePage data={user.data} /> : <PageNotFound />}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

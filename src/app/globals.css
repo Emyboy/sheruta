@@ -32,3 +32,13 @@
 		rgba(17, 23, 23, 1) 94%
 	);
 }
+
+.overlay-sm {
+	background: rgb(23, 73, 15);
+	background: linear-gradient(
+		180deg,
+		rgba(23, 73, 15, 0.04805672268907568) 0%,
+		rgba(18, 27, 22, 1) 93%,
+		rgba(17, 23, 23, 1) 100%
+	);
+}
