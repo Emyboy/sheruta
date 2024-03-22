@@ -25,19 +25,17 @@ export default function HomeTabs({ locations, states }: Props) {
 			slug: location.slug,
 		}))
 
-
 	const [items] = React.useState(getItems)
 
 	const { dragStart, dragStop, dragMove, dragging } = useDrag()
 	const handleDrag =
 		({ scrollContainer }: scrollVisibilityApiType) =>
-			(ev: React.MouseEvent) =>
-				dragMove(ev, (posDiff) => {
-					if (scrollContainer.current) {
-						scrollContainer.current.scrollLeft += posDiff
-					}
-				})
-
+		(ev: React.MouseEvent) =>
+			dragMove(ev, (posDiff) => {
+				if (scrollContainer.current) {
+					scrollContainer.current.scrollLeft += posDiff
+				}
+			})
 
 	return (
 		<Box
@@ -80,7 +78,7 @@ function onWheel(apiObj: scrollVisibilityApiType, ev: React.WheelEvent): void {
 	}
 }
 
-const EachTab = ({ label, slug }: { label: string; slug: string; }) => {
+const EachTab = ({ label, slug }: { label: string; slug: string }) => {
 	return (
 		<Link href={`/search?location=${slug}`}>
 			<Box

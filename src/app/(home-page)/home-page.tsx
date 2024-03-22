@@ -15,9 +15,8 @@ import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import HomeTabs from './HomeTabs'
 
-
 type Props = {
-	locations: string;
+	locations: string
 	states: StateData[]
 }
 

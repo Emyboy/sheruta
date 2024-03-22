@@ -9,8 +9,6 @@ export default function AppLoading({}: Props) {
 	const { appState } = useAppContext()
 	const { app_loading } = appState
 
-	return null;
-
 	if (!app_loading) {
 		return null
 	}

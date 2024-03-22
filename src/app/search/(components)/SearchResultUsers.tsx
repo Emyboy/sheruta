@@ -10,10 +10,13 @@ import { BiSolidBadgeCheck } from 'react-icons/bi'
 type Props = {}
 
 export default function SearchResultUsers({}: Props) {
-	const query = useSearchParams();
-	
+	const query = useSearchParams()
+
 	return (
-		<MainSection heading={`Seekers in ${query.get('location') || ''}`} paddingX={0}>
+		<MainSection
+			heading={`Seekers in ${query.get('location') || ''}`}
+			paddingX={0}
+		>
 			<Flex maxW={'99%'} overflowX={'auto'}>
 				<EachUserCard />
 				<EachUserCard />

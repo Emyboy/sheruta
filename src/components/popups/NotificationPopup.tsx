@@ -23,7 +23,7 @@ export default function NotificationPopup() {
 
 	useEffect(() => {
 		setTimeout(() => {
-			handlePermissionRequest()
+			// handlePermissionRequest()
 		}, 10000)
 	}, [])
 
