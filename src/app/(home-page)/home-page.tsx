@@ -13,8 +13,8 @@ import React from 'react'
 import dynamic from 'next/dynamic'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import { StateData } from '@/firebase/service/options/states/states.types'
+import HomeTabs from './HomeTabs'
 
-const HomeTabs = dynamic(() => import('./HomeTabs'), { ssr: false })
 
 type Props = {
 	locations: string;

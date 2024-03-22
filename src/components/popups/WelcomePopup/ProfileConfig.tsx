@@ -1,7 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import useCommon from '@/hooks/useApp'
+import useCommon from '@/hooks/useCommon'
 import { Box, Button, Flex, Text, VStack } from '@chakra-ui/react'
 import Image from 'next/image'
 import React, { useState } from 'react'

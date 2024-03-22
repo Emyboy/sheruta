@@ -82,7 +82,7 @@ function onWheel(apiObj: scrollVisibilityApiType, ev: React.WheelEvent): void {
 
 const EachTab = ({ label, slug }: { label: string; slug: string; }) => {
 	return (
-		<Link href={`/search?state=${slug}`}>
+		<Link href={`/search?location=${slug}`}>
 			<Box
 				userSelect={'none'}
 				rounded={'xl'}

@@ -1,15 +1,19 @@
+'use client'
 import MainSection from '@/components/atoms/MainSection'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Flex, Text } from '@chakra-ui/react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import React from 'react'
 import { BiSolidBadgeCheck } from 'react-icons/bi'
 
 type Props = {}
 
 export default function SearchResultUsers({}: Props) {
+	const query = useSearchParams();
+	
 	return (
-		<MainSection heading="Seekers in lekki" paddingX={0}>
+		<MainSection heading={`Seekers in ${query.get('location') || ''}`} paddingX={0}>
 			<Flex maxW={'99%'} overflowX={'auto'}>
 				<EachUserCard />
 				<EachUserCard />
