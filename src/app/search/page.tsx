@@ -7,7 +7,7 @@ import MainHeader from '@/components/layout/MainHeader'
 import SearchPageFilter from './(components)/SearchPageFilter'
 
 type Props = {}
-
+export const dynamic = 'force-dynamic'
 export default function page({}: Props) {
 	return (
 		<Flex justifyContent={'center'}>

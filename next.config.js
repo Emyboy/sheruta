@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+
+const withPWA = require('next-pwa')({
+	dest: 'public',
+	register: true,
+	sw: '/firebase-messaging-sw.js',
+	disableDevLogs: true
+})
+
+const nextConfig = withPWA({
 	// images: {
 	// 	domains: ['lh3.googleusercontent.com'],
 	// },
@@ -19,6 +27,6 @@ const nextConfig = {
 			},
 		],
 	},
-}
+})
 
 module.exports = nextConfig
