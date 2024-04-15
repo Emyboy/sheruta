@@ -1,9 +1,9 @@
 'use client'
-import { app } from '@/firebase'
-import { getMessaging, getToken } from 'firebase/messaging'
+// import { app } from '@/firebase'
+// import { getMessaging, getToken } from 'firebase/messaging'
 import React, { useEffect } from 'react'
 
-const messaging = getMessaging(app)
+// const messaging = getMessaging(app)
 
 export default function NotificationPopup() {
 	// const showNotification = () => {
@@ -14,25 +14,25 @@ export default function NotificationPopup() {
 	// 	})
 	// }
 
-	useEffect(() => {
-		;(async () => {
-			const registerServiceWorker = async () => {
-				if ('serviceWorker' in navigator) {
-					try {
-						window.addEventListener('load', () => {
-							if ('serviceWorker' in navigator) {
-								navigator.serviceWorker.register('/firebase-messaging-sw.js')
-							}
-						})
-					} catch (error) {
-						console.error('Service Worker registration failed:', error)
-					}
-				}
-			}
-
-			registerServiceWorker()
-		})()
-	}, [])
+	// useEffect(() => {
+	// 	;(async () => {
+	// 		const registerServiceWorker = async () => {
+	// 			if ('serviceWorker' in navigator) {
+	// 				try {
+	// 					window.addEventListener('load', () => {
+	// 						if ('serviceWorker' in navigator) {
+	// 							navigator.serviceWorker.register('/firebase-messaging-sw.js')
+	// 						}
+	// 					})
+	// 				} catch (error) {
+	// 					console.error('Service Worker registration failed:', error)
+	// 				}
+	// 			}
+	// 		}
+	//
+	// 		registerServiceWorker()
+	// 	})()
+	// }, [])
 
 	return <></>
 }
