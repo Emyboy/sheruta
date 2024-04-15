@@ -4,7 +4,7 @@ const withPWA = require('next-pwa')({
 	dest: 'public',
 	register: true,
 	sw: '/firebase-messaging-sw.js',
-	disableDevLogs: true
+	disableDevLogs: true,
 })
 
 const nextConfig = withPWA({

@@ -1,12 +1,18 @@
 import { DocumentData, doc, getDoc, serverTimestamp } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { AuthUserDTO, RegisterDTO, RegisterDTOSchema } from './auth.types'
+import {
+	AuthUser,
+	AuthUserDTO,
+	RegisterDTO,
+	RegisterDTOSchema,
+} from './auth.types'
 import { db } from '@/firebase'
 import UserInfoService from '../user-info/user-info.firebase'
 import UserSettingsService from '../user-settings/user-settings.firebase'
 import FlatShareProfileService from '../flat-share-profile/flat-share-profile.firebase'
 import UserSecretsService from '../user-secrets/user-secrets.firebase'
 import UserService from '../user/user.firebase'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
 export default class AuthService {
 	static async loginUser(data: RegisterDTO): Promise<DocumentData | undefined> {
@@ -101,6 +107,25 @@ export default class AuthService {
 			} else {
 				return null
 			}
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	static async update({
+		document_id,
+		data,
+	}: {
+		document_id: string
+		data: Partial<AuthUser>
+	}): Promise<AuthUser> {
+		try {
+			let result = await SherutaDB.update({
+				collection_name: DBCollectionName.users,
+				data,
+				document_id,
+			})
+			return result as AuthUser
 		} catch (error) {
 			return Promise.reject(error)
 		}

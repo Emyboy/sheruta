@@ -11,8 +11,8 @@ import MasterPopup from '@/components/popups/MasterPopup'
 import dynamic from 'next/dynamic'
 import { useEffect } from 'react'
 import Cookies from 'js-cookie'
-import { uuid } from 'uuidv4';
-
+import { uuid } from 'uuidv4'
+import GetStarted from '@/components/info/GetStarted/GetStarted'
 
 const CreditOptionsPopups = dynamic(
 	() => import('@/components/popups/CreditOptionsPopups'),
@@ -25,7 +25,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		let exists = Cookies.get('did')
 		if (!exists) {
-			let did = uuid();
+			let did = uuid()
 			Cookies.set('did', `sheruta::did::${did}::${Date.now()}`)
 		}
 	}, [])
@@ -40,7 +40,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 							bg: 'dark',
 						}}
 						minH={'100vh'}
+						userSelect={'none'}
 					>
+						<GetStarted />
 						<CreditOptionsPopups />
 						<MasterPopup />
 						<AppLoading />

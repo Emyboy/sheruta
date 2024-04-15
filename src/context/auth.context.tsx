@@ -17,15 +17,13 @@ import { app, auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import { useToast } from '@chakra-ui/react'
 import { useAppContext } from './app.context'
-import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types';
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { getMessaging, getToken } from 'firebase/messaging'
 import { apiCall } from '@/utils/api.utils'
 import Cookies from 'js-cookie'
 import { FUNCTION_URL } from '@/constants'
 
-
 const messaging = getMessaging(app)
-
 
 interface AuthState {
 	user: AuthUser | null
@@ -61,7 +59,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 		user_settings: null,
 		flat_share_profile: null,
 		auth_loading: false,
-	})
+	});
+
+	console.log('AUTH CONTEXT STATE::', state);
 
 	const getAuthDependencies = async (): Promise<any> => {
 		if (state.user) {
@@ -132,18 +132,21 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 			const res = await apiCall({
 				route: '/deviceActive',
 				options: {
-					body: JSON.stringify({ device_id: Cookies.get('did'), push_token: token, user_id: state.user?._id }),
+					body: JSON.stringify({
+						device_id: Cookies.get('did'),
+						push_token: token,
+						user_id: state.user?._id,
+					}),
 					method: 'POST',
-				}
+				},
 			})
 			console.log('THE RES:: ', res)
-
 		} catch (error) {
 			console.log('THE ERROR::', error)
 		}
 	}
 
-	const handlePermission = async (user:any) => {
+	const handlePermission = async (user: any) => {
 		if (user) {
 			try {
 				const permission = await Notification.requestPermission()
@@ -177,10 +180,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	}, [])
 
 	useEffect(() => {
-		if(state.user){
+		if (state.user) {
 			handlePermission(state.user)
 		}
-	},[state.user])
+	}, [state.user])
 
 	return (
 		<AuthContext.Provider

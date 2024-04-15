@@ -1,12 +1,11 @@
 'use client'
 import { app } from '@/firebase'
 import { getMessaging, getToken } from 'firebase/messaging'
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'
 
 const messaging = getMessaging(app)
 
 export default function NotificationPopup() {
-
 	// const showNotification = () => {
 	// 	new Notification('Testing notifications', {
 	// 		body: 'Looking good 👍🏽',
@@ -16,8 +15,7 @@ export default function NotificationPopup() {
 	// }
 
 	useEffect(() => {
-
-		(async () => {
+		;(async () => {
 			const registerServiceWorker = async () => {
 				if ('serviceWorker' in navigator) {
 					try {
@@ -34,7 +32,6 @@ export default function NotificationPopup() {
 
 			registerServiceWorker()
 		})()
-
 	}, [])
 
 	return <></>
