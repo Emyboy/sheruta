@@ -3,7 +3,7 @@ import HomePage from './(home-page)/home-page'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { CACHE_TTL } from '@/constants'
 
-export const revalidate = CACHE_TTL.SHORT
+export const revalidate = CACHE_TTL?.SHORT
 export default async function page() {
 	let locations = await SherutaDB.getAll({
 		collection_name: DBCollectionName.locationKeyWords,

@@ -5,8 +5,8 @@ export interface UserInfo {
 	user_id: string
 	gender?: 'male' | 'female' | null
 	primary_phone_number: string | null
-	whatsapp_phone_number: string | null;
-	done_kyc: boolean;
+	whatsapp_phone_number: string | null
+	done_kyc: boolean
 }
 
 export interface UserInfoDTO {
@@ -15,5 +15,5 @@ export interface UserInfoDTO {
 	gender: 'male' | 'female' | null
 	primary_phone_number: null | string
 	whatsapp_phone_number: null
-	done_kyc: boolean;
+	done_kyc: boolean
 }

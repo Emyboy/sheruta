@@ -7,20 +7,24 @@ import AuthInfoForm from '@/components/forms/AuthInfoForm'
 
 export default function GetStarted() {
 	const {
-		authState: { user, flat_share_profile, user_info,user_settings },
-	} = useAuthContext();
-	const [step, setStep] = useState(2);
+		authState: { user, flat_share_profile, user_info, user_settings },
+	} = useAuthContext()
+	const [step, setStep] = useState(2)
 
 	const next = () => {
 		setStep(step + 1)
 	}
 
-
-	if(!user) {
+	if (!user) {
 		return null
 	}
 
-	if(!flat_share_profile?.budget || !user_info?.gender || !flat_share_profile?.verified || !user_info?.done_kyc) {
+	if (
+		!flat_share_profile?.budget ||
+		!user_info?.gender ||
+		!flat_share_profile?.verified ||
+		!user_info?.done_kyc
+	) {
 		return (
 			<Flex
 				bg={'dark_light'}
@@ -58,9 +62,7 @@ export default function GetStarted() {
 				</Flex>
 			</Flex>
 		)
-	}else {
+	} else {
 		return null
 	}
-
-
 }

@@ -10,8 +10,8 @@ export interface FlatShareProfileDTO {
 	state: any
 	habits: any[]
 	interests: any[]
-	religion: string | null;
-	verified: boolean;
+	religion: string | null
+	verified: boolean
 }
 
 export interface FlatShareProfileData extends Partial<FlatShareProfileDTO> {
@@ -28,5 +28,5 @@ export interface FlatShareProfileData extends Partial<FlatShareProfileDTO> {
 
 	habits: any[]
 	religion: string | null
-	verified: boolean;
+	verified: boolean
 }

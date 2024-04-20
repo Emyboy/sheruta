@@ -10,14 +10,15 @@ import AuthService from '@/firebase/service/auth/auth.firebase'
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
 		authState: { flat_share_profile, user, user_info },
-		getAuthDependencies
+		getAuthDependencies,
 	} = useAuthContext()
 	const [first_name, setFirstName] = useState(user?.first_name || '')
 	const [last_name, setLastName] = useState(user?.last_name || '')
-	const [primary_phone_number, setPhoneNumber] = useState(user_info?.primary_phone_number || '')
+	const [primary_phone_number, setPhoneNumber] = useState(
+		user_info?.primary_phone_number || '',
+	)
 	const [budget, setBudget] = useState(flat_share_profile?.budget || 0)
 	const [isLoading, setIsLoading] = useState(false)
-
 
 	const update = async (e: any) => {
 		e.preventDefault()
@@ -41,10 +42,10 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 
 			await getAuthDependencies()
 
-			setIsLoading(false);
+			setIsLoading(false)
 
-			if(done){
-				done();
+			if (done) {
+				done()
 			}
 		}
 	}
