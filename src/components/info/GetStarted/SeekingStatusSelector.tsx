@@ -4,22 +4,25 @@ import React, { useState } from 'react'
 import { BiSolidCheckCircle } from 'react-icons/bi'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { useAuthContext } from '@/context/auth.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 
-export default function GenderSelect({ done }: { done?: () => void }) {
+export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 	const {
-		authState: { user, user_info },
+		authState: { user, flat_share_profile },
 		getAuthDependencies,
 	} = useAuthContext()
-	const [gender, setGender] = useState<'male' | 'female' | null>(user_info?.gender || null)
+
 	const [isLoading, setIsLoading] = useState(false)
 
+	const [seeking, setSeeking] = useState<boolean | null | undefined>(flat_share_profile?.seeking);
+
 	const update = async () => {
-		if (gender && user) {
+		if (user) {
 			setIsLoading(true)
-			await UserInfoService.update({
-				data: { gender },
+			await FlatShareProfileService.update({
+				data: { seeking },
 				document_id: user?._id,
-			})
+			});
 			await getAuthDependencies()
 			setIsLoading(false)
 			if (done) {
@@ -31,25 +34,25 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
 			<Text textAlign={'center'} as={'h1'} fontSize={'3xl'}>
-				{`What's your gender?`}
+				{`What brings you to Sheruta?`}
 			</Text>
 			<Text textAlign={'center'} color={'dark_lighter'}>
-				{`Help our matching algorithm find the best match`}
+				{`Select one for a personalized experience`}
 			</Text>
 			<Flex flexDir={{ md: 'row', base: 'column' }} gap={`30px`} py={10}>
 				<EachConfig
-					subHeading={``}
-					onClick={() => setGender('male')}
-					active={gender === 'male'}
-					heading="Male"
-					img_url="/assets/ai/44.jpeg"
+					subHeading={`I'm looking for a flat`}
+					onClick={() => setSeeking(true)}
+					active={seeking === true}
+					heading="Seeker"
+					img_url="/assets/ai/11.jpeg"
 				/>
 				<EachConfig
-					subHeading={``}
-					onClick={() => setGender('female')}
-					active={gender === 'female'}
-					heading="Female"
-					img_url="/assets/ai/22.jpeg"
+					subHeading={`I have a flat to share`}
+					onClick={() => setSeeking(false)}
+					active={seeking === false}
+					heading="Host"
+					img_url="/assets/ai/12.jpeg"
 				/>
 			</Flex>
 			<br />
@@ -59,12 +62,12 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 }
 
 const EachConfig = ({
-	img_url,
-	active,
-	heading,
-	onClick,
-	subHeading,
-}: {
+											img_url,
+											active,
+											heading,
+											onClick,
+											subHeading,
+										}: {
 	img_url: string
 	active: boolean
 	heading: string

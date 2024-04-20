@@ -57,7 +57,7 @@ export default class SherutaDB {
 		_limit = 20,
 	}: {
 		collection_name: string
-		_limit: number
+		_limit: number,
 	}): Promise<any> {
 		const collectionRef = collection(db, collection_name)
 		//@ts-ignore

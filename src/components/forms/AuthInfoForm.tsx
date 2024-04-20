@@ -65,8 +65,9 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 					Update profile
 				</Text>
 				<Text textAlign={'center'} color={'dark_lighter'}>
-					Update your profile to increase your chances.
+					Nothing builds trust more than a complete profile.
 				</Text>
+				<br />
 				<br />
 				<VStack mb={3} w={'full'}>
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -95,7 +96,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 							gap={2}
 						>
 							<Text color={'text_muted'} fontSize={'sm'}>
-								Last Name
+								Last Name <small>{`(private)`}</small>
 							</Text>
 							<Input
 								onChange={(e) => setLastName(e.target.value)}
