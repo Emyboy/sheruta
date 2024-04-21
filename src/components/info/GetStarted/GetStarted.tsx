@@ -2,22 +2,42 @@ import { Box, Flex } from '@chakra-ui/react'
 import { useAuthContext } from '@/context/auth.context'
 import GetStartedBeginning from '@/components/info/GetStarted/GetStartedBeginning'
 import GenderSelect from '@/components/forms/GenderSelector'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AuthInfoForm from '@/components/forms/AuthInfoForm'
 import { BiLeftArrowAlt } from 'react-icons/bi'
 import SeekingStatusSelector from '@/components/info/GetStarted/SeekingStatusSelector'
 import HabitsSelector from '@/components/info/GetStarted/HabitsSelector'
 import InterestsSelector from '@/components/info/GetStarted/InterestsSelector'
+import ProfilePictureSelector from '@/components/info/GetStarted/ProfilePictureSelector'
 
 export default function GetStarted() {
 	const {
 		authState: { user, flat_share_profile, user_info, user_settings },
 	} = useAuthContext()
-	const [step, setStep] = useState(4)
+	const [step, setStep] = useState(6);
+	const [percentage, setPercentage] = useState(0);
 
 	const next = () => {
 		setStep(step + 1)
 	}
+
+	const allSteps = (): any[] => {
+		return [
+			<GetStartedBeginning key={'get-started'} done={next} />,
+			<SeekingStatusSelector key={'agenda'} done={next} />,
+			<GenderSelect key={'my-gender'} done={next} />,
+			<AuthInfoForm key={'auth-form'} done={next} />,
+			<HabitsSelector key={'habits'} done={next} />,
+			<InterestsSelector key={'interests'} done={next} />,
+			<ProfilePictureSelector key={'profile-pics'} done={next} />,
+		]
+	}
+
+	useEffect(() => {
+		const totalSteps = allSteps().length;
+		const calculatedPercentage = (step / totalSteps) * 100;
+		setPercentage(calculatedPercentage);
+	}, [step]);
 
 	if (!user) {
 		return null
@@ -31,6 +51,7 @@ export default function GetStarted() {
 	) {
 		return (
 			<>
+
 				<Flex
 					bg={'dark_light'}
 					_dark={{ bg: 'dark' }}
@@ -45,7 +66,12 @@ export default function GetStarted() {
 					alignItems={'center'}
 					overflowY={'auto'}
 				>
+
 					{step > 1 ? (
+						<>
+							<Flex position={'fixed'} h={'5px'} rounded={'full'} overflow={'hidden'} top={0} left={0} right={0}>
+								<Flex h={'full'} w={`${percentage}%`} bg={'brand'} rounded={'full'} transition={'width 0.5s ease-in-out'} />
+							</Flex>
 						<Flex
 							cursor={'pointer'}
 							h={10}
@@ -67,6 +93,7 @@ export default function GetStarted() {
 						>
 							<BiLeftArrowAlt size={25} />
 						</Flex>
+						</>
 					) : null}
 					<Flex
 						pt={'170px'}
@@ -82,14 +109,7 @@ export default function GetStarted() {
 						}}
 					>
 						{
-							[
-								<GetStartedBeginning key={'get-started'} done={next} />,
-								<SeekingStatusSelector key={'agenda'} done={next} />,
-								<GenderSelect key={'my-gender'} done={next} />,
-								<AuthInfoForm key={'auth-form'} done={next} />,
-								<HabitsSelector key={'habits'} done={next} />,
-								<InterestsSelector key={'interests'} done={next} />,
-							][step]
+							allSteps()[step]
 						}
 					</Flex>
 				</Flex>
