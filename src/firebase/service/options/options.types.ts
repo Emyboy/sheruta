@@ -1,3 +1,5 @@
+import { DocumentReference } from 'firebase/firestore'
+
 export interface Option {
 	id: string
 	name: string
@@ -5,7 +7,8 @@ export interface Option {
 }
 
 export interface HabitData {
-	title: string;
-	slug: string;
+	id: string;
+	title: string
+	slug: string
+	ref: DocumentReference
 }
-

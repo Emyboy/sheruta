@@ -1,20 +1,6 @@
-export interface FlatShareProfileDTO {
-	_user_info_ref: any
-	_user_id: string
-	_user_ref: any
-	seeking: boolean | null
-	budget: null | number
-	credits: number
-	occupation: string | null
-	location_keyword: any
-	state: any
-	habits: any[]
-	interests: any[]
-	religion: string | null
-	verified: boolean
-}
+import { DocumentReference } from 'firebase/firestore'
 
-export interface FlatShareProfileData extends Partial<FlatShareProfileDTO> {
+export interface FlatShareProfileData {
 	_user_info_ref: any
 	_user_id: string
 	_user_ref: any
@@ -26,7 +12,8 @@ export interface FlatShareProfileData extends Partial<FlatShareProfileDTO> {
 	location_keyword?: any | null
 	state?: any | null
 
-	habits: any[]
+	habits: DocumentReference[]
+	interests: DocumentReference[]
 	religion: string | null
 	verified: boolean
 }

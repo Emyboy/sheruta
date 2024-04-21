@@ -14,7 +14,9 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 
 	const [isLoading, setIsLoading] = useState(false)
 
-	const [seeking, setSeeking] = useState<boolean | null | undefined>(flat_share_profile?.seeking);
+	const [seeking, setSeeking] = useState<boolean | null | undefined>(
+		flat_share_profile?.seeking,
+	)
 
 	const update = async () => {
 		if (user) {
@@ -22,7 +24,7 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 			await FlatShareProfileService.update({
 				data: { seeking },
 				document_id: user?._id,
-			});
+			})
 			await getAuthDependencies()
 			setIsLoading(false)
 			if (done) {
@@ -62,12 +64,12 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 }
 
 const EachConfig = ({
-											img_url,
-											active,
-											heading,
-											onClick,
-											subHeading,
-										}: {
+	img_url,
+	active,
+	heading,
+	onClick,
+	subHeading,
+}: {
 	img_url: string
 	active: boolean
 	heading: string

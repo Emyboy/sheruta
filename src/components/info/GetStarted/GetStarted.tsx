@@ -7,6 +7,7 @@ import AuthInfoForm from '@/components/forms/AuthInfoForm'
 import { BiLeftArrowAlt } from 'react-icons/bi'
 import SeekingStatusSelector from '@/components/info/GetStarted/SeekingStatusSelector'
 import HabitsSelector from '@/components/info/GetStarted/HabitsSelector'
+import InterestsSelector from '@/components/info/GetStarted/InterestsSelector'
 
 export default function GetStarted() {
 	const {
@@ -42,11 +43,10 @@ export default function GetStarted() {
 					flexDir={'column'}
 					justifyContent={'center'}
 					alignItems={'center'}
-
 					overflowY={'auto'}
 				>
-					{
-						step > 1 ? <Flex
+					{step > 1 ? (
+						<Flex
 							cursor={'pointer'}
 							h={10}
 							w={10}
@@ -57,7 +57,7 @@ export default function GetStarted() {
 							position={'absolute'}
 							_dark={{
 								borderColor: 'dark_lighter',
-								color: 'dark_lighter'
+								color: 'dark_lighter',
 							}}
 							top={5}
 							left={5}
@@ -66,19 +66,19 @@ export default function GetStarted() {
 							onClick={() => setStep(step - 1)}
 						>
 							<BiLeftArrowAlt size={25} />
-						</Flex>: null
-					}
+						</Flex>
+					) : null}
 					<Flex
 						pt={'170px'}
 						pb={'120px'}
 						flexDir={'column'}
 						minW={{
 							md: '500px',
-							base: '90vw'
+							base: '90vw',
 						}}
 						maxW={{
 							md: '500px',
-							base: '90vw'
+							base: '90vw',
 						}}
 					>
 						{
@@ -88,6 +88,7 @@ export default function GetStarted() {
 								<GenderSelect key={'my-gender'} done={next} />,
 								<AuthInfoForm key={'auth-form'} done={next} />,
 								<HabitsSelector key={'habits'} done={next} />,
+								<InterestsSelector key={'interests'} done={next} />,
 							][step]
 						}
 					</Flex>

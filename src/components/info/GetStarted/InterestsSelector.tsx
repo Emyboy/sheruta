@@ -9,7 +9,7 @@ import { useAuthContext } from '@/context/auth.context'
 import DotsLoading from '@/components/info/GetStarted/DotsLoading'
 import { getDoc } from 'firebase/firestore'
 
-export default function HabitsSelector({ done }: { done?: () => void }) {
+export default function InterestsSelector({ done }: { done?: () => void }) {
 	const {
 		authState: { user, flat_share_profile },
 		getAuthDependencies,
@@ -24,13 +24,14 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 		try {
 			setFetching(true)
 			let res = await SherutaDB.getAll({
-				collection_name: DBCollectionName.habits,
+				collection_name: DBCollectionName.interests,
 				_limit: 50,
 			})
 
 			const documents:HabitData[] = [];
-			let refs = flat_share_profile?.habits as any[]
-			if(refs && refs.length > 0){
+			let refs = flat_share_profile?.interests as any[]
+
+			if(refs && refs?.length > 0){
 				for (const ref of refs) {
 					try {
 						const docSnapshot = await getDoc(ref);
@@ -41,11 +42,11 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 					}
 				}
 			}
+
 			setSelectedHabits(documents)
 			setHabits(res)
 			setFetching(false)
 		} catch (e) {
-			console.log("FETCHING ERROR:",e)
 			setFetching(false)
 			showToast({
 				message: 'Error, please try again',
@@ -67,7 +68,7 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 		if (user) {
 			setLoading(true)
 			await FlatShareProfileService.update({
-				data: { habits: selectedHabits.map(val => val.ref) },
+				data: { interests: selectedHabits.map(val => val.ref) },
 				document_id: user?._id,
 			})
 			await getAuthDependencies()
@@ -86,7 +87,7 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
 			<Text textAlign={'center'} as={'h1'} fontSize={'3xl'} className={'animate__animated animate__fadeInUp animate__faster'}>
-				{`What are your habits?`}
+				{`Pick what interests you?`}
 			</Text>
 			<Text textAlign={'center'} color={'dark_lighter'} className={'animate__animated animate__fadeInUp'}>
 				{`Help our matching algorithm find the best match`}
@@ -116,10 +117,10 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 }
 
 const EachOption = ({
-	label,
-	onClick,
-	isActive
-}: {
+											label,
+											onClick,
+											isActive
+										}: {
 	label: string
 	onClick: () => void
 	isActive?: boolean

@@ -1,9 +1,6 @@
 import { DocumentReference, doc, getDoc } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import {
-	FlatShareProfileDTO,
-	FlatShareProfileData,
-} from './flat-share-profile.types'
+import { FlatShareProfileData } from './flat-share-profile.types'
 import { db } from '@/firebase'
 
 export default class FlatShareProfileService {
@@ -16,7 +13,7 @@ export default class FlatShareProfileService {
 	}) {
 		try {
 			let userInfo = await getDoc(doc(db, DBCollectionName.userInfos, _user_id))
-			let data: FlatShareProfileDTO = {
+			let data: FlatShareProfileData = {
 				_user_info_ref: userInfo.ref,
 				_user_id,
 				budget: null,

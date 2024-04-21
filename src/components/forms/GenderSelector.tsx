@@ -10,7 +10,9 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 		authState: { user, user_info },
 		getAuthDependencies,
 	} = useAuthContext()
-	const [gender, setGender] = useState<'male' | 'female' | null>(user_info?.gender || null)
+	const [gender, setGender] = useState<'male' | 'female' | null>(
+		user_info?.gender || null,
+	)
 	const [isLoading, setIsLoading] = useState(false)
 
 	const update = async () => {
