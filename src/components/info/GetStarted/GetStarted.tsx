@@ -66,12 +66,14 @@ export default function GetStarted() {
 					alignItems={'center'}
 					overflowY={'auto'}
 				>
-
+					{
+						step > 0 ? <Flex position={'fixed'} h={'5px'} rounded={'full'} overflow={'hidden'} top={0} left={0} right={0}>
+							<Flex h={'full'} w={`${percentage}%`} bg={'brand'} rounded={'full'} transition={'width 0.5s ease-in-out'} />
+						</Flex>:null
+					}
 					{step > 1 ? (
 						<>
-							<Flex position={'fixed'} h={'5px'} rounded={'full'} overflow={'hidden'} top={0} left={0} right={0}>
-								<Flex h={'full'} w={`${percentage}%`} bg={'brand'} rounded={'full'} transition={'width 0.5s ease-in-out'} />
-							</Flex>
+
 						<Flex
 							cursor={'pointer'}
 							h={10}
