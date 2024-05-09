@@ -65,7 +65,7 @@ export default class SherutaDB {
 		const documents = querySnapshot.docs.map((doc) => ({
 			id: doc.id,
 			...doc.data(),
-			ref: doc.ref
+			ref: doc.ref,
 		}))
 		return documents
 	}

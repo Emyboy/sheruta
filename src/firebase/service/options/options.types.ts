@@ -7,7 +7,7 @@ export interface Option {
 }
 
 export interface HabitData {
-	id: string;
+	id: string
 	title: string
 	slug: string
 	ref: DocumentReference

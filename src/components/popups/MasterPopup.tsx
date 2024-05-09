@@ -6,7 +6,7 @@ import WelcomePopup from './WelcomePopup/WelcomePopup'
 export default function MasterPopup() {
 	return (
 		<>
-			<WelcomePopup />
+			{/*<WelcomePopup />*/}
 			<AuthPopup />
 			{/*<NotificationPopup />*/}
 		</>

@@ -14,8 +14,8 @@ export default function GetStarted() {
 	const {
 		authState: { user, flat_share_profile, user_info, user_settings },
 	} = useAuthContext()
-	const [step, setStep] = useState(0);
-	const [percentage, setPercentage] = useState(0);
+	const [step, setStep] = useState(0)
+	const [percentage, setPercentage] = useState(0)
 
 	const next = () => {
 		setStep(step + 1)
@@ -34,15 +34,14 @@ export default function GetStarted() {
 	}
 
 	useEffect(() => {
-		const totalSteps = allSteps().length;
-		const calculatedPercentage = (step / totalSteps) * 100;
-		setPercentage(calculatedPercentage);
-	}, [step]);
+		const totalSteps = allSteps().length
+		const calculatedPercentage = (step / totalSteps) * 100
+		setPercentage(calculatedPercentage)
+	}, [step])
 
 	if (!user) {
 		return null
 	}
-
 	if (
 		!flat_share_profile?.budget ||
 		!user_info?.gender ||
@@ -51,7 +50,6 @@ export default function GetStarted() {
 	) {
 		return (
 			<>
-
 				<Flex
 					bg={'dark_light'}
 					_dark={{ bg: 'dark' }}
@@ -66,35 +64,48 @@ export default function GetStarted() {
 					alignItems={'center'}
 					overflowY={'auto'}
 				>
-					{
-						step > 0 ? <Flex position={'fixed'} h={'5px'} rounded={'full'} overflow={'hidden'} top={0} left={0} right={0}>
-							<Flex h={'full'} w={`${percentage}%`} bg={'brand'} rounded={'full'} transition={'width 0.5s ease-in-out'} />
-						</Flex>:null
-					}
+					{step > 0 ? (
+						<Flex
+							position={'fixed'}
+							h={'5px'}
+							rounded={'full'}
+							overflow={'hidden'}
+							top={0}
+							left={0}
+							right={0}
+						>
+							<Flex
+								h={'full'}
+								w={`${percentage}%`}
+								bg={'brand'}
+								rounded={'full'}
+								transition={'width 0.5s ease-in-out'}
+							/>
+						</Flex>
+					) : null}
 					{step > 1 ? (
 						<>
-
-						<Flex
-							cursor={'pointer'}
-							h={10}
-							w={10}
-							border={'1px'}
-							rounded={'full'}
-							color={'dark'}
-							borderColor={'dark'}
-							position={'absolute'}
-							_dark={{
-								borderColor: 'dark_lighter',
-								color: 'dark_lighter',
-							}}
-							top={5}
-							left={5}
-							alignItems={'center'}
-							justifyContent={'center'}
-							onClick={() => setStep(step - 1)}
-						>
-							<BiLeftArrowAlt size={25} />
-						</Flex>
+							<Flex
+								cursor={'pointer'}
+								h={10}
+								w={10}
+								border={'1px'}
+								rounded={'full'}
+								color={'dark'}
+								borderColor={'dark'}
+								position={'absolute'}
+								_dark={{
+									borderColor: 'dark_lighter',
+									color: 'dark_lighter',
+								}}
+								top={5}
+								left={5}
+								alignItems={'center'}
+								justifyContent={'center'}
+								onClick={() => setStep(step - 1)}
+							>
+								<BiLeftArrowAlt size={25} />
+							</Flex>
 						</>
 					) : null}
 					<Flex
@@ -110,9 +121,7 @@ export default function GetStarted() {
 							base: '90vw',
 						}}
 					>
-						{
-							allSteps()[step]
-						}
+						{allSteps()[step]}
 					</Flex>
 				</Flex>
 			</>

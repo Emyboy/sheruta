@@ -28,16 +28,20 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 				_limit: 50,
 			})
 
-			const documents:HabitData[] = [];
+			const documents: HabitData[] = []
 			let refs = flat_share_profile?.habits as any[]
-			if(refs && refs.length > 0){
+			if (refs && refs.length > 0) {
 				for (const ref of refs) {
 					try {
-						const docSnapshot = await getDoc(ref);
+						const docSnapshot = await getDoc(ref)
 						//@ts-ignore
-						documents.push({...docSnapshot.data(), ref: docSnapshot.ref, id: docSnapshot.id} as HabitData);
+						documents.push({
+							...docSnapshot.data(),
+							ref: docSnapshot.ref,
+							id: docSnapshot.id,
+						} as HabitData)
 					} catch (error) {
-						console.error('Error getting document:', error);
+						console.error('Error getting document:', error)
 					}
 				}
 			}
@@ -45,7 +49,7 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 			setHabits(res)
 			setFetching(false)
 		} catch (e) {
-			console.log("FETCHING ERROR:",e)
+			console.log('FETCHING ERROR:', e)
 			setFetching(false)
 			showToast({
 				message: 'Error, please try again',
@@ -54,11 +58,11 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 		}
 	}
 
-	const selectHabit = (habit:HabitData) => {
-		let habitExist = selectedHabits.find(x => x.id == habit.id);
-		if(habitExist) {
-			setSelectedHabits(selectedHabits.filter(x => x.id !== habit.id))
-		}else {
+	const selectHabit = (habit: HabitData) => {
+		let habitExist = selectedHabits.find((x) => x.id == habit.id)
+		if (habitExist) {
+			setSelectedHabits(selectedHabits.filter((x) => x.id !== habit.id))
+		} else {
 			setSelectedHabits([...selectedHabits, habit])
 		}
 	}
@@ -67,7 +71,7 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 		if (user) {
 			setLoading(true)
 			await FlatShareProfileService.update({
-				data: { habits: selectedHabits.map(val => val.ref) },
+				data: { habits: selectedHabits.map((val) => val.ref) },
 				document_id: user?._id,
 			})
 			await getAuthDependencies()
@@ -80,28 +84,44 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 
 	useEffect(() => {
 		getAllHabits()
-	}, []);
-
+	}, [])
 
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
-			<Text textAlign={'center'} as={'h1'} fontSize={'3xl'} className={'animate__animated animate__fadeInUp animate__faster'}>
+			<Text
+				textAlign={'center'}
+				as={'h1'}
+				fontSize={'3xl'}
+				className={'animate__animated animate__fadeInUp animate__faster'}
+			>
 				{`What are your habits?`}
 			</Text>
-			<Text textAlign={'center'} color={'dark_lighter'} className={'animate__animated animate__fadeInUp'}>
+			<Text
+				textAlign={'center'}
+				color={'dark_lighter'}
+				className={'animate__animated animate__fadeInUp'}
+			>
 				{`Help our matching algorithm find the best match`}
 			</Text>
-			{fetching && <>
-				<br />
-				<DotsLoading />
-				<br />
-			</>
-			}
-			<Flex flexWrap={'wrap'} gap={3} py={10} className={'animate__animated animate__fadeIn'}>
+			{fetching && (
+				<>
+					<br />
+					<DotsLoading />
+					<br />
+				</>
+			)}
+			<Flex
+				flexWrap={'wrap'}
+				gap={3}
+				py={10}
+				className={'animate__animated animate__fadeIn'}
+			>
 				{habits.map((habit) => {
 					return (
 						<EachOption
-							isActive={selectedHabits.filter(x => x.id == habit.id).length > 0}
+							isActive={
+								selectedHabits.filter((x) => x.id == habit.id).length > 0
+							}
 							label={habit.title}
 							onClick={() => selectHabit(habit)}
 							key={habit.slug}
@@ -110,7 +130,9 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 				})}
 			</Flex>
 			<br />
-			{!fetching && <Button onClick={update} isLoading={loading}>{`Next`}</Button>}
+			{!fetching && (
+				<Button onClick={update} isLoading={loading}>{`Next`}</Button>
+			)}
 		</Flex>
 	)
 }
@@ -118,7 +140,7 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 const EachOption = ({
 	label,
 	onClick,
-	isActive
+	isActive,
 }: {
 	label: string
 	onClick: () => void
