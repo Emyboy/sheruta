@@ -15,7 +15,7 @@ export default function GetStarted() {
 	const {
 		authState: { user, flat_share_profile, user_info, user_settings },
 	} = useAuthContext()
-	const [step, setStep] = useState(6)
+	const [step, setStep] = useState(7)
 	const [percentage, setPercentage] = useState(0)
 
 	const next = () => {

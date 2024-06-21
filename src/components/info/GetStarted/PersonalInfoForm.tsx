@@ -11,7 +11,10 @@ export default function PersonalInfoForm({ }: Props) {
     const [isLoading, setIsLoading] = useState(false)
     return (
         <>
-            <Flex mt='500px' flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
+            <Flex mt={{
+                base: '30rem',
+                md: '10px'
+            }} flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
                 <Text
                     textAlign={'center'}
                     as={'h1'}
