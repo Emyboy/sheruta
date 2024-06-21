@@ -37,6 +37,7 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 						const docSnapshot = await getDoc(ref)
 						//@ts-ignore
 						documents.push({
+							//@ts-ignore
 							...docSnapshot.data(),
 							ref: docSnapshot.ref,
 							id: docSnapshot.id,

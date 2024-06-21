@@ -9,6 +9,7 @@ import SeekingStatusSelector from '@/components/info/GetStarted/SeekingStatusSel
 import HabitsSelector from '@/components/info/GetStarted/HabitsSelector'
 import InterestsSelector from '@/components/info/GetStarted/InterestsSelector'
 import ProfilePictureSelector from '@/components/info/GetStarted/ProfilePictureSelector'
+import PersonalInfoForm from './PersonalInfoForm'
 
 export default function GetStarted() {
 	const {
@@ -30,6 +31,7 @@ export default function GetStarted() {
 			<HabitsSelector key={'habits'} done={next} />,
 			<InterestsSelector key={'interests'} done={next} />,
 			<ProfilePictureSelector key={'profile-pics'} done={next} />,
+			<PersonalInfoForm key={'personal-info'} done={next} />,
 		]
 	}
 
