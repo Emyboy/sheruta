@@ -14,7 +14,7 @@ export default function GetStarted() {
 	const {
 		authState: { user, flat_share_profile, user_info, user_settings },
 	} = useAuthContext()
-	const [step, setStep] = useState(0)
+	const [step, setStep] = useState(6)
 	const [percentage, setPercentage] = useState(0)
 
 	const next = () => {
@@ -48,6 +48,7 @@ export default function GetStarted() {
 		!flat_share_profile?.verified ||
 		!user_info?.done_kyc
 	) {
+		// return null
 		return (
 			<>
 				<Flex
