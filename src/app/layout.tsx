@@ -5,7 +5,6 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import 'react-horizontal-scrolling-menu/dist/styles.css'
 import 'react-advanced-cropper/dist/style.css'
 
-
 export const metadata: Metadata = {
 	title: 'Sheruta NG',
 	description: 'Flat or space for share in lagos, abuja, lekki and more',
