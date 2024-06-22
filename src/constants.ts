@@ -13,3 +13,41 @@ export const CACHE_TTL = {
 	LONG: 1800, // 30 minutes
 	LONGER: 3600, // 1 hour
 }
+
+export const industries = [
+	'Agriculture',
+	'Automotive',
+	'Banking',
+	'Construction',
+	'Education',
+	'Energy',
+	'Finance',
+	'Healthcare',
+	'Hospitality',
+	'Information Technology',
+	'Manufacturing',
+	'Media',
+	'Retail',
+	'Telecommunications',
+	'Transportation',
+	'Utilities',
+	'Aerospace',
+	'Biotechnology',
+	'Chemicals',
+	'Consumer Goods',
+	'Defense',
+	'Electronics',
+	'Environmental Services',
+	'Food & Beverage',
+	'Forestry',
+	'Government',
+	'Insurance',
+	'Mining',
+	'Pharmaceuticals',
+	'Real Estate',
+	'Recreation',
+	'Shipping',
+	'Textiles',
+	'Waste Management',
+	'Wholesale'
+];

@@ -36,7 +36,7 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 						const docSnapshot = await getDoc(ref)
 						//@ts-ignore
 						documents.push({
-							//@ts-ignore 
+							//@ts-ignore
 							...docSnapshot.data(),
 							ref: docSnapshot.ref,
 							id: docSnapshot.id,

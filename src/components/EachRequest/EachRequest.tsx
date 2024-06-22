@@ -18,6 +18,7 @@ import {
 	BiPhone,
 } from 'react-icons/bi'
 import MainTooltip from '../atoms/MainTooltip'
+import { Link } from '@chakra-ui/next-js'
 
 type Props = {}
 
@@ -96,9 +97,9 @@ export default function EachRequest({}: Props) {
 						distinctio, veritatis ipsa cum perferendis cumque fugit pariatur
 						nobis ab deserunt impedit optio, repellat earum similique. Obcaecati
 						pariatur exercitationem incidunt perspiciatis!{' '}
-						<Text as="span" color="brand">
+						<Link href={'/request/seeker/1234'} as="span" color="brand">
 							Read more..
-						</Text>
+						</Link>
 					</Text>
 				</Flex>
 				<Flex justifyContent={'space-between'}>
