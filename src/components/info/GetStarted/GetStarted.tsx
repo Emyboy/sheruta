@@ -41,6 +41,8 @@ export default function GetStarted() {
 		setPercentage(calculatedPercentage)
 	}, [step])
 
+	return null
+
 	if (!user) {
 		return null
 	}
