@@ -10,6 +10,7 @@ import HabitsSelector from '@/components/info/GetStarted/HabitsSelector'
 import InterestsSelector from '@/components/info/GetStarted/InterestsSelector'
 import ProfilePictureSelector from '@/components/info/GetStarted/ProfilePictureSelector'
 import PersonalInfoForm from './PersonalInfoForm'
+import LocationKeywordForm from './LocationKeywordForm'
 
 export default function GetStarted() {
 	const {
@@ -31,6 +32,7 @@ export default function GetStarted() {
 			<HabitsSelector key={'habits'} done={next} />,
 			<InterestsSelector key={'interests'} done={next} />,
 			<ProfilePictureSelector key={'profile-pics'} done={next} />,
+			<LocationKeywordForm key={'location-keyword'} done={next} />,
 			<PersonalInfoForm key={'personal-info'} done={next} />,
 		]
 	}
@@ -41,7 +43,7 @@ export default function GetStarted() {
 		setPercentage(calculatedPercentage)
 	}, [step])
 
-	return null
+	// return null
 
 
 	if (!user) {

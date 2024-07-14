@@ -1,19 +1,67 @@
-import { DocumentReference } from 'firebase/firestore'
+import { DocumentReference } from 'firebase/firestore';
+import { z } from 'zod';
 
-export interface FlatShareProfileData {
-	_user_info_ref: any
-	_user_id: string
-	_user_ref: any
-	seeking: boolean | null
-	budget: null | number
-	credits: number
+// Define the Zod schema for FlatShareProfileData
+const FlatShareProfileDataSchema = z.object({
+	_user_info_ref: z.any(),
+	_user_id: z.string(),
+	_user_ref: z.any(),
+	seeking: z.boolean().nullable(),
+	budget: z.number().nullable(),
+	credits: z.number(),
+	occupation: z.string().nullable().optional(),
+	location_keyword: z.any().nullable().optional(),
+	state: z.any().nullable().optional(),
+	employment_status: z.string().nullable(),
+	work_industry: z.string().nullable(),
+	tiktok: z.string().nullable(),
+	facebook: z.string().nullable(),
+	instagram: z.string().nullable(),
+	twitter: z.string().nullable(),
+	linkedin: z.string().nullable(),
+	habits: z.array(z.any()),
+	interests: z.array(z.any()),
+	religion: z.string().nullable(),
+	verified: z.boolean()
+});
 
-	occupation?: string | null
-	location_keyword?: any | null
-	state?: any | null
+export type FlatShareProfileData = z.infer<typeof FlatShareProfileDataSchema>;
+export const FlatShareProfileDataDTO = FlatShareProfileDataSchema;
+export type UpdateFlatShareProfileDataDTO = {
+	occupation?: string;
+	employment_status?: string;
+	work_industry?: string;
+	religion?: string;
+	tiktok?: string;
+	facebook?: string;
+	instagram?: string;
+	twitter?: string;
+	linkedin?: string;
+	location_keyword?: string;
+	state?: string;
+	budget?: number;
+	seeking?: boolean;
+	credits?: number;
+	habits?: any[];
+	interests?: any[];	
+}
 
-	habits: DocumentReference[]
-	interests: DocumentReference[]
-	religion: string | null
-	verified: boolean
+export const flatShareProfileDefaults = {
+	religion: null,
+	verified: false,
+	employment_status: null,
+	facebook: null,
+	instagram: null,
+	linkedin: null,
+	tiktok: null,
+	twitter: null,
+	work_industry: null,
+	location_keyword: null,
+	occupation: null,
+	state: null,
+	budget: null,
+	seeking: null,
+	credits: 0,
+	habits: [],
+	interests: [],
 }

@@ -1,6 +1,6 @@
 import { DocumentReference, doc, getDoc } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { FlatShareProfileData } from './flat-share-profile.types'
+import { FlatShareProfileData, flatShareProfileDefaults, UpdateFlatShareProfileDataDTO } from './flat-share-profile.types'
 import { db } from '@/firebase'
 
 export default class FlatShareProfileService {
@@ -14,19 +14,10 @@ export default class FlatShareProfileService {
 		try {
 			let userInfo = await getDoc(doc(db, DBCollectionName.userInfos, _user_id))
 			let data: FlatShareProfileData = {
+				...flatShareProfileDefaults,
 				_user_info_ref: userInfo.ref,
 				_user_id,
-				budget: null,
-				seeking: null,
 				_user_ref,
-				credits: 0,
-				location_keyword: null,
-				occupation: null,
-				state: null,
-				habits: [],
-				interests: [],
-				religion: null,
-				verified: false,
 			}
 			let result = await SherutaDB.create({
 				collection_name: DBCollectionName.flatShareProfile,
@@ -112,7 +103,7 @@ export default class FlatShareProfileService {
 		data,
 	}: {
 		document_id: string
-		data: Partial<FlatShareProfileData>
+		data: Partial<UpdateFlatShareProfileDataDTO>
 	}): Promise<FlatShareProfileData> {
 		try {
 			let result = await SherutaDB.update({
