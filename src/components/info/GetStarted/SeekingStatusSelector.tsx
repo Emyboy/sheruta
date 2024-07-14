@@ -22,7 +22,7 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 		if (user) {
 			setIsLoading(true)
 			await FlatShareProfileService.update({
-				data: { seeking },
+				data: { seeking: seeking as any },
 				document_id: user?._id,
 			})
 			await getAuthDependencies()

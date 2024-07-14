@@ -26,7 +26,7 @@ export default function ProfileConfig({ next }: Props) {
 			setCommonState({ loading: true })
 			let result = await FlatShareProfileService.update({
 				data: {
-					seeking,
+					seeking: seeking as any,
 				},
 				document_id: user?._id as string,
 			})

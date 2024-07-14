@@ -11,14 +11,14 @@ export const dynamic = 'force-dynamic'
 export default function page({}: Props) {
 	return (
 		<Flex justifyContent={'center'}>
-			<MainContainer>
+			{/* <MainContainer>
 				<ThreeColumnLayout header={<MainHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<SearchPageFilter />
 					</Flex>
 					<SearchPage />
 				</ThreeColumnLayout>
-			</MainContainer>
+			</MainContainer> */}
 		</Flex>
 	)
 }
