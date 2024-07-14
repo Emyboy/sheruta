@@ -1,4 +1,4 @@
-import { Box, Flex } from '@chakra-ui/react'
+import { Flex } from '@chakra-ui/react'
 import { useAuthContext } from '@/context/auth.context'
 import GetStartedBeginning from '@/components/info/GetStarted/GetStartedBeginning'
 import GenderSelect from '@/components/forms/GenderSelector'
@@ -42,6 +42,7 @@ export default function GetStarted() {
 	}, [step])
 
 	return null
+
 
 	if (!user) {
 		return null

@@ -21,9 +21,9 @@ export default function UserProfilePage({ data }: Props) {
 			</MainSection>
 			<PersonalInfo />
 			<MainSection heading="My Postings" borderBottom={0}>
+				{/* <EachRequest />
 				<EachRequest />
-				<EachRequest />
-				<EachRequest />
+				<EachRequest /> */}
 			</MainSection>
 		</Flex>
 	)

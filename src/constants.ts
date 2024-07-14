@@ -49,5 +49,5 @@ export const industries = [
 	'Shipping',
 	'Textiles',
 	'Waste Management',
-	'Wholesale'
-];
+	'Wholesale',
+]
