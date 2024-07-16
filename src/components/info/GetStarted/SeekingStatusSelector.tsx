@@ -2,7 +2,6 @@ import { Box, Button, Flex, Text } from '@chakra-ui/react'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { BiSolidCheckCircle } from 'react-icons/bi'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 

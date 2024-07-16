@@ -1,5 +1,5 @@
-import { DocumentReference } from 'firebase/firestore';
-import { z } from 'zod';
+import { DocumentReference } from 'firebase/firestore'
+import { z } from 'zod'
 
 // Define the Zod schema for FlatShareProfileData
 const FlatShareProfileDataSchema = z.object({
@@ -22,28 +22,28 @@ const FlatShareProfileDataSchema = z.object({
 	habits: z.array(z.any()),
 	interests: z.array(z.any()),
 	religion: z.string().nullable(),
-	verified: z.boolean()
-});
+	verified: z.boolean(),
+})
 
-export type FlatShareProfileData = z.infer<typeof FlatShareProfileDataSchema>;
-export const FlatShareProfileDataDTO = FlatShareProfileDataSchema;
+export type FlatShareProfileData = z.infer<typeof FlatShareProfileDataSchema>
+export const FlatShareProfileDataDTO = FlatShareProfileDataSchema
 export type UpdateFlatShareProfileDataDTO = {
-	occupation?: string;
-	employment_status?: string;
-	work_industry?: string;
-	religion?: string;
-	tiktok?: string;
-	facebook?: string;
-	instagram?: string;
-	twitter?: string;
-	linkedin?: string;
-	location_keyword?: string;
-	state?: string;
-	budget?: number;
-	seeking?: boolean;
-	credits?: number;
-	habits?: any[];
-	interests?: any[];	
+	occupation?: string
+	employment_status?: string
+	work_industry?: string
+	religion?: string
+	tiktok?: string
+	facebook?: string
+	instagram?: string
+	twitter?: string
+	linkedin?: string
+	location_keyword?: string
+	state?: string
+	budget?: number
+	seeking?: boolean
+	credits?: number
+	habits?: any[]
+	interests?: any[]
 }
 
 export const flatShareProfileDefaults = {

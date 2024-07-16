@@ -1,6 +1,10 @@
 import { DocumentReference, doc, getDoc } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { FlatShareProfileData, flatShareProfileDefaults, UpdateFlatShareProfileDataDTO } from './flat-share-profile.types'
+import {
+	FlatShareProfileData,
+	flatShareProfileDefaults,
+	UpdateFlatShareProfileDataDTO,
+} from './flat-share-profile.types'
 import { db } from '@/firebase'
 
 export default class FlatShareProfileService {
