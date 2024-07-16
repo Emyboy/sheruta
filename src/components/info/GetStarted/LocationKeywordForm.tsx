@@ -1,11 +1,75 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
+import { StateData } from '@/firebase/service/options/states/states.types'
 import { Button, Flex, Input, Select, Text, VStack } from '@chakra-ui/react'
-import React, { useState } from 'react'
+import {
+	collection,
+	DocumentReference,
+	getDocs,
+	query,
+	where,
+} from 'firebase/firestore'
+import React, { useEffect, useState } from 'react'
 
 export default function LocationKeywordForm({ done }: { done: () => void }) {
 	const [isLoading, setIsLoading] = useState(false)
-	const [location, setLocation] = useState('')
-	const [state, setState] = useState('')
+
+	const [states, setStates] = useState<StateData[]>([])
+	const [keywords, setKeywords] = useState<LocationKeywordData[]>([])
+
+	const [stateRef, setStateRef] = useState<DocumentReference | null>(null)
+	const [locationRef, setLocationRef] = useState<DocumentReference | null>(null)
+
+	const fetchStates = async () => {
+		setIsLoading(true)
+		try {
+			const querySnapshot = await getDocs(
+				collection(db, DBCollectionName.states),
+			)
+			const statesList = querySnapshot.docs.map(
+				(doc) =>
+					({
+						id: doc.id,
+						...doc.data(),
+					}) as StateData,
+			)
+			console.log('ALL STATES:::', statesList)
+			setStates(statesList)
+		} catch (err) {
+			console.error('Error fetching states:', err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	const fetchKeywords = async () => {
+		setIsLoading(true)
+		try {
+			const q = query(
+				collection(db, DBCollectionName.locationKeyWords),
+				where('_state_ref', '==', stateRef),
+			)
+			const querySnapshot = await getDocs(q)
+			const keywordsList = querySnapshot.docs.map(
+				(doc) =>
+					({
+						id: doc.id,
+						...doc.data(),
+					}) as LocationKeywordData,
+			)
+			setKeywords(keywordsList)
+		} catch (err) {
+			console.error('Error fetching location keywords:', err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	useEffect(() => {
+		fetchStates()
+	}, [])
 
 	return (
 		<>
@@ -37,39 +101,46 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 							<Text color={'text_muted'} fontSize={'sm'}>
 								State
 							</Text>
-							<Select placeholder="Select option" bg="dark">
-								<option value="option1">Option 1</option>
-								<option value="option2">Option 2</option>
-								<option value="option3">Option 3</option>
+							<Select placeholder="Select state" bg="dark">
+								{states.map((state) => {
+									return (
+										<option
+											key={state.id}
+											value={state.name.toLocaleLowerCase()}
+										>
+											{state.name}
+										</option>
+									)
+								})}
 							</Select>
-							<Input
-								required
-								value={state}
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Ex. Jane"
-							/>
 						</Flex>
 					</Flex>
-					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={2}
-						>
-							<Text color={'text_muted'} fontSize={'sm'}>
-								Location
-							</Text>
-							<Input
-								required
-								value={location}
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Ex. Jane"
-							/>
+					{locationRef && (
+						<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
+							<Flex
+								justifyContent={'flex-start'}
+								flexDir={'column'}
+								w="full"
+								gap={2}
+							>
+								<Text color={'text_muted'} fontSize={'sm'}>
+									Area
+								</Text>
+								<Select placeholder="Select area" bg="dark">
+									{states.map((state) => {
+										return (
+											<option
+												key={state.id}
+												value={state.name.toLocaleLowerCase()}
+											>
+												{state.name}
+											</option>
+										)
+									})}
+								</Select>
+							</Flex>
 						</Flex>
-					</Flex>
+					)}
 				</VStack>
 				<br />
 				<Button type={'submit'} isLoading={isLoading}>{`Next`}</Button>
