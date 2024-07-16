@@ -21,38 +21,43 @@ type Props = {
 	done?: () => void
 }
 
-export default function PersonalInfoForm({ }: Props) {
-	const { showToast } = useCommon();
-	const { authState: { user, flat_share_profile } } = useAuthContext();
+export default function PersonalInfoForm({}: Props) {
+	const { showToast } = useCommon()
+	const {
+		authState: { user, flat_share_profile },
+	} = useAuthContext()
 	const [isLoading, setIsLoading] = useState(false)
-	const [occupation, setOccupation] = useState('');
-	const [employment_status, setEmploymentStatus] = useState('');
-	const [work_industry, setWorkIndustry] = useState('');
-	const [religion, setReligion] = useState('');
-	const [tiktok, setTiktok] = useState('');
-	const [facebook, setFacebook] = useState('');
-	const [instagram, setInstagram] = useState('');
-	const [twitter, setTwitter] = useState('');
-	const [linkedin, setLinkedin] = useState('');
+	const [occupation, setOccupation] = useState('')
+	const [employment_status, setEmploymentStatus] = useState('')
+	const [work_industry, setWorkIndustry] = useState('')
+	const [religion, setReligion] = useState('')
+	const [tiktok, setTiktok] = useState('')
+	const [facebook, setFacebook] = useState('')
+	const [instagram, setInstagram] = useState('')
+	const [twitter, setTwitter] = useState('')
+	const [linkedin, setLinkedin] = useState('')
 
 	const handleSubmit = async (e: any) => {
-		e.preventDefault();
+		e.preventDefault()
 		try {
-			await FlatShareProfileService.update({ document_id: user?._id as string, data: {
-				occupation,
-				employment_status,
-				work_industry,
-				religion,
-				tiktok,
-				facebook,
-				instagram,
-				twitter,
-				linkedin
-			} })
+			await FlatShareProfileService.update({
+				document_id: user?._id as string,
+				data: {
+					occupation,
+					employment_status,
+					work_industry,
+					religion,
+					tiktok,
+					facebook,
+					instagram,
+					twitter,
+					linkedin,
+				},
+			})
 		} catch (error) {
 			showToast({
-				message: "Error, please try again",
-				status: 'error'
+				message: 'Error, please try again',
+				status: 'error',
 			})
 		}
 	}
@@ -107,7 +112,7 @@ export default function PersonalInfoForm({ }: Props) {
 									borderColor={'border_color'}
 									_dark={{ borderColor: 'dark_light' }}
 									placeholder="Ex. Jane"
-									onChange={e => setOccupation(e.target.value)}
+									onChange={(e) => setOccupation(e.target.value)}
 								/>
 							</Flex>
 							<Flex
@@ -119,7 +124,15 @@ export default function PersonalInfoForm({ }: Props) {
 								<Text color={'text_muted'} fontSize={'sm'}>
 									Employment Status
 								</Text>
-								<Select placeholder="Select option" bg="dark" required onChange={e => setEmploymentStatus(e.target.value)} value={flat_share_profile?.employment_status?.toLowerCase() || ''}>
+								<Select
+									placeholder="Select option"
+									bg="dark"
+									required
+									onChange={(e) => setEmploymentStatus(e.target.value)}
+									value={
+										flat_share_profile?.employment_status?.toLowerCase() || ''
+									}
+								>
 									<option value="employed">Employed</option>
 									<option value="unemployed">Unemployed</option>
 									<option value="self employed">Self employed</option>
@@ -138,7 +151,13 @@ export default function PersonalInfoForm({ }: Props) {
 								<Text color={'text_muted'} fontSize={'sm'}>
 									Work Industry
 								</Text>
-								<Select placeholder="Select option" bg="dark" required onChange={e => setWorkIndustry(e.target.value)} value={flat_share_profile?.work_industry?.toLowerCase() || ''}>
+								<Select
+									placeholder="Select option"
+									bg="dark"
+									required
+									onChange={(e) => setWorkIndustry(e.target.value)}
+									value={flat_share_profile?.work_industry?.toLowerCase() || ''}
+								>
 									{industries.map((industry) => (
 										<option key={industry} value={industry.toLowerCase()}>
 											{industry}
@@ -155,7 +174,13 @@ export default function PersonalInfoForm({ }: Props) {
 								<Text color={'text_muted'} fontSize={'sm'}>
 									Religion
 								</Text>
-								<Select placeholder="Select option" bg="dark" required onChange={e => setReligion(e.target.value)} value={flat_share_profile?.religion || ''}>
+								<Select
+									placeholder="Select option"
+									bg="dark"
+									required
+									onChange={(e) => setReligion(e.target.value)}
+									value={flat_share_profile?.religion || ''}
+								>
 									<option value="christian">Christian</option>
 									<option value="muslim">Muslim</option>
 									<option value="others">Others</option>
@@ -181,7 +206,12 @@ export default function PersonalInfoForm({ }: Props) {
 									>
 										tiktok.com/
 									</InputLeftAddon>
-									<Input type="text" placeholder="@johndoe" onChange={e => setTiktok(e.target.value)} value={flat_share_profile?.tiktok || ''} />
+									<Input
+										type="text"
+										placeholder="@johndoe"
+										onChange={(e) => setTiktok(e.target.value)}
+										value={flat_share_profile?.tiktok || ''}
+									/>
 								</InputGroup>
 							</Flex>
 							<Flex
@@ -201,7 +231,12 @@ export default function PersonalInfoForm({ }: Props) {
 									>
 										facebook.com/
 									</InputLeftAddon>
-									<Input type="text" placeholder="johndoe" onChange={e => setFacebook(e.target.value)} value={flat_share_profile?.facebook || ''} />
+									<Input
+										type="text"
+										placeholder="johndoe"
+										onChange={(e) => setFacebook(e.target.value)}
+										value={flat_share_profile?.facebook || ''}
+									/>
 								</InputGroup>
 							</Flex>
 						</Flex>
@@ -223,7 +258,13 @@ export default function PersonalInfoForm({ }: Props) {
 									>
 										instagram.com/
 									</InputLeftAddon>
-									<Input type="text" placeholder="johndoe" required onChange={e => setInstagram(e.target.value)} value={flat_share_profile?.instagram || ''} />
+									<Input
+										type="text"
+										placeholder="johndoe"
+										required
+										onChange={(e) => setInstagram(e.target.value)}
+										value={flat_share_profile?.instagram || ''}
+									/>
 								</InputGroup>
 							</Flex>
 							<Flex
@@ -243,7 +284,12 @@ export default function PersonalInfoForm({ }: Props) {
 									>
 										x.com/
 									</InputLeftAddon>
-									<Input type="text" placeholder="ohndoe" onChange={e => setTwitter(e.target.value)} value={flat_share_profile?.twitter || ''} />
+									<Input
+										type="text"
+										placeholder="ohndoe"
+										onChange={(e) => setTwitter(e.target.value)}
+										value={flat_share_profile?.twitter || ''}
+									/>
 								</InputGroup>
 							</Flex>
 						</Flex>
@@ -262,7 +308,7 @@ export default function PersonalInfoForm({ }: Props) {
 									borderColor={'border_color'}
 									_dark={{ borderColor: 'dark_light' }}
 									placeholder="Ex. https://www.linkedin.com/in/xyz"
-									onChange={e => setLinkedin(e.target.value)}
+									onChange={(e) => setLinkedin(e.target.value)}
 									value={flat_share_profile?.linkedin || ''}
 								/>
 							</Flex>
