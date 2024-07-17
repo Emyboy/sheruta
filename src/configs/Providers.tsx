@@ -10,9 +10,7 @@ import { Next13ProgressBar } from 'next13-progressbar'
 import MasterPopup from '@/components/popups/MasterPopup'
 import dynamic from 'next/dynamic'
 import GetStarted from '@/components/info/GetStarted/GetStarted'
-import {
-	OptionsProvider,
-} from '@/context/options.context'
+import { OptionsProvider } from '@/context/options.context'
 
 const CreditOptionsPopups = dynamic(
 	() => import('@/components/popups/CreditOptionsPopups'),
@@ -21,12 +19,8 @@ const CreditOptionsPopups = dynamic(
 	},
 )
 
-export function Providers({
-	children,
-}: {
-	children: React.ReactNode
-}) {
-		return (
+export function Providers({ children }: { children: React.ReactNode }) {
+	return (
 		<ChakraProvider theme={theme}>
 			<ColorModeScript initialColorMode={theme.config.initialColorMode} />
 			<AppContextProvider>
