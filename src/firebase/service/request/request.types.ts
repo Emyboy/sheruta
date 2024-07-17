@@ -28,6 +28,8 @@ export interface RequestData {
     media_type: RequestDataMediaType;
 
     seeking: boolean; // if the user is a seeker or a host
+    room_type: "ensuite" | "shared";
+    agency_free_included: boolean;
 
     images_urls: string[];
     video_url: string | null;
