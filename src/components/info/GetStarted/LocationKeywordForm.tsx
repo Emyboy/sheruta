@@ -3,13 +3,11 @@ import { useOptionsContext } from '@/context/options.context'
 import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { Button, Flex, Input, Select, Text, VStack } from '@chakra-ui/react'
-import {
-	DocumentReference,
-} from 'firebase/firestore'
+import { DocumentReference } from 'firebase/firestore'
 import React, { useEffect, useState } from 'react'
 
 export default function LocationKeywordForm({ done }: { done: () => void }) {
-	const { optionsState: options } = useOptionsContext();
+	const { optionsState: options } = useOptionsContext()
 	const [isLoading, setIsLoading] = useState(false)
 
 	const [states, setStates] = useState<StateData[]>([])
