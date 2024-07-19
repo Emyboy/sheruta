@@ -71,7 +71,6 @@ export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 
 			const results = await Promise.all(optionPromises)
 			const options: OptionsState = Object.assign({}, ...results)
-			console.log('THE OPTIONS::', options)
 			setOptionsState(options)
 			setAppState({ app_loading: false })
 		})()
