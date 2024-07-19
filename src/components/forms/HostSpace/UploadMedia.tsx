@@ -1,5 +1,4 @@
 import UploadMediaIcon from '@/assets/svg/upload-media-icon'
-import { DEFAULT_PADDING } from '@/configs/theme'
 import {
 	Button,
 	Flex,
@@ -7,21 +6,27 @@ import {
 	Grid,
 	GridItem,
 	Input,
-	Select,
 	Text,
-	Textarea,
 	useToast,
 	VStack,
 } from '@chakra-ui/react'
 import Image from 'next/image'
 import React, { useState } from 'react'
+import { HostSpaceFormProps } from '.'
+import { useAuthContext } from '@/context/auth.context'
+import SherutaDB from '@/firebase/service/index.firebase'
 
-type Props = {
-	next: () => void
-}
-
-export default function UploadMedia({ next }: Props) {
+export default function UploadMedia({
+	next,
+	formData,
+	setFormData,
+}: HostSpaceFormProps) {
 	const toast = useToast()
+	const {
+		authState: { user },
+	} = useAuthContext()
+
+	const [loading, setLoading] = useState(false)
 
 	const [mediaData, setMediaData] = useState<{
 		images: string[]
@@ -95,14 +100,52 @@ export default function UploadMedia({ next }: Props) {
 	}
 
 	const handleSubmit = async (e: any) => {
+		setLoading(true)
 		e.preventDefault()
-		if (mediaData.images.length === 0 && !mediaData.video)
+		if (mediaData.images.length < 4)
 			return toast({
 				title: 'Upload either an image or a video',
 				status: 'error',
 			})
-		console.log(mediaData)
-		next()
+
+		const userId = user?._id
+		const imageUploadPromises = mediaData.images.map((url, i) =>
+			SherutaDB.uploadMedia({
+				data: url,
+				storageUrl: `images/requests/${userId}/${crypto.randomUUID()}/image_${i}`,
+			}),
+		)
+
+		const videoUploadPromise = mediaData.video
+			? SherutaDB.uploadMedia({
+					data: mediaData.video,
+					storageUrl: `videos/requests/${userId}/${crypto.randomUUID()}/video_0`,
+				})
+			: null
+
+		const promises = videoUploadPromise
+			? [...imageUploadPromises, videoUploadPromise]
+			: imageUploadPromises
+
+		Promise.all(promises)
+			.then((values) => {
+				const res = [...values]
+				let video_url = undefined
+
+				if (mediaData.video) {
+					video_url = res.pop()?.metadata.fullPath
+				}
+				const images_urls = res.map((result) => result.metadata.fullPath)
+
+				setFormData((prev) => ({ ...prev, video_url, images_urls }))
+			})
+			.catch((error) => {
+				console.error('Error uploading media:', error)
+				toast({ title: 'Error uploading media', status: 'error' })
+			})
+
+		setLoading(false)
+		// next()
 	}
 
 	return (
@@ -258,7 +301,9 @@ export default function UploadMedia({ next }: Props) {
 					</FormLabel>
 				</VStack>
 				<br />
-				<Button type={'submit'}>{`Next`}</Button>
+				<Button disabled={loading} type={'submit'}>
+					{loading ? 'Loading...' : 'Next'}
+				</Button>
 			</Flex>
 		</>
 	)

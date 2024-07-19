@@ -1,127 +1,153 @@
-import { DocumentReference } from "@firebase/firestore-types";
-import { Timestamp } from "firebase/firestore";
-import { z } from "zod";
+import { DocumentReference } from '@firebase/firestore-types'
+import { Timestamp } from 'firebase/firestore'
+import { z } from 'zod'
 
 export interface RequestData {
-    title?: string;
-    description?: string;
-    uuid: string; // for tracking firebase storage location
+	title?: string
+	description?: string
+	uuid: string // for tracking firebase storage location
 
-    budget: number;
+	budget: number
+	service_charge: number
 
-    google_location_object: Record<string, string>;
-    google_location_text: string;
+	google_location_object: Record<string, string>
+	google_location_text: string
 
-    _location_keyword_ref: DocumentReference;
-    _state_ref: DocumentReference;
-    _service_ref: DocumentReference;
-    _category_ref: DocumentReference;
-    _status_ref: DocumentReference;
+	_location_keyword_ref: DocumentReference
+	_state_ref: DocumentReference
+	_service_ref: DocumentReference
+	_category_ref: DocumentReference
+	_status_ref: DocumentReference
 
-    payment_type: PaymentPlan;
+	payment_type: PaymentPlan
 
-    bedrooms: null | number;
-    bathrooms: null | number;
-    toilets: null | number;
-    living_rooms: null | number;
+	bedrooms: null | number
+	bathrooms: null | number
+	toilets: null | number
+	living_rooms: null | number
 
-    media_type: RequestDataMediaType;
+	seeking: boolean // if the user is a seeker or a host
+	room_type: 'ensuite' | 'shared'
+	agency_free_included: boolean
 
-    seeking: boolean; // if the user is a seeker or a host
-    room_type: "ensuite" | "shared";
-    agency_free_included: boolean;
+	images_urls: string[]
+	video_url: string | null
 
-    images_urls: string[];
-    video_url: string | null;
+	availability_status: AvailabilityStatus | null // this should be for only hosts
 
-    availability_status: AvailabilityStatus | null; // this should be for only hosts
-
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
+	createdAt: Timestamp
+	updatedAt: Timestamp
 }
 
-type RequestDataMediaType = "image" | "video" | 'image_video';
-type PaymentPlan = 'monthly' | 'annually' | 'bi-annually' | 'weekly';
-type AvailabilityStatus = "available" | 'unavailable' | 'reserved';
+type PaymentPlan = 'monthly' | 'annually' | 'bi-annually' | 'weekly'
+type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
 export const createHostRequestDTO = z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    uuid: z.string(),
+	uuid: z.string(),
 
-    budget: z.number(),
-    service_charge: z.number().nullable(),
+	title: z.string().optional(),
+	description: z.string().optional(),
+	budget: z.number(),
+	service_charge: z.number().nullable(),
+	payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
+	availability_status: z
+		.enum(['available', 'unavailable', 'reserved'])
+		.nullable(),
 
-    google_location_object: z.record(z.string()),
-    google_location_text: z.string(),
+	bedrooms: z.number().nullable(),
+	bathrooms: z.number().nullable(),
+	toilets: z.number().nullable(),
+	living_rooms: z.number().nullable(),
 
-    _location_keyword_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _state_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _service_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _category_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _status_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
+	images_urls: z.array(z.string()),
+	video_url: z.string().nullable(),
 
-    payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
+	seeking: z.boolean(),
 
-    bedrooms: z.number().nullable(),
-    bathrooms: z.number().nullable(),
-    toilets: z.number().nullable(),
-    living_rooms: z.number().nullable(),
+	google_location_object: z.record(z.string()),
+	google_location_text: z.string(),
 
-    media_type: z.enum(["image", "video", "image_video"]),
+	_location_keyword_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_state_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_service_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_category_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_status_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
 
-    seeking: z.boolean(),
-
-    images_urls: z.array(z.string()),
-    video_url: z.string().nullable(),
-
-    availability_status: z.enum(["available", "unavailable", "reserved"]).nullable(),
-
-    createdAt: z.instanceof(Timestamp),
-    updatedAt: z.instanceof(Timestamp),
-});
+	createdAt: z.instanceof(Timestamp),
+	updatedAt: z.instanceof(Timestamp),
+})
 
 export const createSeekerRequestDTO = z.object({
-    description: z.string().optional(),
-    uuid: z.string(),
+	description: z.string().optional(),
+	uuid: z.string(),
 
-    budget: z.number(),
+	budget: z.number(),
 
-    google_location_object: z.record(z.string()),
-    google_location_text: z.string(),
+	google_location_object: z.record(z.string()),
+	google_location_text: z.string(),
 
-    _location_keyword_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _state_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _service_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _category_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
-    _status_ref: z.custom<DocumentReference>((val) => val instanceof DocumentReference, {
-        message: "Must be a DocumentReference",
-    }),
+	_location_keyword_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_state_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_service_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_category_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_status_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
 
-    payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
+	payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
 
-    media_type: z.enum(["image", "video", "image_video"]),
+	media_type: z.enum(['image', 'video', 'image_video']),
 
-    seeking: z.boolean(), // true for seekers
+	seeking: z.boolean(), // true for seekers
 
-    createdAt: z.instanceof(Timestamp),
-    updatedAt: z.instanceof(Timestamp),
-});
+	createdAt: z.instanceof(Timestamp),
+	updatedAt: z.instanceof(Timestamp),
+})

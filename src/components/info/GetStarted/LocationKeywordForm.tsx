@@ -1,19 +1,13 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { useOptionsContext } from '@/context/options.context'
 import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { Button, Flex, Input, Select, Text, VStack } from '@chakra-ui/react'
-import {
-	collection,
-	DocumentReference,
-	getDocs,
-	query,
-	where,
-} from 'firebase/firestore'
+import { DocumentReference } from 'firebase/firestore'
 import React, { useEffect, useState } from 'react'
 
 export default function LocationKeywordForm({ done }: { done: () => void }) {
+	const { optionsState: options } = useOptionsContext()
 	const [isLoading, setIsLoading] = useState(false)
 
 	const [states, setStates] = useState<StateData[]>([])
@@ -21,55 +15,6 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 
 	const [stateRef, setStateRef] = useState<DocumentReference | null>(null)
 	const [locationRef, setLocationRef] = useState<DocumentReference | null>(null)
-
-	const fetchStates = async () => {
-		setIsLoading(true)
-		try {
-			const querySnapshot = await getDocs(
-				collection(db, DBCollectionName.states),
-			)
-			const statesList = querySnapshot.docs.map(
-				(doc) =>
-					({
-						id: doc.id,
-						...doc.data(),
-					}) as StateData,
-			)
-			console.log('ALL STATES:::', statesList)
-			setStates(statesList)
-		} catch (err) {
-			console.error('Error fetching states:', err)
-		} finally {
-			setIsLoading(false)
-		}
-	}
-
-	const fetchKeywords = async () => {
-		setIsLoading(true)
-		try {
-			const q = query(
-				collection(db, DBCollectionName.locationKeyWords),
-				where('_state_ref', '==', stateRef),
-			)
-			const querySnapshot = await getDocs(q)
-			const keywordsList = querySnapshot.docs.map(
-				(doc) =>
-					({
-						id: doc.id,
-						...doc.data(),
-					}) as LocationKeywordData,
-			)
-			setKeywords(keywordsList)
-		} catch (err) {
-			console.error('Error fetching location keywords:', err)
-		} finally {
-			setIsLoading(false)
-		}
-	}
-
-	useEffect(() => {
-		fetchStates()
-	}, [])
 
 	return (
 		<>
@@ -102,7 +47,7 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 								State
 							</Text>
 							<Select placeholder="Select state" bg="dark">
-								{states.map((state) => {
+								{options.states.map((state) => {
 									return (
 										<option
 											key={state.id}

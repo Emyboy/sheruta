@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '..'
 import moment from 'moment'
+import { getStorage, ref, uploadString } from 'firebase/storage'
 
 interface createDTO {
 	collection_name: string
@@ -101,6 +102,20 @@ export default class SherutaDB {
 		} catch (error) {
 			return Promise.reject(error)
 		}
+	}
+
+	static async uploadMedia({
+		data,
+		storageUrl,
+	}: {
+		data: string
+		storageUrl: string
+	}) {
+		const storage = getStorage()
+		const storageRef = ref(storage, storageUrl)
+
+		const snapshot = await uploadString(storageRef, data, 'data_url')
+		return snapshot
 	}
 }
 

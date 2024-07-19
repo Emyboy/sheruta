@@ -9,18 +9,20 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
+import { HostSpaceFormProps } from '.'
 
-type Props = {
-	next: () => void
-}
-
-export default function Summary({ next }: Props) {
+export default function Summary({
+	next,
+	formData,
+	setFormData,
+}: HostSpaceFormProps) {
 	const [summaryData, setSummaryData] = useState({
-		title: '',
-		summary: '',
-		accomodationType: '',
-		apartmentType: '',
-		serviceType: '',
+		title: formData.title || '',
+		description: formData.description || '',
+		budget: formData.budget || undefined,
+		service_charge: formData.service_charge || undefined,
+		payment_type: formData.payment_type || '',
+		availability_status: formData.availability_status || '',
 	})
 
 	const handleChange = (
@@ -28,12 +30,20 @@ export default function Summary({ next }: Props) {
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
-		setSummaryData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+		if (e.target.name === 'budget' || e.target.name === 'service_charge') {
+			setSummaryData((prev) => ({
+				...prev,
+				[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
+			}))
+		} else {
+			setSummaryData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+		}
 	}
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
 		console.log(summaryData)
+		setFormData((prev) => ({ ...prev, ...summaryData }))
 		next()
 	}
 
@@ -79,13 +89,13 @@ export default function Summary({ next }: Props) {
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Apartment Summary
+								Apartment Description
 							</Text>
 							<Textarea
 								onChange={handleChange}
 								required
-								value={summaryData.summary}
-								name="summary"
+								value={summaryData.description}
+								name="description"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Summary Here"
@@ -95,58 +105,80 @@ export default function Summary({ next }: Props) {
 						</Flex>
 					</Flex>
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Select
-							onChange={handleChange}
-							required
-							value={summaryData.accomodationType}
-							name="accomodationType"
-							borderColor={'border_color'}
-							iconColor="border_color"
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Accomodation Type"
-							size="md"
-							color={'border_color'}
-							w={'full'}
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
 						>
-							<option value="option1">Option 1</option>
-							<option value="option2">Option 2</option>
-							<option value="option3">Option 3</option>
-						</Select>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Budget
+							</Text>
+							<Input
+								onChange={handleChange}
+								required
+								value={summaryData.budget}
+								name="budget"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Price"
+							/>
+						</Flex>
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
+						>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Service Charge
+							</Text>
+							<Input
+								onChange={handleChange}
+								required
+								value={summaryData.service_charge}
+								name="service_charge"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Service Charge"
+							/>
+						</Flex>
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 						<Select
 							onChange={handleChange}
 							required
-							value={summaryData.apartmentType}
-							name="apartmentType"
+							value={summaryData.payment_type}
+							name="payment_type"
 							borderColor={'border_color'}
 							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Apartment Type"
+							placeholder="Payment Type"
 							size="md"
 							color={'border_color'}
 						>
-							<option value="option1">Option 1</option>
-							<option value="option2">Option 2</option>
-							<option value="option3">Option 3</option>
+							<option value="monthly">MONTHLY</option>
+							<option value="annually">ANNUALLY</option>
+							<option value="bi-annually">BI-ANNUALLY</option>
+							<option value="option3">WEEKLY</option>
 						</Select>
 
 						<Select
 							onChange={handleChange}
 							required
-							value={summaryData.serviceType}
-							name="serviceType"
+							value={summaryData.availability_status}
+							name="availability_status"
 							borderColor={'border_color'}
 							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Service Type"
+							placeholder="Availability Status"
 							size="md"
 							color={'border_color'}
 						>
-							<option value="option1">Option 1</option>
-							<option value="option2">Option 2</option>
-							<option value="option3">Option 3</option>
+							<option value="available">AVAILABLE</option>
+							<option value="unavailable">UNAVAILABLE</option>
+							<option value="reserved">RESERVED</option>
 						</Select>
 					</Flex>
 				</VStack>
