@@ -63,6 +63,7 @@ export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 				const querySnapshot = await getDocs(collection(db, collectionName))
 				const options = querySnapshot.docs.map((doc) => ({
 					id: doc.id,
+					_ref: doc.ref,
 					...doc.data(),
 				}))
 				return { [collectionName]: options }
