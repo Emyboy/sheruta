@@ -7,41 +7,71 @@ import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
 import Summary from './Summary'
 import UploadMedia from './UploadMedia'
+import { DocumentReference } from 'firebase/firestore'
 
 export type HostSpaceFormProps = {
 	next: () => void
-	formData: Partial<RequestData>
-	setFormData: React.SetStateAction<React.Dispatch<Partial<RequestData>>>
+	formData: FormDataType
+	setFormData: React.SetStateAction<React.Dispatch<FormDataType>>
+}
+
+export type FormDataType = Partial<ApartmentDetailsType & MediaType>
+
+export type ApartmentDetailsType = {
+	title: string
+	description: string
+	service_charge: number
+	budget: number
+	payment_type: string
+	bedrooms: number
+	bathrooms: number
+	toilets: number
+	living_rooms: number
+	availability_status: string
+	_location_keyword_ref: undefined | DocumentReference
+	_state_ref: undefined | DocumentReference
+	_service_ref: undefined | DocumentReference
+	_category_ref: undefined | DocumentReference
+	_status_ref: undefined | DocumentReference
+	state: string
+	area: string
+	service: string
+	category: string
+}
+
+export type MediaType = {
+	images_urls: string[]
+	video_url: string | undefined
 }
 
 const initialState = {
 	title: '',
 	description: '',
-	uuid: '',
 	service_charge: undefined,
 	budget: undefined,
-	payment_type: undefined,
-	bedrooms: null,
-	bathrooms: null,
-	toilets: null,
-	living_rooms: null,
-	room_type: undefined,
-	agency_free_included: false,
+	payment_type: '',
+	bedrooms: undefined,
+	bathrooms: undefined,
+	toilets: undefined,
+	living_rooms: undefined,
 	images_urls: [],
 	video_url: '',
-	availability_status: null,
+	availability_status: '',
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
 	_category_ref: undefined,
 	_status_ref: undefined,
+	state: '',
+	area: '',
+	service: '',
+	category: '',
 }
 
 export default function HostSpace() {
 	const router = useRouter()
 
-	const [hostSpaceData, setHostSpaceData] =
-		useState<Partial<RequestData>>(initialState)
+	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>(initialState)
 
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
@@ -56,12 +86,14 @@ export default function HostSpace() {
 
 	const allSteps = (): Array<React.ReactNode> => [
 		<Summary
+			key={0}
 			next={next}
 			formData={hostSpaceData}
 			setFormData={setHostSpaceData}
 		/>,
 
 		<UploadMedia
+			key={1}
 			next={next}
 			formData={hostSpaceData}
 			setFormData={setHostSpaceData}
@@ -69,6 +101,11 @@ export default function HostSpace() {
 	]
 
 	const allStepNames = (): string[] => ['About Apartment', 'Upload Media']
+
+	useEffect(() => {
+		const formData = localStorage.getItem('host_space_form')
+		if (formData) setHostSpaceData(JSON.parse(formData))
+	}, [])
 
 	useEffect(() => {
 		const totalSteps = allSteps().length

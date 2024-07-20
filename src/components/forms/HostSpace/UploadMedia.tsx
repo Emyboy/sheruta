@@ -1,4 +1,6 @@
 import UploadMediaIcon from '@/assets/svg/upload-media-icon'
+import { useAuthContext } from '@/context/auth.context'
+import SherutaDB from '@/firebase/service/index.firebase'
 import {
 	Button,
 	Flex,
@@ -12,9 +14,7 @@ import {
 } from '@chakra-ui/react'
 import Image from 'next/image'
 import React, { useState } from 'react'
-import { HostSpaceFormProps } from '.'
-import { useAuthContext } from '@/context/auth.context'
-import SherutaDB from '@/firebase/service/index.firebase'
+import { HostSpaceFormProps, MediaType } from '.'
 
 export default function UploadMedia({
 	next,
@@ -27,13 +27,11 @@ export default function UploadMedia({
 	} = useAuthContext()
 
 	const [loading, setLoading] = useState(false)
+	const [length, setLength] = useState(4)
 
-	const [mediaData, setMediaData] = useState<{
-		images: string[]
-		video: string
-	}>({
-		images: [],
-		video: '',
+	const [mediaData, setMediaData] = useState<MediaType>({
+		images_urls: [],
+		video_url: '',
 	})
 
 	const handleUploadImages = (
@@ -54,11 +52,11 @@ export default function UploadMedia({
 		const reader = new FileReader()
 		reader.readAsDataURL(selectedFile)
 		reader.onload = () => {
-			const additionalImgs = [...mediaData.images]
+			const additionalImgs = [...mediaData.images_urls]
 			additionalImgs[i] = reader.result as string
 			setMediaData((prev) => ({
 				...prev,
-				images: additionalImgs,
+				images_urls: additionalImgs,
 			}))
 		}
 		reader.onerror = (err) => {
@@ -100,25 +98,26 @@ export default function UploadMedia({
 	}
 
 	const handleSubmit = async (e: any) => {
-		setLoading(true)
 		e.preventDefault()
-		if (mediaData.images.length < 4)
+		if (mediaData.images_urls.length < length)
 			return toast({
-				title: 'Upload either an image or a video',
+				title: `Upload at least ${length} images`,
 				status: 'error',
 			})
 
+		setLoading(true)
+
 		const userId = user?._id
-		const imageUploadPromises = mediaData.images.map((url, i) =>
+		const imageUploadPromises = mediaData.images_urls.map((url, i) =>
 			SherutaDB.uploadMedia({
 				data: url,
 				storageUrl: `images/requests/${userId}/${crypto.randomUUID()}/image_${i}`,
 			}),
 		)
 
-		const videoUploadPromise = mediaData.video
+		const videoUploadPromise = mediaData.video_url
 			? SherutaDB.uploadMedia({
-					data: mediaData.video,
+					data: mediaData.video_url,
 					storageUrl: `videos/requests/${userId}/${crypto.randomUUID()}/video_0`,
 				})
 			: null
@@ -132,7 +131,7 @@ export default function UploadMedia({
 				const res = [...values]
 				let video_url = undefined
 
-				if (mediaData.video) {
+				if (mediaData.video_url) {
 					video_url = res.pop()?.metadata.fullPath
 				}
 				const images_urls = res.map((result) => result.metadata.fullPath)
@@ -145,6 +144,7 @@ export default function UploadMedia({
 			})
 
 		setLoading(false)
+
 		// next()
 	}
 
@@ -160,79 +160,123 @@ export default function UploadMedia({
 			>
 				<br />
 				<VStack spacing={6} mb={3} w={'full'}>
-					<Grid templateColumns={'repeat(2, 1fr)'} gap={6}>
-						{Array.from({ length: 4 }).map((_, i) => (
-							<GridItem w={'100%'}>
-								<FormLabel
-									key={i}
-									htmlFor={i.toString()}
-									height={240}
-									w={240}
-									borderRadius={'4px'}
-									display={'flex'}
-									transition={'all'}
-									transitionDuration={'300ms'}
-									cursor={'pointer'}
-									_active={{
-										scale: 95,
-										opacity: 25,
-									}}
-									overflow={'hidden'}
-								>
-									{mediaData.images[i] ? (
-										<Image
-											src={mediaData.images[i]}
-											alt="additional Image"
-											objectFit="fill"
-											objectPosition="center"
-											width={240}
-											height={240}
-										/>
-									) : (
+					<Flex flexDirection={'column'} gap={2} w={'100%'}>
+						{mediaData.images_urls.length > 4 && (
+							<Button
+								padding={'1rem'}
+								borderRadius={999}
+								bgColor={'brand'}
+								color={'white'}
+								alignSelf={'end'}
+								onClick={() => setLength((prev) => prev + 1)}
+								title="Add image"
+							>
+								+
+							</Button>
+						)}
+						<Grid templateColumns={'repeat(2, 1fr)'} gap={6}>
+							{Array.from({
+								length,
+							}).map((_, i) => (
+								<GridItem w={'100%'} position={'relative'}>
+									{length > 4 && (
 										<Flex
-											justifyContent={'center'}
+											padding={'0.5rem'}
 											alignItems={'center'}
-											gap={2}
-											w={'100%'}
-											h={'100%'}
-											borderRadius={'8px'}
-											borderColor={'border_color'}
-											border={'1px'}
-											borderStyle={'dashed'}
-											backgroundColor={'gray'}
-											padding={'8px'}
+											justifyContent={'center'}
+											w={6}
+											h={6}
+											borderRadius={999}
+											bgColor={'brand'}
+											color={'white'}
+											alignSelf={'end'}
+											onClick={() => {
+												setLength((prev) => prev - 1)
+												const images_urls = mediaData.images_urls.splice(i, 1)
+												setMediaData((prev) => ({ ...prev, images_urls }))
+											}}
+											title="Remove image"
+											position={'absolute'}
+											cursor={'pointer'}
+											top={-2.5}
+											right={0}
+											zIndex={50}
 										>
+											-
+										</Flex>
+									)}
+									<FormLabel
+										key={i}
+										htmlFor={i.toString()}
+										height={240}
+										w={240}
+										borderRadius={'4px'}
+										display={'flex'}
+										transition={'all'}
+										transitionDuration={'300ms'}
+										position={'relative'}
+										cursor={'pointer'}
+										_active={{
+											scale: 95,
+											opacity: 25,
+										}}
+									>
+										{mediaData.images_urls[i] ? (
+											<Image
+												src={mediaData.images_urls[i]}
+												alt="additional Image"
+												objectFit="fill"
+												objectPosition="center"
+												width={240}
+												height={240}
+											/>
+										) : (
 											<Flex
 												justifyContent={'center'}
 												alignItems={'center'}
 												gap={2}
-												flexDirection={'column'}
+												w={'100%'}
+												h={'100%'}
+												borderRadius={'8px'}
+												borderColor={'border_color'}
+												border={'1px'}
+												borderStyle={'dashed'}
+												backgroundColor={'gray'}
+												padding={'8px'}
+												position={'relative'}
 											>
-												<UploadMediaIcon />
-												<Text
-													as={'h4'}
-													fontSize={'base'}
-													textAlign={'center'}
-													color={'text_muted'}
-													fontWeight={'medium'}
+												<Flex
+													justifyContent={'center'}
+													alignItems={'center'}
+													gap={2}
+													flexDirection={'column'}
 												>
-													Upload Image
-												</Text>
+													<UploadMediaIcon />
+													<Text
+														as={'h4'}
+														fontSize={'base'}
+														textAlign={'center'}
+														color={'text_muted'}
+														fontWeight={'medium'}
+													>
+														Upload Image
+													</Text>
+												</Flex>
 											</Flex>
-										</Flex>
-									)}
-									<Input
-										title="upload image"
-										type="file"
-										id={i.toString()}
-										accept="image/*"
-										display={'none'}
-										onChange={(e) => handleUploadImages(e, i)}
-									/>
-								</FormLabel>
-							</GridItem>
-						))}
-					</Grid>
+										)}
+										<Input
+											title="upload image"
+											type="file"
+											id={i.toString()}
+											accept="image/*"
+											display={'none'}
+											onChange={(e) => handleUploadImages(e, i)}
+										/>
+									</FormLabel>
+								</GridItem>
+							))}
+						</Grid>
+					</Flex>
 
 					<FormLabel
 						htmlFor={'video'}
@@ -250,9 +294,9 @@ export default function UploadMedia({
 						}}
 						overflow={'hidden'}
 					>
-						{mediaData.video ? (
+						{mediaData.video_url ? (
 							<video
-								src={mediaData.video}
+								src={mediaData.video_url}
 								className="w-full h-full"
 								width={'100%'}
 								height={'100%'}
@@ -301,8 +345,16 @@ export default function UploadMedia({
 					</FormLabel>
 				</VStack>
 				<br />
-				<Button disabled={loading} type={'submit'}>
-					{loading ? 'Loading...' : 'Next'}
+				<Button
+					disabled={loading}
+					bgColor={'brand'}
+					w={'100%'}
+					type={'submit'}
+					_hover={{
+						bgColor: 'brand_light',
+					}}
+				>
+					{loading ? 'Loading...' : 'Submit'}
 				</Button>
 			</Flex>
 		</>

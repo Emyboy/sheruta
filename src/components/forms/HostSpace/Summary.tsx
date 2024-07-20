@@ -10,8 +10,7 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
-import { HostSpaceFormProps } from '.'
-import { RequestData } from '@/firebase/service/request/request.types'
+import { ApartmentDetailsType, HostSpaceFormProps } from '.'
 
 export default function Summary({
 	next,
@@ -20,23 +19,28 @@ export default function Summary({
 }: HostSpaceFormProps) {
 	const { optionsState: options } = useOptionsContext()
 
-	const [summaryData, setSummaryData] = useState<Partial<RequestData>>({
-		title: formData.title || '',
-		description: formData.description || '',
-		budget: formData.budget || undefined,
-		service_charge: formData.service_charge || undefined,
-		payment_type: formData.payment_type || undefined,
-		availability_status: formData.availability_status || undefined,
-		bedrooms: formData.bedrooms || undefined,
-		bathrooms: formData.bathrooms || undefined,
-		toilets: formData.toilets || undefined,
-		living_rooms: formData.living_rooms || undefined,
-		_state_ref: formData._state_ref || undefined,
-		_location_keyword_ref: formData._location_keyword_ref || undefined,
-		_service_ref: formData._service_ref || undefined,
-		_category_ref: formData._category_ref || undefined,
-		_status_ref: formData._status_ref || undefined,
-	})
+	const [apartmentDetails, setApartmentDetails] =
+		useState<ApartmentDetailsType>({
+			title: formData.title || '',
+			description: formData.description || '',
+			budget: formData.budget || 0,
+			service_charge: formData.service_charge || 0,
+			payment_type: formData.payment_type || '',
+			availability_status: formData.availability_status || '',
+			bedrooms: formData.bedrooms || 0,
+			bathrooms: formData.bathrooms || 0,
+			toilets: formData.toilets || 0,
+			living_rooms: formData.living_rooms || 0,
+			_state_ref: formData._state_ref,
+			_location_keyword_ref: formData._location_keyword_ref,
+			_service_ref: formData._service_ref,
+			_category_ref: formData._category_ref,
+			_status_ref: formData._status_ref,
+			state: formData.state || '',
+			area: formData.area || '',
+			service: formData.service || '',
+			category: formData.category || '',
+		})
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -51,19 +55,41 @@ export default function Summary({
 			e.target.name === 'toilets' ||
 			e.target.name === 'living_rooms'
 		) {
-			setSummaryData((prev) => ({
+			setApartmentDetails((prev) => ({
 				...prev,
 				[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
 			}))
+			localStorage.setItem(
+				'host_space_form',
+				JSON.stringify({
+					...apartmentDetails,
+					[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
+				}),
+			)
 		} else {
-			setSummaryData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+			setApartmentDetails((prev) => ({
+				...prev,
+				[e.target.name]: e.target.value,
+			}))
+			localStorage.setItem(
+				'host_space_form',
+				JSON.stringify({
+					...apartmentDetails,
+					[e.target.name]: e.target.value,
+				}),
+			)
 		}
 	}
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
-		console.log(summaryData)
-		setFormData((prev) => ({ ...prev, ...summaryData }))
+
+		setFormData((prev) => ({ ...prev, ...apartmentDetails }))
+		localStorage.setItem(
+			'host_space_form',
+			JSON.stringify({ ...formData, ...apartmentDetails }),
+		)
+
 		next()
 	}
 
@@ -93,7 +119,8 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								value={summaryData.title}
+								minLength={5}
+								value={apartmentDetails.title}
 								name="title"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -114,7 +141,8 @@ export default function Summary({
 							<Textarea
 								onChange={handleChange}
 								required
-								value={summaryData.description}
+								minLength={10}
+								value={apartmentDetails.description}
 								name="description"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -137,7 +165,9 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								value={summaryData.budget}
+								type="number"
+								min={1}
+								value={String(apartmentDetails.budget)}
 								name="budget"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -156,7 +186,9 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								value={summaryData.service_charge}
+								type="number"
+								min={1}
+								value={String(apartmentDetails.service_charge)}
 								name="service_charge"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -169,36 +201,47 @@ export default function Summary({
 						<Select
 							onChange={handleChange}
 							required
-							value={summaryData.payment_type}
+							value={apartmentDetails.payment_type}
 							name="payment_type"
 							borderColor={'border_color'}
-							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Payment Type"
 							size="md"
 							color={'border_color'}
 						>
-							<option value="monthly">MONTHLY</option>
-							<option value="annually">ANNUALLY</option>
-							<option value="bi-annually">BI-ANNUALLY</option>
-							<option value="option3">WEEKLY</option>
+							<option style={{ color: 'black' }} value="monthly">
+								MONTHLY
+							</option>
+							<option style={{ color: 'black' }} value="annually">
+								ANNUALLY
+							</option>
+							<option style={{ color: 'black' }} value="bi-annually">
+								BI-ANNUALLY
+							</option>
+							<option style={{ color: 'black' }} value="weekly">
+								WEEKLY
+							</option>
 						</Select>
 
 						<Select
 							onChange={handleChange}
 							required
-							value={summaryData.availability_status}
+							value={apartmentDetails.availability_status}
 							name="availability_status"
 							borderColor={'border_color'}
-							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Availability Status"
 							size="md"
-							color={'border_color'}
 						>
-							<option value="available">AVAILABLE</option>
-							<option value="unavailable">UNAVAILABLE</option>
-							<option value="reserved">RESERVED</option>
+							<option style={{ color: 'black' }} value="available">
+								AVAILABLE
+							</option>
+							<option style={{ color: 'black' }} value="unavailable">
+								UNAVAILABLE
+							</option>
+							<option style={{ color: 'black' }} value="reserved">
+								RESERVED
+							</option>
 						</Select>
 					</Flex>
 
@@ -215,7 +258,9 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								value={summaryData.bedrooms}
+								type="number"
+								min={1}
+								value={String(apartmentDetails.bedrooms)}
 								name="bedrooms"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -234,7 +279,9 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								value={summaryData.living_rooms}
+								type="number"
+								min={1}
+								value={String(apartmentDetails.living_rooms)}
 								name="living_rooms"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -255,7 +302,9 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								value={summaryData.toilets}
+								type="number"
+								min={1}
+								value={String(apartmentDetails.toilets)}
 								name="toilets"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -274,7 +323,9 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								value={summaryData.bathrooms}
+								type="number"
+								min={1}
+								value={String(apartmentDetails.bathrooms)}
 								name="bathrooms"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -285,72 +336,120 @@ export default function Summary({
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 						<Select
-							onChange={handleChange}
+							onChange={(e) => {
+								handleChange(e)
+								const selectedState = options.states.find(
+									(state) => state.id === e.target.value,
+								)
+								if (selectedState) {
+									setApartmentDetails((prev) => ({
+										...prev,
+										_state_ref: selectedState._ref,
+									}))
+								}
+							}}
 							required
-							value={summaryData._state_ref}
-							name="_state_ref"
+							value={apartmentDetails.state}
+							name="state"
 							borderColor={'border_color'}
-							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Select State"
 							size="md"
 							color={'border_color'}
 						>
 							{options.states.map((state) => (
-								<option value={state._ref}>{state.name}</option>
+								<option style={{ color: 'black' }} value={state.id}>
+									{state.name.toUpperCase()}
+								</option>
 							))}
 						</Select>
 
 						<Select
-							onChange={handleChange}
+							onChange={(e) => {
+								handleChange(e)
+								const selectedLocation = options.location_keywords.find(
+									(location) => location.id === e.target.value,
+								)
+								if (selectedLocation) {
+									setApartmentDetails((prev) => ({
+										...prev,
+										_location_keyword_ref: selectedLocation._ref,
+									}))
+								}
+							}}
 							required
-							value={summaryData._location_keyword_ref}
-							name="_location_keyword_ref"
+							value={apartmentDetails.area}
+							name="area"
 							borderColor={'border_color'}
-							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Select Area"
 							size="md"
 							color={'border_color'}
 						>
 							{options.location_keywords.map((area) => (
-								<option value={area._ref}>{area.name}</option>
+								<option style={{ color: 'black' }} value={area.id}>
+									{area.name.toUpperCase()}
+								</option>
 							))}
 						</Select>
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 						<Select
-							onChange={handleChange}
+							onChange={(e) => {
+								handleChange(e)
+								const selectedService = options.services.find(
+									(service) => service.id === e.target.value,
+								)
+								if (selectedService) {
+									setApartmentDetails((prev) => ({
+										...prev,
+										_service_ref: selectedService._ref,
+									}))
+								}
+							}}
 							required
-							value={summaryData._service_ref}
-							name="_service_ref"
+							value={apartmentDetails.service}
+							name="service"
 							borderColor={'border_color'}
-							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Service Type"
 							size="md"
 							color={'border_color'}
 						>
 							{options.services.map((service) => (
-								<option value={service._ref}>{service.title}</option>
+								<option style={{ color: 'black' }} value={service.id}>
+									{service.title.toUpperCase()}
+								</option>
 							))}
 						</Select>
 
 						<Select
-							onChange={handleChange}
-							// required
-							value={summaryData._category_ref}
-							name="_category_ref"
+							onChange={(e) => {
+								handleChange(e)
+								const selectedCategory = options.categories.find(
+									(category) => category.id === e.target.value,
+								)
+								if (selectedCategory) {
+									setApartmentDetails((prev) => ({
+										...prev,
+										_category_ref: selectedCategory._ref,
+									}))
+								}
+							}}
+							required
+							value={apartmentDetails.category}
+							name="category"
 							borderColor={'border_color'}
-							iconColor="border_color"
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Select Category"
 							size="md"
 							color={'border_color'}
 						>
 							{options.categories.map((category) => (
-								<option value={category._ref}>{category.name}</option>
+								<option style={{ color: 'black' }} value={category.id}>
+									{category.title.toUpperCase()}
+								</option>
 							))}
 						</Select>
 					</Flex>
