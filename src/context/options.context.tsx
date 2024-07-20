@@ -63,6 +63,7 @@ export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 				const querySnapshot = await getDocs(collection(db, collectionName))
 				const options = querySnapshot.docs.map((doc) => ({
 					id: doc.id,
+					_ref: doc.ref,
 					...doc.data(),
 				}))
 				return { [collectionName]: options }
@@ -70,7 +71,9 @@ export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 
 			const results = await Promise.all(optionPromises)
 			const options: OptionsState = Object.assign({}, ...results)
+
 			console.log('THE OPTIONS::', options)
+
 			setOptionsState(options)
 			setAppState({ app_loading: false })
 		})()

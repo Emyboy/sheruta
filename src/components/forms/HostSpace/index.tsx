@@ -5,10 +5,8 @@ import { Box, Flex, Text } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
-import AvailableAmenities from './AvailableAmenities'
 import Summary from './Summary'
 import UploadMedia from './UploadMedia'
-import LocationDetails from './LocationDetails'
 
 export type HostSpaceFormProps = {
 	next: () => void
@@ -27,13 +25,16 @@ const initialState = {
 	bathrooms: null,
 	toilets: null,
 	living_rooms: null,
-
 	room_type: undefined,
 	agency_free_included: false,
-
 	images_urls: [],
 	video_url: '',
 	availability_status: null,
+	_location_keyword_ref: undefined,
+	_state_ref: undefined,
+	_service_ref: undefined,
+	_category_ref: undefined,
+	_status_ref: undefined,
 }
 
 export default function HostSpace() {
@@ -59,16 +60,7 @@ export default function HostSpace() {
 			formData={hostSpaceData}
 			setFormData={setHostSpaceData}
 		/>,
-		<AvailableAmenities
-			next={next}
-			formData={hostSpaceData}
-			setFormData={setHostSpaceData}
-		/>,
-		<LocationDetails
-			next={next}
-			formData={hostSpaceData}
-			setFormData={setHostSpaceData}
-		/>,
+
 		<UploadMedia
 			next={next}
 			formData={hostSpaceData}
@@ -76,12 +68,7 @@ export default function HostSpace() {
 		/>,
 	]
 
-	const allStepNames = (): string[] => [
-		'About Apartment',
-		'Available Amenities',
-		'Location Details',
-		'Upload Media',
-	]
+	const allStepNames = (): string[] => ['About Apartment', 'Upload Media']
 
 	useEffect(() => {
 		const totalSteps = allSteps().length
