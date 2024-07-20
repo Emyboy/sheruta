@@ -17,7 +17,7 @@ export interface RequestData {
 	_state_ref: DocumentReference
 	_service_ref: DocumentReference
 	_category_ref: DocumentReference
-	_status_ref: DocumentReference
+	_property_type_ref: DocumentReference
 
 	payment_type: PaymentPlan
 
@@ -90,7 +90,7 @@ export const createHostRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_status_ref: z.custom<DocumentReference>(
+	_property_type_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
@@ -134,7 +134,7 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_status_ref: z.custom<DocumentReference>(
+	_property_type_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',

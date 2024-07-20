@@ -28,6 +28,7 @@ export type ApartmentDetailsType = {
 	toilets: number
 	living_rooms: number
 	availability_status: string
+	_property_type_ref: undefined | DocumentReference
 	_location_keyword_ref: undefined | DocumentReference
 	_state_ref: undefined | DocumentReference
 	_service_ref: undefined | DocumentReference
@@ -37,6 +38,7 @@ export type ApartmentDetailsType = {
 	area: string
 	service: string
 	category: string
+	property: string
 }
 
 export type MediaType = {
@@ -62,10 +64,12 @@ const initialState = {
 	_service_ref: undefined,
 	_category_ref: undefined,
 	_status_ref: undefined,
+	_property_type_ref: undefined,
 	state: '',
 	area: '',
 	service: '',
 	category: '',
+	property: '',
 }
 
 export default function HostSpace() {

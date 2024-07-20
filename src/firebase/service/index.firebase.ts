@@ -132,6 +132,7 @@ export const DBCollectionName = {
 	conversations: 'conversations',
 
 	// options
+	propertyTypes: 'property_types',
 	locationKeyWords: 'location_keywords',
 	states: 'states',
 	services: 'services',

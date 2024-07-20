@@ -36,10 +36,12 @@ export default function Summary({
 			_service_ref: formData._service_ref,
 			_category_ref: formData._category_ref,
 			_status_ref: formData._status_ref,
+			_property_type_ref: formData._property_type_ref,
 			state: formData.state || '',
 			area: formData.area || '',
 			service: formData.service || '',
 			category: formData.category || '',
+			property: formData.property || '',
 		})
 
 	const handleChange = (
@@ -449,6 +451,37 @@ export default function Summary({
 							{options.categories.map((category) => (
 								<option style={{ color: 'black' }} value={category.id}>
 									{category.title.toUpperCase()}
+								</option>
+							))}
+						</Select>
+					</Flex>
+
+					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
+						<Select
+							onChange={(e) => {
+								handleChange(e)
+								const selectedProperty = options.property_types.find(
+									(property) => property.id === e.target.value,
+								)
+								if (selectedProperty) {
+									setApartmentDetails((prev) => ({
+										...prev,
+										_property_type_ref: selectedProperty._ref,
+									}))
+								}
+							}}
+							required
+							value={apartmentDetails.property}
+							name="property"
+							borderColor={'border_color'}
+							_dark={{ borderColor: 'dark_light' }}
+							placeholder="Property Type"
+							size="md"
+							color={'border_color'}
+						>
+							{options.property_types.map((property) => (
+								<option style={{ color: 'black' }} value={property.id}>
+									{property.title.toUpperCase()}
 								</option>
 							))}
 						</Select>
