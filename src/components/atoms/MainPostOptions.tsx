@@ -12,7 +12,7 @@ export default function MainPostOptions({}: Props) {
 			<Link href={`/request/host`} style={{ width: '50%' }}>
 				<EachOption label="Post available space" />
 			</Link>
-			<Link href={`/request/guest`} style={{ width: '50%' }}>
+			<Link href={`/request/seeker`} style={{ width: '50%' }}>
 				<EachOption label="Request a space" />
 			</Link>
 		</Flex>
