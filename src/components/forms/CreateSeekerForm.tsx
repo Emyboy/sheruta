@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
 	Button,
 	FormControl,
@@ -12,7 +12,6 @@ import {
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' // Import Timestamp and DocumentReference from Firebase for type checking
 import { v4 as generateUId } from 'uuid'
 import { GoogleMap, LoadScript, Autocomplete } from '@react-google-maps/api'
-import { db } from '@/firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
@@ -60,7 +59,7 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 const initialFormState: Partial<RequestData> = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
-	budget: 0,
+	budget: 10000,
 	google_location_object: {},
 	google_location_text: '',
 	_location_keyword_ref: undefined as DocumentReference | undefined,
@@ -110,11 +109,11 @@ type PaymentType =
 	| 'weekly'
 
 const budgetLimits: Record<PaymentType, number> = {
+	weekly: 10000,
 	monthly: 25000,
-	annually: 150000,
 	quarterly: 80000,
 	bi_annually: 100000,
-	weekly: 10000,
+	annually: 150000,
 }
 
 const CreateSeekerForm: React.FC = () => {
@@ -129,7 +128,7 @@ const CreateSeekerForm: React.FC = () => {
 
 	//get user authentication state
 	const {
-		authState: { flat_share_profile }
+		authState: { flat_share_profile },
 	} = useAuthContext()
 
 	// console.log(authState)
@@ -213,7 +212,7 @@ const CreateSeekerForm: React.FC = () => {
 					value = Number(value) as any
 				}
 
-				break;
+				break
 
 			case 'payment_type':
 				//get the budget
@@ -226,7 +225,7 @@ const CreateSeekerForm: React.FC = () => {
 					setIsBudgetInvalid(budget < budgetLimit)
 				}
 
-				break;
+				break
 
 			case 'stateId':
 				if (value) {
@@ -454,6 +453,7 @@ const CreateSeekerForm: React.FC = () => {
 					value={formData.description}
 					onChange={handleChange}
 					placeholder="I am looking for ..."
+					maxLength={200}
 				/>
 				<FormHelperText>
 					Provide a little description of the apartment you are seeking
@@ -558,10 +558,10 @@ const CreateSeekerForm: React.FC = () => {
 					placeholder="Select payment type"
 				>
 					<option value="weekly">Weekly</option>
-					<option value="monthly">Monthly</option>
-					<option value="annually">Annually</option>
+					<option value="monthly">Monthly</option>					
 					<option value="quarterly">Quarterly</option>
 					<option value="bi_annually">Bi-annually</option>
+					<option value="annually">Annually</option>
 				</Select>
 				<FormHelperText>
 					Choose how you would like to pay for this apartment
@@ -583,9 +583,13 @@ const CreateSeekerForm: React.FC = () => {
 					onChange={handleChange}
 				/>
 				<FormErrorMessage>
-					Please enter an amount that meets the minimum required value of ₦{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}.
+					Please enter an amount that meets the minimum required value of ₦
+					{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}.
 				</FormErrorMessage>
-				<FormHelperText>Your budget should meet the minimum required value of ₦{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}</FormHelperText>
+				<FormHelperText>
+					Your budget should meet the minimum required value of ₦
+					{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}
+				</FormHelperText>
 			</FormControl>
 
 			{/* Submit button */}
@@ -603,4 +607,4 @@ const CreateSeekerForm: React.FC = () => {
 	)
 }
 
-export default CreateSeekerForm
+export default CreateSeekerForm;

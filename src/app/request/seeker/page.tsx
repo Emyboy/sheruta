@@ -12,7 +12,7 @@ import NextLink from 'next/link'
 
 type Props = {}
 
-export default function page({ }: Props) {
+export default function page({}: Props) {
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
