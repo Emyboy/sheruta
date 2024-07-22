@@ -374,7 +374,7 @@ export default function Summary({
 						>
 							{options.states.map((state) => (
 								<option style={{ color: 'black' }} value={state.id}>
-									{state.name.toUpperCase()}
+									{state.name}
 								</option>
 							))}
 						</Select>
@@ -404,7 +404,7 @@ export default function Summary({
 							{apartmentDetails.state &&
 								filteredLocationOptions.map((area) => (
 									<option style={{ color: 'black' }} value={area.id}>
-										{area.name.toUpperCase()}
+										{area.name}
 									</option>
 								))}
 						</Select>
@@ -435,7 +435,7 @@ export default function Summary({
 						>
 							{options.services.map((service) => (
 								<option style={{ color: 'black' }} value={service.id}>
-									{service.title.toUpperCase()}
+									{service.title}
 								</option>
 							))}
 						</Select>
@@ -464,7 +464,7 @@ export default function Summary({
 						>
 							{options.categories.map((category) => (
 								<option style={{ color: 'black' }} value={category.id}>
-									{category.title.toUpperCase()}
+									{category.title}
 								</option>
 							))}
 						</Select>
@@ -495,7 +495,7 @@ export default function Summary({
 						>
 							{options.property_types.map((property) => (
 								<option style={{ color: 'black' }} value={property.id}>
-									{property.title.toUpperCase()}
+									{property.title}
 								</option>
 							))}
 						</Select>

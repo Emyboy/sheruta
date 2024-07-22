@@ -197,19 +197,20 @@ export default function UploadMedia({
 				<br />
 				<VStack spacing={6} mb={3} w={'full'}>
 					<Flex flexDirection={'column'} gap={2} w={'100%'}>
-						{mediaData.images_urls.length > 4 && (
-							<Button
-								padding={'1rem'}
-								borderRadius={999}
-								bgColor={'brand'}
-								color={'white'}
-								alignSelf={'end'}
-								onClick={() => setLength((prev) => prev + 1)}
-								title="Add image"
-							>
-								+
-							</Button>
-						)}
+						{mediaData.images_urls.length >= 4 &&
+							mediaData.images_urls.length < 8 && (
+								<Button
+									padding={'1rem'}
+									borderRadius={999}
+									bgColor={'brand'}
+									color={'white'}
+									alignSelf={'end'}
+									onClick={() => setLength((prev) => prev + 1)}
+									title="Add image"
+								>
+									+
+								</Button>
+							)}
 						<Grid templateColumns={'repeat(2, 1fr)'} gap={6}>
 							{Array.from({
 								length,
@@ -228,7 +229,9 @@ export default function UploadMedia({
 											alignSelf={'end'}
 											onClick={() => {
 												setLength((prev) => prev - 1)
-												const images_urls = mediaData.images_urls.splice(i, 1)
+												const images_urls = mediaData.images_urls.filter(
+													(_, idx) => i !== idx,
+												)
 												setMediaData((prev) => ({ ...prev, images_urls }))
 											}}
 											title="Remove image"
