@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '..'
 import moment from 'moment'
-import { getStorage, ref, uploadString } from 'firebase/storage'
+import { deleteObject, getStorage, ref, uploadString } from 'firebase/storage'
 
 interface createDTO {
 	collection_name: string
@@ -116,6 +116,13 @@ export default class SherutaDB {
 
 		const snapshot = await uploadString(storageRef, data, 'data_url')
 		return snapshot
+	}
+
+	static async deleteMedia({ storageUrl }: { storageUrl: string }) {
+		const storage = getStorage()
+		const deleteRef = ref(storage, storageUrl)
+
+		await deleteObject(deleteRef)
 	}
 }
 

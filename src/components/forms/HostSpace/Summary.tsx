@@ -1,6 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useOptionsContext } from '@/context/options.context'
 import {
+	Box,
 	Button,
 	Flex,
 	Input,
@@ -9,7 +10,7 @@ import {
 	Textarea,
 	VStack,
 } from '@chakra-ui/react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ApartmentDetailsType, HostSpaceFormProps } from '.'
 
 export default function Summary({
@@ -24,13 +25,13 @@ export default function Summary({
 			title: formData.title || '',
 			description: formData.description || '',
 			budget: formData.budget || 0,
-			service_charge: formData.service_charge || 0,
+			service_charge: formData.service_charge || null,
 			payment_type: formData.payment_type || '',
-			availability_status: formData.availability_status || '',
-			bedrooms: formData.bedrooms || 0,
-			bathrooms: formData.bathrooms || 0,
-			toilets: formData.toilets || 0,
-			living_rooms: formData.living_rooms || 0,
+			availability_status: formData.availability_status || null,
+			bedrooms: formData.bedrooms || null,
+			bathrooms: formData.bathrooms || null,
+			toilets: formData.toilets || null,
+			living_rooms: formData.living_rooms || null,
 			_state_ref: formData._state_ref,
 			_location_keyword_ref: formData._location_keyword_ref,
 			_service_ref: formData._service_ref,
@@ -43,6 +44,19 @@ export default function Summary({
 			category: formData.category || '',
 			property: formData.property || '',
 		})
+
+	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
+		options.location_keywords,
+	)
+
+	useEffect(() => {
+		if (apartmentDetails.state)
+			setFilteredLocationOptions(
+				options.location_keywords.filter(
+					(location) => location._state_id === apartmentDetails.state,
+				),
+			)
+	}, [apartmentDetails.state])
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -73,6 +87,7 @@ export default function Summary({
 				...prev,
 				[e.target.name]: e.target.value,
 			}))
+
 			localStorage.setItem(
 				'host_space_form',
 				JSON.stringify({
@@ -187,9 +202,7 @@ export default function Summary({
 							</Text>
 							<Input
 								onChange={handleChange}
-								required
 								type="number"
-								min={1}
 								value={String(apartmentDetails.service_charge)}
 								name="service_charge"
 								borderColor={'border_color'}
@@ -228,7 +241,7 @@ export default function Summary({
 						<Select
 							onChange={handleChange}
 							required
-							value={apartmentDetails.availability_status}
+							value={apartmentDetails.availability_status || ''}
 							name="availability_status"
 							borderColor={'border_color'}
 							_dark={{ borderColor: 'dark_light' }}
@@ -388,11 +401,12 @@ export default function Summary({
 							size="md"
 							color={'border_color'}
 						>
-							{options.location_keywords.map((area) => (
-								<option style={{ color: 'black' }} value={area.id}>
-									{area.name.toUpperCase()}
-								</option>
-							))}
+							{apartmentDetails.state &&
+								filteredLocationOptions.map((area) => (
+									<option style={{ color: 'black' }} value={area.id}>
+										{area.name.toUpperCase()}
+									</option>
+								))}
 						</Select>
 					</Flex>
 

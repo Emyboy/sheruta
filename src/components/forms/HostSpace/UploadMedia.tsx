@@ -1,6 +1,7 @@
 import UploadMediaIcon from '@/assets/svg/upload-media-icon'
 import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
+import { createHostRequestDTO } from '@/firebase/service/request/request.types'
 import {
 	Button,
 	Flex,
@@ -8,6 +9,7 @@ import {
 	Grid,
 	GridItem,
 	Input,
+	Spinner,
 	Text,
 	useToast,
 	VStack,
@@ -15,6 +17,7 @@ import {
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { HostSpaceFormProps, MediaType } from '.'
+import { Timestamp } from 'firebase/firestore'
 
 export default function UploadMedia({
 	next,
@@ -31,7 +34,7 @@ export default function UploadMedia({
 
 	const [mediaData, setMediaData] = useState<MediaType>({
 		images_urls: [],
-		video_url: '',
+		video_url: null,
 	})
 
 	const handleUploadImages = (
@@ -85,7 +88,7 @@ export default function UploadMedia({
 		reader.onload = () => {
 			setMediaData((prev) => ({
 				...prev,
-				video: reader.result as string,
+				video_url: reader.result as string,
 			}))
 		}
 		reader.onerror = (err) => {
@@ -99,6 +102,8 @@ export default function UploadMedia({
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
+		const uuid = crypto.randomUUID()
+
 		if (mediaData.images_urls.length < length)
 			return toast({
 				title: `Upload at least ${length} images`,
@@ -111,14 +116,14 @@ export default function UploadMedia({
 		const imageUploadPromises = mediaData.images_urls.map((url, i) =>
 			SherutaDB.uploadMedia({
 				data: url,
-				storageUrl: `images/requests/${userId}/${crypto.randomUUID()}/image_${i}`,
+				storageUrl: `images/requests/${userId}/${uuid}/image_${i}`,
 			}),
 		)
 
 		const videoUploadPromise = mediaData.video_url
 			? SherutaDB.uploadMedia({
 					data: mediaData.video_url,
-					storageUrl: `videos/requests/${userId}/${crypto.randomUUID()}/video_0`,
+					storageUrl: `videos/requests/${userId}/${uuid}/video_0`,
 				})
 			: null
 
@@ -140,12 +145,42 @@ export default function UploadMedia({
 			})
 			.catch((error) => {
 				console.error('Error uploading media:', error)
-				toast({ title: 'Error uploading media', status: 'error' })
+				return toast({ title: 'Error uploading media', status: 'error' })
 			})
 
-		setLoading(false)
+		try {
+			let data = {
+				...formData,
+				uuid,
+				seeking: false,
+				createdAt: new Timestamp(0, 0),
+				updatedAt: new Timestamp(0, 0),
+			}
 
-		// next()
+			delete data.category
+			delete data.service
+			delete data.state
+			delete data.area
+			delete data.property
+
+			console.log(data)
+
+			data = createHostRequestDTO.parse(data)
+
+			await SherutaDB.create({
+				collection_name: 'requests',
+				data,
+				document_id: uuid,
+			})
+
+			localStorage.removeItem('host_space_form')
+		} catch (error) {
+			console.log(error)
+			// mediaData.images_urls.forEach()
+			toast({ title: 'Error creating your details', status: 'error' })
+		}
+
+		setLoading(false)
 	}
 
 	return (
@@ -292,8 +327,32 @@ export default function UploadMedia({
 							scale: 95,
 							opacity: 25,
 						}}
-						overflow={'hidden'}
+						position={'relative'}
 					>
+						{mediaData.video_url && (
+							<Flex
+								padding={'0.5rem'}
+								alignItems={'center'}
+								justifyContent={'center'}
+								w={6}
+								h={6}
+								borderRadius={999}
+								bgColor={'brand'}
+								color={'white'}
+								alignSelf={'end'}
+								onClick={() =>
+									setMediaData((prev) => ({ ...prev, video_url: null }))
+								}
+								title="Remove image"
+								position={'absolute'}
+								cursor={'pointer'}
+								top={-2.5}
+								right={0}
+								zIndex={50}
+							>
+								-
+							</Flex>
+						)}
 						{mediaData.video_url ? (
 							<video
 								src={mediaData.video_url}
@@ -353,8 +412,11 @@ export default function UploadMedia({
 					_hover={{
 						bgColor: 'brand_light',
 					}}
+					display={'flex'}
+					alignItems={'center'}
+					justifyContent={'center'}
 				>
-					{loading ? 'Loading...' : 'Submit'}
+					{loading ? <Spinner /> : 'Submit'}
 				</Button>
 			</Flex>
 		</>
