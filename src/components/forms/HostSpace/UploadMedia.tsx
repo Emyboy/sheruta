@@ -163,9 +163,9 @@ export default function UploadMedia({
 			delete data.area
 			delete data.property
 
-			console.log(data)
+			// console.log(data)
 
-			data = createHostRequestDTO.parse(data)
+			// data = createHostRequestDTO.parse(data)
 
 			await SherutaDB.create({
 				collection_name: 'requests',
@@ -174,6 +174,7 @@ export default function UploadMedia({
 			})
 
 			localStorage.removeItem('host_space_form')
+			toast({ status: 'success', title: 'You have successfully added a space' })
 		} catch (error) {
 			console.log(error)
 			// mediaData.images_urls.forEach()
