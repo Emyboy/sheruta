@@ -12,7 +12,7 @@ import NextLink from 'next/link'
 
 type Props = {}
 
-export default function page({}: Props) {
+export default function page({ }: Props) {
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
@@ -27,11 +27,12 @@ export default function page({}: Props) {
 									<AlertIcon />
 									<span>
 										{
-											'Note that you are requesting for an apartment. If you wish to upload an apartment with pictures or videos, please '
+											'Have a vacant space? Increase occupancy rate by posting visuals. '
 										}
 										<NextLink href={'/request/host'}>
-											<Text as="u">click here</Text>
+											<Text as="u">Click here</Text>
 										</NextLink>
+										{' to post with visuals.'}
 									</span>
 								</Flex>
 							</Alert>

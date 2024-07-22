@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
 	Button,
 	FormControl,
@@ -9,17 +9,16 @@ import {
 	FormErrorMessage,
 	FormHelperText,
 } from '@chakra-ui/react'
-import {
-	Timestamp,
-	DocumentReference,
-	DocumentData,
-} from 'firebase/firestore' // Import Timestamp and DocumentReference from Firebase for type checking
+import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' // Import Timestamp and DocumentReference from Firebase for type checking
 import { v4 as generateUId } from 'uuid'
 import { GoogleMap, LoadScript, Autocomplete } from '@react-google-maps/api'
 import { db } from '@/firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
-import { createSeekerRequestDTO } from '@/firebase/service/request/request.types'
+import {
+	createSeekerRequestDTO,
+	RequestData,
+} from '@/firebase/service/request/request.types'
 import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
@@ -55,10 +54,10 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 }
 
 //generate schema from the validation object
-type createSeekerRequestSchema = z.infer<typeof createSeekerRequestDTO>
+// type createSeekerRequestSchema = z.infer<typeof createSeekerRequestDTO>
 
 // Define the initial state based on the DTO structure
-const initialFormState: Partial<createSeekerRequestSchema> = {
+const initialFormState: Partial<RequestData> = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
 	budget: 0,
@@ -78,7 +77,7 @@ const initialFormState: Partial<createSeekerRequestSchema> = {
 
 const libraries: 'places'[] = ['places']
 
-type OptionsRef = DocumentReference | undefined;
+type OptionsRef = DocumentReference | undefined
 
 interface Options {
 	_service_ref: OptionsRef
@@ -91,11 +90,34 @@ const initialOptionsStateRef = {
 	_service_ref: undefined,
 	_property_type_ref: undefined,
 	_category_ref: undefined,
-	_location_keyword_ref: undefined
+	_location_keyword_ref: undefined,
+}
+
+interface budgetLimits {
+	monthly: number
+	annually: number
+	quarterly: number
+	bi_annually: number
+	weekly: number
+}
+
+// PaymentType union type
+type PaymentType =
+	| 'monthly'
+	| 'annually'
+	| 'quarterly'
+	| 'bi_annually'
+	| 'weekly'
+
+const budgetLimits: Record<PaymentType, number> = {
+	monthly: 25000,
+	annually: 150000,
+	quarterly: 80000,
+	bi_annually: 100000,
+	weekly: 10000,
 }
 
 const CreateSeekerForm: React.FC = () => {
-
 	//get the toast plugin
 	const { showToast } = useCommon()
 
@@ -106,22 +128,35 @@ const CreateSeekerForm: React.FC = () => {
 	const router = useRouter()
 
 	//get user authentication state
-	const { authState: { user_info, flat_share_profile }, getAuthDependencies } = useAuthContext()
+	const {
+		authState: { flat_share_profile }
+	} = useAuthContext()
 
 	// console.log(authState)
 
 	//state to hold _user_ref value
-	const [userRef, setUserRef] = useState<DocumentReference | undefined>(undefined)
+	const [userRef, setUserRef] = useState<DocumentReference | undefined>(
+		undefined,
+	)
 
 	// update userRef state when auth state changes
 	useEffect(() => {
 		if (typeof flat_share_profile?._user_ref !== 'undefined') {
-			setUserRef(flat_share_profile?._user_ref);
+			setUserRef(flat_share_profile?._user_ref)
 		}
-	}), [flat_share_profile, flat_share_profile?._user_ref]
+	}),
+		[flat_share_profile, flat_share_profile?._user_ref]
 
 	//get options
-	const { optionsState: { categories, services, states, location_keywords, property_types } } = useOptionsContext()
+	const {
+		optionsState: {
+			categories,
+			services,
+			states,
+			location_keywords,
+			property_types,
+		},
+	} = useOptionsContext()
 
 	//state for storing Document Ref for category, services, states, properties
 	const [optionsRef, setOptionsRef] = useState<Options>(initialOptionsStateRef)
@@ -131,8 +166,7 @@ const CreateSeekerForm: React.FC = () => {
 
 	//utility function to filter locations by the selected state using the selected state _state_id
 	const getLocations = (stateId: string): string[] => {
-		return location_keywords.filter(item => item.
-			_state_id === stateId)
+		return location_keywords.filter((item) => item._state_id === stateId)
 	}
 
 	//state for storing form data
@@ -163,94 +197,120 @@ const CreateSeekerForm: React.FC = () => {
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
-
 		let { name, value } = e.target
 
 		switch (name) {
 			case 'budget':
-				setIsBudgetInvalid(Number(value) < 50000)
-				//convert to number
-				value = Number(value) as any
+				//get the payment type
+				const paymentType = formData.payment_type
+
+				if (paymentType) {
+					//get the budget limit
+					const budgetLimit = budgetLimits[paymentType]
+
+					setIsBudgetInvalid(Number(value) < budgetLimit)
+					//convert to number
+					value = Number(value) as any
+				}
+
+				break;
+
+			case 'payment_type':
+				//get the budget
+				const budget = formData.budget as number
+
+				if (value) {
+					//get the budget limit
+					const budgetLimit = budgetLimits[value as PaymentType]
+
+					setIsBudgetInvalid(budget < budgetLimit)
+				}
 
 				break;
 
 			case 'stateId':
 				if (value) {
 					//call function to filter the locaitons by _state_id
-					const newLocations = getLocations(value);
+					const newLocations = getLocations(value)
 					// console.log(newLocations)
 					// store the new locations
-					setLocations(newLocations);
+					setLocations(newLocations)
 					//get ref
-					const stateRef = states.find((data) => data.id === value)?._ref;
+					const stateRef = states.find((data) => data.id === value)?._ref
 					//update options ref state
 					setOptionsRef((prev) => ({
 						...prev,
-						_state_ref: stateRef
+						_state_ref: stateRef,
 					}))
 				}
-				break;
+				break
 
 			case 'locationKeywordId':
 				if (value) {
 					//get ref
-					const locationKeywordRef = location_keywords.find((data) => data.id === value)?._ref;
+					const locationKeywordRef = location_keywords.find(
+						(data) => data.id === value,
+					)?._ref
 					//update options ref
 					setOptionsRef((prev) => ({
 						...prev,
-						_location_keyword_ref: locationKeywordRef
+						_location_keyword_ref: locationKeywordRef,
 					}))
 				}
-				break;
+				break
 
 			case 'serviceId':
 				if (value) {
 					//get ref
-					const serviceRef = services.find((data) => data.id === value)?._ref;
+					const serviceRef = services.find((data) => data.id === value)?._ref
 					//update options ref
 					setOptionsRef((prev) => ({
 						...prev,
-						_service_ref: serviceRef
+						_service_ref: serviceRef,
 					}))
 				}
-				break;
+				break
 
 			case 'propertyTypeId':
 				if (value) {
 					//get ref
-					const propertyTypeRef = property_types.find((data) => data.id === value)?._ref;
+					const propertyTypeRef = property_types.find(
+						(data) => data.id === value,
+					)?._ref
 					//update options ref
 					setOptionsRef((prev) => ({
 						...prev,
-						_property_type_ref: propertyTypeRef
+						_property_type_ref: propertyTypeRef,
 					}))
 				}
-				break;
+				break
 
 			case 'categoryId':
 				if (value) {
 					//get ref
-					const categoryRef = categories.find((data) => data.id === value)?._ref;
+					const categoryRef = categories.find((data) => data.id === value)?._ref
 					//update options ref state
 					setOptionsRef((prev) => ({
 						...prev,
-						_category_ref: categoryRef
+						_category_ref: categoryRef,
 					}))
 				}
-				break;
+				break
 		}
 
 		//store in global form data state
 		setFormData((prevData) => ({
 			...prevData,
 			...{
-				[name]: value
-			}
+				[name]: value,
+			},
 		}))
 	}
 
 	// Function to handle form submission
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<any> => {
+	const handleSubmit = async (
+		e: React.FormEvent<HTMLFormElement>,
+	): Promise<any> => {
 		e.preventDefault()
 		try {
 			setIsLoading(true)
@@ -258,10 +318,10 @@ const CreateSeekerForm: React.FC = () => {
 			const finalFormData = {
 				...formData,
 				...optionsRef,
-				_user_ref: userRef
+				_user_ref: userRef,
 			}
 
-			console.log(finalFormData) // Log the form data to the console
+			// console.log(finalFormData) // Log the form data to the console
 
 			//validate the zod schema with final form data
 			createSeekerRequestDTO.parse(finalFormData)
@@ -332,7 +392,9 @@ const CreateSeekerForm: React.FC = () => {
 
 			{/* Select property type field */}
 			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="_property_type_ref">Select apartment type</FormLabel>
+				<FormLabel htmlFor="_property_type_ref">
+					Select apartment type
+				</FormLabel>
 				<Select
 					id="property_type"
 					name="propertyTypeId"
@@ -424,7 +486,6 @@ const CreateSeekerForm: React.FC = () => {
 				</FormHelperText>
 			</FormControl>
 
-
 			{/* Select location field */}
 			<FormControl isRequired mb={4}>
 				<FormLabel htmlFor="payment_type">Select location</FormLabel>
@@ -486,6 +547,27 @@ const CreateSeekerForm: React.FC = () => {
 				</FormControl>
 			</LoadScript>
 
+			{/* Payment type field */}
+			<FormControl isRequired mb={4}>
+				<FormLabel htmlFor="payment_type">Payment Type</FormLabel>
+				<Select
+					id="payment_type"
+					name="payment_type"
+					onChange={handleChange}
+					bg="dark"
+					placeholder="Select payment type"
+				>
+					<option value="weekly">Weekly</option>
+					<option value="monthly">Monthly</option>
+					<option value="annually">Annually</option>
+					<option value="quarterly">Quarterly</option>
+					<option value="bi_annually">Bi-annually</option>
+				</Select>
+				<FormHelperText>
+					Choose how you would like to pay for this apartment
+				</FormHelperText>
+			</FormControl>
+
 			{/* Budget field */}
 			<FormControl
 				isRequired
@@ -501,29 +583,11 @@ const CreateSeekerForm: React.FC = () => {
 					onChange={handleChange}
 				/>
 				<FormErrorMessage>
-					Please enter an amount that is more than ₦50,000.
+					Please enter an amount that meets the minimum required value of ₦{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}.
 				</FormErrorMessage>
-				<FormHelperText>Your budget should be more than ₦50,000</FormHelperText>
+				<FormHelperText>Your budget should meet the minimum required value of ₦{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}</FormHelperText>
 			</FormControl>
-			{/* Payment type field */}
-			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="payment_type">Payment Type</FormLabel>
-				<Select
-					id="payment_type"
-					name="payment_type"
-					onChange={handleChange}
-					bg="dark"
-					placeholder="Select payment type"
-				>
-					<option value="monthly">Monthly</option>
-					<option value="annually">Annually</option>
-					<option value="bi-annually">Bi-annually</option>
-					<option value="weekly">Weekly</option>
-				</Select>
-				<FormHelperText>
-					Choose how you would like to pay for this apartment
-				</FormHelperText>
-			</FormControl>
+
 			{/* Submit button */}
 			<Button
 				isLoading={isLoading}

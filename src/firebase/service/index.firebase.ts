@@ -123,5 +123,5 @@ export const DBCollectionName = {
 	habits: 'habits',
 	interests: 'interests',
 	categories: 'categories',
-	propertyTypes: 'property_types', 
+	propertyTypes: 'property_types',
 }
