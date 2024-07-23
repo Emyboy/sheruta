@@ -14,6 +14,8 @@
 		"@chakra-ui/react": "^2.8.2",
 		"@emotion/react": "^11.11.3",
 		"@emotion/styled": "^11.11.0",
+		"@react-google-maps/api": "^2.19.3",
+		"@types/uuid": "^10.0.0",
 		"axios": "^1.6.8",
 		"firebase": "^10.7.1",
 		"framer-motion": "^10.18.0",
@@ -31,6 +33,7 @@
 		"react-icons": "^5.0.1",
 		"react-loading-skeleton": "^3.3.1",
 		"react-paystack": "^5.0.0",
+		"uuid": "^10.0.0",
 		"uuidv4": "^6.2.13",
 		"zod": "^3.22.4"
 	},
