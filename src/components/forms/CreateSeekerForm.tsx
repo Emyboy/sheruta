@@ -558,7 +558,7 @@ const CreateSeekerForm: React.FC = () => {
 					placeholder="Select payment type"
 				>
 					<option value="weekly">Weekly</option>
-					<option value="monthly">Monthly</option>					
+					<option value="monthly">Monthly</option>
 					<option value="quarterly">Quarterly</option>
 					<option value="bi_annually">Bi-annually</option>
 					<option value="annually">Annually</option>
@@ -607,4 +607,4 @@ const CreateSeekerForm: React.FC = () => {
 	)
 }
 
-export default CreateSeekerForm;
+export default CreateSeekerForm
