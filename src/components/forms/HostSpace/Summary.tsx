@@ -373,7 +373,7 @@ export default function Summary({
 							color={'border_color'}
 						>
 							{options.states.map((state) => (
-								<option style={{ color: 'black' }} value={state.id}>
+								<option style={{ color: 'black' }} value={state.id} key={state.id}>
 									{state.name}
 								</option>
 							))}
@@ -403,7 +403,7 @@ export default function Summary({
 						>
 							{apartmentDetails.state &&
 								filteredLocationOptions.map((area) => (
-									<option style={{ color: 'black' }} value={area.id}>
+									<option style={{ color: 'black' }} value={area.id} key={area.id}>
 										{area.name}
 									</option>
 								))}
@@ -434,7 +434,7 @@ export default function Summary({
 							color={'border_color'}
 						>
 							{options.services.map((service) => (
-								<option style={{ color: 'black' }} value={service.id}>
+								<option style={{ color: 'black' }} value={service.id} key={service.id}>
 									{service.title}
 								</option>
 							))}
@@ -463,7 +463,7 @@ export default function Summary({
 							color={'border_color'}
 						>
 							{options.categories.map((category) => (
-								<option style={{ color: 'black' }} value={category.id}>
+								<option style={{ color: 'black' }} value={category.id} key={category.id}>
 									{category.title}
 								</option>
 							))}
@@ -494,7 +494,7 @@ export default function Summary({
 							color={'border_color'}
 						>
 							{options.property_types.map((property) => (
-								<option style={{ color: 'black' }} value={property.id}>
+								<option style={{ color: 'black' }} value={property.id} key={property.id}>
 									{property.title}
 								</option>
 							))}
