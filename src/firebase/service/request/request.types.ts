@@ -9,7 +9,7 @@ export interface RequestData {
 	budget: number
 	service_charge: number
 
-	google_location_object: Record<string, string>
+	google_location_object: Record<string, any>
 	google_location_text: string
 
 	_location_keyword_ref: DocumentReference
@@ -41,7 +41,7 @@ export interface RequestData {
 }
 
 type RequestDataMediaType = 'image' | 'video' | 'image_video'
-type PaymentPlan =
+export type PaymentPlan =
 	| 'monthly'
 	| 'annually'
 	| 'quarterly'
@@ -71,7 +71,7 @@ export const createHostRequestDTO = z.object({
 
 	seeking: z.boolean(),
 
-	google_location_object: z.record(z.string()),
+	google_location_object: z.record(z.string(), z.any()),
 	google_location_text: z.string(),
 
 	_location_keyword_ref: z.custom<DocumentReference>(
@@ -115,7 +115,7 @@ export const createSeekerRequestDTO = z.object({
 
 	budget: z.number(),
 
-	google_location_object: z.record(z.string()),
+	google_location_object: z.record(z.string(), z.any()),
 	google_location_text: z.string(),
 	_location_keyword_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
@@ -161,8 +161,6 @@ export const createSeekerRequestDTO = z.object({
 		'quarterly',
 		'weekly',
 	]),
-
-	// media_type: z.enum(['image', 'video', 'image_video']),
 
 	seeking: z.boolean(), // true for seekers
 
