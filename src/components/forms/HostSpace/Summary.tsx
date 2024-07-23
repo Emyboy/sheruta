@@ -213,51 +213,70 @@ export default function Summary({
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Select
-							onChange={handleChange}
-							required
-							value={apartmentDetails.payment_type}
-							name="payment_type"
-							borderColor={'border_color'}
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Payment Type"
-							size="md"
-							color={'border_color'}
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
 						>
-							<option style={{ color: 'black' }} value="monthly">
-								MONTHLY
-							</option>
-							<option style={{ color: 'black' }} value="annually">
-								ANNUALLY
-							</option>
-							<option style={{ color: 'black' }} value="bi-annually">
-								BI-ANNUALLY
-							</option>
-							<option style={{ color: 'black' }} value="weekly">
-								WEEKLY
-							</option>
-						</Select>
-
-						<Select
-							onChange={handleChange}
-							required
-							value={apartmentDetails.availability_status || ''}
-							name="availability_status"
-							borderColor={'border_color'}
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Availability Status"
-							size="md"
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select a payment type
+							</Text>
+							<Select
+								onChange={handleChange}
+								required
+								value={apartmentDetails.payment_type}
+								name="payment_type"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Payment Type"
+								size="md"
+								color={'border_color'}
+							>
+								<option style={{ color: 'black' }} value="weekly">
+									WEEKLY
+								</option>
+								<option style={{ color: 'black' }} value="monthly">
+									Monthly
+								</option>
+								<option style={{ color: 'black' }} value="annually">
+									Annually
+								</option>
+								<option style={{ color: 'black' }} value="bi-annually">
+									Bi-Annually
+								</option>
+							</Select>
+						</Flex>
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
 						>
-							<option style={{ color: 'black' }} value="available">
-								AVAILABLE
-							</option>
-							<option style={{ color: 'black' }} value="unavailable">
-								UNAVAILABLE
-							</option>
-							<option style={{ color: 'black' }} value="reserved">
-								RESERVED
-							</option>
-						</Select>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select availability status
+							</Text>
+							<Select
+								onChange={handleChange}
+								required
+								value={apartmentDetails.availability_status || ''}
+								name="availability_status"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Availability Status"
+								size="md"
+							>
+								<option style={{ color: 'black' }} value="available">
+									Available
+								</option>
+								<option style={{ color: 'black' }} value="unavailable">
+									Unavailable
+								</option>
+								<option style={{ color: 'black' }} value="reserved">
+									Reserved
+								</option>
+							</Select>
+						</Flex>
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -350,155 +369,205 @@ export default function Summary({
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Select
-							onChange={(e) => {
-								handleChange(e)
-								const selectedState = options.states.find(
-									(state) => state.id === e.target.value,
-								)
-								if (selectedState) {
-									setApartmentDetails((prev) => ({
-										...prev,
-										_state_ref: selectedState._ref,
-									}))
-								}
-							}}
-							required
-							value={apartmentDetails.state}
-							name="state"
-							borderColor={'border_color'}
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Select State"
-							size="md"
-							color={'border_color'}
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
 						>
-							{options.states.map((state) => (
-								<option style={{ color: 'black' }} value={state.id}>
-									{state.name}
-								</option>
-							))}
-						</Select>
-
-						<Select
-							onChange={(e) => {
-								handleChange(e)
-								const selectedLocation = options.location_keywords.find(
-									(location) => location.id === e.target.value,
-								)
-								if (selectedLocation) {
-									setApartmentDetails((prev) => ({
-										...prev,
-										_location_keyword_ref: selectedLocation._ref,
-									}))
-								}
-							}}
-							required
-							value={apartmentDetails.area}
-							name="area"
-							borderColor={'border_color'}
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Select Area"
-							size="md"
-							color={'border_color'}
-						>
-							{apartmentDetails.state &&
-								filteredLocationOptions.map((area) => (
-									<option style={{ color: 'black' }} value={area.id}>
-										{area.name}
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select a State
+							</Text>
+							<Select
+								onChange={(e) => {
+									handleChange(e)
+									const selectedState = options.states.find(
+										(state) => state.id === e.target.value,
+									)
+									if (selectedState) {
+										setApartmentDetails((prev) => ({
+											...prev,
+											_state_ref: selectedState._ref,
+										}))
+									}
+								}}
+								required
+								value={apartmentDetails.state}
+								name="state"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="State"
+								size="md"
+								color={'border_color'}
+							>
+								{options.states.map((state) => (
+									<option style={{ color: 'black' }} value={state.id}>
+										{state.name}
 									</option>
 								))}
-						</Select>
+							</Select>
+						</Flex>
+
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
+						>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select an area
+							</Text>
+							<Select
+								onChange={(e) => {
+									handleChange(e)
+									const selectedLocation = options.location_keywords.find(
+										(location) => location.id === e.target.value,
+									)
+									if (selectedLocation) {
+										setApartmentDetails((prev) => ({
+											...prev,
+											_location_keyword_ref: selectedLocation._ref,
+										}))
+									}
+								}}
+								required
+								value={apartmentDetails.area}
+								name="area"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Area"
+								size="md"
+								color={'border_color'}
+							>
+								{apartmentDetails.state &&
+									filteredLocationOptions.map((area) => (
+										<option style={{ color: 'black' }} value={area.id}>
+											{area.name}
+										</option>
+									))}
+							</Select>
+						</Flex>
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Select
-							onChange={(e) => {
-								handleChange(e)
-								const selectedService = options.services.find(
-									(service) => service.id === e.target.value,
-								)
-								if (selectedService) {
-									setApartmentDetails((prev) => ({
-										...prev,
-										_service_ref: selectedService._ref,
-									}))
-								}
-							}}
-							required
-							value={apartmentDetails.service}
-							name="service"
-							borderColor={'border_color'}
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Service Type"
-							size="md"
-							color={'border_color'}
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
 						>
-							{options.services.map((service) => (
-								<option style={{ color: 'black' }} value={service.id}>
-									{service.title}
-								</option>
-							))}
-						</Select>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select a service type
+							</Text>
+							<Select
+								onChange={(e) => {
+									handleChange(e)
+									const selectedService = options.services.find(
+										(service) => service.id === e.target.value,
+									)
+									if (selectedService) {
+										setApartmentDetails((prev) => ({
+											...prev,
+											_service_ref: selectedService._ref,
+										}))
+									}
+								}}
+								required
+								value={apartmentDetails.service}
+								name="service"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Service Type"
+								size="md"
+								color={'border_color'}
+							>
+								{options.services.map((service) => (
+									<option style={{ color: 'black' }} value={service.id}>
+										{service.title}
+									</option>
+								))}
+							</Select>
+						</Flex>
 
-						<Select
-							onChange={(e) => {
-								handleChange(e)
-								const selectedCategory = options.categories.find(
-									(category) => category.id === e.target.value,
-								)
-								if (selectedCategory) {
-									setApartmentDetails((prev) => ({
-										...prev,
-										_category_ref: selectedCategory._ref,
-									}))
-								}
-							}}
-							required
-							value={apartmentDetails.category}
-							name="category"
-							borderColor={'border_color'}
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Select Category"
-							size="md"
-							color={'border_color'}
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
 						>
-							{options.categories.map((category) => (
-								<option style={{ color: 'black' }} value={category.id}>
-									{category.title}
-								</option>
-							))}
-						</Select>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select a category
+							</Text>
+							<Select
+								onChange={(e) => {
+									handleChange(e)
+									const selectedCategory = options.categories.find(
+										(category) => category.id === e.target.value,
+									)
+									if (selectedCategory) {
+										setApartmentDetails((prev) => ({
+											...prev,
+											_category_ref: selectedCategory._ref,
+										}))
+									}
+								}}
+								required
+								value={apartmentDetails.category}
+								name="category"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Category"
+								size="md"
+								color={'border_color'}
+							>
+								{options.categories.map((category) => (
+									<option style={{ color: 'black' }} value={category.id}>
+										{category.title}
+									</option>
+								))}
+							</Select>
+						</Flex>
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Select
-							onChange={(e) => {
-								handleChange(e)
-								const selectedProperty = options.property_types.find(
-									(property) => property.id === e.target.value,
-								)
-								if (selectedProperty) {
-									setApartmentDetails((prev) => ({
-										...prev,
-										_property_type_ref: selectedProperty._ref,
-									}))
-								}
-							}}
-							required
-							value={apartmentDetails.property}
-							name="property"
-							borderColor={'border_color'}
-							_dark={{ borderColor: 'dark_light' }}
-							placeholder="Property Type"
-							size="md"
-							color={'border_color'}
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
 						>
-							{options.property_types.map((property) => (
-								<option style={{ color: 'black' }} value={property.id}>
-									{property.title}
-								</option>
-							))}
-						</Select>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select type of property
+							</Text>
+							<Select
+								onChange={(e) => {
+									handleChange(e)
+									const selectedProperty = options.property_types.find(
+										(property) => property.id === e.target.value,
+									)
+									if (selectedProperty) {
+										setApartmentDetails((prev) => ({
+											...prev,
+											_property_type_ref: selectedProperty._ref,
+										}))
+									}
+								}}
+								required
+								value={apartmentDetails.property}
+								name="property"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Property Type"
+								size="md"
+								color={'border_color'}
+							>
+								{options.property_types.map((property) => (
+									<option style={{ color: 'black' }} value={property.id}>
+										{property.title}
+									</option>
+								))}
+							</Select>
+						</Flex>
 					</Flex>
 				</VStack>
 				<br />
