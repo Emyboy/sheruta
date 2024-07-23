@@ -11,7 +11,7 @@ import {
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' // Import Timestamp and DocumentReference from Firebase for type checking
 import { v4 as generateUId } from 'uuid'
-import { GoogleMap, LoadScript, Autocomplete } from '@react-google-maps/api'
+import { GoogleMap, LoadScript, Autocomplete } from '@react-google-maps/api';
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {

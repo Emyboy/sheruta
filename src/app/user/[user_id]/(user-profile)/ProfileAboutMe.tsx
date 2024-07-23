@@ -14,7 +14,7 @@ export default function ProfileAboutMe({}: Props) {
 				tempore officiis.
 			</Text>
 			<Flex flexWrap={'wrap'} gap={2}>
-				{new Array(14).fill(null).map((_) => {
+				{new Array(10).fill(null).map((_) => {
 					return (
 						<Badge
 							key={Math.random()}

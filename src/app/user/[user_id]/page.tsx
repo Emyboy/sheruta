@@ -44,7 +44,9 @@ export default async function page(props: any) {
 			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
 			const formattedUserInfoDoc = userInfoDocs.empty
 				? null
-				: userInfoDocs.docs[0].data()
+				: userInfoDocs.docs[0].data();
+
+				console.log("Expected data:",formattedFlatShareProfile,formattedUserDoc, formattedUserInfoDoc)
 
 			return {
 				flatShareProfile: formattedFlatShareProfile,
@@ -57,7 +59,8 @@ export default async function page(props: any) {
 		}
 	}
 
-	const user = await getUserProfile()
+	const user = await getUserProfile();
+	console.log("user profile:", user)
 
 	return (
 		<Flex justifyContent={'center'}>
