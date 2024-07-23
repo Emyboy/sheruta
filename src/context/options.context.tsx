@@ -18,6 +18,7 @@ export interface OptionsState {
 	habits: any[]
 	interests: any[]
 	categories: any[]
+	property_types: any[]
 }
 
 interface OptionsContextType {
@@ -34,6 +35,7 @@ const initialOptionsState: OptionsState = {
 	habits: [],
 	interests: [],
 	categories: [],
+	property_types: [],
 }
 
 export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
@@ -57,6 +59,7 @@ export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 				DBCollectionName.habits,
 				DBCollectionName.interests,
 				DBCollectionName.categories,
+				DBCollectionName.propertyTypes,
 			]
 
 			const optionPromises = optionsCollections.map(async (collectionName) => {
@@ -71,6 +74,9 @@ export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 
 			const results = await Promise.all(optionPromises)
 			const options: OptionsState = Object.assign({}, ...results)
+
+			console.log('THE OPTIONS::', options)
+
 			setOptionsState(options)
 			setAppState({ app_loading: false })
 		})()

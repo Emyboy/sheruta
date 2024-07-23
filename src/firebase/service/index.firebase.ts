@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '..'
 import moment from 'moment'
+import { deleteObject, getStorage, ref, uploadString } from 'firebase/storage'
 
 interface createDTO {
 	collection_name: string
@@ -102,6 +103,27 @@ export default class SherutaDB {
 			return Promise.reject(error)
 		}
 	}
+
+	static async uploadMedia({
+		data,
+		storageUrl,
+	}: {
+		data: string
+		storageUrl: string
+	}) {
+		const storage = getStorage()
+		const storageRef = ref(storage, storageUrl)
+
+		const snapshot = await uploadString(storageRef, data, 'data_url')
+		return snapshot
+	}
+
+	static async deleteMedia({ storageUrl }: { storageUrl: string }) {
+		const storage = getStorage()
+		const deleteRef = ref(storage, storageUrl)
+
+		await deleteObject(deleteRef)
+	}
 }
 
 export const DBCollectionName = {
@@ -117,10 +139,12 @@ export const DBCollectionName = {
 	conversations: 'conversations',
 
 	// options
+	propertyTypes: 'property_types',
 	locationKeyWords: 'location_keywords',
 	states: 'states',
 	services: 'services',
 	habits: 'habits',
 	interests: 'interests',
 	categories: 'categories',
+	propertyTypes: 'property_types',
 }

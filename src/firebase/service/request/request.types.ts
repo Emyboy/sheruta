@@ -1,5 +1,4 @@
-import { DocumentReference } from '@firebase/firestore-types'
-import { Timestamp } from 'firebase/firestore'
+import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
 
 export interface RequestData {
@@ -8,15 +7,18 @@ export interface RequestData {
 	uuid: string // for tracking firebase storage location
 
 	budget: number
+	service_charge: number
 
-	google_location_object: Record<string, string>
+	google_location_object: Record<string, any>
 	google_location_text: string
 
 	_location_keyword_ref: DocumentReference
 	_state_ref: DocumentReference
 	_service_ref: DocumentReference
 	_category_ref: DocumentReference
+	_property_type_ref: DocumentReference
 	_status_ref: DocumentReference
+	_user_ref: DocumentReference
 
 	payment_type: PaymentPlan
 
@@ -24,8 +26,6 @@ export interface RequestData {
 	bathrooms: null | number
 	toilets: null | number
 	living_rooms: null | number
-
-	media_type: RequestDataMediaType
 
 	seeking: boolean // if the user is a seeker or a host
 	room_type: 'ensuite' | 'shared'
@@ -41,18 +41,37 @@ export interface RequestData {
 }
 
 type RequestDataMediaType = 'image' | 'video' | 'image_video'
-type PaymentPlan = 'monthly' | 'annually' | 'bi-annually' | 'weekly'
+export type PaymentPlan =
+	| 'monthly'
+	| 'annually'
+	| 'quarterly'
+	| 'bi_annually'
+	| 'weekly'
+
 type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
 export const createHostRequestDTO = z.object({
-	title: z.string().optional(),
-	description: z.string().optional(),
 	uuid: z.string(),
 
+	title: z.string().optional(),
+	description: z.string().optional(),
 	budget: z.number(),
 	service_charge: z.number().nullable(),
+	payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
+	availability_status: z
+		.enum(['available', 'unavailable', 'reserved'])
+		.nullable(),
+	bedrooms: z.number().nullable(),
+	bathrooms: z.number().nullable(),
+	toilets: z.number().nullable(),
+	living_rooms: z.number().nullable(),
 
-	google_location_object: z.record(z.string()),
+	images_urls: z.array(z.string()),
+	video_url: z.string().nullable(),
+
+	seeking: z.boolean(),
+
+	google_location_object: z.record(z.string(), z.any()),
 	google_location_text: z.string(),
 
 	_location_keyword_ref: z.custom<DocumentReference>(
@@ -79,30 +98,12 @@ export const createHostRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_status_ref: z.custom<DocumentReference>(
+	_property_type_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-
-	payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
-
-	bedrooms: z.number().nullable(),
-	bathrooms: z.number().nullable(),
-	toilets: z.number().nullable(),
-	living_rooms: z.number().nullable(),
-
-	media_type: z.enum(['image', 'video', 'image_video']),
-
-	seeking: z.boolean(),
-
-	images_urls: z.array(z.string()),
-	video_url: z.string().nullable(),
-
-	availability_status: z
-		.enum(['available', 'unavailable', 'reserved'])
-		.nullable(),
 
 	createdAt: z.instanceof(Timestamp),
 	updatedAt: z.instanceof(Timestamp),
@@ -114,10 +115,15 @@ export const createSeekerRequestDTO = z.object({
 
 	budget: z.number(),
 
-	google_location_object: z.record(z.string()),
+	google_location_object: z.record(z.string(), z.any()),
 	google_location_text: z.string(),
-
 	_location_keyword_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_user_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
@@ -141,16 +147,20 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_status_ref: z.custom<DocumentReference>(
+	_property_type_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
 
-	payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
-
-	media_type: z.enum(['image', 'video', 'image_video']),
+	payment_type: z.enum([
+		'monthly',
+		'annually',
+		'bi_annually',
+		'quarterly',
+		'weekly',
+	]),
 
 	seeking: z.boolean(), // true for seekers
 
