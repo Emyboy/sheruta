@@ -11,17 +11,21 @@ import {
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' // Import Timestamp and DocumentReference from Firebase for type checking
 import { v4 as generateUId } from 'uuid'
-import { GoogleMap, LoadScript, Autocomplete } from '@react-google-maps/api'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
+	PaymentPlan,
 	RequestData,
 } from '@/firebase/service/request/request.types'
 import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
+
+//get google places API KEY
+const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
 // Define the type for the error objects
 interface ErrorObject {
@@ -52,15 +56,12 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 	}, {} as Errors)
 }
 
-//generate schema from the validation object
-// type createSeekerRequestSchema = z.infer<typeof createSeekerRequestDTO>
-
 // Define the initial state based on the DTO structure
 const initialFormState: Partial<RequestData> = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
 	budget: 10000,
-	google_location_object: {},
+	google_location_object: {} as LocationObject,
 	google_location_text: '',
 	_location_keyword_ref: undefined as DocumentReference | undefined,
 	_state_ref: undefined as DocumentReference | undefined,
@@ -68,7 +69,6 @@ const initialFormState: Partial<RequestData> = {
 	_category_ref: undefined as DocumentReference | undefined,
 	_user_ref: undefined as DocumentReference | undefined,
 	payment_type: 'monthly',
-	// media_type: 'image',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
 	updatedAt: Timestamp.now(),
@@ -99,16 +99,19 @@ interface budgetLimits {
 	bi_annually: number
 	weekly: number
 }
+interface LocationObject {
+	formatted_address?: string;
+	geometry?: {
+		location?: {
+			lat: number;
+			lng: number;
+		};
+	};
+	[key: string]: any;
+}
 
-// PaymentType union type
-type PaymentType =
-	| 'monthly'
-	| 'annually'
-	| 'quarterly'
-	| 'bi_annually'
-	| 'weekly'
 
-const budgetLimits: Record<PaymentType, number> = {
+const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
@@ -174,21 +177,49 @@ const CreateSeekerForm: React.FC = () => {
 	//state to store budget validation
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 
-	const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
+	// const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
 
 	//state to store errors when validating with zod
 	const [formErrors, setFormErrors] = useState<Errors>({})
 
-	const handlePlaceChanged = (
-		autocomplete: google.maps.places.Autocomplete,
-	) => {
-		const place = autocomplete.getPlace()
-		if (place.geometry) {
-			setGoogleLocationObject(place)
-			setGoogleLocationText(place.formatted_address || '')
+	//state to store google places location data
+	const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+	const handleLoad = (autocompleteInstance: google.maps.places.Autocomplete) => {
+		setAutocomplete(autocompleteInstance);
+		console.log('Autocomplete Loaded:', autocompleteInstance);
+	};
+
+	const handlePlaceChanged = () => {
+		if (autocomplete) {
+			//get place
+			const place = autocomplete.getPlace();
+			//get location object
+			const locationObject: LocationObject = {
+				formatted_address: place.formatted_address,
+				geometry: place.geometry
+					? {
+						location: {
+							lat: place.geometry.location?.lat() ?? 0,
+							lng: place.geometry.location?.lng() ?? 0,
+						},
+					}
+					: undefined,
+			};
+			//get locaiton text
+			const locationText = locationObject.formatted_address || '';
+			//update location text state
+			setGoogleLocationText(locationText);
+			//update form data
+			setFormData((prev) => ({
+				...prev,
+				google_location_object: locationObject,
+				google_location_text: locationText,
+			}))
+
 		}
-	}
+	};
 
 	// Function to handle form input changes
 	const handleChange = (
@@ -196,6 +227,7 @@ const CreateSeekerForm: React.FC = () => {
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
+		//destructure event properties
 		let { name, value } = e.target
 
 		switch (name) {
@@ -220,7 +252,7 @@ const CreateSeekerForm: React.FC = () => {
 
 				if (value) {
 					//get the budget limit
-					const budgetLimit = budgetLimits[value as PaymentType]
+					const budgetLimit = budgetLimits[value as PaymentPlan]
 
 					setIsBudgetInvalid(budget < budgetLimit)
 				}
@@ -348,7 +380,6 @@ const CreateSeekerForm: React.FC = () => {
 			console.error(error)
 			if (error instanceof ZodError) {
 				setFormErrors(extractErrors(error.issues as ErrorObject[]))
-				console.log(typeof formErrors?.budget)
 				console.error('Zod Validation Error:', error.issues)
 			} else {
 				// Handle other errors
@@ -512,29 +543,15 @@ const CreateSeekerForm: React.FC = () => {
 				</FormHelperText>
 			</FormControl>
 
-			{/* Google location text field */}
-			{/* <FormControl mb={4}>
-                <FormLabel htmlFor="google_location_text">Location</FormLabel>
-                <Input
-                    id="google_location_text"
-                    name="google_location_text"
-                    value={formData.google_location_text}
-                    onChange={handleChange}
-                />
-            </FormControl> */}
 			<LoadScript
-				googleMapsApiKey="AIzaSyB2cI573A6N2fvTgJcfyci5GLdTdU0Z67E"
+				googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
 				libraries={libraries}
 			>
-				<FormControl mb={4}>
-					<FormLabel htmlFor="location">Location</FormLabel>
+				<FormControl isRequired mb={4}>
+					<FormLabel htmlFor="location">Address</FormLabel>
 					<Autocomplete
-						onLoad={(autocomplete) => console.log('Autocomplete Loaded')}
-						onPlaceChanged={() =>
-							handlePlaceChanged(
-								(window as any).google.maps.places.Autocomplete,
-							)
-						}
+						onLoad={handleLoad}
+						onPlaceChanged={handlePlaceChanged}
 					>
 						<Input
 							id="location"
@@ -544,6 +561,7 @@ const CreateSeekerForm: React.FC = () => {
 							onChange={(e) => setGoogleLocationText(e.target.value)}
 						/>
 					</Autocomplete>
+					<FormHelperText>Enter an address where you would like to seek for this apartment</FormHelperText>
 				</FormControl>
 			</LoadScript>
 
@@ -558,7 +576,7 @@ const CreateSeekerForm: React.FC = () => {
 					placeholder="Select payment type"
 				>
 					<option value="weekly">Weekly</option>
-					<option value="monthly">Monthly</option>					
+					<option value="monthly">Monthly</option>
 					<option value="quarterly">Quarterly</option>
 					<option value="bi_annually">Bi-annually</option>
 					<option value="annually">Annually</option>
@@ -607,4 +625,4 @@ const CreateSeekerForm: React.FC = () => {
 	)
 }
 
-export default CreateSeekerForm;
+export default CreateSeekerForm
