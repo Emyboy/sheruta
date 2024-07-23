@@ -33,7 +33,6 @@ export type ApartmentDetailsType = {
 	_state_ref: undefined | DocumentReference
 	_service_ref: undefined | DocumentReference
 	_category_ref: undefined | DocumentReference
-	_status_ref: undefined | DocumentReference
 	state: string
 	area: string
 	service: string

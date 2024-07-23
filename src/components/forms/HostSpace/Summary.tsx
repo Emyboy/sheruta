@@ -36,7 +36,6 @@ export default function Summary({
 			_location_keyword_ref: formData._location_keyword_ref,
 			_service_ref: formData._service_ref,
 			_category_ref: formData._category_ref,
-			_status_ref: formData._status_ref,
 			_property_type_ref: formData._property_type_ref,
 			state: formData.state || '',
 			area: formData.area || '',
