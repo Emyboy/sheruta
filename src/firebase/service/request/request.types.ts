@@ -1,5 +1,4 @@
-import { DocumentReference } from '@firebase/firestore-types'
-import { Timestamp } from 'firebase/firestore'
+import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
 
 export interface RequestData {
@@ -17,6 +16,7 @@ export interface RequestData {
 	_service_ref: DocumentReference
 	_category_ref: DocumentReference
 	_status_ref: DocumentReference
+	_user_ref: DocumentReference
 
 	payment_type: PaymentPlan
 
@@ -41,7 +41,12 @@ export interface RequestData {
 }
 
 type RequestDataMediaType = 'image' | 'video' | 'image_video'
-type PaymentPlan = 'monthly' | 'annually' | 'bi-annually' | 'weekly'
+type PaymentPlan =
+	| 'monthly'
+	| 'annually'
+	| 'quarterly'
+	| 'bi_annually'
+	| 'weekly'
 type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
 export const createHostRequestDTO = z.object({
@@ -116,8 +121,13 @@ export const createSeekerRequestDTO = z.object({
 
 	google_location_object: z.record(z.string()),
 	google_location_text: z.string(),
-
 	_location_keyword_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_user_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
@@ -141,16 +151,22 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_status_ref: z.custom<DocumentReference>(
+	_property_type_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
 
-	payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
+	payment_type: z.enum([
+		'monthly',
+		'annually',
+		'bi_annually',
+		'quarterly',
+		'weekly',
+	]),
 
-	media_type: z.enum(['image', 'video', 'image_video']),
+	// media_type: z.enum(['image', 'video', 'image_video']),
 
 	seeking: z.boolean(), // true for seekers
 
