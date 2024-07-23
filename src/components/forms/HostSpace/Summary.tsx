@@ -181,7 +181,7 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								type="number"
+								type="text"
 								min={1}
 								value={String(apartmentDetails.budget)}
 								name="budget"
@@ -201,7 +201,7 @@ export default function Summary({
 							</Text>
 							<Input
 								onChange={handleChange}
-								type="number"
+								type="text"
 								value={String(apartmentDetails.service_charge)}
 								name="service_charge"
 								borderColor={'border_color'}
@@ -291,7 +291,7 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								type="number"
+								type="text"
 								min={1}
 								value={String(apartmentDetails.bedrooms)}
 								name="bedrooms"
@@ -312,7 +312,7 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								type="number"
+								type="text"
 								min={1}
 								value={String(apartmentDetails.living_rooms)}
 								name="living_rooms"
@@ -335,7 +335,7 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								type="number"
+								type="text"
 								min={1}
 								value={String(apartmentDetails.toilets)}
 								name="toilets"
@@ -356,7 +356,7 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								required
-								type="number"
+								type="text"
 								min={1}
 								value={String(apartmentDetails.bathrooms)}
 								name="bathrooms"
