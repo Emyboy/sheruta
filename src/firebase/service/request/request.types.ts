@@ -145,18 +145,6 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_category_ref: z.custom<DocumentReference>(
-		(val) => val instanceof DocumentReference,
-		{
-			message: 'Must be a DocumentReference',
-		},
-	),
-	_property_type_ref: z.custom<DocumentReference>(
-		(val) => val instanceof DocumentReference,
-		{
-			message: 'Must be a DocumentReference',
-		},
-	),
 
 	payment_type: z.enum([
 		'monthly',
