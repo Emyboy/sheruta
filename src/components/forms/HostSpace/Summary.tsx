@@ -1,17 +1,32 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useOptionsContext } from '@/context/options.context'
 import {
-	Box,
 	Button,
 	Flex,
+	FormControl,
+	FormLabel,
 	Input,
 	Select,
 	Text,
 	Textarea,
 	VStack,
 } from '@chakra-ui/react'
+import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
 import { ApartmentDetailsType, HostSpaceFormProps } from '.'
+
+const libraries: 'places'[] = ['places']
+
+interface LocationObject {
+	formatted_address?: string
+	geometry?: {
+		location?: {
+			lat: number
+			lng: number
+		}
+	}
+	[key: string]: any
+}
 
 export default function Summary({
 	next,
@@ -25,13 +40,13 @@ export default function Summary({
 			title: formData.title || '',
 			description: formData.description || '',
 			budget: formData.budget || 0,
-			service_charge: formData.service_charge || null,
+			service_charge: formData.service_charge || 0,
 			payment_type: formData.payment_type || '',
-			availability_status: formData.availability_status || null,
-			bedrooms: formData.bedrooms || null,
-			bathrooms: formData.bathrooms || null,
-			toilets: formData.toilets || null,
-			living_rooms: formData.living_rooms || null,
+			availability_status: formData.availability_status || '',
+			bedrooms: formData.bedrooms || 0,
+			bathrooms: formData.bathrooms || 0,
+			toilets: formData.toilets || 0,
+			living_rooms: formData.living_rooms || 0,
 			_state_ref: formData._state_ref,
 			_location_keyword_ref: formData._location_keyword_ref,
 			_service_ref: formData._service_ref,
@@ -56,6 +71,46 @@ export default function Summary({
 				),
 			)
 	}, [apartmentDetails.state])
+
+	const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
+	const [googleLocationText, setGoogleLocationText] = useState<string>('')
+	const [autocomplete, setAutocomplete] =
+		useState<google.maps.places.Autocomplete | null>(null)
+
+	const handleLoad = (
+		autocompleteInstance: google.maps.places.Autocomplete,
+	) => {
+		setAutocomplete(autocompleteInstance)
+		console.log('Autocomplete Loaded:', autocompleteInstance)
+	}
+
+	const handlePlaceChanged = () => {
+		if (autocomplete) {
+			const place = autocomplete.getPlace()
+			console.log(place)
+
+			const locationObject: LocationObject = {
+				formatted_address: place.formatted_address,
+				geometry: place.geometry
+					? {
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
+					: undefined,
+			}
+
+			const locationText = locationObject.formatted_address || ''
+			setGoogleLocationText(locationText)
+
+			// setFormData((prev) => ({
+			// 	...prev,
+			// 	google_location_object: locationObject,
+			// 	google_location_text: locationText,
+			// }))
+		}
+	}
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -157,7 +212,7 @@ export default function Summary({
 							<Textarea
 								onChange={handleChange}
 								required
-								minLength={10}
+								minLength={20}
 								value={apartmentDetails.description}
 								name="description"
 								borderColor={'border_color'}
@@ -399,8 +454,8 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.states.map((state) => (
-									<option style={{ color: 'black' }} value={state.id}>
+								{options.states.map((state, i) => (
+									<option key={i} style={{ color: 'black' }} value={state.id}>
 										{state.name}
 									</option>
 								))}
@@ -439,14 +494,41 @@ export default function Summary({
 								color={'border_color'}
 							>
 								{apartmentDetails.state &&
-									filteredLocationOptions.map((area) => (
-										<option style={{ color: 'black' }} value={area.id}>
+									filteredLocationOptions.map((area, i) => (
+										<option key={i} style={{ color: 'black' }} value={area.id}>
 											{area.name}
 										</option>
 									))}
 							</Select>
 						</Flex>
 					</Flex>
+
+					{apartmentDetails.area && (
+						<LoadScript
+							googleMapsApiKey={
+								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
+							}
+							libraries={libraries}
+						>
+							<FormControl mt={'-1.5rem'}>
+								<FormLabel htmlFor="address">
+									Choose a more descriptive location in {apartmentDetails.area}?
+								</FormLabel>
+								<Autocomplete
+									onLoad={handleLoad}
+									onPlaceChanged={handlePlaceChanged}
+								>
+									<Input
+										id="address"
+										type="text"
+										placeholder="Enter a location"
+										value={googleLocationText}
+										onChange={(e) => setGoogleLocationText(e.target.value)}
+									/>
+								</Autocomplete>
+							</FormControl>
+						</LoadScript>
+					)}
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 						<Flex
@@ -480,8 +562,8 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.services.map((service) => (
-									<option style={{ color: 'black' }} value={service.id}>
+								{options.services.map((service, i) => (
+									<option key={i} style={{ color: 'black' }} value={service.id}>
 										{service.title}
 									</option>
 								))}
@@ -519,8 +601,12 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.categories.map((category) => (
-									<option style={{ color: 'black' }} value={category.id}>
+								{options.categories.map((category, i) => (
+									<option
+										key={i}
+										style={{ color: 'black' }}
+										value={category.id}
+									>
 										{category.title}
 									</option>
 								))}
@@ -560,8 +646,12 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.property_types.map((property) => (
-									<option style={{ color: 'black' }} value={property.id}>
+								{options.property_types.map((property, i) => (
+									<option
+										key={i}
+										style={{ color: 'black' }}
+										value={property.id}
+									>
 										{property.title}
 									</option>
 								))}
