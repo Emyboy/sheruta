@@ -363,7 +363,7 @@ const CreateSeekerForm: React.FC = () => {
 				//redirect users after 3secs
 				setTimeout(() => {
 					router.push('/')
-				}, 1500)
+				}, 1000)
 			}
 		} catch (error) {
 			console.error(error)
@@ -391,7 +391,9 @@ const CreateSeekerForm: React.FC = () => {
 					}
 					flex="1"
 				>
-					<FormLabel htmlFor="budget">Budget</FormLabel>
+					<FormLabel requiredIndicator={null} htmlFor="budget">
+						Budget
+					</FormLabel>
 					<Input
 						type="number"
 						id="budget"
@@ -408,7 +410,9 @@ const CreateSeekerForm: React.FC = () => {
 				</FormControl>
 
 				<FormControl isRequired flex="1">
-					<FormLabel htmlFor="payment_type">Payment Type</FormLabel>
+					<FormLabel requiredIndicator={null} htmlFor="payment_type">
+						Payment Type
+					</FormLabel>
 					<Select
 						id="payment_type"
 						name="payment_type"
@@ -427,7 +431,9 @@ const CreateSeekerForm: React.FC = () => {
 
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">
-					<FormLabel htmlFor="state">Select state</FormLabel>
+					<FormLabel requiredIndicator={null} htmlFor="state">
+						Select state
+					</FormLabel>
 					<Select
 						id="state"
 						name="stateId"
@@ -446,7 +452,9 @@ const CreateSeekerForm: React.FC = () => {
 				</FormControl>
 
 				<FormControl isRequired flex="1">
-					<FormLabel htmlFor="location">Select location</FormLabel>
+					<FormLabel requiredIndicator={null} htmlFor="location">
+						Select location
+					</FormLabel>
 					<Select
 						id="location"
 						name="locationKeywordId"
@@ -467,7 +475,9 @@ const CreateSeekerForm: React.FC = () => {
 
 			{selectedLocation && (
 				<FormControl isRequired mb={4}>
-					<FormLabel htmlFor="address">Where in {selectedLocation}</FormLabel>
+					<FormLabel requiredIndicator={null} htmlFor="address">
+						Where in {selectedLocation}
+					</FormLabel>
 					<LoadScript
 						googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
 						libraries={libraries}
@@ -490,7 +500,9 @@ const CreateSeekerForm: React.FC = () => {
 
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">
-					<FormLabel htmlFor="service">Service Type</FormLabel>
+					<FormLabel requiredIndicator={null} htmlFor="service">
+						Service Type
+					</FormLabel>
 					<Select
 						id="service"
 						name="serviceId"
@@ -509,7 +521,7 @@ const CreateSeekerForm: React.FC = () => {
 			</Flex>
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">
-					<FormLabel htmlFor="description">
+					<FormLabel requiredIndicator={null} htmlFor="description">
 						Describe your ideal room (140 chars)
 					</FormLabel>
 					<Textarea

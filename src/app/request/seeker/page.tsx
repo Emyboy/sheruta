@@ -2,7 +2,15 @@
 
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex, Alert, AlertIcon, Text, Button } from '@chakra-ui/react'
+import {
+	Box,
+	Flex,
+	Alert,
+	AlertIcon,
+	Text,
+	Button,
+	IconButton,
+} from '@chakra-ui/react'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
@@ -11,6 +19,8 @@ import MainHeader from '@/components/layout/MainHeader'
 import CreateSeekerForm from '@/components/forms/CreateSeekerForm'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
+import { BiLeftArrow } from 'react-icons/bi'
+import { FaAngleLeft } from 'react-icons/fa'
 
 type Props = {}
 
@@ -32,15 +42,16 @@ export default function Page({ }: Props) {
 						<Box marginBottom={10}>
 							<Box marginBottom={10}>
 								<Flex align="center" mb={4}>
-									<Button
+									<IconButton
 										onClick={handleBackClick}
+										aria-label="Search database"
+										icon={<FaAngleLeft />}
 										variant="ghost"
-										_hover={{ bg: "transparent" }}
-										_focus={{ boxShadow: "none" }}
-										_active={{ bg: "transparent" }}
-									>
-										<ArrowBackIcon w={6} h={6} />
-									</Button>
+							 			_hover={{ bg: 'transparent' }}
+										_focus={{ boxShadow: 'none' }}
+										_active={{ bg: 'transparent' }}
+									/>
+
 									<Text fontSize="3xl" fontWeight="bold">
 										Post Your Flat Request
 									</Text>
