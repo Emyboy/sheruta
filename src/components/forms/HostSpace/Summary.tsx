@@ -454,8 +454,12 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.states.map((state, i) => (
-									<option key={i} style={{ color: 'black' }} value={state.id}>
+								{options.states.map((state) => (
+									<option
+										style={{ color: 'black' }}
+										value={state.id}
+										key={state.id}
+									>
 										{state.name}
 									</option>
 								))}
@@ -474,7 +478,7 @@ export default function Summary({
 							<Select
 								onChange={(e) => {
 									handleChange(e)
-									const selectedLocation = options.location_keywords.find(
+									const selectedLocation = filteredLocationOptions.find(
 										(location) => location.id === e.target.value,
 									)
 									if (selectedLocation) {
@@ -494,8 +498,12 @@ export default function Summary({
 								color={'border_color'}
 							>
 								{apartmentDetails.state &&
-									filteredLocationOptions.map((area, i) => (
-										<option key={i} style={{ color: 'black' }} value={area.id}>
+									filteredLocationOptions.map((area) => (
+										<option
+											style={{ color: 'black' }}
+											value={area.id}
+											key={area.id}
+										>
 											{area.name}
 										</option>
 									))}
@@ -562,8 +570,12 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.services.map((service, i) => (
-									<option key={i} style={{ color: 'black' }} value={service.id}>
+								{options.services.map((service) => (
+									<option
+										key={service.id}
+										style={{ color: 'black' }}
+										value={service.id}
+									>
 										{service.title}
 									</option>
 								))}
@@ -601,9 +613,9 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.categories.map((category, i) => (
+								{options.categories.map((category) => (
 									<option
-										key={i}
+										key={category.id}
 										style={{ color: 'black' }}
 										value={category.id}
 									>
@@ -646,9 +658,9 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{options.property_types.map((property, i) => (
+								{options.property_types.map((property) => (
 									<option
-										key={i}
+										key={property.id}
 										style={{ color: 'black' }}
 										value={property.id}
 									>

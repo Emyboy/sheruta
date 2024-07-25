@@ -216,7 +216,7 @@ export default function UploadMedia({
 							{Array.from({
 								length,
 							}).map((_, i) => (
-								<GridItem key={i} w={'100%'} position={'relative'}>
+								<GridItem w={'100%'} position={'relative'} key={`media-${i}`}>
 									{length > 4 && (
 										<Flex
 											padding={'0.5rem'}

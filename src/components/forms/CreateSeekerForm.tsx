@@ -7,21 +7,27 @@ import {
 	Select,
 	Textarea,
 	FormErrorMessage,
-	FormHelperText,
+	Flex,
+	useColorMode,
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' // Import Timestamp and DocumentReference from Firebase for type checking
 import { v4 as generateUId } from 'uuid'
-import { GoogleMap, LoadScript, Autocomplete } from '@react-google-maps/api'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
+	PaymentPlan,
 	RequestData,
 } from '@/firebase/service/request/request.types'
 import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
+
+//get google places API KEY
+const GOOGLE_PLACES_API_KEY: string | undefined =
+	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
 // Define the type for the error objects
 interface ErrorObject {
@@ -52,23 +58,18 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 	}, {} as Errors)
 }
 
-//generate schema from the validation object
-// type createSeekerRequestSchema = z.infer<typeof createSeekerRequestDTO>
-
 // Define the initial state based on the DTO structure
 const initialFormState: Partial<RequestData> = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
 	budget: 10000,
-	google_location_object: {},
+	google_location_object: {} as LocationObject,
 	google_location_text: '',
 	_location_keyword_ref: undefined as DocumentReference | undefined,
 	_state_ref: undefined as DocumentReference | undefined,
 	_service_ref: undefined as DocumentReference | undefined,
-	_category_ref: undefined as DocumentReference | undefined,
 	_user_ref: undefined as DocumentReference | undefined,
 	payment_type: 'monthly',
-	// media_type: 'image',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
 	updatedAt: Timestamp.now(),
@@ -76,20 +77,10 @@ const initialFormState: Partial<RequestData> = {
 
 const libraries: 'places'[] = ['places']
 
-type OptionsRef = DocumentReference | undefined
-
 interface Options {
-	_service_ref: OptionsRef
-	_property_type_ref: OptionsRef
-	_category_ref: OptionsRef
-	_location_keyword_ref: OptionsRef
-}
-
-const initialOptionsStateRef = {
-	_service_ref: undefined,
-	_property_type_ref: undefined,
-	_category_ref: undefined,
-	_location_keyword_ref: undefined,
+	_service_ref: DocumentReference | undefined
+	_location_keyword_ref: DocumentReference | undefined
+	_state_ref: DocumentReference | undefined
 }
 
 interface budgetLimits {
@@ -99,16 +90,18 @@ interface budgetLimits {
 	bi_annually: number
 	weekly: number
 }
+interface LocationObject {
+	formatted_address?: string
+	geometry?: {
+		location?: {
+			lat: number
+			lng: number
+		}
+	}
+	[key: string]: any
+}
 
-// PaymentType union type
-type PaymentType =
-	| 'monthly'
-	| 'annually'
-	| 'quarterly'
-	| 'bi_annually'
-	| 'weekly'
-
-const budgetLimits: Record<PaymentType, number> = {
+const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
@@ -116,7 +109,16 @@ const budgetLimits: Record<PaymentType, number> = {
 	annually: 150000,
 }
 
+interface userInfo {
+	userRef: DocumentReference | undefined
+	state: string | undefined
+	location: string | undefined
+}
+
 const CreateSeekerForm: React.FC = () => {
+	//color mode
+	const { colorMode } = useColorMode()
+
 	//get the toast plugin
 	const { showToast } = useCommon()
 
@@ -131,37 +133,43 @@ const CreateSeekerForm: React.FC = () => {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
-	// console.log(authState)
+	console.log('share profile', flat_share_profile)
 
-	//state to hold _user_ref value
-	const [userRef, setUserRef] = useState<DocumentReference | undefined>(
-		undefined,
-	)
+	//state to hold userInfo value
+	const [userInfo, setUserInfo] = useState<userInfo>({
+		userRef: undefined,
+		state: undefined,
+		location: undefined,
+	})
 
 	// update userRef state when auth state changes
 	useEffect(() => {
-		if (typeof flat_share_profile?._user_ref !== 'undefined') {
-			setUserRef(flat_share_profile?._user_ref)
+		if (typeof flat_share_profile !== 'undefined') {
+			setUserInfo({
+				userRef: flat_share_profile?._user_ref,
+				state: flat_share_profile?.state,
+				location: flat_share_profile?.location_keyword,
+			})
 		}
-	}),
-		[flat_share_profile, flat_share_profile?._user_ref]
+	}, [flat_share_profile])
 
 	//get options
 	const {
-		optionsState: {
-			categories,
-			services,
-			states,
-			location_keywords,
-			property_types,
-		},
+		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
 
 	//state for storing Document Ref for category, services, states, properties
-	const [optionsRef, setOptionsRef] = useState<Options>(initialOptionsStateRef)
+	const [optionsRef, setOptionsRef] = useState<Options>({
+		_service_ref: undefined,
+		_state_ref: undefined,
+		_location_keyword_ref: undefined,
+	})
 
 	//state for storing filtered locations based on the selected state
 	const [locations, setLocations] = useState<any[]>([])
+
+	//state for storing selected location keyword
+	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
 	//utility function to filter locations by the selected state using the selected state _state_id
 	const getLocations = (stateId: string): string[] => {
@@ -174,19 +182,50 @@ const CreateSeekerForm: React.FC = () => {
 	//state to store budget validation
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 
-	const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
+	// const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
 
 	//state to store errors when validating with zod
 	const [formErrors, setFormErrors] = useState<Errors>({})
 
-	const handlePlaceChanged = (
-		autocomplete: google.maps.places.Autocomplete,
+	//state to store google places location data
+	const [autocomplete, setAutocomplete] =
+		useState<google.maps.places.Autocomplete | null>(null)
+
+	const handleLoad = (
+		autocompleteInstance: google.maps.places.Autocomplete,
 	) => {
-		const place = autocomplete.getPlace()
-		if (place.geometry) {
-			setGoogleLocationObject(place)
-			setGoogleLocationText(place.formatted_address || '')
+		setAutocomplete(autocompleteInstance)
+		console.log('Autocomplete Loaded:', autocompleteInstance)
+	}
+
+	const handlePlaceChanged = () => {
+		if (autocomplete) {
+			//get place
+			const place = autocomplete.getPlace()
+			console.log(place)
+			//get location object
+			const locationObject: LocationObject = {
+				formatted_address: place.formatted_address,
+				geometry: place.geometry
+					? {
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
+					: undefined,
+			}
+			//get locaiton text
+			const locationText = locationObject.formatted_address || ''
+			//update location text state
+			setGoogleLocationText(locationText)
+			//update form data
+			setFormData((prev) => ({
+				...prev,
+				google_location_object: locationObject,
+				google_location_text: locationText,
+			}))
 		}
 	}
 
@@ -196,6 +235,7 @@ const CreateSeekerForm: React.FC = () => {
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
+		//destructure event properties
 		let { name, value } = e.target
 
 		switch (name) {
@@ -209,7 +249,11 @@ const CreateSeekerForm: React.FC = () => {
 
 					setIsBudgetInvalid(Number(value) < budgetLimit)
 					//convert to number
-					value = Number(value) as any
+					if (value) {
+						value = Number(value) as any
+					} else {
+						value = 10000 as any
+					}
 				}
 
 				break
@@ -220,7 +264,7 @@ const CreateSeekerForm: React.FC = () => {
 
 				if (value) {
 					//get the budget limit
-					const budgetLimit = budgetLimits[value as PaymentType]
+					const budgetLimit = budgetLimits[value as PaymentPlan]
 
 					setIsBudgetInvalid(budget < budgetLimit)
 				}
@@ -247,13 +291,16 @@ const CreateSeekerForm: React.FC = () => {
 			case 'locationKeywordId':
 				if (value) {
 					//get ref
-					const locationKeywordRef = location_keywords.find(
-						(data) => data.id === value,
-					)?._ref
+					const { _ref, name } =
+						location_keywords.find((data) => data.id === value) ?? {}
+
+					//set location keyword
+					setSelectedLocation(name)
+
 					//update options ref
 					setOptionsRef((prev) => ({
 						...prev,
-						_location_keyword_ref: locationKeywordRef,
+						_location_keyword_ref: _ref,
 					}))
 				}
 				break
@@ -266,32 +313,6 @@ const CreateSeekerForm: React.FC = () => {
 					setOptionsRef((prev) => ({
 						...prev,
 						_service_ref: serviceRef,
-					}))
-				}
-				break
-
-			case 'propertyTypeId':
-				if (value) {
-					//get ref
-					const propertyTypeRef = property_types.find(
-						(data) => data.id === value,
-					)?._ref
-					//update options ref
-					setOptionsRef((prev) => ({
-						...prev,
-						_property_type_ref: propertyTypeRef,
-					}))
-				}
-				break
-
-			case 'categoryId':
-				if (value) {
-					//get ref
-					const categoryRef = categories.find((data) => data.id === value)?._ref
-					//update options ref state
-					setOptionsRef((prev) => ({
-						...prev,
-						_category_ref: categoryRef,
 					}))
 				}
 				break
@@ -317,7 +338,7 @@ const CreateSeekerForm: React.FC = () => {
 			const finalFormData = {
 				...formData,
 				...optionsRef,
-				_user_ref: userRef,
+				_user_ref: userInfo.userRef,
 			}
 
 			// console.log(finalFormData) // Log the form data to the console
@@ -342,13 +363,12 @@ const CreateSeekerForm: React.FC = () => {
 				//redirect users after 3secs
 				setTimeout(() => {
 					router.push('/')
-				}, 1500)
+				}, 1000)
 			}
 		} catch (error) {
 			console.error(error)
 			if (error instanceof ZodError) {
 				setFormErrors(extractErrors(error.issues as ErrorObject[]))
-				console.log(typeof formErrors?.budget)
 				console.error('Zod Validation Error:', error.issues)
 			} else {
 				// Handle other errors
@@ -363,234 +383,156 @@ const CreateSeekerForm: React.FC = () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			{/* Select service field */}
-			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="payment_type">Select service</FormLabel>
-				<Select
-					id="service"
-					name="serviceId"
-					onChange={handleChange}
-					bg="dark"
-					placeholder="Select a service"
+			<Flex mb={4} gap={4}>
+				<FormControl
+					isRequired
+					isInvalid={
+						isBudgetInvalid || typeof formErrors?.budget !== 'undefined'
+					}
+					flex="1"
 				>
-					{services &&
-						services.map((data, index: number) => {
-							const serviceTitle = data.title
-							const serviceId = data.id
-							return (
-								<option key={index} value={serviceId}>
-									{serviceTitle}
-								</option>
-							)
-						})}
-				</Select>
-				<FormHelperText>
-					What kind of service are you interested in?
-				</FormHelperText>
-			</FormControl>
-
-			{/* Select property type field */}
-			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="_property_type_ref">
-					Select apartment type
-				</FormLabel>
-				<Select
-					id="property_type"
-					name="propertyTypeId"
-					onChange={handleChange}
-					bg="dark"
-					placeholder="Select apartment type"
-				>
-					{property_types &&
-						property_types.map((data, index: number) => {
-							const propertyTitle = data.title
-							const propertyId = data.id
-							return (
-								<option key={index} value={propertyId}>
-									{propertyTitle}
-								</option>
-							)
-						})}
-				</Select>
-				<FormHelperText>
-					What type of apartment are you interested in?
-				</FormHelperText>
-			</FormControl>
-
-			{/* Select category field */}
-			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="payment_type">Select category</FormLabel>
-				<Select
-					id="category"
-					name="categoryId"
-					onChange={handleChange}
-					bg="dark"
-					placeholder="Select a category"
-				>
-					{categories &&
-						categories.map((data, index: number) => {
-							const categoryTitle = data.title
-							const categoryId = data.id
-							return (
-								<option key={index} value={categoryId}>
-									{categoryTitle}
-								</option>
-							)
-						})}
-				</Select>
-				<FormHelperText>
-					Select the type of space you are requesting, such as &apos;2
-					bedroom&apos;, &apos;3 bedroom&apos;, or &apos;self-contained&apos;.
-				</FormHelperText>
-			</FormControl>
-
-			{/* Description field */}
-			<FormControl mb={4}>
-				<FormLabel htmlFor="description">Description</FormLabel>
-				<Textarea
-					id="description"
-					name="description"
-					value={formData.description}
-					onChange={handleChange}
-					placeholder="I am looking for ..."
-					maxLength={200}
-				/>
-				<FormHelperText>
-					Provide a little description of the apartment you are seeking
-				</FormHelperText>
-			</FormControl>
-
-			{/* Select state field */}
-			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="payment_type">Select state</FormLabel>
-				<Select
-					id="state"
-					name="stateId"
-					onChange={handleChange}
-					bg="dark"
-					placeholder="Select a state"
-				>
-					{states &&
-						states.map((state, index: number) => {
-							const stateName = state.name
-							const stateId = state.id
-							return (
-								<option key={index} value={stateId}>
-									{stateName}
-								</option>
-							)
-						})}
-				</Select>
-				<FormHelperText>
-					Choose a state where you want to seek an apartment from
-				</FormHelperText>
-			</FormControl>
-
-			{/* Select location field */}
-			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="payment_type">Select location</FormLabel>
-				<Select
-					id="location"
-					name="locationKeywordId"
-					onChange={handleChange}
-					bg="dark"
-					placeholder="Select a location"
-				>
-					{locations &&
-						locations.map((data, index: number) => {
-							const locationName = data.name
-							const locationId = data.id
-							return (
-								<option key={index} value={locationId}>
-									{locationName}
-								</option>
-							)
-						})}
-				</Select>
-				<FormHelperText>
-					Choose the location where you wish to seek an apartment from
-				</FormHelperText>
-			</FormControl>
-
-			{/* Google location text field */}
-			{/* <FormControl mb={4}>
-                <FormLabel htmlFor="google_location_text">Location</FormLabel>
-                <Input
-                    id="google_location_text"
-                    name="google_location_text"
-                    value={formData.google_location_text}
-                    onChange={handleChange}
-                />
-            </FormControl> */}
-			<LoadScript
-				googleMapsApiKey="AIzaSyB2cI573A6N2fvTgJcfyci5GLdTdU0Z67E"
-				libraries={libraries}
-			>
-				<FormControl mb={4}>
-					<FormLabel htmlFor="location">Location</FormLabel>
-					<Autocomplete
-						onLoad={(autocomplete) => console.log('Autocomplete Loaded')}
-						onPlaceChanged={() =>
-							handlePlaceChanged(
-								(window as any).google.maps.places.Autocomplete,
-							)
-						}
-					>
-						<Input
-							id="location"
-							type="text"
-							placeholder="Enter a location"
-							value={googleLocationText}
-							onChange={(e) => setGoogleLocationText(e.target.value)}
-						/>
-					</Autocomplete>
+					<FormLabel requiredIndicator={null} htmlFor="budget">
+						Budget
+					</FormLabel>
+					<Input
+						type="number"
+						id="budget"
+						name="budget"
+						value={formData.budget}
+						onChange={handleChange}
+						placeholder={`Minimum ₦${budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}`}
+					/>
+					<FormErrorMessage>
+						Please enter an amount that meets the minimum required value of ₦
+						{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}
+						.
+					</FormErrorMessage>
 				</FormControl>
-			</LoadScript>
 
-			{/* Payment type field */}
-			<FormControl isRequired mb={4}>
-				<FormLabel htmlFor="payment_type">Payment Type</FormLabel>
-				<Select
-					id="payment_type"
-					name="payment_type"
-					onChange={handleChange}
-					bg="dark"
-					placeholder="Select payment type"
-				>
-					<option value="weekly">Weekly</option>
-					<option value="monthly">Monthly</option>
-					<option value="quarterly">Quarterly</option>
-					<option value="bi_annually">Bi-annually</option>
-					<option value="annually">Annually</option>
-				</Select>
-				<FormHelperText>
-					Choose how you would like to pay for this apartment
-				</FormHelperText>
-			</FormControl>
+				<FormControl isRequired flex="1">
+					<FormLabel requiredIndicator={null} htmlFor="payment_type">
+						Payment Type
+					</FormLabel>
+					<Select
+						id="payment_type"
+						name="payment_type"
+						onChange={handleChange}
+						placeholder="Monthly, Annually etc"
+						bgColor={colorMode}
+					>
+						<option value="weekly">Weekly</option>
+						<option value="monthly">Monthly</option>
+						<option value="quarterly">Quarterly</option>
+						<option value="bi_annually">Bi-annually</option>
+						<option value="annually">Annually</option>
+					</Select>
+				</FormControl>
+			</Flex>
+			<Flex mb={4} gap={4}>
+				<FormControl isRequired flex="1">
+					<FormLabel requiredIndicator={null} htmlFor="state">
+						Select state
+					</FormLabel>
+					<Select
+						id="state"
+						name="stateId"
+						onChange={handleChange}
+						placeholder="Select a state"
+						bgColor={colorMode}
+						defaultValue={userInfo?.state}
+					>
+						{states &&
+							states.map((state, index: number) => (
+								<option key={index} value={state.id}>
+									{state.name}
+								</option>
+							))}
+					</Select>
+				</FormControl>
 
-			{/* Budget field */}
-			<FormControl
-				isRequired
-				isInvalid={isBudgetInvalid || typeof formErrors?.budget !== 'undefined'}
-				mb={4}
-			>
-				<FormLabel htmlFor="budget">Your budget</FormLabel>
-				<Input
-					type="number"
-					id="budget"
-					name="budget"
-					value={formData.budget}
-					onChange={handleChange}
-				/>
-				<FormErrorMessage>
-					Please enter an amount that meets the minimum required value of ₦
-					{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}.
-				</FormErrorMessage>
-				<FormHelperText>
-					Your budget should meet the minimum required value of ₦
-					{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}
-				</FormHelperText>
-			</FormControl>
+				<FormControl isRequired flex="1">
+					<FormLabel requiredIndicator={null} htmlFor="location">
+						Select location
+					</FormLabel>
+					<Select
+						id="location"
+						name="locationKeywordId"
+						onChange={handleChange}
+						placeholder="Select a location"
+						bgColor={colorMode}
+						defaultValue={userInfo?.location}
+					>
+						{locations &&
+							locations.map((data, index: number) => (
+								<option key={index} value={data.id}>
+									{data.name}
+								</option>
+							))}
+					</Select>
+				</FormControl>
+			</Flex>
+
+			{selectedLocation && (
+				<FormControl isRequired mb={4}>
+					<FormLabel requiredIndicator={null} htmlFor="address">
+						Where in {selectedLocation}
+					</FormLabel>
+					<LoadScript
+						googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
+						libraries={libraries}
+					>
+						<Autocomplete
+							onLoad={handleLoad}
+							onPlaceChanged={handlePlaceChanged}
+						>
+							<Input
+								id="address"
+								type="text"
+								placeholder="Select..."
+								value={googleLocationText}
+								onChange={(e) => setGoogleLocationText(e.target.value)}
+							/>
+						</Autocomplete>
+					</LoadScript>
+				</FormControl>
+			)}
+
+			<Flex mb={4} gap={4}>
+				<FormControl isRequired flex="1">
+					<FormLabel requiredIndicator={null} htmlFor="service">
+						Service Type
+					</FormLabel>
+					<Select
+						id="service"
+						name="serviceId"
+						onChange={handleChange}
+						placeholder="For rent, Shared room etc"
+						bgColor={colorMode}
+					>
+						{services &&
+							services.map((data, index: number) => (
+								<option key={index} value={data.id}>
+									{data.title}
+								</option>
+							))}
+					</Select>
+				</FormControl>
+			</Flex>
+			<Flex mb={4} gap={4}>
+				<FormControl isRequired flex="1">
+					<FormLabel requiredIndicator={null} htmlFor="description">
+						Describe your ideal room (140 chars)
+					</FormLabel>
+					<Textarea
+						id="description"
+						name="description"
+						value={formData.description}
+						onChange={handleChange}
+						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
+						maxLength={140}
+					/>
+				</FormControl>
+			</Flex>
 
 			{/* Submit button */}
 			<Button
