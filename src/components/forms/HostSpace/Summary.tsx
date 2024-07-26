@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react'
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
-import { ApartmentDetailsType, HostSpaceFormProps } from '.'
+import { HostSpaceFormProps } from '.'
 
 const libraries: 'places'[] = ['places']
 
@@ -35,44 +35,19 @@ export default function Summary({
 }: HostSpaceFormProps) {
 	const { optionsState: options } = useOptionsContext()
 
-	const [apartmentDetails, setApartmentDetails] =
-		useState<ApartmentDetailsType>({
-			title: formData.title,
-			description: formData.description,
-			budget: formData.budget,
-			service_charge: formData.service_charge,
-			payment_type: formData.payment_type,
-			availability_status: formData.availability_status,
-			bedrooms: formData.bedrooms,
-			bathrooms: formData.bathrooms,
-			toilets: formData.toilets,
-			living_rooms: formData.living_rooms,
-			_state_ref: formData._state_ref,
-			_location_keyword_ref: formData._location_keyword_ref,
-			_service_ref: formData._service_ref,
-			_category_ref: formData._category_ref,
-			_property_type_ref: formData._property_type_ref,
-			state: formData.state,
-			area: formData.area,
-			service: formData.service,
-			category: formData.category,
-			property: formData.property,
-		})
-
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
 		options.location_keywords,
 	)
 
 	useEffect(() => {
-		if (apartmentDetails.state)
+		if (formData.state)
 			setFilteredLocationOptions(
 				options.location_keywords.filter(
-					(location) => location._state_id === apartmentDetails.state,
+					(location) => location._state_id === formData.state,
 				),
 			)
-	}, [apartmentDetails.state])
+	}, [formData.state])
 
-	const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
@@ -104,11 +79,11 @@ export default function Summary({
 			const locationText = locationObject.formatted_address || ''
 			setGoogleLocationText(locationText)
 
-			// setFormData((prev) => ({
-			// 	...prev,
-			// 	google_location_object: locationObject,
-			// 	google_location_text: locationText,
-			// }))
+			setFormData((prev) => ({
+				...prev,
+				google_location_object: locationObject,
+				google_location_text: locationText,
+			}))
 		}
 	}
 
@@ -125,19 +100,19 @@ export default function Summary({
 			e.target.name === 'toilets' ||
 			e.target.name === 'living_rooms'
 		) {
-			setApartmentDetails((prev) => ({
+			setFormData((prev) => ({
 				...prev,
 				[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
 			}))
 			localStorage.setItem(
 				'host_space_form',
 				JSON.stringify({
-					...apartmentDetails,
+					...formData,
 					[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
 				}),
 			)
 		} else {
-			setApartmentDetails((prev) => ({
+			setFormData((prev) => ({
 				...prev,
 				[e.target.name]: e.target.value,
 			}))
@@ -145,7 +120,7 @@ export default function Summary({
 			localStorage.setItem(
 				'host_space_form',
 				JSON.stringify({
-					...apartmentDetails,
+					...formData,
 					[e.target.name]: e.target.value,
 				}),
 			)
@@ -155,10 +130,10 @@ export default function Summary({
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
 
-		setFormData((prev) => ({ ...prev, ...apartmentDetails }))
+		setFormData((prev) => ({ ...prev, ...formData }))
 		localStorage.setItem(
 			'host_space_form',
-			JSON.stringify({ ...formData, ...apartmentDetails }),
+			JSON.stringify({ ...formData, ...formData }),
 		)
 
 		next()
@@ -191,7 +166,7 @@ export default function Summary({
 								onChange={handleChange}
 								required
 								minLength={5}
-								value={apartmentDetails.title}
+								value={formData.title}
 								name="title"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -213,7 +188,7 @@ export default function Summary({
 								onChange={handleChange}
 								required
 								minLength={20}
-								value={apartmentDetails.description}
+								value={formData.description}
 								name="description"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -238,7 +213,7 @@ export default function Summary({
 								required
 								type="text"
 								min={1}
-								value={String(apartmentDetails.budget)}
+								value={String(formData.budget)}
 								name="budget"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -257,7 +232,7 @@ export default function Summary({
 							<Input
 								onChange={handleChange}
 								type="text"
-								value={String(apartmentDetails.service_charge)}
+								value={String(formData.service_charge)}
 								name="service_charge"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -279,7 +254,7 @@ export default function Summary({
 							<Select
 								onChange={handleChange}
 								required
-								value={apartmentDetails.payment_type}
+								value={formData.payment_type}
 								name="payment_type"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -313,7 +288,7 @@ export default function Summary({
 							<Select
 								onChange={handleChange}
 								required
-								value={apartmentDetails.availability_status || ''}
+								value={formData.availability_status || ''}
 								name="availability_status"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -350,14 +325,14 @@ export default function Summary({
 										(category) => category.id === e.target.value,
 									)
 									if (selectedCategory) {
-										setApartmentDetails((prev) => ({
+										setFormData((prev) => ({
 											...prev,
 											_category_ref: selectedCategory._ref,
 										}))
 									}
 								}}
 								required
-								value={apartmentDetails.category}
+								value={formData.category}
 								name="category"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -390,7 +365,7 @@ export default function Summary({
 								required
 								type="text"
 								min={1}
-								value={String(apartmentDetails.living_rooms)}
+								value={String(formData.living_rooms)}
 								name="living_rooms"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -413,7 +388,7 @@ export default function Summary({
 								required
 								type="text"
 								min={1}
-								value={String(apartmentDetails.toilets)}
+								value={String(formData.toilets)}
 								name="toilets"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -434,7 +409,7 @@ export default function Summary({
 								required
 								type="text"
 								min={1}
-								value={String(apartmentDetails.bathrooms)}
+								value={String(formData.bathrooms)}
 								name="bathrooms"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -460,14 +435,14 @@ export default function Summary({
 										(service) => service.id === e.target.value,
 									)
 									if (selectedService) {
-										setApartmentDetails((prev) => ({
+										setFormData((prev) => ({
 											...prev,
 											_service_ref: selectedService._ref,
 										}))
 									}
 								}}
 								required
-								value={apartmentDetails.service}
+								value={formData.service}
 								name="service"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -503,14 +478,14 @@ export default function Summary({
 										(property) => property.id === e.target.value,
 									)
 									if (selectedProperty) {
-										setApartmentDetails((prev) => ({
+										setFormData((prev) => ({
 											...prev,
 											_property_type_ref: selectedProperty._ref,
 										}))
 									}
 								}}
 								required
-								value={apartmentDetails.property}
+								value={formData.property}
 								name="property"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -554,14 +529,14 @@ export default function Summary({
 										(state) => state.id === e.target.value,
 									)
 									if (selectedState) {
-										setApartmentDetails((prev) => ({
+										setFormData((prev) => ({
 											...prev,
 											_state_ref: selectedState._ref,
 										}))
 									}
 								}}
 								required
-								value={apartmentDetails.state}
+								value={formData.state}
 								name="state"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -597,14 +572,14 @@ export default function Summary({
 										(location) => location.id === e.target.value,
 									)
 									if (selectedLocation) {
-										setApartmentDetails((prev) => ({
+										setFormData((prev) => ({
 											...prev,
 											_location_keyword_ref: selectedLocation._ref,
 										}))
 									}
 								}}
 								required
-								value={apartmentDetails.area}
+								value={formData.area}
 								name="area"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -612,7 +587,7 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
-								{apartmentDetails.state &&
+								{formData.state &&
 									filteredLocationOptions.map((area) => (
 										<option
 											style={{ color: 'black', textTransform: 'capitalize' }}
@@ -626,7 +601,7 @@ export default function Summary({
 						</Flex>
 					</Flex>
 
-					{apartmentDetails.area && (
+					{formData.area && (
 						<LoadScript
 							googleMapsApiKey={
 								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
@@ -635,7 +610,7 @@ export default function Summary({
 						>
 							<FormControl mt={'-1.5rem'}>
 								<FormLabel htmlFor="address">
-									Choose a more descriptive location in {apartmentDetails.area}?
+									Choose a more descriptive location in {formData.area}?
 								</FormLabel>
 								<Autocomplete
 									onLoad={handleLoad}
@@ -645,7 +620,7 @@ export default function Summary({
 										id="address"
 										type="text"
 										placeholder="Enter a location"
-										value={googleLocationText}
+										value={formData.google_location_text}
 										onChange={(e) => setGoogleLocationText(e.target.value)}
 									/>
 								</Autocomplete>

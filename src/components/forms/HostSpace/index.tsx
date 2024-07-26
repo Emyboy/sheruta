@@ -15,9 +15,7 @@ export type HostSpaceFormProps = {
 	setFormData: React.Dispatch<React.SetStateAction<FormDataType>>
 }
 
-export type FormDataType = ApartmentDetailsType & MediaType
-
-export type ApartmentDetailsType = {
+export type FormDataType = {
 	title: string
 	description: string
 	service_charge: number | null
@@ -33,6 +31,10 @@ export type ApartmentDetailsType = {
 	_state_ref: undefined | DocumentReference
 	_service_ref: undefined | DocumentReference
 	_category_ref: undefined | DocumentReference
+	images_urls: string[]
+	video_url: string | null
+	google_location_object: Record<string, any> | undefined
+	google_location_text: string
 	state?: string
 	area?: string
 	service?: string
@@ -63,6 +65,8 @@ const initialState = {
 	_service_ref: undefined,
 	_category_ref: undefined,
 	_property_type_ref: undefined,
+	google_location_object: undefined,
+	google_location_text: '',
 	state: '',
 	area: '',
 	service: '',
@@ -108,7 +112,8 @@ export default function HostSpace() {
 	useEffect(() => {
 		const formData = localStorage.getItem('host_space_form')
 
-		if (formData && appState.app_loading == false)
+		if (!formData && !appState.app_loading) setHostSpaceData(initialState)
+		if (formData && !appState.app_loading)
 			setHostSpaceData(JSON.parse(formData))
 	}, [appState.app_loading])
 
