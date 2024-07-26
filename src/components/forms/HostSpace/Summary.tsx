@@ -48,7 +48,6 @@ export default function Summary({
 			)
 	}, [formData.state])
 
-	const [googleLocationText, setGoogleLocationText] = useState<string>('')
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
@@ -76,8 +75,8 @@ export default function Summary({
 					: undefined,
 			}
 
-			const locationText = locationObject.formatted_address || ''
-			setGoogleLocationText(locationText)
+			const locationText =
+				locationObject.formatted_address || formData.google_location_text
 
 			setFormData((prev) => ({
 				...prev,
@@ -620,8 +619,9 @@ export default function Summary({
 										id="address"
 										type="text"
 										placeholder="Enter a location"
+										name="google_location_text"
 										value={formData.google_location_text}
-										onChange={(e) => setGoogleLocationText(e.target.value)}
+										onChange={handleChange}
 									/>
 								</Autocomplete>
 							</FormControl>
