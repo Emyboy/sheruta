@@ -12,10 +12,10 @@ import { useAppContext } from '@/context/app.context'
 export type HostSpaceFormProps = {
 	next: () => void
 	formData: FormDataType
-	setFormData: React.SetStateAction<React.Dispatch<FormDataType>>
+	setFormData: React.Dispatch<React.SetStateAction<FormDataType>>
 }
 
-export type FormDataType = Partial<ApartmentDetailsType & MediaType>
+export type FormDataType = ApartmentDetailsType & MediaType
 
 export type ApartmentDetailsType = {
 	title: string
@@ -33,11 +33,11 @@ export type ApartmentDetailsType = {
 	_state_ref: undefined | DocumentReference
 	_service_ref: undefined | DocumentReference
 	_category_ref: undefined | DocumentReference
-	state: string
-	area: string
-	service: string
-	category: string
-	property: string
+	state?: string
+	area?: string
+	service?: string
+	category?: string
+	property?: string
 }
 
 export type MediaType = {
@@ -48,7 +48,7 @@ export type MediaType = {
 const initialState = {
 	title: '',
 	description: '',
-	service_charge: null,
+	service_charge: 0,
 	budget: 0,
 	payment_type: '',
 	bedrooms: 0,
@@ -56,8 +56,8 @@ const initialState = {
 	toilets: 0,
 	living_rooms: 0,
 	images_urls: [],
-	video_url: '',
-	availability_status: null,
+	video_url: null,
+	availability_status: '',
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
@@ -107,8 +107,10 @@ export default function HostSpace() {
 
 	useEffect(() => {
 		const formData = localStorage.getItem('host_space_form')
-		if (formData && appState) setHostSpaceData(JSON.parse(formData))
-	}, [appState])
+
+		if (formData && appState.app_loading == false)
+			setHostSpaceData(JSON.parse(formData))
+	}, [appState.app_loading])
 
 	useEffect(() => {
 		const totalSteps = allSteps().length

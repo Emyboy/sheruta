@@ -134,14 +134,20 @@ export default function UploadMedia({
 		Promise.all(promises)
 			.then((values) => {
 				const res = [...values]
-				let video_url = undefined
 
 				if (mediaData.video_url) {
-					video_url = res.pop()?.metadata.fullPath
+					setMediaData((prev) => ({
+						...prev,
+						video_url: res.pop()?.metadata.fullPath || null,
+					}))
 				}
-				const images_urls = res.map((result) => result.metadata.fullPath)
 
-				setFormData((prev) => ({ ...prev, video_url, images_urls }))
+				setMediaData((prev) => ({
+					...prev,
+					images_urls: res.map((result) => result.metadata.fullPath),
+				}))
+
+				setFormData((prev) => ({ ...prev, ...mediaData }))
 			})
 			.catch((error) => {
 				console.error('Error uploading media:', error)
