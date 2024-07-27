@@ -428,7 +428,6 @@ const CreateSeekerForm: React.FC = () => {
 					</Select>
 				</FormControl>
 			</Flex>
-
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">
 					<FormLabel requiredIndicator={null} htmlFor="state">
