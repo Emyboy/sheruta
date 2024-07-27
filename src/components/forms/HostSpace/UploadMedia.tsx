@@ -1,7 +1,6 @@
 import UploadMediaIcon from '@/assets/svg/upload-media-icon'
 import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
-import { createHostRequestDTO } from '@/firebase/service/request/request.types'
 import {
 	Button,
 	Flex,
@@ -14,13 +13,13 @@ import {
 	useToast,
 	VStack,
 } from '@chakra-ui/react'
+import { Timestamp } from 'firebase/firestore'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { HostSpaceFormProps, MediaType } from '.'
-import { Timestamp } from 'firebase/firestore'
 
 export default function UploadMedia({
-	next,
 	formData,
 	setFormData,
 }: HostSpaceFormProps) {
@@ -28,6 +27,7 @@ export default function UploadMedia({
 	const {
 		authState: { user },
 	} = useAuthContext()
+	const router = useRouter()
 
 	const [loading, setLoading] = useState(false)
 	const [length, setLength] = useState(4)
@@ -134,14 +134,20 @@ export default function UploadMedia({
 		Promise.all(promises)
 			.then((values) => {
 				const res = [...values]
-				let video_url = undefined
 
 				if (mediaData.video_url) {
-					video_url = res.pop()?.metadata.fullPath
+					setMediaData((prev) => ({
+						...prev,
+						video_url: res.pop()?.metadata.fullPath || null,
+					}))
 				}
-				const images_urls = res.map((result) => result.metadata.fullPath)
 
-				setFormData((prev) => ({ ...prev, video_url, images_urls }))
+				setMediaData((prev) => ({
+					...prev,
+					images_urls: res.map((result) => result.metadata.fullPath),
+				}))
+
+				setFormData((prev) => ({ ...prev, ...mediaData }))
 			})
 			.catch((error) => {
 				console.error('Error uploading media:', error)
@@ -175,6 +181,7 @@ export default function UploadMedia({
 
 			localStorage.removeItem('host_space_form')
 			toast({ status: 'success', title: 'You have successfully added a space' })
+			router.push('/')
 		} catch (error) {
 			console.log(error)
 			// mediaData.images_urls.forEach()
@@ -310,6 +317,7 @@ export default function UploadMedia({
 											accept="image/*"
 											display={'none'}
 											onChange={(e) => handleUploadImages(e, i)}
+											disabled={loading}
 										/>
 									</FormLabel>
 								</GridItem>
@@ -404,6 +412,7 @@ export default function UploadMedia({
 							accept="video/*"
 							display={'none'}
 							onChange={handleVideoUpload}
+							disabled={loading}
 						/>
 					</FormLabel>
 				</VStack>
