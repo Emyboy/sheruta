@@ -21,7 +21,6 @@ export type FormDataType = {
 	service_charge: number | null
 	budget: number
 	payment_type: string
-	bedrooms: number | null
 	bathrooms: number | null
 	toilets: number | null
 	living_rooms: number | null
@@ -53,7 +52,7 @@ const initialState = {
 	service_charge: 0,
 	budget: 0,
 	payment_type: '',
-	bedrooms: 0,
+
 	bathrooms: 0,
 	toilets: 0,
 	living_rooms: 0,

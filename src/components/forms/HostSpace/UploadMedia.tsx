@@ -14,7 +14,8 @@ import {
 	useToast,
 	VStack,
 } from '@chakra-ui/react'
-import { serverTimestamp, Timestamp } from 'firebase/firestore'
+import { serverTimestamp } from 'firebase/firestore'
+import { StorageReference } from 'firebase/storage'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
@@ -135,25 +136,29 @@ export default function UploadMedia({
 
 			const values = await Promise.all(promises)
 
-			const res = [...values]
-
 			if (mediaData.video_url) {
-				setMediaData((prev) => ({
+				const videoPath = values.pop()
+				const downloadUrl = await SherutaDB.getMediaUrl(
+					videoPath?.ref as StorageReference,
+				)
+
+				setFormData((prev) => ({
 					...prev,
-					video_url: res.pop()?.metadata.fullPath || null,
+					video_url: downloadUrl,
 				}))
 			}
 
-			setMediaData((prev) => ({
-				...prev,
-				images_urls: res.map((result) => result.metadata.fullPath),
-			}))
+			const imgUrls = await Promise.all(
+				values.map(async (img) => await SherutaDB.getMediaUrl(img.ref)),
+			)
 
-			setFormData((prev) => ({ ...prev, ...mediaData }))
+			setFormData((prev) => ({
+				...prev,
+				images_urls: imgUrls.filter((url) => url !== null),
+			}))
 
 			let data = {
 				...formData,
-				uuid,
 				seeking: false,
 				createdAt: serverTimestamp(),
 				updatedAt: serverTimestamp(),
@@ -166,7 +171,7 @@ export default function UploadMedia({
 			delete data.area
 			delete data.property
 
-			createHostRequestDTO.parse(data)
+			// createHostRequestDTO.parse(data)
 
 			await SherutaDB.create({
 				collection_name: 'requests',

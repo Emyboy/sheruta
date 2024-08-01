@@ -15,6 +15,7 @@ import {
 	getDownloadURL,
 	getStorage,
 	ref,
+	StorageReference,
 	uploadString,
 } from 'firebase/storage'
 import moment from 'moment'
@@ -139,13 +140,9 @@ export default class SherutaDB {
 		return snapshot
 	}
 
-	static async getMediaUrl(mediaPath: string) {
-		const storage = getStorage()
-
+	static async getMediaUrl(ref: StorageReference) {
 		try {
-			const mediaRef = ref(storage, mediaPath)
-
-			const url = await getDownloadURL(mediaRef)
+			const url = await getDownloadURL(ref)
 
 			return url
 		} catch (error) {

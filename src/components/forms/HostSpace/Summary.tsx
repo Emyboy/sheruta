@@ -94,7 +94,6 @@ export default function Summary({
 		if (
 			e.target.name === 'budget' ||
 			e.target.name === 'service_charge' ||
-			e.target.name === 'bedrooms' ||
 			e.target.name === 'bathrooms' ||
 			e.target.name === 'toilets' ||
 			e.target.name === 'living_rooms'
@@ -504,12 +503,6 @@ export default function Summary({
 							</Select>
 						</Flex>
 					</Flex>
-
-					<Flex
-						gap={DEFAULT_PADDING}
-						w="full"
-						flexDir={['column', 'row']}
-					></Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 						<Flex

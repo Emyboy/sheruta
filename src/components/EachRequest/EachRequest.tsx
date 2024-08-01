@@ -8,10 +8,10 @@ import {
 	Button,
 	Flex,
 	Image,
-	Spinner,
 	Text,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
+import { useState } from 'react'
 import {
 	BiBarChart,
 	BiDotsHorizontalRounded,
@@ -20,8 +20,6 @@ import {
 	BiPhone,
 } from 'react-icons/bi'
 import MainTooltip from '../atoms/MainTooltip'
-import { useEffect, useState } from 'react'
-import SherutaDB from '@/firebase/service/index.firebase'
 
 type Props = { request: any }
 
@@ -46,7 +44,7 @@ export default function EachRequest({ request }: Props) {
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Link
-					href={`/request/seeker/${request.uuid}`}
+					href={`/request/seeker/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex gap={5} alignItems={'center'}>
@@ -105,7 +103,7 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/seeker/${request.uuid}`}
+					href={`/request/seeker/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex flexDirection={'column'}>
@@ -117,14 +115,11 @@ export default function EachRequest({ request }: Props) {
 						>
 							<BiLocationPlus /> {request.google_location_text}
 						</Flex>
-						<Truncate
-							text={request.description}
-							link={`/request/seeker/${request.uuid}`}
-						/>
+						<Truncate text={request.description} />
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/seeker/${request.uuid}`}
+					href={`/request/seeker/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex justifyContent={'space-between'}>
@@ -277,10 +272,6 @@ const EachRequestImages = ({
 	const [url, setUrl] = useState<string>('')
 	const [type, setType] = useState<'video' | 'img'>('img')
 
-	const [videoUrl, setVideoUrl] = useState<string | null>(null)
-	const [imagesUrl, setImagesUrl] = useState<string[]>([])
-	const [loadingMedia, setLoadingMedia] = useState(false)
-
 	const handleClick = (url: string, type: 'video' | 'img') => {
 		setType(type)
 		setUrl(url)
@@ -288,32 +279,6 @@ const EachRequestImages = ({
 	}
 
 	const close = () => setClicked(false)
-
-	const getMediaUrl = async () => {
-		setLoadingMedia(true)
-		try {
-			if (video) {
-				const videoUrl = await SherutaDB.getMediaUrl(video)
-				setVideoUrl(videoUrl)
-			}
-
-			const imgUrls = await Promise.all(
-				images.map(async (img) => await SherutaDB.getMediaUrl(img)),
-			)
-			setImagesUrl(imgUrls.filter((url) => url !== null))
-		} catch (error) {
-			console.error('Error fetching media URLs:', error)
-		}
-		setLoadingMedia(false)
-	}
-
-	useEffect(() => {
-		const fetchMediaUrls = async () => {
-			await getMediaUrl()
-		}
-
-		fetchMediaUrls()
-	}, [])
 
 	return (
 		<>
@@ -354,7 +319,7 @@ const EachRequestImages = ({
 							alignItems={'center'}
 							justifyContent={'center'}
 						>
-							<video src={url} width={'full'} height={'full'} />
+							<iframe src={url} width={'100%'} height={'100%'} />
 						</Flex>
 					)}
 				</Flex>
@@ -367,55 +332,49 @@ const EachRequestImages = ({
 				gap={DEFAULT_PADDING}
 				overflowX={'scroll'}
 				alignItems={'center'}
-				justifyContent={'center'}
 			>
-				{loadingMedia ? (
-					<Spinner />
-				) : (
-					<Flex
-						flexDirection={'column'}
-						gap={DEFAULT_PADDING}
-						w={'90%'}
-						flexWrap={'wrap'}
-						h={'full'}
-					>
-						{videoUrl && (
-							<Box
+				<Flex
+					flexDirection={'column'}
+					gap={DEFAULT_PADDING}
+					w={'90%'}
+					flexWrap={'wrap'}
+					h={'full'}
+				>
+					{video && (
+						<Box
+							position={'relative'}
+							overflow={'hidden'}
+							cursor={'pointer'}
+							rounded="md"
+							onClick={() => handleClick(video, 'video')}
+						>
+							<video src={video} width={'100%'} height={'100%'} />
+						</Box>
+					)}
+					{images.map((imgUrl, i) => (
+						<Box
+							key={i}
+							position={'relative'}
+							overflow={'hidden'}
+							cursor={'pointer'}
+							rounded="md"
+							bg="dark"
+							onClick={() => handleClick(imgUrl, 'img')}
+						>
+							<Image
+								src={imgUrl}
+								alt="image of the shared space"
 								position={'relative'}
-								overflow={'hidden'}
-								cursor={'pointer'}
-								rounded="md"
-								onClick={() => handleClick(videoUrl, 'video')}
-							>
-								<video src={videoUrl} />
-							</Box>
-						)}
-						{!!imagesUrl.length &&
-							imagesUrl.map((imgUrl, i) => (
-								<Box
-									key={i}
-									position={'relative'}
-									overflow={'hidden'}
-									cursor={'pointer'}
-									rounded="md"
-									bg="dark"
-									onClick={() => handleClick(imgUrl, 'img')}
-								>
-									<Image
-										src={imgUrl}
-										alt="image of the shared space"
-										position={'relative'}
-									/>
-								</Box>
-							))}
-					</Flex>
-				)}
+							/>
+						</Box>
+					))}
+				</Flex>
 			</Flex>
 		</>
 	)
 }
 
-const Truncate = ({ text, link }: { text: string; link: string }) => {
+const Truncate = ({ text }: { text: string }) => {
 	const maxChars = 200
 
 	const truncatedText =
@@ -425,9 +384,9 @@ const Truncate = ({ text, link }: { text: string; link: string }) => {
 		<Text>
 			{truncatedText}
 			{text.length > maxChars && (
-				<Link href={link} as="span" color="brand">
+				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
 					Read more..
-				</Link>
+				</Text>
 			)}
 		</Text>
 	)
