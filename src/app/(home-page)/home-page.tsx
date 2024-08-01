@@ -18,9 +18,11 @@ import HomeTabs from './HomeTabs'
 type Props = {
 	locations: string
 	states: StateData[]
+	requests: string
 }
 
-export default function HomePage({ locations, states }: Props) {
+export default function HomePage({ locations, states, requests }: Props) {
+	const flatShareRequests = requests ? JSON.parse(requests) : []
 	return (
 		<>
 			<MainPageBody>
@@ -32,12 +34,12 @@ export default function HomePage({ locations, states }: Props) {
 						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
 						<Flex flexDirection={'column'} gap={0}>
-							{new Array(9).fill(null).map((_, index: number) => {
+							{flatShareRequests.map((request: any, index: number) => {
 								return (
 									<>
 										{index === 3 && <JoinTheCommunity />}
-										<Flex key={Math.random()} px={DEFAULT_PADDING}>
-											<EachRequest />
+										<Flex key={request.uuid} px={DEFAULT_PADDING}>
+											<EachRequest request={request} />
 										</Flex>
 									</>
 								)

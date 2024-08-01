@@ -17,7 +17,6 @@ export interface RequestData {
 	_service_ref: DocumentReference
 	_category_ref: DocumentReference
 	_property_type_ref: DocumentReference
-	_status_ref: DocumentReference
 	_user_ref: DocumentReference
 
 	payment_type: PaymentPlan
@@ -40,7 +39,6 @@ export interface RequestData {
 	updatedAt: Timestamp
 }
 
-type RequestDataMediaType = 'image' | 'video' | 'image_video'
 export type PaymentPlan =
 	| 'monthly'
 	| 'annually'
@@ -99,6 +97,12 @@ export const createHostRequestDTO = z.object({
 		},
 	),
 	_property_type_ref: z.custom<DocumentReference>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_user_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',

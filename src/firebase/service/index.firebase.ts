@@ -2,17 +2,23 @@ import {
 	collection,
 	deleteDoc,
 	doc,
+	DocumentReference,
 	getDoc,
 	getDocs,
 	limit,
-	query,
 	serverTimestamp,
 	setDoc,
 	updateDoc,
 } from 'firebase/firestore'
-import { db } from '..'
+import {
+	deleteObject,
+	getDownloadURL,
+	getStorage,
+	ref,
+	uploadString,
+} from 'firebase/storage'
 import moment from 'moment'
-import { deleteObject, getStorage, ref, uploadString } from 'firebase/storage'
+import { db } from '..'
 
 interface createDTO {
 	collection_name: string
@@ -61,14 +67,29 @@ export default class SherutaDB {
 		_limit: number
 	}): Promise<any> {
 		const collectionRef = collection(db, collection_name)
-		//@ts-ignore
+		// @ts-ignore
 		const querySnapshot = await getDocs(collectionRef, limit(_limit))
-		const documents = querySnapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data(),
-			ref: doc.ref,
-		}))
-		return documents
+
+		const documents = querySnapshot.docs.map(async (doc) => {
+			const docData = { ...doc.data() }
+
+			const refFields = Object.entries(docData).filter(
+				([key, value]) => value instanceof DocumentReference,
+			)
+
+			const resolvedRefs = await Promise.all(
+				refFields.map(async ([key, ref]) => {
+					const resolvedDoc = await getDoc(ref)
+					return { [key]: resolvedDoc.data() }
+				}),
+			)
+
+			Object.assign(docData, ...resolvedRefs)
+
+			return { id: doc.id, ...docData, ref: doc.ref }
+		})
+
+		return await Promise.all(documents)
 	}
 
 	static async get({
@@ -118,6 +139,21 @@ export default class SherutaDB {
 		return snapshot
 	}
 
+	static async getMediaUrl(mediaPath: string) {
+		const storage = getStorage()
+
+		try {
+			const mediaRef = ref(storage, mediaPath)
+
+			const url = await getDownloadURL(mediaRef)
+
+			return url
+		} catch (error) {
+			console.log(error)
+			return null
+		}
+	}
+
 	static async deleteMedia({ storageUrl }: { storageUrl: string }) {
 		const storage = getStorage()
 		const deleteRef = ref(storage, storageUrl)
@@ -133,7 +169,7 @@ export const DBCollectionName = {
 	userSettings: 'user_settings',
 
 	flatShareProfile: 'flat_share_profiles',
-	flatShareRequests: 'flat_share_requests',
+	flatShareRequests: 'requests',
 
 	messages: 'messages',
 	conversations: 'conversations',
