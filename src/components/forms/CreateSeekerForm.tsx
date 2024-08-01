@@ -62,7 +62,7 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 const initialFormState: Partial<RequestData> = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
-	budget: 10000,
+	budget: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
 	_location_keyword_ref: undefined as DocumentReference | undefined,
@@ -133,8 +133,6 @@ const CreateSeekerForm: React.FC = () => {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
-	console.log('share profile', flat_share_profile)
-
 	//state to hold userInfo value
 	const [userInfo, setUserInfo] = useState<userInfo>({
 		userRef: undefined,
@@ -203,17 +201,16 @@ const CreateSeekerForm: React.FC = () => {
 		if (autocomplete) {
 			//get place
 			const place = autocomplete.getPlace()
-			console.log(place)
 			//get location object
 			const locationObject: LocationObject = {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
+						location: {
+							lat: place.geometry.location?.lat() ?? 0,
+							lng: place.geometry.location?.lng() ?? 0,
+						},
+					}
 					: undefined,
 			}
 			//get locaiton text
@@ -235,97 +232,67 @@ const CreateSeekerForm: React.FC = () => {
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
-		//destructure event properties
-		let { name, value } = e.target
+		const { id, name, value } = e.target;
 
-		switch (name) {
+		const updateBudgetInvalidState = (paymentType: string, budgetValue: number) => {
+			const budgetLimit = budgetLimits[paymentType as PaymentPlan];
+			setIsBudgetInvalid(budgetValue < budgetLimit);
+		};
+
+		const updateOptionsRef = (key: string, refValue: any) => {
+			setOptionsRef((prev) => ({
+				...prev,
+				[key]: refValue,
+			}));
+		};
+
+		switch (id) {
 			case 'budget':
-				//get the payment type
-				const paymentType = formData.payment_type
-
-				if (paymentType) {
-					//get the budget limit
-					const budgetLimit = budgetLimits[paymentType]
-
-					setIsBudgetInvalid(Number(value) < budgetLimit)
-					//convert to number
-					if (value) {
-						value = Number(value) as any
-					} else {
-						value = 10000 as any
-					}
-				}
-
-				break
+				const paymentType = formData.payment_type;
+				if (paymentType) updateBudgetInvalidState(paymentType, Number(value));
+				break;
 
 			case 'payment_type':
-				//get the budget
-				const budget = formData.budget as number
-
-				if (value) {
-					//get the budget limit
-					const budgetLimit = budgetLimits[value as PaymentPlan]
-
-					setIsBudgetInvalid(budget < budgetLimit)
-				}
-
-				break
+				const budget = formData.budget as number;
+				if (value) updateBudgetInvalidState(value as PaymentPlan, budget);
+				break;
 
 			case 'stateId':
 				if (value) {
-					//call function to filter the locaitons by _state_id
-					const newLocations = getLocations(value)
-					// console.log(newLocations)
-					// store the new locations
-					setLocations(newLocations)
-					//get ref
-					const stateRef = states.find((data) => data.id === value)?._ref
-					//update options ref state
-					setOptionsRef((prev) => ({
-						...prev,
-						_state_ref: stateRef,
-					}))
+					const newLocations = getLocations(value);
+					setLocations(newLocations);
+					const stateRef = states.find((data) => data.id === value)?._ref;
+					updateOptionsRef('_state_ref', stateRef);
 				}
-				break
+				break;
 
 			case 'locationKeywordId':
 				if (value) {
-					//get ref
-					const { _ref, name } =
-						location_keywords.find((data) => data.id === value) ?? {}
-
-					//set location keyword
-					setSelectedLocation(name)
-
-					//update options ref
-					setOptionsRef((prev) => ({
-						...prev,
-						_location_keyword_ref: _ref,
-					}))
+					const { _ref, name } = location_keywords.find((data) => data.id === value) ?? {};
+					setSelectedLocation(name);
+					updateOptionsRef('_location_keyword_ref', _ref);
 				}
-				break
+				break;
 
 			case 'serviceId':
 				if (value) {
-					//get ref
-					const serviceRef = services.find((data) => data.id === value)?._ref
-					//update options ref
-					setOptionsRef((prev) => ({
-						...prev,
-						_service_ref: serviceRef,
-					}))
+					const serviceRef = services.find((data) => data.id === value)?._ref;
+					updateOptionsRef('_service_ref', serviceRef);
 				}
-				break
+				break;
+
+			default:
+				break;
 		}
 
-		//store in global form data state
-		setFormData((prevData) => ({
-			...prevData,
-			...{
+		if (name && value) {
+			setFormData((prevData) => ({
+				...prevData,
 				[name]: value,
-			},
-		}))
-	}
+			}));
+		}
+	};
+
 
 	// Function to handle form submission
 	const handleSubmit = async (
@@ -341,7 +308,8 @@ const CreateSeekerForm: React.FC = () => {
 				_user_ref: userInfo.userRef,
 			}
 
-			// console.log(finalFormData) // Log the form data to the console
+			//convert budget to number
+			finalFormData.budget = Number(finalFormData.budget)
 
 			//validate the zod schema with final form data
 			createSeekerRequestDTO.parse(finalFormData)
@@ -398,7 +366,6 @@ const CreateSeekerForm: React.FC = () => {
 						type="number"
 						id="budget"
 						name="budget"
-						value={formData.budget}
 						onChange={handleChange}
 						placeholder={`Minimum ₦${budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}`}
 					/>
@@ -435,8 +402,7 @@ const CreateSeekerForm: React.FC = () => {
 						Select state
 					</FormLabel>
 					<Select
-						id="state"
-						name="stateId"
+						id="stateId"
 						onChange={handleChange}
 						placeholder="Select a state"
 						bgColor={colorMode}
@@ -456,8 +422,7 @@ const CreateSeekerForm: React.FC = () => {
 						Select location
 					</FormLabel>
 					<Select
-						id="location"
-						name="locationKeywordId"
+						id="locationKeywordId"
 						onChange={handleChange}
 						placeholder="Select a location"
 						bgColor={colorMode}
@@ -504,8 +469,7 @@ const CreateSeekerForm: React.FC = () => {
 						Service Type
 					</FormLabel>
 					<Select
-						id="service"
-						name="serviceId"
+						id="serviceId"
 						onChange={handleChange}
 						placeholder="For rent, Shared room etc"
 						bgColor={colorMode}
@@ -530,7 +494,7 @@ const CreateSeekerForm: React.FC = () => {
 						value={formData.description}
 						onChange={handleChange}
 						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
-						maxLength={140}
+						minLength={140}
 					/>
 				</FormControl>
 			</Flex>

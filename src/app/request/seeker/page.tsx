@@ -24,7 +24,7 @@ import { FaAngleLeft } from 'react-icons/fa'
 
 type Props = {}
 
-export default function Page({ }: Props) {
+export default function Page({}: Props) {
 	const router = useRouter()
 
 	const handleBackClick = () => {
@@ -47,7 +47,7 @@ export default function Page({ }: Props) {
 										aria-label="Search database"
 										icon={<FaAngleLeft />}
 										variant="ghost"
-							 			_hover={{ bg: 'transparent' }}
+										_hover={{ bg: 'transparent' }}
 										_focus={{ boxShadow: 'none' }}
 										_active={{ bg: 'transparent' }}
 									/>
