@@ -27,3 +27,40 @@ export function formatPrice(digit: number): string {
 	})
 	return formatter.format(digit)
 }
+
+export function timeAgo(updatedAt: {
+	seconds: number
+	nanoseconds: number
+}): string {
+	if (typeof updatedAt === 'undefined') return 'unknown'
+
+	const updatedDate = new Date(
+		updatedAt.seconds * 1000 + updatedAt.nanoseconds / 1000000,
+	)
+	const now = new Date()
+	const seconds = Math.floor((now.getTime() - updatedDate.getTime()) / 1000)
+
+	const intervals = {
+		year: 365 * 24 * 60 * 60,
+		month: 30 * 24 * 60 * 60,
+		week: 7 * 24 * 60 * 60,
+		day: 24 * 60 * 60,
+		hour: 60 * 60,
+		minute: 60,
+		second: 1,
+	}
+
+	for (const [unit, value] of Object.entries(intervals)) {
+		const result = Math.floor(seconds / value)
+		if (result >= 1) {
+			return `${result} ${unit}${result > 1 ? 's' : ''} ago`
+		}
+	}
+
+	return 'just now'
+}
+
+export const capitalizeString = (str: string): string => {
+    if (!str) return str; 
+    return str.charAt(0).toUpperCase() + str.slice(1);
+};

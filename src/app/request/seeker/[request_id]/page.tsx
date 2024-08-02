@@ -3,34 +3,44 @@
 import SherutaDB from '@/firebase/service/index.firebase'
 import { useEffect, useState } from 'react'
 import {
-	createSeekerRequestDTO,
-	PaymentPlan,
-	RequestData,
+    createSeekerRequestDTO,
+    PaymentPlan,
+    RequestData,
 } from '@/firebase/service/request/request.types'
 import {
-	DocumentData,
-	DocumentReference,
-	getDoc,
-	Timestamp,
+    DocumentData,
+    DocumentReference,
+    getDoc,
+    Timestamp,
 } from 'firebase/firestore'
 
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import {
-	Box,
-	Flex,
-	Alert,
-	AlertIcon,
-	Text,
-	Button,
-	IconButton,
-	Input,
-	Avatar,
-	Badge,
-	Heading,
-	HStack,
-	useDisclosure,
-	useColorMode,
+    Box,
+    Flex,
+    Alert,
+    AlertIcon,
+    Text,
+    Button,
+    IconButton,
+    Input,
+    Avatar,
+    Badge,
+    Heading,
+    HStack,
+    useDisclosure,
+    useColorMode,
+    Tooltip,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverArrow,
+    PopoverCloseButton,
+    PopoverHeader,
+    PopoverBody,
+    VStack,
+    Icon,
 } from '@chakra-ui/react'
 import { ArrowBackIcon, PhoneIcon } from '@chakra-ui/icons'
 import React from 'react'
@@ -41,679 +51,454 @@ import CreateSeekerForm from '@/components/forms/CreateSeekerForm'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-	BiBookmark,
-	BiChat,
-	BiLeftArrow,
-	BiMap,
-	BiMapPin,
-	BiMessage,
-	BiPhone,
+    BiBadgeCheck,
+    BiBookmark,
+    BiChat,
+    BiDotsHorizontal,
+    BiDotsHorizontalRounded,
+    BiEnvelope,
+    BiLeftArrow,
+    BiMap,
+    BiMapPin,
+    BiMessage,
+    BiMessageRoundedDetail,
+    BiPencil,
+    BiPhone,
+    BiPhoneCall,
+    BiPhoneOutgoing,
+    BiShare,
+    BiSolidBadgeCheck,
+    BiTrash,
 } from 'react-icons/bi'
 import { FaAngleLeft } from 'react-icons/fa'
 import { BiLocationPlus } from 'react-icons/bi'
 import { TbSend } from 'react-icons/tb'
 import { useAuthContext } from '@/context/auth.context'
 import { HiEllipsisHorizontal, HiEllipsisVertical } from 'react-icons/hi2'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { capitalizeString, timeAgo } from '@/utils/index.utils'
+import useCommon from '@/hooks/useCommon'
 
 interface PageParams {
-	[key: string]: string | undefined
+    [key: string]: string | undefined
 }
 
 const size = {
-	base: '98vw',
-	lg: '1000px',
-}
-
-function timeAgo(updatedAt: { seconds: number; nanoseconds: number }): string {
-	if (typeof updatedAt === 'undefined') return 'unknown'
-
-	const updatedDate = new Date(
-		updatedAt.seconds * 1000 + updatedAt.nanoseconds / 1000000,
-	)
-	const now = new Date()
-	const seconds = Math.floor((now.getTime() - updatedDate.getTime()) / 1000)
-
-	const intervals = {
-		year: 365 * 24 * 60 * 60,
-		month: 30 * 24 * 60 * 60,
-		week: 7 * 24 * 60 * 60,
-		day: 24 * 60 * 60,
-		hour: 60 * 60,
-		minute: 60,
-		second: 1,
-	}
-
-	for (const [unit, value] of Object.entries(intervals)) {
-		const result = Math.floor(seconds / value)
-		if (result >= 1) {
-			return `${result} ${unit}${result > 1 ? 's' : ''} ago`
-		}
-	}
-
-	return 'just now'
-}
-
-///sample object
-
-const s = {
-	_state_ref: {
-		converter: null,
-		_key: {
-			path: {
-				segments: [
-					'projects',
-					'sheruta-dev-2d4f1',
-					'databases',
-					'(default)',
-					'documents',
-					'states',
-					'b639b939-5965-480a-abad-60a40e4ac7771707571804780',
-				],
-				offset: 5,
-				len: 2,
-			},
-		},
-		type: 'document',
-		firestore: {
-			app: {
-				_isDeleted: false,
-				_options: {
-					apiKey: 'AIzaSyDTd4f0CSzNGj7KzIa4rAPX6MeUJw62D6Q',
-					authDomain: 'sheruta-dev-2d4f1.firebaseapp.com',
-					projectId: 'sheruta-dev-2d4f1',
-					storageBucket: 'sheruta-dev-2d4f1.appspot.com',
-					messagingSenderId: '932622767496',
-					appId: '1:932622767496:web:15d5531caa1b324993563d',
-				},
-				_config: {
-					name: '[DEFAULT]',
-					automaticDataCollectionEnabled: false,
-				},
-				_name: '[DEFAULT]',
-				_automaticDataCollectionEnabled: false,
-				_container: {
-					name: '[DEFAULT]',
-					providers: {},
-				},
-			},
-			databaseId: {
-				projectId: 'sheruta-dev-2d4f1',
-				database: '(default)',
-			},
-			settings: {
-				host: 'firestore.googleapis.com',
-				ssl: true,
-				ignoreUndefinedProperties: false,
-				cacheSizeBytes: 41943040,
-				experimentalForceLongPolling: false,
-				experimentalAutoDetectLongPolling: true,
-				experimentalLongPollingOptions: {},
-				useFetchStreams: true,
-			},
-		},
-	},
-	deleteDate: {
-		seconds: 1727185941,
-		nanoseconds: 542000000,
-	},
-	_user_ref: {
-		converter: null,
-		_key: {
-			path: {
-				segments: [
-					'projects',
-					'sheruta-dev-2d4f1',
-					'databases',
-					'(default)',
-					'documents',
-					'users',
-					'b4Sx53cu5oNHNSbfwtYNG4Cy3TR2',
-				],
-				offset: 5,
-				len: 2,
-			},
-		},
-		type: 'document',
-		firestore: {
-			app: {
-				_isDeleted: false,
-				_options: {
-					apiKey: 'AIzaSyDTd4f0CSzNGj7KzIa4rAPX6MeUJw62D6Q',
-					authDomain: 'sheruta-dev-2d4f1.firebaseapp.com',
-					projectId: 'sheruta-dev-2d4f1',
-					storageBucket: 'sheruta-dev-2d4f1.appspot.com',
-					messagingSenderId: '932622767496',
-					appId: '1:932622767496:web:15d5531caa1b324993563d',
-				},
-				_config: {
-					name: '[DEFAULT]',
-					automaticDataCollectionEnabled: false,
-				},
-				_name: '[DEFAULT]',
-				_automaticDataCollectionEnabled: false,
-				_container: {
-					name: '[DEFAULT]',
-					providers: {},
-				},
-			},
-			databaseId: {
-				projectId: 'sheruta-dev-2d4f1',
-				database: '(default)',
-			},
-			settings: {
-				host: 'firestore.googleapis.com',
-				ssl: true,
-				ignoreUndefinedProperties: false,
-				cacheSizeBytes: 41943040,
-				experimentalForceLongPolling: false,
-				experimentalAutoDetectLongPolling: true,
-				experimentalLongPollingOptions: {},
-				useFetchStreams: true,
-			},
-		},
-	},
-	seeking: true,
-	_service_ref: {
-		converter: null,
-		_key: {
-			path: {
-				segments: [
-					'projects',
-					'sheruta-dev-2d4f1',
-					'databases',
-					'(default)',
-					'documents',
-					'services',
-					'carry-over',
-				],
-				offset: 5,
-				len: 2,
-			},
-		},
-		type: 'document',
-		firestore: {
-			app: {
-				_isDeleted: false,
-				_options: {
-					apiKey: 'AIzaSyDTd4f0CSzNGj7KzIa4rAPX6MeUJw62D6Q',
-					authDomain: 'sheruta-dev-2d4f1.firebaseapp.com',
-					projectId: 'sheruta-dev-2d4f1',
-					storageBucket: 'sheruta-dev-2d4f1.appspot.com',
-					messagingSenderId: '932622767496',
-					appId: '1:932622767496:web:15d5531caa1b324993563d',
-				},
-				_config: {
-					name: '[DEFAULT]',
-					automaticDataCollectionEnabled: false,
-				},
-				_name: '[DEFAULT]',
-				_automaticDataCollectionEnabled: false,
-				_container: {
-					name: '[DEFAULT]',
-					providers: {},
-				},
-			},
-			databaseId: {
-				projectId: 'sheruta-dev-2d4f1',
-				database: '(default)',
-			},
-			settings: {
-				host: 'firestore.googleapis.com',
-				ssl: true,
-				ignoreUndefinedProperties: false,
-				cacheSizeBytes: 41943040,
-				experimentalForceLongPolling: false,
-				experimentalAutoDetectLongPolling: true,
-				experimentalLongPollingOptions: {},
-				useFetchStreams: true,
-			},
-		},
-	},
-	stateId: 'b639b939-5965-480a-abad-60a40e4ac7771707571804780',
-	google_location_object: {
-		geometry: {
-			location: {
-				lat: 6.464587400000001,
-				lng: 3.5725244,
-			},
-		},
-		formatted_address: 'Aja, Lekki 106104, Lagos, Nigeria',
-	},
-	uuid: '10ea2048-7eb2-451e-a4d4-e39a83fb6f30',
-	_location_keyword_ref: {
-		converter: null,
-		_key: {
-			path: {
-				segments: [
-					'projects',
-					'sheruta-dev-2d4f1',
-					'databases',
-					'(default)',
-					'documents',
-					'location_keywords',
-					'ajah',
-				],
-				offset: 5,
-				len: 2,
-			},
-		},
-		type: 'document',
-		firestore: {
-			app: {
-				_isDeleted: false,
-				_options: {
-					apiKey: 'AIzaSyDTd4f0CSzNGj7KzIa4rAPX6MeUJw62D6Q',
-					authDomain: 'sheruta-dev-2d4f1.firebaseapp.com',
-					projectId: 'sheruta-dev-2d4f1',
-					storageBucket: 'sheruta-dev-2d4f1.appspot.com',
-					messagingSenderId: '932622767496',
-					appId: '1:932622767496:web:15d5531caa1b324993563d',
-				},
-				_config: {
-					name: '[DEFAULT]',
-					automaticDataCollectionEnabled: false,
-				},
-				_name: '[DEFAULT]',
-				_automaticDataCollectionEnabled: false,
-				_container: {
-					name: '[DEFAULT]',
-					providers: {},
-				},
-			},
-			databaseId: {
-				projectId: 'sheruta-dev-2d4f1',
-				database: '(default)',
-			},
-			settings: {
-				host: 'firestore.googleapis.com',
-				ssl: true,
-				ignoreUndefinedProperties: false,
-				cacheSizeBytes: 41943040,
-				experimentalForceLongPolling: false,
-				experimentalAutoDetectLongPolling: true,
-				experimentalLongPollingOptions: {},
-				useFetchStreams: true,
-			},
-		},
-	},
-	serviceId: 'carry-over',
-	createdAt: {
-		seconds: 1721829142,
-		nanoseconds: 589000000,
-	},
-	google_location_text: 'Aja, Lekki 106104, Lagos, Nigeria',
-	budget: 10000,
-	updatedAt: {
-		seconds: 1721829142,
-		nanoseconds: 589000000,
-	},
-	description: 'Just testing baba',
-	payment_type: 'weekly',
-	locationKeywordId: 'ajah',
-}
-
-const _ref = {
-	_id: 'b4Sx53cu5oNHNSbfwtYNG4Cy3TR2',
-	last_seen: {
-		seconds: 1721564202,
-		nanoseconds: 825000000,
-	},
-	account_status: 'active',
-	avatar_url:
-		'https://lh3.googleusercontent.com/a/ACg8ocIVE9jB8NYZgDB5vSnIJXDsMh6s-jQmdRopwOeTU9HygNIsN9Hp=s96-c',
-	email: 'ugorji757@gmail.com',
-	first_name: 'simon',
-	providerId: 'google',
-	updatedAt: {
-		seconds: 1721564202,
-		nanoseconds: 825000000,
-	},
-	last_name: 'ugorji',
-	deleteDate: {
-		seconds: 1726920956,
-		nanoseconds: 985000000,
-	},
-	createdAt: {
-		seconds: 1721564202,
-		nanoseconds: 825000000,
-	},
+    base: '98vw',
+    lg: '1000px',
 }
 
 interface Props {
-	postData: DocumentData
+    // postData: DocumentData
+    [key: string]: any // Allows for arbitrary properties
 }
 
 const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
-	const recordSnap = await getDoc(docRef)
+    const recordSnap = await getDoc(docRef)
 
-	return recordSnap.exists() ? recordSnap.data() : null
+    return recordSnap.exists() ? recordSnap.data() : null
 }
 
 const Post = ({ postData }: Props) => {
-	const { colorMode } = useColorMode()
+    const { colorMode } = useColorMode()
 
-	//destructure
-	const {
-		updatedAt,
-		description,
-		google_location_text,
-		userDoc,
-		serviceTypeDoc,
-		budget,
-	} = postData || {}
+    const { showToast } = useCommon()
+    // Destructure
+    const {
+        updatedAt,
+        description,
+        google_location_text,
+        userDoc,
+        userInfoDoc,
+        serviceTypeDoc,
+        locationKeywordDoc,
+        budget,
+        payment_type,
+        loggedInUser,
+    } = postData || {}
 
-	console.log(serviceTypeDoc, userDoc, google_location_text)
+    // Handle redirect
+    const router = useRouter()
 
-	//show more / hide text
-	const { isOpen, onOpen, onClose } = useDisclosure()
+    const handleRedirect = (url: string) => {
+        return () => {
+            router.replace(url)
+        }
+    }
 
-	return (
-		<>
-			<Box>
-				<Flex alignItems="center" justifyContent="space-between">
-					<Flex alignItems="center">
-						<Avatar
-							size="lg"
-							src={userDoc?.avatar_url || 'https://via.placeholder.com/150'}
-						/>
-						<Box ml={2}>
-							<Heading as="h3" size="md">
-								New Apartment
-							</Heading>
-							<Text
-								fontWeight={'300'}
-								fontSize="sm"
-								color={colorMode === 'light' ? '#11171766' : '#ddd'}
-							>
-								Posted {timeAgo(updatedAt)}
-							</Text>
-						</Box>
-					</Flex>
-					<HStack>
-						<IconButton
-							fontSize={'24px'}
-							aria-label="se"
-							icon={<HiEllipsisHorizontal />}
-						/>
-						<IconButton
-							fontSize={'24px'}
-							aria-label="se"
-							icon={<BiBookmark />}
-						/>
-					</HStack>
-				</Flex>
+    // Function to check if user is post admin
+    const isPostAdmin = (): boolean => loggedInUser?._id === userInfoDoc?._user_id
 
-				<Flex gap={2} mt={2} p={2} alignItems={'center'} color="#00BC73">
-					<Text fontSize={'25px'}>
-						<BiMap />
-					</Text>{' '}
-					<Text fontSize={'15px'}> {google_location_text} </Text>
-				</Flex>
+    const generateShareUrl = (): void => {
+        if (typeof window !== 'undefined' && typeof window.navigator !== 'undefined') {
+            window.navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    showToast({
+                        message: 'Link has been copied successfully',
+                        status: 'info',
+                    });
+                })
+                .catch(err => {
+                    showToast({
+                        message: 'Failed to copy the link',
+                        status: 'error',
+                    });
+                    console.error('Could not copy text: ', err);
+                });
+        }
+    };
 
-				{/* <Text mt={4} mb={4} color={"#111717CC"}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer consequat
-                    fringilla dolor, non feugiat nunc fringilla non. Sed a orci lobortis, Lorem
-                    ipsum dolor sit amet, consectetur adipiscing elit. Integer consequat
-                    fringilla dolor Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Integer consequat. Lorem ipsum dolor sit amet, consectetur adipiscing
-                    elit. Integer consequat. {isOpen ? (
-                        <>Show more...</>
-                    ) : (
-                        <Button color="#00BC73" onClick={onOpen} size="sm" variant="link" textDecoration={"underline"}>
-                            Show more...
-                        </Button>
-                    )}
-                </Text> */}
+    return (
+        <>
+            <Box>
+                <Flex alignItems="center" justifyContent="space-between">
+                    <Flex alignItems="center">
+                        <Avatar
+                            size="lg"
+                            src={userDoc?.avatar_url || 'https://via.placeholder.com/150'}
+                        />
+                        <Box ml={2}>
+                            <Heading as="h3" size="md">
+                                New Apartment
+                            </Heading>
+                            <Text
+                                fontWeight={'300'}
+                                fontSize="sm"
+                                color={colorMode === 'light' ? '#11171766' : '#ddd'}
+                            >
+                                Posted {timeAgo(updatedAt)}
+                            </Text>
+                        </Box>
+                    </Flex>
+                    <HStack flexWrap={'wrap'}>
+                        <Popover>
+                            <PopoverTrigger>
+                                <IconButton
+                                    fontSize={'24px'}
+                                    aria-label="Options"
+                                    icon={<BiDotsHorizontalRounded />}
+                                />
+                            </PopoverTrigger>
+                            <PopoverContent
+                                color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
+                                bg={colorMode === 'dark' ? '#202020' : '#fff'}
+                                width={'100%'}
+                                padding={4}
+                            >
+                                <PopoverBody p={0}>
+                                    <VStack spacing={2} align="flex-start">
+                                        {isPostAdmin() && (
+                                            <Box
+                                                cursor={'pointer'}
+                                                display="flex"
+                                                alignItems="center"
+                                                padding={1}
+                                                _hover={{ bg: 'gray.700' }}
+                                                width={'100%'}
+                                            >
+                                                <BiPencil />
+                                                <Text marginLeft={2}>Edit</Text>
+                                            </Box>
+                                        )}
+                                        <Box
+                                            cursor={'pointer'}
+                                            display="flex"
+                                            alignItems="center"
+                                            padding={1}
+                                            _hover={{ bg: 'gray.700' }}
+                                            width={'100%'}
+                                            onClick={() => {
+                                                generateShareUrl()
+                                            }}
+                                        >
+                                            <BiShare />
+                                            <Text marginLeft={2}>Share</Text>
+                                        </Box>
+                                        {isPostAdmin() && (
+                                            <Box
+                                                cursor={'pointer'}
+                                                display="flex"
+                                                alignItems="center"
+                                                padding={1}
+                                                _hover={{ bg: 'gray.700' }}
+                                                width={'100%'}
+                                                color={'red.400'}
+                                            >
+                                                <BiTrash />
+                                                <Text marginLeft={2}>Delete</Text>
+                                            </Box>
+                                        )}
+                                    </VStack>
+                                </PopoverBody>
+                            </PopoverContent>
+                        </Popover>
+                        <IconButton
+                            fontSize={'24px'}
+                            aria-label="se"
+                            icon={<BiBookmark />}
+                        />
+                    </HStack>
+                </Flex>
 
-				<Text mt={5} mb={5}>
-					{isOpen ? description : `${description?.substring(0, 100)}... `}
-					{isOpen ? (
-						<Button
-							color="#00BC73"
-							onClick={onClose}
-							size="sm"
-							variant="link"
-							textDecoration={'underline'}
-						>
-							{' '}
-							Show less
-						</Button>
-					) : (
-						description &&
-						description?.length >= 100 && (
-							<Button
-								color="#00BC73"
-								onClick={onOpen}
-								size="sm"
-								variant="link"
-								textDecoration={'underline'}
-							>
-								{' '}
-								Show more
-							</Button>
-						)
-					)}
-				</Text>
+                <Flex justifyContent={'space-between'} alignItems={'center'}>
+                    <Flex gap={2} mt={2} p={2} alignItems={'center'} color="#00BC73">
+                        <Text fontSize={'25px'}>
+                            <BiMap />
+                        </Text>{' '}
+                        <Text fontSize={'15px'}> {locationKeywordDoc?.name} </Text>
+                    </Flex>
 
-				<HStack color="#11171799">
-					<IconButton
-						variant="outline"
-						aria-label="Call Sage"
-						border="none"
-						// justifyContent="flex-start"
-						fontSize={'24px'}
-						icon={<BiChat />}
-					/>
+                    <Text>
+                        <Badge
+                            fontSize={'15px'}
+                            padding={'4.67px 9.35px 4.67px 9.35px'}
+                            textTransform={'capitalize'}
+                            bgColor={'#E4FAA866'}
+                            borderRadius={'15px'}
+                            variant="subtle"
+                            fontWeight={300}
+                        >
+                            {serviceTypeDoc?.title}
+                        </Badge>
+                    </Text>
+                </Flex>
 
-					<IconButton
-						variant="outline"
-						aria-label="Call Sage"
-						border="none"
-						// justifyContent="flex-start"
-						fontSize={'24px'}
-						icon={<BiPhone />}
-					/>
-				</HStack>
-				{/* //#515151 --dark */}
-				{/* //#1117171A --light */}
-				<HStack
-					mt={2}
-					mb={2}
-					borderBottom={`.5px solid ${colorMode === 'light' ? '#1117171A' : '#515151'}`}
-				></HStack>
-				<HStack mt={4} spacing={2}>
-					<Flex
-						width={'100%'}
-						direction={'row'}
-						justifyContent={'space-between'}
-					>
-						<Text>
-							<Badge
-								fontSize={'15px'}
-								padding={'4.67px 9.35px 4.67px 9.35px'}
-								textTransform={'capitalize'}
-								bgColor={'#E4FAA866'}
-								borderRadius={'15px'}
-								variant="subtle"
-								fontWeight={300}
-							>
-								{serviceTypeDoc?.title}
-							</Badge>
-						</Text>
-						<Text fontSize={'1.4rem'} fontWeight={'700'}>
-							N{budget?.toLocaleString()}
-						</Text>
-					</Flex>
-				</HStack>
-			</Box>
-		</>
-	)
+                <Text mt={5} mb={5} whiteSpace={'pre-wrap'}>
+                    {description}
+                </Text>
+
+                <HStack>
+                    <Flex
+                        flexWrap={'wrap'}
+                        width={'100%'}
+                        direction={'row'}
+                        justifyContent={'space-between'}
+                    >
+                        <Box>
+                            <Tooltip
+                                bgColor={colorMode === 'dark' ? '#fff' : 'gray.300'}
+                                hasArrow
+                                label={`Call ${userDoc?.first_name}`}
+                                color={colorMode === 'dark' ? 'black' : 'black'}
+                            >
+                                <IconButton
+                                    variant="outline"
+                                    aria-label={`Call ${userDoc?.first_name}`}
+                                    border="none"
+                                    fontSize={'24px'}
+                                    icon={<BiPhone />}
+                                    onClick={() => {
+                                        if (userInfoDoc?.primary_phone_number) {
+                                            handleRedirect(`tel:${userInfoDoc.primary_phone_number}`)
+                                        }
+                                    }}
+                                />
+                            </Tooltip>
+                            <Tooltip
+                                bgColor={colorMode === 'dark' ? '#fff' : 'gray.300'}
+                                hasArrow
+                                label={`Message ${userDoc?.first_name}`}
+                                color={colorMode === 'dark' ? 'black' : 'black'}
+                            >
+                                <IconButton
+                                    variant="outline"
+                                    aria-label={`Message ${userDoc?.first_name}`}
+                                    border="none"
+                                    fontSize="24px"
+                                    icon={<BiMessageRoundedDetail />}
+                                    onClick={handleRedirect(`/messages/${userDoc?._id}`)}
+                                />
+                            </Tooltip>
+                        </Box>
+                        <Flex flexWrap={'wrap'}>
+                            <Text fontSize={'1.4rem'} fontWeight={'700'}>
+                                &#8358;{budget?.toLocaleString()}
+                            </Text>
+                            <Text fontSize={20} fontWeight={200}>
+                                {'/'}
+                                {payment_type}
+                            </Text>
+                        </Flex>
+                    </Flex>
+                </HStack>
+                <HStack
+                    mt={2}
+                    mb={2}
+                    borderBottom={`.5px solid ${colorMode === 'light' ? '#1117171A' : '#515151'}`}
+                ></HStack>
+            </Box>
+            <Box marginTop={10}>
+                <UserCard
+                    handleRedirect={handleRedirect}
+                    name={capitalizeString(userDoc?.first_name) + ' ' + userDoc?.last_name}
+                    handle={userDoc?.first_name}
+                    profilePicture={userDoc?.avatar_url}
+                    bio={"A well renowed Software Engineer with 99 years of experience."}
+                />
+            </Box>
+        </>
+    )
+}
+
+const UserCard = ({ name, handle, bio, profilePicture, userInfoDoc, handleRedirect }: Props) => {
+    return (
+        <Box bgColor="#202020" borderRadius="15px">
+            <Flex bg="brand_darker" p={4} alignItems="center" borderRadius="15px">
+                <Avatar size="lg" src={profilePicture} />
+                <Box ml={2}>
+                    <Flex gap={1} alignItems={'center'}>
+                        <Text fontWeight="bold" color="white">
+                            {name}
+                        </Text>
+                        <Icon as={BiSolidBadgeCheck} color="blue.500" ml={1} />
+                    </Flex>
+                    <Text color="#fff" fontSize="sm">
+                        @{handle}
+                    </Text>
+                    <Text color="#fff" fontSize="sm">
+                        {bio}
+                    </Text>
+                </Box>
+            </Flex>
+
+            <HStack
+                p={4}
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                bgColor={'gray.600'}
+                color={'#fff'}
+            >
+                <Text fontWeight={"semibold"}>Book Inspection</Text>
+                <Flex justifyContent="flex-end">
+                    <IconButton
+                        aria-label="sese"
+                        icon={<BiEnvelope />}
+                        variant="ghost"
+                        colorScheme="white"
+                        size={"md"}
+                        onClick={handleRedirect(`/messages/${userInfoDoc?._user_id}`)}
+                    />
+                    <IconButton
+                        aria-label="sese"
+                        icon={<BiPhone />}
+                        variant="ghost"
+                        colorScheme="white"
+                        ml={2}
+                        size={"md"}
+                        onClick={() => {
+                            if (userInfoDoc?.primary_phone_number) {
+                                handleRedirect(`tel:${userInfoDoc.primary_phone_number}`)
+                            }
+                        }}
+                    />
+                </Flex>
+            </HStack>
+        </Box>
+    )
 }
 
 export default function Page({ params }: { params: PageParams }) {
-	const [isFetching, setIsFetching] = useState<boolean>(false)
+    const [isFetching, setIsFetching] = useState<boolean>(false)
 
-	const [requestData, setRequestData] = useState<Partial<DocumentData>>({})
+    const { authState } = useAuthContext()
 
-	const { authState } = useAuthContext()
 
-	console.log(authState)
+    const [requestData, setRequestData] = useState<Partial<DocumentData>>({})
 
-	const requestId = params.request_id
+    useEffect(() => {
+        if (Object.keys(authState?.user || {}).length) {
+            setRequestData((prev) => ({
+                ...prev,
+                loggedInUser: authState.user
+            }))
+        }
+    }, [authState.user])
 
-	console.log(requestId)
+    const requestId = params.request_id
 
-	const getRequest = async (): Promise<any> => {
-		try {
-			setIsFetching(true)
+    const getRequest = async (): Promise<any> => {
+        try {
 
-			//get data from DB
-			const result = await SherutaDB.get({
-				collection_name: 'requests',
-				document_id: requestId as string,
-			})
+            setIsFetching(true)
 
-			if (
-				result &&
-				Object.keys(result) &&
-				typeof result?._user_ref !== 'undefined'
-			) {
-				//get poster's document from database
-				const [userDoc, serviceTypeDoc] = await Promise.all([
-					getDataFromRef(result._user_ref),
-					getDataFromRef(result._service_ref),
-				])
+            const result = await SherutaDB.get({
+                collection_name: 'requests',
+                document_id: requestId as string,
+            })
 
-				setRequestData({
-					...result,
-					userDoc,
-					serviceTypeDoc,
-				})
+            if (
+                result &&
+                Object.keys(result) &&
+                typeof result?._user_ref !== 'undefined'
+            ) {
+                let userInfoDoc: DocumentData | undefined = undefined
 
-				// const recordSnap = await getDoc(result._user_ref);
+                //get poster's document from database
+                const [userDoc, serviceTypeDoc, locationKeywordDoc] = await Promise.all(
+                    [
+                        getDataFromRef(result._user_ref),
+                        getDataFromRef(result._service_ref),
+                        getDataFromRef(result._location_keyword_ref),
+                    ],
+                )
 
-				// if (recordSnap.exists()) {
-				//     const result = recordSnap.data();
+                if (userDoc?._id) {
+                    userInfoDoc = await UserInfoService.get(userDoc?._id)
+                }
 
-				//     console.log("recordSnap data", result);
+                setRequestData((prev) => ({
+                    ...prev,
+                    ...result,
+                    userDoc,
+                    userInfoDoc,
+                    serviceTypeDoc,
+                    locationKeywordDoc
+                }))
 
-				// } else {
-				//     console.log('No such record!');
-				// }
+                setIsFetching(false)
+            } else {
+                //redirect back to homepage
+                // Router.push('/')
+            }
+        } catch (error: any) {
+            console.log(error)
+            setIsFetching(false)
+        }
+    }
 
-				// console.log(recordSnap)
-				//  // Assuming result._user_ref is a DocumentReference
-				//     const userRef: DocumentReference<DocumentData> = result._user_ref;
+    useEffect(() => {
+        getRequest()
+    }, [])
 
-				//     userRef.get().then((docSnap) => {
-				//       if (docSnap.exists()) {
-				//         console.log('Referenced document data:', docSnap.data());
-				//       } else {
-				//         console.log('No such document!');
-				//       }
-				//     }).catch((error) => {
-				//       console.error('Error getting referenced document:', error);
-				//     });
-			} else {
-				//redirect back to homepage
-				// Router.push('/')
-			}
+    return (
+        <Flex justifyContent={'center'}>
+            <MainContainer>
+                <ThreeColumnLayout header={<MainHeader />}>
+                    <Flex flexDirection={'column'} w="full">
+                        <MainLeftNav />
+                    </Flex>
+                    <Box p={DEFAULT_PADDING}>
+                        <Box marginBottom={5}>
+                            <Flex align="center" mb={4}>
+                                <IconButton
+                                    // onClick={rout}
+                                    aria-label="Search database"
+                                    icon={<FaAngleLeft />}
+                                    variant="ghost"
+                                    _hover={{ bg: 'transparent' }}
+                                    _focus={{ boxShadow: 'none' }}
+                                    _active={{ bg: 'transparent' }}
+                                />
 
-			console.log(result)
-
-			// //"10ea2048-7eb2-451e-a4d4-e39a83fb6f30"
-		} catch (error: any) {
-			console.log(error)
-			setIsFetching(false)
-		}
-	}
-
-	useEffect(() => {
-		getRequest()
-	}, [])
-
-	return (
-		<Flex justifyContent={'center'}>
-			<MainContainer>
-				<ThreeColumnLayout header={<MainHeader />}>
-					<Flex flexDirection={'column'} w="full">
-						<MainLeftNav />
-					</Flex>
-					<Box p={DEFAULT_PADDING}>
-						<Box marginBottom={5}>
-							<Flex align="center" mb={4}>
-								<IconButton
-									// onClick={rout}
-									aria-label="Search database"
-									icon={<FaAngleLeft />}
-									variant="ghost"
-									_hover={{ bg: 'transparent' }}
-									_focus={{ boxShadow: 'none' }}
-									_active={{ bg: 'transparent' }}
-								/>
-
-								<Text fontSize="xl" fontWeight="bold">
-									Go Back
-								</Text>
-							</Flex>
-						</Box>
-						{/* {requestData && Object.keys(requestData) ? (
-                            <>
-                                <Box maxWidth="600px" mx="auto">
-                                    <Flex
-                                        borderBottom={'1px'}
-                                        width={'100%'}
-                                        // rounded={'lg'}
-                                        borderColor={'gray'}
-                                        overflow={'hidden'}
-                                    >
-                                        <Flex
-                                            // borderRight={'1px'}
-                                            minW={'100%'}
-                                            // borderColor={'brand_darker'}
-                                            flexFlow={'column'}
-                                        >
-                                            <Flex p={DEFAULT_PADDING} gap={DEFAULT_PADDING}>
-                                                <Avatar src="https://bit.ly/prosper-baba" />
-                                                <Flex flexFlow={'column'}>
-                                                    <Text>Person first name</Text>
-                                                    <Text fontSize={'sm'} color={'text_muted'}>
-                                                        Posted {timeAgo(requestData?.updatedAt)}
-                                                    </Text>
-                                                </Flex>
-                                            </Flex>
-                                            <Flex flexFlow={'column'} p={DEFAULT_PADDING}>
-                                                <Flex
-                                                    alignItems={'center'}
-                                                    as="address"
-                                                    color="brand"
-                                                    fontSize={'sm'}
-                                                >
-                                                    <BiLocationPlus /> Somewhere in town
-                                                </Flex>
-                                                <Text>{requestData?.description}</Text>
-                                            </Flex>
-                                        </Flex>
-                                    </Flex>
-                                    <hr />
-                                </Box>
-                                <Box>
-                                    <Flex>
-                                        <Badge variant='solid' colorScheme='green'>
-                                            Success
-                                        </Badge>
-                                    </Flex>
-
-                                </Box>
-
-                            </>
-                        ) : (
-                            'NO DATA '
-                        )} */}
-						<Post postData={requestData} />
-					</Box>
-				</ThreeColumnLayout>
-			</MainContainer>
-		</Flex>
-	)
+                                <Text fontSize="xl" fontWeight="bold">
+                                    Go Back
+                                </Text>
+                            </Flex>
+                        </Box>
+                        <Post postData={requestData} />
+                    </Box>
+                </ThreeColumnLayout>
+            </MainContainer>
+        </Flex>
+    )
 }

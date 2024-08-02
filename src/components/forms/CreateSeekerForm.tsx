@@ -206,11 +206,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			//get locaiton text
@@ -232,67 +232,70 @@ const CreateSeekerForm: React.FC = () => {
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
-		const { id, name, value } = e.target;
+		const { id, name, value } = e.target
 
-		const updateBudgetInvalidState = (paymentType: string, budgetValue: number) => {
-			const budgetLimit = budgetLimits[paymentType as PaymentPlan];
-			setIsBudgetInvalid(budgetValue < budgetLimit);
-		};
+		const updateBudgetInvalidState = (
+			paymentType: string,
+			budgetValue: number,
+		) => {
+			const budgetLimit = budgetLimits[paymentType as PaymentPlan]
+			setIsBudgetInvalid(budgetValue < budgetLimit)
+		}
 
 		const updateOptionsRef = (key: string, refValue: any) => {
 			setOptionsRef((prev) => ({
 				...prev,
 				[key]: refValue,
-			}));
-		};
+			}))
+		}
 
 		switch (id) {
 			case 'budget':
-				const paymentType = formData.payment_type;
-				if (paymentType) updateBudgetInvalidState(paymentType, Number(value));
-				break;
+				const paymentType = formData.payment_type
+				if (paymentType) updateBudgetInvalidState(paymentType, Number(value))
+				break
 
 			case 'payment_type':
-				const budget = formData.budget as number;
-				if (value) updateBudgetInvalidState(value as PaymentPlan, budget);
-				break;
+				const budget = formData.budget as number
+				if (value) updateBudgetInvalidState(value as PaymentPlan, budget)
+				break
 
 			case 'stateId':
 				if (value) {
-					const newLocations = getLocations(value);
-					setLocations(newLocations);
-					const stateRef = states.find((data) => data.id === value)?._ref;
-					updateOptionsRef('_state_ref', stateRef);
+					const newLocations = getLocations(value)
+					setLocations(newLocations)
+					const stateRef = states.find((data) => data.id === value)?._ref
+					updateOptionsRef('_state_ref', stateRef)
 				}
-				break;
+				break
 
 			case 'locationKeywordId':
 				if (value) {
-					const { _ref, name } = location_keywords.find((data) => data.id === value) ?? {};
-					setSelectedLocation(name);
-					updateOptionsRef('_location_keyword_ref', _ref);
+					const { _ref, name } =
+						location_keywords.find((data) => data.id === value) ?? {}
+					setSelectedLocation(name)
+					updateOptionsRef('_location_keyword_ref', _ref)
 				}
-				break;
+				break
 
 			case 'serviceId':
 				if (value) {
-					const serviceRef = services.find((data) => data.id === value)?._ref;
-					updateOptionsRef('_service_ref', serviceRef);
+					const serviceRef = services.find((data) => data.id === value)?._ref
+					updateOptionsRef('_service_ref', serviceRef)
 				}
-				break;
+				break
 
 			default:
-				break;
+				break
 		}
 
 		if (name && value) {
 			setFormData((prevData) => ({
 				...prevData,
 				[name]: value,
-			}));
+			}))
 		}
-	};
-
+	}
 
 	// Function to handle form submission
 	const handleSubmit = async (
