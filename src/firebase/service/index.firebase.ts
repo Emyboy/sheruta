@@ -104,7 +104,22 @@ export default class SherutaDB {
 		const docSnap = await getDoc(docRef)
 
 		if (docSnap.exists()) {
-			return docSnap.data()
+			const docData = { ...docSnap.data() }
+
+			const refFields = Object.entries(docData).filter(
+				([key, value]) => value instanceof DocumentReference,
+			)
+
+			const resolvedRefs = await Promise.all(
+				refFields.map(async ([key, ref]) => {
+					const resolvedDoc = await getDoc(ref)
+					return { [key]: resolvedDoc.data() }
+				}),
+			)
+
+			Object.assign(docData, ...resolvedRefs)
+
+			return { id: docSnap.id, ...docData, ref: docSnap.ref }
 		} else {
 			return null
 		}

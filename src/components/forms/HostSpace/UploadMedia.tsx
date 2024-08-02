@@ -14,7 +14,7 @@ import {
 	useToast,
 	VStack,
 } from '@chakra-ui/react'
-import { serverTimestamp } from 'firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 import { StorageReference } from 'firebase/storage'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -79,7 +79,7 @@ export default function UploadMedia({
 
 		if (!selectedFile.type.includes('video'))
 			return toast({ title: 'Please select video only', status: 'error' })
-		if (selectedFile.size > 20 * 1024 * 1024)
+		if (selectedFile.size > 70 * 1024 * 1024)
 			return toast({
 				title: 'Video cannot be larger than 20mb',
 				status: 'error',
@@ -160,8 +160,9 @@ export default function UploadMedia({
 			let data = {
 				...formData,
 				seeking: false,
-				createdAt: serverTimestamp(),
-				updatedAt: serverTimestamp(),
+				uuid,
+				createdAt: Timestamp.now(),
+				updatedAt: Timestamp.now(),
 				_user_ref: flat_share_profile?._user_ref,
 			}
 
@@ -171,7 +172,7 @@ export default function UploadMedia({
 			delete data.area
 			delete data.property
 
-			// createHostRequestDTO.parse(data)
+			createHostRequestDTO.parse(data)
 
 			await SherutaDB.create({
 				collection_name: 'requests',

@@ -44,7 +44,7 @@ export default function EachRequest({ request }: Props) {
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Link
-					href={`/request/seeker/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex gap={5} alignItems={'center'}>
@@ -103,7 +103,7 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/seeker/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex flexDirection={'column'}>
@@ -119,7 +119,7 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/seeker/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex justifyContent={'space-between'}>

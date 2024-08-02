@@ -52,7 +52,6 @@ const initialState = {
 	service_charge: 0,
 	budget: 0,
 	payment_type: '',
-
 	bathrooms: 0,
 	toilets: 0,
 	living_rooms: 0,

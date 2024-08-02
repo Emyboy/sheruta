@@ -59,7 +59,6 @@ export const createHostRequestDTO = z.object({
 	availability_status: z
 		.enum(['available', 'unavailable', 'reserved'])
 		.nullable(),
-	bedrooms: z.number().nullable(),
 	bathrooms: z.number().nullable(),
 	toilets: z.number().nullable(),
 	living_rooms: z.number().nullable(),
