@@ -47,9 +47,7 @@ export default class SherutaDB {
 			updatedAt: serverTimestamp(),
 		})
 
-		// fetching the updated value;
-		const docRef = doc(db, data.collection_name, data.document_id)
-		const docSnap = await getDoc(docRef)
+		const docSnap = await getDoc(ref)
 		return docSnap.data()
 	}
 

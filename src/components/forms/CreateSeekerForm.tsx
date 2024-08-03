@@ -10,7 +10,7 @@ import {
 	Flex,
 	useColorMode,
 } from '@chakra-ui/react'
-import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' // Import Timestamp and DocumentReference from Firebase for type checking
+import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' 
 import { v4 as generateUId } from 'uuid'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
@@ -58,23 +58,6 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 	}, {} as Errors)
 }
 
-// Define the initial state based on the DTO structure
-const initialFormState: Partial<RequestData> = {
-	description: '',
-	uuid: generateUId(), //automatically generate a uuid
-	budget: 0,
-	google_location_object: {} as LocationObject,
-	google_location_text: '',
-	_location_keyword_ref: undefined as DocumentReference | undefined,
-	_state_ref: undefined as DocumentReference | undefined,
-	_service_ref: undefined as DocumentReference | undefined,
-	_user_ref: undefined as DocumentReference | undefined,
-	payment_type: 'monthly',
-	seeking: true, //this should be true by default for seekers
-	createdAt: Timestamp.now(),
-	updatedAt: Timestamp.now(),
-}
-
 const libraries: 'places'[] = ['places']
 
 interface Options {
@@ -115,7 +98,25 @@ interface userInfo {
 	location: string | undefined
 }
 
+// Define the initial state based on the DTO structure
+const initialFormState: Partial<RequestData> = {
+	description: '',
+	uuid: generateUId(), //automatically generate a uuid
+	budget: 0,
+	google_location_object: {} as LocationObject,
+	google_location_text: '',
+	_location_keyword_ref: undefined as DocumentReference | undefined,
+	_state_ref: undefined as DocumentReference | undefined,
+	_service_ref: undefined as DocumentReference | undefined,
+	_user_ref: undefined as DocumentReference | undefined,
+	payment_type: 'weekly',
+	seeking: true, //this should be true by default for seekers
+	createdAt: Timestamp.now(),
+	updatedAt: Timestamp.now(),
+}
+
 const CreateSeekerForm: React.FC = () => {
+
 	//color mode
 	const { colorMode } = useColorMode()
 
@@ -206,11 +207,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
+						location: {
+							lat: place.geometry.location?.lat() ?? 0,
+							lng: place.geometry.location?.lng() ?? 0,
+						},
+					}
 					: undefined,
 			}
 			//get locaiton text
@@ -370,11 +371,12 @@ const CreateSeekerForm: React.FC = () => {
 						id="budget"
 						name="budget"
 						onChange={handleChange}
-						placeholder={`Minimum ₦${budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}`}
+						placeholder={`Minimum ₦${budgetLimits[formData?.payment_type || 'weekly'].toLocaleString()}`}
+						defaultValue={(!formData?.budget) ? '' : formData.budget}
 					/>
 					<FormErrorMessage>
 						Please enter an amount that meets the minimum required value of ₦
-						{budgetLimits[formData?.payment_type || 'monthly'].toLocaleString()}
+						{budgetLimits[formData?.payment_type || 'weekly'].toLocaleString()}
 						.
 					</FormErrorMessage>
 				</FormControl>
@@ -389,6 +391,7 @@ const CreateSeekerForm: React.FC = () => {
 						onChange={handleChange}
 						placeholder="Monthly, Annually etc"
 						bgColor={colorMode}
+						defaultValue={formData?.payment_type}
 					>
 						<option value="weekly">Weekly</option>
 						<option value="monthly">Monthly</option>
@@ -498,6 +501,7 @@ const CreateSeekerForm: React.FC = () => {
 						onChange={handleChange}
 						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
 						minLength={140}
+                        rows={10}
 					/>
 				</FormControl>
 			</Flex>

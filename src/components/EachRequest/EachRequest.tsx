@@ -8,7 +8,7 @@ import {
 	Flex,
 	Image,
 	Text,
-	IconButton,
+	IconButton
 } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import {
@@ -22,7 +22,9 @@ import MainTooltip from '../atoms/MainTooltip'
 import { Link } from '@chakra-ui/next-js'
 import { useRouter } from 'next/navigation'
 import { timeAgo } from '@/utils/index.utils'
-import { DocumentData, DocumentReference, getDoc } from 'firebase/firestore'
+import {
+	DocumentData, DocumentReference, getDoc
+} from 'firebase/firestore'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 
 type Props = {
@@ -35,7 +37,7 @@ const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
 	return recordSnap.exists() ? recordSnap.data() : null
 }
 
-export function EachRequest({}: Props) {
+export function EachRequest({ }: Props) {
 	return (
 		<Box
 			fontSize={{
@@ -282,45 +284,37 @@ export function EachSeekerRequest({ seekerData }: Props) {
 		_location_keyword_ref,
 		budget,
 		payment_type,
-	} = seekerData || {}
+	} = seekerData || {};
 
-	const [userInfoDoc, setUserInfoDoc] = useState<DocumentData | undefined>(
-		undefined,
-	)
-	const [userDoc, setUserDoc] = useState<any>(undefined)
-	const [serviceTypeDoc, setServiceTypeDoc] = useState<any>(undefined)
-	const [locationKeywordDoc, setLocationKeywordDoc] = useState<any>(undefined)
+	const [userInfoDoc, setUserInfoDoc] = useState<DocumentData | undefined>(undefined);
+	const [userDoc, setUserDoc] = useState<any>(undefined);
+	const [serviceTypeDoc, setServiceTypeDoc] = useState<any>(undefined);
+	const [locationKeywordDoc, setLocationKeywordDoc] = useState<any>(undefined);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			if (_user_ref) {
 				// Get poster's document from the database
-				const [
-					fetchedUserDoc,
-					fetchedServiceTypeDoc,
-					fetchedLocationKeywordDoc,
-				] = await Promise.all([
+				const [fetchedUserDoc, fetchedServiceTypeDoc, fetchedLocationKeywordDoc] = await Promise.all([
 					getDataFromRef(_user_ref),
 					getDataFromRef(_service_ref),
 					getDataFromRef(_location_keyword_ref),
-				])
+				]);
 
-				setUserDoc(fetchedUserDoc)
-				setServiceTypeDoc(fetchedServiceTypeDoc)
-				setLocationKeywordDoc(fetchedLocationKeywordDoc)
+				setUserDoc(fetchedUserDoc);
+				setServiceTypeDoc(fetchedServiceTypeDoc);
+				setLocationKeywordDoc(fetchedLocationKeywordDoc);
 
 				if (fetchedUserDoc?._id) {
 					// Get userInfo
-					const fetchedUserInfoDoc = await UserInfoService.get(
-						fetchedUserDoc._id,
-					)
-					setUserInfoDoc(fetchedUserInfoDoc)
+					const fetchedUserInfoDoc = await UserInfoService.get(fetchedUserDoc._id);
+					setUserInfoDoc(fetchedUserInfoDoc);
 				}
 			}
-		}
+		};
 
-		fetchData()
-	}, [_user_ref, _service_ref, _location_keyword_ref])
+		fetchData();
+	}, [_user_ref, _service_ref, _location_keyword_ref]);
 
 	// Handle redirect
 	const router = useRouter()
@@ -349,11 +343,7 @@ export function EachSeekerRequest({ seekerData }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Avatar
-						src={
-							userDoc?.avatar_url
-								? userDoc.avatar_url
-								: 'https://bit.ly/prosper-baba'
-						}
+						src={(userDoc?.avatar_url) ? userDoc.avatar_url : 'https://bit.ly/prosper-baba'}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -368,16 +358,12 @@ export function EachSeekerRequest({ seekerData }: Props) {
 						flex={1}
 					>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Text>
-								{capitalizeString(userDoc?.first_name) +
-									' ' +
-									capitalizeString(userDoc?.last_name)}
-							</Text>
+							<Text>{capitalizeString(userDoc?.first_name)+' '+capitalizeString(userDoc?.last_name)}</Text>
 							<IconButton
-								fontSize={'24px'}
-								aria-label="Options"
-								icon={<BiDotsHorizontalRounded />}
-							/>
+                                    fontSize={'24px'}
+                                    aria-label="Options"
+                                    icon={<BiDotsHorizontalRounded />}
+                                />
 						</Flex>
 						<Text color="text_muted" fontSize={'sm'}>
 							{timeAgo(updatedAt)}
@@ -395,12 +381,12 @@ export function EachSeekerRequest({ seekerData }: Props) {
 					</Flex>
 					<Text>
 						{description?.substring(0, 100)}
-						{description && description?.length > 100 && (
+						{
+							(description && description?.length > 100) &&
 							<Link href={`/request/seeker/${id}`} as="span" color="brand">
-								{' '}
-								Read more..
+								{' '}Read more..
 							</Link>
-						)}
+						}
 					</Text>
 				</Flex>
 				<Flex justifyContent={'space-between'}>
