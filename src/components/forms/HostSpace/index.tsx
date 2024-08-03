@@ -12,12 +12,10 @@ import { useAppContext } from '@/context/app.context'
 export type HostSpaceFormProps = {
 	next: () => void
 	formData: FormDataType
-	setFormData: React.SetStateAction<React.Dispatch<FormDataType>>
+	setFormData: React.Dispatch<React.SetStateAction<FormDataType>>
 }
 
-export type FormDataType = Partial<ApartmentDetailsType & MediaType>
-
-export type ApartmentDetailsType = {
+export type FormDataType = {
 	title: string
 	description: string
 	service_charge: number | null
@@ -33,12 +31,15 @@ export type ApartmentDetailsType = {
 	_state_ref: undefined | DocumentReference
 	_service_ref: undefined | DocumentReference
 	_category_ref: undefined | DocumentReference
-	_status_ref: undefined | DocumentReference
-	state: string
-	area: string
-	service: string
-	category: string
-	property: string
+	images_urls: string[]
+	video_url: string | null
+	google_location_object: Record<string, any> | undefined
+	google_location_text: string
+	state?: string
+	area?: string
+	service?: string
+	category?: string
+	property?: string
 }
 
 export type MediaType = {
@@ -49,7 +50,7 @@ export type MediaType = {
 const initialState = {
 	title: '',
 	description: '',
-	service_charge: null,
+	service_charge: 0,
 	budget: 0,
 	payment_type: '',
 	bedrooms: 0,
@@ -57,13 +58,15 @@ const initialState = {
 	toilets: 0,
 	living_rooms: 0,
 	images_urls: [],
-	video_url: '',
-	availability_status: null,
+	video_url: null,
+	availability_status: '',
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
 	_category_ref: undefined,
 	_property_type_ref: undefined,
+	google_location_object: undefined,
+	google_location_text: '',
 	state: '',
 	area: '',
 	service: '',
@@ -108,8 +111,11 @@ export default function HostSpace() {
 
 	useEffect(() => {
 		const formData = localStorage.getItem('host_space_form')
-		if (formData && appState) setHostSpaceData(JSON.parse(formData))
-	}, [appState])
+
+		if (!formData && !appState.app_loading) setHostSpaceData(initialState)
+		if (formData && !appState.app_loading)
+			setHostSpaceData(JSON.parse(formData))
+	}, [appState.app_loading])
 
 	useEffect(() => {
 		const totalSteps = allSteps().length
