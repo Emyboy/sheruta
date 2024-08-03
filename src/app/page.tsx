@@ -10,10 +10,16 @@ export default async function page() {
 		_limit: 10,
 	})
 
+	let requests = await SherutaDB.getAll({
+		collection_name: DBCollectionName.flatShareRequests,
+		_limit: 10,
+	})
+
 	return (
 		<HomePage
 			locations={locations ? JSON.stringify(locations) : '[]'}
 			states={[]}
+			requests={requests ? JSON.stringify(requests) : '[]'}
 		/>
 	)
 }
