@@ -29,22 +29,18 @@ export default async function page({
 
 	return (
 		<>
-			<Flex
-				justifyContent={'center'}
-				alignItems={'center'}
-				minH={'100vh'}
-				flexDir={['column', 'row']}
-			>
+			<Flex justifyContent={'center'} alignItems={'center'} minH={'100vh'}>
 				<Flex
 					minH={'90vh'}
 					maxH={'90vh'}
 					maxW={size}
 					minW={size}
-					overflow={'hidden'}
+					overflow={{ lg: 'hidden' }}
+					flexDir={{ base: 'column', lg: 'row' }}
 				>
 					<Flex
-						minW={{ base: '40%', xl: '50%' }}
-						maxW={{ base: '40%', xl: '50%' }}
+						minW={{ base: '100%', lg: '50%' }}
+						maxW={{ base: '100%', lg: '50%' }}
 						borderRight={'1px'}
 						borderColor={'brand_darker'}
 						flexFlow={'column'}

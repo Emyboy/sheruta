@@ -43,10 +43,10 @@ export type PaymentPlan =
 	| 'monthly'
 	| 'annually'
 	| 'quarterly'
-	| 'bi_annually'
+	| 'bi-annually'
 	| 'weekly'
 
-type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
+export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
 export const createHostRequestDTO = z.object({
 	uuid: z.string(),
@@ -55,13 +55,20 @@ export const createHostRequestDTO = z.object({
 	description: z.string().optional(),
 	budget: z.number(),
 	service_charge: z.number().nullable(),
-	payment_type: z.enum(['monthly', 'annually', 'bi-annually', 'weekly']),
+	payment_type: z.enum([
+		'monthly',
+		'annually',
+		'quarterly',
+		'bi-annually',
+		'weekly',
+	]),
 	availability_status: z
 		.enum(['available', 'unavailable', 'reserved'])
 		.nullable(),
 	bathrooms: z.number().nullable(),
 	toilets: z.number().nullable(),
 	living_rooms: z.number().nullable(),
+	amenities: z.array(z.string()),
 
 	images_urls: z.array(z.string()),
 	video_url: z.string().nullable(),
@@ -71,37 +78,37 @@ export const createHostRequestDTO = z.object({
 	google_location_object: z.record(z.string(), z.any()),
 	google_location_text: z.string(),
 
-	_location_keyword_ref: z.custom<DocumentReference>(
+	_location_keyword_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_state_ref: z.custom<DocumentReference>(
+	_state_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_service_ref: z.custom<DocumentReference>(
+	_service_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_category_ref: z.custom<DocumentReference>(
+	_category_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_property_type_ref: z.custom<DocumentReference>(
+	_property_type_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_user_ref: z.custom<DocumentReference>(
+	_user_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
@@ -148,7 +155,7 @@ export const createSeekerRequestDTO = z.object({
 	payment_type: z.enum([
 		'monthly',
 		'annually',
-		'bi_annually',
+		'bi-annually',
 		'quarterly',
 		'weekly',
 	]),
@@ -158,3 +165,6 @@ export const createSeekerRequestDTO = z.object({
 	createdAt: z.instanceof(Timestamp),
 	updatedAt: z.instanceof(Timestamp),
 })
+
+export type HostRequestData = z.infer<typeof createHostRequestDTO>
+export type SeekerRequestData = z.infer<typeof createSeekerRequestDTO>

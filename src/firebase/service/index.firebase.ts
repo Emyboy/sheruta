@@ -6,6 +6,7 @@ import {
 	getDoc,
 	getDocs,
 	limit,
+	orderBy,
 	serverTimestamp,
 	setDoc,
 	updateDoc,
@@ -68,8 +69,12 @@ export default class SherutaDB {
 		_limit: number
 	}): Promise<any> {
 		const collectionRef = collection(db, collection_name)
-		// @ts-ignore
-		const querySnapshot = await getDocs(collectionRef, limit(_limit))
+		const querySnapshot = await getDocs(
+			collectionRef,
+			// @ts-ignore
+			orderBy('updatedAt', 'desc'),
+			limit(_limit),
+		)
 
 		const documents = querySnapshot.docs.map(async (doc) => {
 			const docData = { ...doc.data() }
@@ -166,11 +171,13 @@ export default class SherutaDB {
 		}
 	}
 
-	static async deleteMedia({ storageUrl }: { storageUrl: string }) {
-		const storage = getStorage()
-		const deleteRef = ref(storage, storageUrl)
-
-		await deleteObject(deleteRef)
+	static async deleteMedia(ref: StorageReference) {
+		try {
+			await deleteObject(ref)
+			return Promise.resolve(true)
+		} catch (error) {
+			return Promise.reject(error)
+		}
 	}
 }
 
@@ -194,4 +201,5 @@ export const DBCollectionName = {
 	habits: 'habits',
 	interests: 'interests',
 	categories: 'categories',
+	amenities: 'amenities',
 }

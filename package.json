@@ -37,7 +37,7 @@
 		"react-paystack": "^5.0.0",
 		"uuid": "^10.0.0",
 		"uuidv4": "^6.2.13",
-		"zod": "^3.22.4"
+		"zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"@types/js-cookie": "^3.0.6",

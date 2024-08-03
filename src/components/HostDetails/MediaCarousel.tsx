@@ -27,7 +27,7 @@ export default function MediaCarousel({
 			overflow={'hidden'}
 			maxH={'725px'}
 			w={'100%'}
-			h={'100%'}
+			h={{ base: '500px', md: '100%' }}
 		>
 			<Box
 				pos={'absolute'}

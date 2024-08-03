@@ -1,7 +1,10 @@
 import UploadMediaIcon from '@/assets/svg/upload-media-icon'
 import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
-import { createHostRequestDTO } from '@/firebase/service/request/request.types'
+import {
+	createHostRequestDTO,
+	HostRequestData,
+} from '@/firebase/service/request/request.types'
 import {
 	Button,
 	Flex,
@@ -38,6 +41,7 @@ export default function UploadMedia({
 		images_urls: [],
 		video_url: null,
 	})
+	const [mediaDataRefs, setMediaDataRefs] = useState<StorageReference[]>([])
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -79,9 +83,9 @@ export default function UploadMedia({
 
 		if (!selectedFile.type.includes('video'))
 			return toast({ title: 'Please select video only', status: 'error' })
-		if (selectedFile.size > 70 * 1024 * 1024)
+		if (selectedFile.size > 75 * 1024 * 1024)
 			return toast({
-				title: 'Video cannot be larger than 20mb',
+				title: 'Video cannot be larger than 75mb',
 				status: 'error',
 			})
 
@@ -112,6 +116,12 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
+		if (!user?._id || !flat_share_profile?._user_ref)
+			return toast({
+				status: 'error',
+				title: 'please login to upload your space ',
+			})
+
 		setLoading(true)
 
 		try {
@@ -135,42 +145,31 @@ export default function UploadMedia({
 				: imageUploadPromises
 
 			const values = await Promise.all(promises)
+			setMediaDataRefs(values.map((value) => value.ref))
 
-			if (mediaData.video_url) {
-				const videoPath = values.pop()
-				const downloadUrl = await SherutaDB.getMediaUrl(
-					videoPath?.ref as StorageReference,
-				)
-
-				setFormData((prev) => ({
-					...prev,
-					video_url: downloadUrl,
-				}))
-			}
-
-			const imgUrls = await Promise.all(
-				values.map(async (img) => await SherutaDB.getMediaUrl(img.ref)),
+			const mediaUrls = await Promise.all(
+				values.map(async (url) => await SherutaDB.getMediaUrl(url.ref)),
 			)
 
-			setFormData((prev) => ({
-				...prev,
-				images_urls: imgUrls.filter((url) => url !== null),
-			}))
+			let video_url = null
+			if (mediaData.video_url) {
+				video_url = mediaUrls.pop() || null
+			}
+			const images_urls = mediaUrls.filter((url) => url !== null)
 
-			let data = {
-				...formData,
+			const { category, service, state, area, property, ...cleanedFormData } =
+				formData
+
+			let data: HostRequestData = {
+				...cleanedFormData,
 				seeking: false,
+				video_url,
+				images_urls,
 				uuid,
 				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
 				_user_ref: flat_share_profile?._user_ref,
 			}
-
-			delete data.category
-			delete data.service
-			delete data.state
-			delete data.area
-			delete data.property
 
 			createHostRequestDTO.parse(data)
 
@@ -185,7 +184,9 @@ export default function UploadMedia({
 			router.push('/')
 		} catch (error) {
 			console.log(error)
-			// mediaData.images_urls.forEach()
+			Promise.all(
+				mediaDataRefs.map(async (ref) => await SherutaDB.deleteMedia(ref)),
+			)
 			toast({ title: 'Error creating your details', status: 'error' })
 		}
 

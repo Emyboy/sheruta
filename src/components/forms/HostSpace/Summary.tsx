@@ -2,11 +2,15 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { useOptionsContext } from '@/context/options.context'
 import {
 	Button,
+	Checkbox,
+	CheckboxGroup,
 	Flex,
 	FormControl,
 	FormLabel,
 	Input,
 	Select,
+	SimpleGrid,
+	Stack,
 	Text,
 	Textarea,
 	VStack,
@@ -501,6 +505,46 @@ export default function Summary({
 									</option>
 								))}
 							</Select>
+						</Flex>
+					</Flex>
+					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
+						>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Select available amenities
+							</Text>
+							<CheckboxGroup colorScheme={'#00bc73'}>
+								<SimpleGrid columns={[2, null, 3]} spacingY="8px">
+									{options.amenities.map((amenity, i) => (
+										<Checkbox
+											textTransform={'capitalize'}
+											color={'border_color'}
+											value={amenity.title}
+											key={amenity.id}
+											textColor={'white'}
+											isChecked={formData.amenities.includes(amenity.title)}
+											onChange={(e) => {
+												const { checked, value } = e.target
+												if (checked) {
+													const amenities = [...formData.amenities, value]
+													setFormData((prev) => ({ ...prev, amenities }))
+												} else {
+													const amenities = formData.amenities.filter(
+														(amenity) => amenity !== value,
+													)
+													setFormData((prev) => ({ ...prev, amenities }))
+												}
+											}}
+										>
+											{amenity.title}
+										</Checkbox>
+									))}
+								</SimpleGrid>
+							</CheckboxGroup>
 						</Flex>
 					</Flex>
 

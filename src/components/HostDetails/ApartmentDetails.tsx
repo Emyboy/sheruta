@@ -30,9 +30,9 @@ export default function ApartmentDetails({ request }: { request: string }) {
 					alignItems={'center'}
 					justifyContent={'center'}
 					maxH={'58px'}
-					height={'100%'}
 					flex={1}
 					alignSelf={'end'}
+					w={'100%'}
 				>
 					{mini_nav_items.map((item, i) => (
 						<Flex
@@ -40,11 +40,17 @@ export default function ApartmentDetails({ request }: { request: string }) {
 							alignItems={'center'}
 							flexDirection={'column'}
 							justifyContent={'space-between'}
-							height={'100%'}
+							height={{ base: '48px', md: '58px' }}
 							cursor={'pointer'}
+							w={'auto'}
 							onClick={() => setActiveTab(item)}
 						>
-							<Text as="p" fontWeight={'normal'} fontSize={'16px'}>
+							<Text
+								as="p"
+								fontWeight={'normal'}
+								textAlign={'center'}
+								fontSize={{ base: '12px', md: '16px' }}
+							>
 								{item}
 							</Text>
 							{activeTab === item && (
@@ -52,7 +58,7 @@ export default function ApartmentDetails({ request }: { request: string }) {
 									as="span"
 									h={'4px'}
 									marginBottom={'-2px'}
-									w={'100%'}
+									w={'full'}
 									borderRadius={'4px'}
 									bg={'brand'}
 								/>
