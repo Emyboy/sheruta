@@ -46,8 +46,6 @@ export default async function page({
 					<Flex
 						minW={{ base: '100%', lg: '50%' }}
 						maxW={{ base: '100%', lg: '50%' }}
-						borderRight={'1px'}
-						borderColor={'brand_darker'}
 						flexFlow={'column'}
 						paddingRight={DEFAULT_PADDING}
 					>

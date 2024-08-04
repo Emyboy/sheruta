@@ -22,6 +22,7 @@ export default function ApartmentDetails({ request }: { request: string }) {
 				minW="100%"
 				borderBottom="1px"
 				borderColor="brand_darker"
+				_light={{ borderColor: '#1117171A' }}
 				alignItems="center"
 				justifyContent="center"
 			>
@@ -31,10 +32,11 @@ export default function ApartmentDetails({ request }: { request: string }) {
 					justifyContent="center"
 					maxH="58px"
 					overflowX="auto"
+					overflowY={'hidden'}
 					flex={1}
 					alignSelf="end"
 					w="100%"
-					mx={'16px'}
+					mx={{ base: '16px', md: 0 }}
 				>
 					{mini_nav_items.map((item, i) => (
 						<Flex
@@ -60,7 +62,6 @@ export default function ApartmentDetails({ request }: { request: string }) {
 								<Text
 									as="span"
 									h="4px"
-									marginBottom="-2px"
 									w="full"
 									borderRadius="4px"
 									bg="brand"

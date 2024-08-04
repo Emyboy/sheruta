@@ -53,6 +53,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 				flexDir={{ base: 'column', sm: 'row' }}
 				p={DEFAULT_PADDING}
 				bgColor={'dark'}
+				_light={{ bgColor: '#FDFDFD' }}
 			>
 				<Flex alignItems={'center'} gap={{ base: '8px', md: '16px' }}>
 					<Avatar
@@ -190,7 +191,6 @@ export default function ApartmentSummary({ request }: { request: any }) {
 				overflowX={'hidden'}
 				p={DEFAULT_PADDING}
 				gap={'16px'}
-				bgColor={'dark'}
 				mt={'-16px'}
 			>
 				<Text color="text_muted" fontSize={'sm'}>
@@ -223,6 +223,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					borderRadius={'4px'}
 					w={'100%'}
 					bgColor={'brand_darker'}
+					_light={{ bgColor: '#1117171A' }}
 				/>
 				<Flex justifyContent={'space-between'}>
 					<Flex gap={DEFAULT_PADDING}>
@@ -297,6 +298,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					rounded={'lg'}
 					border={'1px'}
 					borderColor={'brand_darker'}
+					_light={{ borderColor: '#1117171A' }}
 					position={'relative'}
 					paddingTop={{ base: '140px', md: '120px' }}
 					paddingBottom={DEFAULT_PADDING}
@@ -305,9 +307,6 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					flexDir={'column'}
 				>
 					<Flex
-						borderBottom={'1px'}
-						borderX={'1px'}
-						borderColor={'brand_darker'}
 						pos={'absolute'}
 						padding={DEFAULT_PADDING}
 						top={DEFAULT_PADDING}
@@ -320,6 +319,10 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						flexDir={{ base: 'column', sm: 'row' }}
 						gap={{ base: '24px', sm: '16px' }}
 						alignItems={{ base: 'start', sm: 'center' }}
+						_light={{
+							bgColor: '#FDFDFD',
+							boxShadow: '0 2px 3px rgba(0, 0, 0, 0.5)',
+						}}
 						boxShadow="0 2px 3px rgba(255, 255, 255, 0.5)"
 					>
 						<Flex flexDir={'column'}>
@@ -351,6 +354,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 							h={{ base: '48px', md: '52px' }}
 							paddingY={{ base: '12px', md: DEFAULT_PADDING }}
 							bgColor={'black'}
+							_light={{ color: 'white' }}
 							onClick={openModal}
 							fontSize={{ base: 'sm', md: 'base' }}
 						>
@@ -395,6 +399,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						borderRadius={'4px'}
 						w={'100%'}
 						bgColor={'brand_darker'}
+						_light={{ bgColor: '#1117171A' }}
 					/>
 					<Flex flexDir={'column'} gap={'32px'} w={'100%'}>
 						<Flex
@@ -430,6 +435,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						paddingY={'16px'}
 						w={'100%'}
 						bgColor={'brand'}
+						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
 					>
@@ -450,6 +456,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						borderRadius={'4px'}
 						w={'100%'}
 						bgColor={'brand_darker'}
+						_light={{ bgColor: '#1117171A' }}
 					/>
 					<SimpleGrid columns={[2, null, 3]} spacingY="16px">
 						{request.amenities.map((amenity: string, i: number) => (
@@ -484,6 +491,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						borderRadius={'4px'}
 						w={'100%'}
 						bgColor={'brand_darker'}
+						_light={{ bgColor: '#1117171A' }}
 					/>
 					<SimpleGrid columns={[2, null, 3]} spacingY="16px">
 						{[
@@ -525,6 +533,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						borderRadius={'4px'}
 						w={'100%'}
 						bgColor={'brand_darker'}
+						_light={{ bgColor: '#1117171A' }}
 					/>
 					<SimpleGrid columns={1} spacingY="16px">
 						{[
@@ -554,6 +563,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					rounded={'16px'}
 					border={'1px'}
 					borderColor={'brand_dark'}
+					_light={{ borderColor: '#1117171A' }}
 				>
 					<Flex alignItems={'center'} p={DEFAULT_PADDING}>
 						<Text
@@ -800,7 +810,11 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 				position={'relative'}
 				rounded={'16px'}
 				_dark={{ bgColor: 'black' }}
-				_light={{ bgColor: 'white' }}
+				_light={{
+					bgColor: '#FDFDFD',
+					border: '1px',
+					borderColor: 'text_muted',
+				}}
 				py={{ base: '16px', md: '24px' }}
 				px={{ base: '16px', sm: '24px', md: '32px' }}
 				gap={{ base: '24px', md: '32px' }}
