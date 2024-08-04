@@ -37,7 +37,6 @@ const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
 const libraries: 'places'[] = ['places']
-
 interface DocRefs {
 	_service_ref: DocumentReference | undefined
 	_location_keyword_ref: DocumentReference | undefined
@@ -45,13 +44,6 @@ interface DocRefs {
 	_user_ref: DocumentReference | undefined
 }
 
-interface budgetLimits {
-	monthly: number
-	annually: number
-	quarterly: number
-	bi_annually: number
-	weekly: number
-}
 interface LocationObject {
 	formatted_address?: string
 	geometry?: {
@@ -153,18 +145,20 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 				}))
 				// Get author's Doc and check if current user is allowed to perform this action
 				if (editFormData._user_ref) {
-
-					const authorDoc = editFormData._user_ref as unknown as Record<string, any>;
+					const authorDoc = editFormData._user_ref as unknown as Record<
+						string,
+						any
+					>
 					if (authorDoc?._id !== flat_share_profile?._user_id) {
-						router.push('/');
+						router.push('/')
 					}
 
 					//convert authorDoc | _user_ref back to a DocumentReference
 					const _user_ref = doc(db, 'users', authorDoc._id)
 					setDocRefs((prev) => ({
-                        ...prev,
-                        _user_ref
-                    }))
+						...prev,
+						_user_ref,
+					}))
 				}
 			}
 		}
@@ -198,11 +192,11 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			//get locaiton text
@@ -379,7 +373,7 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 						<option value="weekly">Weekly</option>
 						<option value="monthly">Monthly</option>
 						<option value="quarterly">Quarterly</option>
-						<option value="bi_annually">Bi-annually</option>
+						<option value="bi-annually">Bi-annually</option>
 						<option value="annually">Annually</option>
 					</Select>
 				</FormControl>
