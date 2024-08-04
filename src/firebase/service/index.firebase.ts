@@ -2,17 +2,25 @@ import {
 	collection,
 	deleteDoc,
 	doc,
+	DocumentReference,
 	getDoc,
 	getDocs,
 	limit,
-	query,
+	orderBy,
 	serverTimestamp,
 	setDoc,
 	updateDoc,
 } from 'firebase/firestore'
-import { db } from '..'
+import {
+	deleteObject,
+	getDownloadURL,
+	getStorage,
+	ref,
+	StorageReference,
+	uploadString,
+} from 'firebase/storage'
 import moment from 'moment'
-import { deleteObject, getStorage, ref, uploadString } from 'firebase/storage'
+import { db } from '..'
 
 interface createDTO {
 	collection_name: string
@@ -47,9 +55,7 @@ export default class SherutaDB {
 			updatedAt: serverTimestamp(),
 		})
 
-		// fetching the updated value;
-		const docRef = doc(db, data.collection_name, data.document_id)
-		const docSnap = await getDoc(docRef)
+		const docSnap = await getDoc(ref)
 		return docSnap.data()
 	}
 
@@ -61,14 +67,33 @@ export default class SherutaDB {
 		_limit: number
 	}): Promise<any> {
 		const collectionRef = collection(db, collection_name)
-		//@ts-ignore
-		const querySnapshot = await getDocs(collectionRef, limit(_limit))
-		const documents = querySnapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data(),
-			ref: doc.ref,
-		}))
-		return documents
+		const querySnapshot = await getDocs(
+			collectionRef,
+			// @ts-ignore
+			orderBy('updatedAt', 'desc'),
+			limit(_limit),
+		)
+
+		const documents = querySnapshot.docs.map(async (doc) => {
+			const docData = { ...doc.data() }
+
+			const refFields = Object.entries(docData).filter(
+				([key, value]) => value instanceof DocumentReference,
+			)
+
+			const resolvedRefs = await Promise.all(
+				refFields.map(async ([key, ref]) => {
+					const resolvedDoc = await getDoc(ref)
+					return { [key]: resolvedDoc.data() }
+				}),
+			)
+
+			Object.assign(docData, ...resolvedRefs)
+
+			return { id: doc.id, ...docData, ref: doc.ref }
+		})
+
+		return await Promise.all(documents)
 	}
 
 	static async get({
@@ -82,7 +107,22 @@ export default class SherutaDB {
 		const docSnap = await getDoc(docRef)
 
 		if (docSnap.exists()) {
-			return docSnap.data()
+			const docData = { ...docSnap.data() }
+
+			const refFields = Object.entries(docData).filter(
+				([key, value]) => value instanceof DocumentReference,
+			)
+
+			const resolvedRefs = await Promise.all(
+				refFields.map(async ([key, ref]) => {
+					const resolvedDoc = await getDoc(ref)
+					return { [key]: resolvedDoc.data() }
+				}),
+			)
+
+			Object.assign(docData, ...resolvedRefs)
+
+			return { id: docSnap.id, ...docData, ref: docSnap.ref }
 		} else {
 			return null
 		}
@@ -118,11 +158,24 @@ export default class SherutaDB {
 		return snapshot
 	}
 
-	static async deleteMedia({ storageUrl }: { storageUrl: string }) {
-		const storage = getStorage()
-		const deleteRef = ref(storage, storageUrl)
+	static async getMediaUrl(ref: StorageReference) {
+		try {
+			const url = await getDownloadURL(ref)
 
-		await deleteObject(deleteRef)
+			return url
+		} catch (error) {
+			console.log(error)
+			return null
+		}
+	}
+
+	static async deleteMedia(ref: StorageReference) {
+		try {
+			await deleteObject(ref)
+			return Promise.resolve(true)
+		} catch (error) {
+			return Promise.reject(error)
+		}
 	}
 }
 
@@ -133,7 +186,7 @@ export const DBCollectionName = {
 	userSettings: 'user_settings',
 
 	flatShareProfile: 'flat_share_profiles',
-	flatShareRequests: 'flat_share_requests',
+	flatShareRequests: 'requests',
 
 	messages: 'messages',
 	conversations: 'conversations',
@@ -146,4 +199,5 @@ export const DBCollectionName = {
 	habits: 'habits',
 	interests: 'interests',
 	categories: 'categories',
+	amenities: 'amenities',
 }

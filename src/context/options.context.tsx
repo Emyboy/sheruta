@@ -19,6 +19,7 @@ export interface OptionsState {
 	interests: any[]
 	categories: any[]
 	property_types: any[]
+	amenities: any[]
 }
 
 interface OptionsContextType {
@@ -36,6 +37,7 @@ const initialOptionsState: OptionsState = {
 	interests: [],
 	categories: [],
 	property_types: [],
+	amenities: [],
 }
 
 export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
@@ -60,6 +62,7 @@ export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 				DBCollectionName.interests,
 				DBCollectionName.categories,
 				DBCollectionName.propertyTypes,
+				DBCollectionName.amenities,
 			]
 
 			const optionPromises = optionsCollections.map(async (collectionName) => {

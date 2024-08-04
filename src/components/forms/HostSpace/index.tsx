@@ -8,6 +8,10 @@ import { FaAngleLeft } from 'react-icons/fa'
 import Summary from './Summary'
 import UploadMedia from './UploadMedia'
 import { useAppContext } from '@/context/app.context'
+import {
+	AvailabilityStatus,
+	PaymentPlan,
+} from '@/firebase/service/request/request.types'
 
 export type HostSpaceFormProps = {
 	next: () => void
@@ -20,12 +24,12 @@ export type FormDataType = {
 	description: string
 	service_charge: number | null
 	budget: number
-	payment_type: string
-	bedrooms: number | null
+	payment_type: PaymentPlan
 	bathrooms: number | null
 	toilets: number | null
 	living_rooms: number | null
-	availability_status: string | null
+	amenities: string[]
+	availability_status: AvailabilityStatus | null
 	_property_type_ref: undefined | DocumentReference
 	_location_keyword_ref: undefined | DocumentReference
 	_state_ref: undefined | DocumentReference
@@ -33,7 +37,7 @@ export type FormDataType = {
 	_category_ref: undefined | DocumentReference
 	images_urls: string[]
 	video_url: string | null
-	google_location_object: Record<string, any> | undefined
+	google_location_object: Record<string, any>
 	google_location_text: string
 	state?: string
 	area?: string
@@ -47,38 +51,36 @@ export type MediaType = {
 	video_url: string | null
 }
 
-const initialState = {
-	title: '',
-	description: '',
-	service_charge: 0,
-	budget: 0,
-	payment_type: '',
-	bedrooms: 0,
-	bathrooms: 0,
-	toilets: 0,
-	living_rooms: 0,
-	images_urls: [],
-	video_url: null,
-	availability_status: '',
-	_location_keyword_ref: undefined,
-	_state_ref: undefined,
-	_service_ref: undefined,
-	_category_ref: undefined,
-	_property_type_ref: undefined,
-	google_location_object: undefined,
-	google_location_text: '',
-	state: '',
-	area: '',
-	service: '',
-	category: '',
-	property: '',
-}
-
 export default function HostSpace() {
 	const router = useRouter()
 	const { appState } = useAppContext()
 
-	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>(initialState)
+	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>({
+		title: '',
+		description: '',
+		service_charge: 0,
+		budget: 0,
+		payment_type: 'monthly',
+		bathrooms: 0,
+		toilets: 0,
+		living_rooms: 0,
+		amenities: [],
+		images_urls: [],
+		video_url: null,
+		availability_status: 'available',
+		_location_keyword_ref: undefined,
+		_state_ref: undefined,
+		_service_ref: undefined,
+		_category_ref: undefined,
+		_property_type_ref: undefined,
+		google_location_object: {},
+		google_location_text: '',
+		state: '',
+		area: '',
+		service: '',
+		category: '',
+		property: '',
+	})
 
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
@@ -112,7 +114,6 @@ export default function HostSpace() {
 	useEffect(() => {
 		const formData = localStorage.getItem('host_space_form')
 
-		if (!formData && !appState.app_loading) setHostSpaceData(initialState)
 		if (formData && !appState.app_loading)
 			setHostSpaceData(JSON.parse(formData))
 	}, [appState.app_loading])
