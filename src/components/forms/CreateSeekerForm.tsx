@@ -87,7 +87,7 @@ interface budgetLimits {
 	monthly: number
 	annually: number
 	quarterly: number
-	bi_annually: number
+	'bi-annually': number
 	weekly: number
 }
 interface LocationObject {
@@ -105,7 +105,7 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
-	bi_annually: 100000,
+	'bi-annually': 100000,
 	annually: 150000,
 }
 
