@@ -10,7 +10,7 @@ import {
 	Flex,
 	useColorMode,
 } from '@chakra-ui/react'
-import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore' 
+import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
 import { v4 as generateUId } from 'uuid'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
@@ -88,7 +88,7 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
-	bi_annually: 100000,
+	'bi-annually': 100000,
 	annually: 150000,
 }
 
@@ -116,7 +116,6 @@ const initialFormState: Partial<RequestData> = {
 }
 
 const CreateSeekerForm: React.FC = () => {
-
 	//color mode
 	const { colorMode } = useColorMode()
 
@@ -207,11 +206,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			//get locaiton text
@@ -372,12 +371,11 @@ const CreateSeekerForm: React.FC = () => {
 						name="budget"
 						onChange={handleChange}
 						placeholder={`Minimum ₦${budgetLimits[formData?.payment_type || 'weekly'].toLocaleString()}`}
-						defaultValue={(!formData?.budget) ? '' : formData.budget}
+						defaultValue={!formData?.budget ? '' : formData.budget}
 					/>
 					<FormErrorMessage>
 						Please enter an amount that meets the minimum required value of ₦
-						{budgetLimits[formData?.payment_type || 'weekly'].toLocaleString()}
-						.
+						{budgetLimits[formData?.payment_type || 'weekly'].toLocaleString()}.
 					</FormErrorMessage>
 				</FormControl>
 
@@ -396,7 +394,7 @@ const CreateSeekerForm: React.FC = () => {
 						<option value="weekly">Weekly</option>
 						<option value="monthly">Monthly</option>
 						<option value="quarterly">Quarterly</option>
-						<option value="bi_annually">Bi-annually</option>
+						<option value="bi-annually">Bi-annually</option>
 						<option value="annually">Annually</option>
 					</Select>
 				</FormControl>
@@ -500,7 +498,7 @@ const CreateSeekerForm: React.FC = () => {
 						onChange={handleChange}
 						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
 						minLength={140}
-                        rows={10}
+						rows={10}
 					/>
 				</FormControl>
 			</Flex>
