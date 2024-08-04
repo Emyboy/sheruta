@@ -26,6 +26,16 @@ export default async function page(props: any) {
 	async function getUserProfile() {
 		try {
 			const [flatShareProfileDocs, userDoc, userInfoDocs] = await Promise.all([
+				// getDocs(
+				// 	query(
+				// 		collection(db, 'flatShareProfile'),
+				// 		where('_user_id', '==', user_id),
+				// 	),
+				// ),
+				// getDoc(doc(db, 'users', user_id)),
+				// getDocs(
+				// 	query(collection(db, 'userInfos'), where('_user_id', '==', user_id)),
+				// ),
 				getDocs(
 					query(
 						collection(db, 'flatShareProfile'),

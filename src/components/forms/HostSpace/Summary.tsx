@@ -173,7 +173,7 @@ export default function Summary({
 							/>
 						</Flex>
 					</Flex>
-					
+
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 						<Flex
 							justifyContent={'flex-start'}
@@ -282,7 +282,6 @@ export default function Summary({
 								</option>
 							</Select>
 						</Flex> */}
-						
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -393,7 +392,6 @@ export default function Summary({
 								placeholder="Bathrooms"
 							/>
 						</Flex>
-
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
