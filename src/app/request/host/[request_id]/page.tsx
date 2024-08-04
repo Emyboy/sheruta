@@ -29,7 +29,12 @@ export default async function page({
 
 	return (
 		<>
-			<Flex justifyContent={'center'} alignItems={'center'} minH={'100vh'}>
+			<Flex
+				justifyContent={'center'}
+				alignItems={'center'}
+				minH={'100vh'}
+				pos={'relative'}
+			>
 				<Flex
 					minH={'90vh'}
 					maxH={'90vh'}
