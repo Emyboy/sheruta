@@ -23,6 +23,7 @@ export default function MediaCarousel({
 			justifyContent={'center'}
 			position={'relative'}
 			bgColor={'dark'}
+			_light={{ bgColor: 'white' }}
 			borderRadius={'16px'}
 			overflow={'hidden'}
 			maxH={'725px'}
@@ -36,15 +37,17 @@ export default function MediaCarousel({
 				left={0}
 				bottom={0}
 				bgColor={'black'}
+				_light={{ bgColor: 'white' }}
 				opacity={'10%'}
-				// backgroundImage={selectedMedia}
+				backgroundImage={selectedMedia}
 			/>
 			<Box
 				position={'relative'}
 				overflow={'hidden'}
 				cursor={'pointer'}
 				rounded="md"
-				bg="dark"
+				bgColor="dark"
+				_light={{ bgColor: 'white' }}
 				h={'100%'}
 				w={'100%'}
 				border={'1.5px'}
@@ -63,7 +66,8 @@ export default function MediaCarousel({
 					</Box>
 				) : (
 					<Flex
-						bg="dark"
+						bgColor="dark"
+						_light={{ bgColor: 'white' }}
 						width={'100%'}
 						height={'100%'}
 						alignItems={'center'}
