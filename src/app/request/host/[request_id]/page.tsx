@@ -29,7 +29,12 @@ export default async function page({
 
 	return (
 		<>
-			<Flex justifyContent={'center'} alignItems={'center'} minH={'100vh'}>
+			<Flex
+				justifyContent={'center'}
+				alignItems={'center'}
+				minH={'100vh'}
+				pos={'relative'}
+			>
 				<Flex
 					minH={'90vh'}
 					maxH={'90vh'}
@@ -41,8 +46,6 @@ export default async function page({
 					<Flex
 						minW={{ base: '100%', lg: '50%' }}
 						maxW={{ base: '100%', lg: '50%' }}
-						borderRight={'1px'}
-						borderColor={'brand_darker'}
 						flexFlow={'column'}
 						paddingRight={DEFAULT_PADDING}
 					>

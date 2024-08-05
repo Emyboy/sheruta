@@ -17,56 +17,61 @@ export default function ApartmentDetails({ request }: { request: string }) {
 	return (
 		<>
 			<Flex
-				minH={'70px'}
-				maxH={'70px'}
-				borderBottom={'1px'}
-				borderColor={'brand_darker'}
-				alignItems={'center'}
-				justifyContent={'center'}
-				paddingInline={'5%'}
+				minH="70px"
+				maxH="70px"
+				minW="100%"
+				borderBottom="1px"
+				borderColor="brand_darker"
+				_light={{ borderColor: '#1117171A' }}
+				alignItems="center"
+				justifyContent="center"
 			>
 				<Flex
-					gap={'32px'}
-					alignItems={'center'}
-					justifyContent={'center'}
-					maxH={'58px'}
+					gap={{ base: '16px', md: '32px' }}
+					alignItems="center"
+					justifyContent="center"
+					maxH="58px"
+					overflowX="auto"
+					overflowY={'hidden'}
 					flex={1}
-					alignSelf={'end'}
-					w={'100%'}
+					alignSelf="end"
+					w="100%"
+					mx={{ base: '16px', md: 0 }}
 				>
 					{mini_nav_items.map((item, i) => (
 						<Flex
 							key={i}
-							alignItems={'center'}
-							flexDirection={'column'}
-							justifyContent={'space-between'}
+							alignItems="center"
+							flexDirection="column"
+							justifyContent="space-between"
 							height={{ base: '48px', md: '58px' }}
-							cursor={'pointer'}
-							w={'auto'}
+							cursor="pointer"
+							w="auto"
 							onClick={() => setActiveTab(item)}
 						>
 							<Text
 								as="p"
-								fontWeight={'normal'}
-								textAlign={'center'}
+								fontWeight="normal"
+								textAlign="center"
 								fontSize={{ base: '12px', md: '16px' }}
+								whiteSpace="nowrap" // Added to prevent text wrapping
 							>
 								{item}
 							</Text>
 							{activeTab === item && (
 								<Text
 									as="span"
-									h={'4px'}
-									marginBottom={'-2px'}
-									w={'full'}
-									borderRadius={'4px'}
-									bg={'brand'}
+									h="4px"
+									w="full"
+									borderRadius="4px"
+									bg="brand"
 								/>
 							)}
 						</Flex>
 					))}
 				</Flex>
 			</Flex>
+
 			{activeTab === 'Apartment Summary' && (
 				<ApartmentSummary request={JSON.parse(request)} />
 			)}

@@ -65,6 +65,15 @@ interface Options {
 	_location_keyword_ref: DocumentReference | undefined
 	_state_ref: DocumentReference | undefined
 }
+
+interface budgetLimits {
+	monthly: number
+	annually: number
+	quarterly: number
+	'bi-annually': number
+	weekly: number
+}
+
 interface LocationObject {
 	formatted_address?: string
 	geometry?: {

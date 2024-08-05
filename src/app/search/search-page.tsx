@@ -10,15 +10,15 @@ export default function SearchPage({}: Props) {
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING}>
 			<Flex flexDir={'column'} px={DEFAULT_PADDING}>
-				<EachRequest />
-				<EachRequest />
+				{/* <EachRequest />
+				<EachRequest /> */}
 			</Flex>
 			<SearchResultUsers />
 			<Flex flexDir={'column'} px={DEFAULT_PADDING}>
+				{/* <EachRequest />
 				<EachRequest />
 				<EachRequest />
-				<EachRequest />
-				<EachRequest />
+				<EachRequest /> */}
 			</Flex>
 		</Flex>
 	)

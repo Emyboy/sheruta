@@ -10,7 +10,6 @@ import {
 	Input,
 	Select,
 	SimpleGrid,
-	Stack,
 	Text,
 	Textarea,
 	VStack,
@@ -55,17 +54,12 @@ export default function Summary({
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (
-		autocompleteInstance: google.maps.places.Autocomplete,
-	) => {
+	const handleLoad = (autocompleteInstance: google.maps.places.Autocomplete) =>
 		setAutocomplete(autocompleteInstance)
-		console.log('Autocomplete Loaded:', autocompleteInstance)
-	}
 
 	const handlePlaceChanged = () => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
-			console.log(place)
 
 			const locationObject: LocationObject = {
 				formatted_address: place.formatted_address,
@@ -106,6 +100,7 @@ export default function Summary({
 				...prev,
 				[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
 			}))
+
 			localStorage.setItem(
 				'host_space_form',
 				JSON.stringify({
@@ -129,14 +124,58 @@ export default function Summary({
 		}
 	}
 
-	const handleSubmit = async (e: any) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		setFormData((prev) => ({ ...prev, ...formData }))
-		localStorage.setItem(
-			'host_space_form',
-			JSON.stringify({ ...formData, ...formData }),
+		const selectedCategory = options.categories.find(
+			(category) => category.id === formData.category,
 		)
+		if (selectedCategory) {
+			setFormData((prev) => ({
+				...prev,
+				_category_ref: selectedCategory._ref,
+			}))
+		}
+
+		const selectedService = options.services.find(
+			(service) => service.id === formData.service,
+		)
+		if (selectedService) {
+			setFormData((prev) => ({
+				...prev,
+				_service_ref: selectedService._ref,
+			}))
+		}
+
+		const selectedLocation = filteredLocationOptions.find(
+			(location) => location.id === formData.area,
+		)
+		if (selectedLocation) {
+			setFormData((prev) => ({
+				...prev,
+				_location_keyword_ref: selectedLocation._ref,
+			}))
+		}
+
+		const selectedState = options.states.find(
+			(state) => state.id === formData.state,
+		)
+		if (selectedState) {
+			setFormData((prev) => ({
+				...prev,
+				_state_ref: selectedState._ref,
+			}))
+		}
+
+		const selectedProperty = options.property_types.find(
+			(property) => property.id === formData.property,
+		)
+		if (selectedProperty) {
+			setFormData((prev) => ({
+				...prev,
+				_property_type_ref: selectedProperty._ref,
+			}))
+		}
 
 		next()
 	}
@@ -170,6 +209,7 @@ export default function Summary({
 								minLength={5}
 								value={formData.title}
 								name="title"
+								_placeholder={{ color: 'text_muted' }}
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="TITLE HERE"
@@ -194,7 +234,7 @@ export default function Summary({
 								name="description"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Summary Here"
+								placeholder="Write a brief description about the apartment"
 								resize={'vertical'}
 								height={160}
 							/>
@@ -211,6 +251,7 @@ export default function Summary({
 								Budget
 							</Text>
 							<Input
+								_placeholder={{ color: 'text_muted' }}
 								onChange={handleChange}
 								required
 								type="text"
@@ -232,6 +273,7 @@ export default function Summary({
 								Service Charge
 							</Text>
 							<Input
+								_placeholder={{ color: 'text_muted' }}
 								onChange={handleChange}
 								type="text"
 								value={String(formData.service_charge)}
@@ -261,6 +303,8 @@ export default function Summary({
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Payment Type"
+								_placeholder={{ color: 'text_muted' }}
+								_light={{ color: 'dark' }}
 								size="md"
 								color={'border_color'}
 							>
@@ -294,6 +338,8 @@ export default function Summary({
 								name="availability_status"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
+								_placeholder={{ color: 'text_muted' }}
+								_light={{ color: 'dark' }}
 								placeholder="Availability Status"
 								size="md"
 							>
@@ -321,23 +367,14 @@ export default function Summary({
 								Select apartment category
 							</Text>
 							<Select
-								onChange={(e) => {
-									handleChange(e)
-									const selectedCategory = options.categories.find(
-										(category) => category.id === e.target.value,
-									)
-									if (selectedCategory) {
-										setFormData((prev) => ({
-											...prev,
-											_category_ref: selectedCategory._ref,
-										}))
-									}
-								}}
+								onChange={handleChange}
 								required
 								value={formData.category}
 								name="category"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
+								_placeholder={{ color: 'text_muted' }}
+								_light={{ color: 'dark' }}
 								placeholder="Category"
 								size="md"
 								color={'border_color'}
@@ -363,6 +400,7 @@ export default function Summary({
 								Living rooms
 							</Text>
 							<Input
+								_placeholder={{ color: 'text_muted' }}
 								onChange={handleChange}
 								required
 								type="text"
@@ -386,6 +424,7 @@ export default function Summary({
 								Toilets
 							</Text>
 							<Input
+								_placeholder={{ color: 'text_muted' }}
 								onChange={handleChange}
 								required
 								type="text"
@@ -407,6 +446,7 @@ export default function Summary({
 								Bathrooms
 							</Text>
 							<Input
+								_placeholder={{ color: 'text_muted' }}
 								onChange={handleChange}
 								required
 								type="text"
@@ -431,18 +471,9 @@ export default function Summary({
 								Select a service type
 							</Text>
 							<Select
-								onChange={(e) => {
-									handleChange(e)
-									const selectedService = options.services.find(
-										(service) => service.id === e.target.value,
-									)
-									if (selectedService) {
-										setFormData((prev) => ({
-											...prev,
-											_service_ref: selectedService._ref,
-										}))
-									}
-								}}
+								_placeholder={{ color: 'text_muted' }}
+								_light={{ color: 'dark' }}
+								onChange={handleChange}
 								required
 								value={formData.service}
 								name="service"
@@ -474,18 +505,9 @@ export default function Summary({
 								Select type of property
 							</Text>
 							<Select
-								onChange={(e) => {
-									handleChange(e)
-									const selectedProperty = options.property_types.find(
-										(property) => property.id === e.target.value,
-									)
-									if (selectedProperty) {
-										setFormData((prev) => ({
-											...prev,
-											_property_type_ref: selectedProperty._ref,
-										}))
-									}
-								}}
+								_placeholder={{ color: 'text_muted' }}
+								_light={{ color: 'dark' }}
+								onChange={handleChange}
 								required
 								value={formData.property}
 								name="property"
@@ -517,12 +539,13 @@ export default function Summary({
 							<Text color={'text_muted'} fontSize={'base'}>
 								Select available amenities
 							</Text>
-							<CheckboxGroup colorScheme={'#00bc73'}>
-								<SimpleGrid columns={[2, null, 3]} spacingY="8px">
-									{options.amenities.map((amenity, i) => (
+							<CheckboxGroup colorScheme={'green'}>
+								<SimpleGrid columns={[1, 2, 3]} spacingY="8px">
+									{options.amenities.map((amenity) => (
 										<Checkbox
 											textTransform={'capitalize'}
 											color={'border_color'}
+											_light={{ color: 'dark' }}
 											value={amenity.title}
 											key={amenity.id}
 											textColor={'white'}
@@ -559,18 +582,9 @@ export default function Summary({
 								Select a State
 							</Text>
 							<Select
-								onChange={(e) => {
-									handleChange(e)
-									const selectedState = options.states.find(
-										(state) => state.id === e.target.value,
-									)
-									if (selectedState) {
-										setFormData((prev) => ({
-											...prev,
-											_state_ref: selectedState._ref,
-										}))
-									}
-								}}
+								_placeholder={{ color: 'text_muted' }}
+								_light={{ color: 'dark' }}
+								onChange={handleChange}
 								required
 								value={formData.state}
 								name="state"
@@ -602,18 +616,9 @@ export default function Summary({
 								Select an area
 							</Text>
 							<Select
-								onChange={(e) => {
-									handleChange(e)
-									const selectedLocation = filteredLocationOptions.find(
-										(location) => location.id === e.target.value,
-									)
-									if (selectedLocation) {
-										setFormData((prev) => ({
-											...prev,
-											_location_keyword_ref: selectedLocation._ref,
-										}))
-									}
-								}}
+								_placeholder={{ color: 'text_muted' }}
+								_light={{ color: 'dark' }}
+								onChange={handleChange}
 								required
 								value={formData.area}
 								name="area"
@@ -653,6 +658,7 @@ export default function Summary({
 									onPlaceChanged={handlePlaceChanged}
 								>
 									<Input
+										_placeholder={{ color: 'text_muted' }}
 										id="address"
 										type="text"
 										placeholder="Enter a location"
@@ -666,7 +672,11 @@ export default function Summary({
 					)}
 				</VStack>
 				<br />
-				<Button type={'submit'}>{`Next`}</Button>
+				<Button
+					bgColor={'brand'}
+					color={'white'}
+					type={'submit'}
+				>{`Next`}</Button>
 			</Flex>
 		</>
 	)
