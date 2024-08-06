@@ -1,6 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useOptionsContext } from '@/context/options.context'
 import {
+	Box,
 	Button,
 	Checkbox,
 	CheckboxGroup,
@@ -17,6 +18,7 @@ import {
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
 import { HostSpaceFormProps } from '.'
+import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 
 const libraries: 'places'[] = ['places']
 
@@ -38,18 +40,13 @@ export default function Summary({
 }: HostSpaceFormProps) {
 	const { optionsState: options } = useOptionsContext()
 
+	const [houseRules, setHouseRules] = useState<string[]>(
+		formData.house_rules ? formData.house_rules : [''],
+	)
+
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
 		options.location_keywords,
 	)
-
-	useEffect(() => {
-		if (formData.state)
-			setFilteredLocationOptions(
-				options.location_keywords.filter(
-					(location) => location._state_id === formData.state,
-				),
-			)
-	}, [formData.state])
 
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
@@ -82,6 +79,28 @@ export default function Summary({
 				google_location_text: locationText,
 			}))
 		}
+	}
+
+	const addHouseRule = () => setHouseRules((prev) => [...prev, ''])
+
+	const removeHouseRule = (i: number) => {
+		const updatedRules = houseRules.filter((_, idx) => idx !== i)
+
+		setHouseRules(updatedRules)
+		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
+	}
+
+	const handleHouseRuleChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		idx: number,
+	) => {
+		const { value } = e.target
+
+		const updatedRules = [...houseRules]
+		updatedRules[idx] = value
+		setHouseRules(updatedRules)
+
+		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
 	}
 
 	const handleChange = (
@@ -179,6 +198,15 @@ export default function Summary({
 
 		next()
 	}
+
+	useEffect(() => {
+		if (formData.state)
+			setFilteredLocationOptions(
+				options.location_keywords.filter(
+					(location) => location._state_id === formData.state,
+				),
+			)
+	}, [formData.state])
 
 	return (
 		<>
@@ -569,6 +597,53 @@ export default function Summary({
 								</SimpleGrid>
 							</CheckboxGroup>
 						</Flex>
+					</Flex>
+
+					<Flex gap={DEFAULT_PADDING} w="full" flexDir={'column'}>
+						<Flex
+							justifyContent={'space-between'}
+							alignItems={'center'}
+							w="full"
+						>
+							<Text color={'text_muted'} fontSize={'base'}>
+								List some house rules
+							</Text>
+
+							<BiPlusCircle
+								cursor={'pointer'}
+								onClick={addHouseRule}
+								size={'20px'}
+								fill="#00bc73"
+								title="add house rule"
+							/>
+						</Flex>
+						{houseRules.map((_, i) => (
+							<Box key={i} pos={'relative'}>
+								<Input
+									onChange={(e) => handleHouseRuleChange(e, i)}
+									minLength={5}
+									value={houseRules[i]}
+									_placeholder={{ color: 'text_muted' }}
+									borderColor={'border_color'}
+									_dark={{ borderColor: 'dark_light' }}
+									placeholder="Enter your rule"
+								/>
+								{houseRules.length > 1 && (
+									<BiMinusCircle
+										cursor={'pointer'}
+										onClick={() => removeHouseRule(i)}
+										style={{
+											position: 'absolute',
+											top: '-8px',
+											right: '-8px',
+										}}
+										size={'20px'}
+										fill="#00bc73"
+										title="add house rule"
+									/>
+								)}
+							</Box>
+						))}
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>

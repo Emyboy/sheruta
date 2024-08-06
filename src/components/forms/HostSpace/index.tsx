@@ -29,6 +29,7 @@ export type FormDataType = {
 	toilets: number | null
 	living_rooms: number | null
 	amenities: string[]
+	house_rules: string[] | null
 	availability_status: AvailabilityStatus | null
 	_property_type_ref: undefined | DocumentReference
 	_location_keyword_ref: undefined | DocumentReference
@@ -65,6 +66,7 @@ export default function HostSpace() {
 		toilets: 0,
 		living_rooms: 0,
 		amenities: [],
+		house_rules: null,
 		images_urls: [],
 		video_url: null,
 		availability_status: 'available',
@@ -154,16 +156,18 @@ export default function HostSpace() {
 				justifyContent={'center'}
 				flexDirection={'row'}
 				alignItems={'center'}
-				style={{
-					cursor: 'pointer',
-				}}
+				cursor={'pointer'}
 				gap={2}
 				onClick={() => (step > 0 ? back() : router.back())}
 			>
 				<Box>
 					<FaAngleLeft width={'24px'} height={'24px'} />
 				</Box>
-				<Text as={'h4'} fontSize={'24px'} fontWeight={'medium'}>
+				<Text
+					as={'h4'}
+					fontSize={{ base: 'base', md: '24px' }}
+					fontWeight={'medium'}
+				>
 					{allStepNames()[step]}
 				</Text>
 			</Flex>
