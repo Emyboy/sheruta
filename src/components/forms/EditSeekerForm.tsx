@@ -15,6 +15,7 @@ import {
 	DocumentReference,
 	DocumentData,
 	getDoc,
+	doc,
 } from 'firebase/firestore'
 import { v4 as generateUId } from 'uuid'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
@@ -28,26 +29,21 @@ import {
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
+import { ZodError } from 'zod'
+import { db } from '@/firebase'
 
 //get google places API KEY
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
 const libraries: 'places'[] = ['places']
-
-interface Options {
+interface DocRefs {
 	_service_ref: DocumentReference | undefined
 	_location_keyword_ref: DocumentReference | undefined
 	_state_ref: DocumentReference | undefined
+	_user_ref: DocumentReference | undefined
 }
 
-interface budgetLimits {
-	monthly: number
-	annually: number
-	quarterly: number
-	bi_annually: number
-	weekly: number
-}
 interface LocationObject {
 	formatted_address?: string
 	geometry?: {
@@ -63,7 +59,7 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
-	bi_annually: 100000,
+	'bi-annually': 100000,
 	annually: 150000,
 }
 
@@ -89,11 +85,11 @@ const initialFormState: Partial<RequestData> = {
 	updatedAt: Timestamp.now(),
 }
 
-const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
-	const recordSnap = await getDoc(docRef)
+// const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
+// 	const recordSnap = await getDoc(docRef)
 
-	return recordSnap.exists() ? recordSnap.data() : null
-}
+// 	return recordSnap.exists() ? recordSnap.data() : null
+// }
 
 const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	//color mode
@@ -122,10 +118,11 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	} = useOptionsContext()
 
 	//state for storing Document Ref for category, services, states, properties
-	const [optionsRef, setOptionsRef] = useState<Options>({
+	const [docRefs, setDocRefs] = useState<DocRefs>({
 		_service_ref: undefined,
 		_state_ref: undefined,
 		_location_keyword_ref: undefined,
+		_user_ref: undefined,
 	})
 
 	//state for storing filtered locations based on the selected state
@@ -142,27 +139,26 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (editFormData && flat_share_profile?._user_id) {
-				setOptionsRef({
-					_service_ref: editFormData._service_ref,
-					_state_ref: editFormData._state_ref,
-					_location_keyword_ref: editFormData._location_keyword_ref,
-				})
-
 				setFormData((prev) => ({
 					...prev,
 					...editFormData,
 				}))
 				// Get author's Doc and check if current user is allowed to perform this action
 				if (editFormData._user_ref) {
-					try {
-						const authorDoc = await getDataFromRef(editFormData._user_ref)
-
-						if (authorDoc?._id !== flat_share_profile?._user_id) {
-							router.push('/')
-						}
-					} catch (error) {
-						console.error('Error fetching author doc:', error)
+					const authorDoc = editFormData._user_ref as unknown as Record<
+						string,
+						any
+					>
+					if (authorDoc?._id !== flat_share_profile?._user_id) {
+						router.push('/')
 					}
+
+					//convert authorDoc | _user_ref back to a DocumentReference
+					const _user_ref = doc(db, 'users', authorDoc._id)
+					setDocRefs((prev) => ({
+						...prev,
+						_user_ref,
+					}))
 				}
 			}
 		}
@@ -233,7 +229,7 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 		}
 
 		const updateOptionsRef = (key: string, refValue: any) => {
-			setOptionsRef((prev) => ({
+			setDocRefs((prev) => ({
 				...prev,
 				[key]: refValue,
 			}))
@@ -297,7 +293,7 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
-				...optionsRef,
+				...docRefs,
 			}
 
 			//convert budget to number
@@ -327,13 +323,16 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 					router.push('/')
 				}, 1000)
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error(error)
-			// Handle other errors
-			showToast({
-				message: 'Error, please try again',
-				status: 'error',
-			})
+			if (error instanceof ZodError) {
+				console.error('Zod Validation Error:', error.issues)
+			} else {
+				showToast({
+					message: 'Error, please try again',
+					status: 'error',
+				})
+			}
 			setIsLoading(false)
 		}
 	}
@@ -374,7 +373,7 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 						<option value="weekly">Weekly</option>
 						<option value="monthly">Monthly</option>
 						<option value="quarterly">Quarterly</option>
-						<option value="bi_annually">Bi-annually</option>
+						<option value="bi-annually">Bi-annually</option>
 						<option value="annually">Annually</option>
 					</Select>
 				</FormControl>
@@ -473,7 +472,7 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 					<Textarea
 						id="description"
 						name="description"
-						value={formData?.description}
+						defaultValue={formData?.description}
 						onChange={handleChange}
 						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
 						minLength={140}

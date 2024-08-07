@@ -23,6 +23,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { HostSpaceFormProps, MediaType } from '.'
+import { ZodError } from 'zod'
 
 export default function UploadMedia({
 	formData,
@@ -182,9 +183,17 @@ export default function UploadMedia({
 			localStorage.removeItem('host_space_form')
 			toast({ status: 'success', title: 'You have successfully added a space' })
 			router.push('/')
-		} catch (error) {
-			console.log(error)
-			Promise.all(
+		} catch (e) {
+			if (e instanceof ZodError) {
+				e.errors.forEach((error: any) => {
+					console.log(
+						`Validation error in ${error.path.join('.')}: ${error.message}`,
+					)
+				})
+			} else {
+				console.log('Unknown error', e)
+			}
+			await Promise.all(
 				mediaDataRefs.map(async (ref) => await SherutaDB.deleteMedia(ref)),
 			)
 			toast({ title: 'Error creating your details', status: 'error' })

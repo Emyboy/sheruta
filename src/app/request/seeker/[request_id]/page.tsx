@@ -47,6 +47,7 @@ import { useAuthContext } from '@/context/auth.context'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { capitalizeString, timeAgo } from '@/utils/index.utils'
 import useCommon from '@/hooks/useCommon'
+import Link from 'next/link'
 
 interface PageParams {
 	[key: string]: string | undefined
@@ -57,7 +58,6 @@ interface Props {
 
 const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
 	const recordSnap = await getDoc(docRef)
-
 	return recordSnap.exists() ? recordSnap.data() : null
 }
 
@@ -70,10 +70,10 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 		updatedAt,
 		description,
 		google_location_text,
-		userDoc,
+		_user_ref: userDoc,
 		userInfoDoc,
-		serviceTypeDoc,
-		locationKeywordDoc,
+		_service_ref: serviceTypeDoc,
+		_location_keyword_ref: locationKeywordDoc,
 		budget,
 		payment_type,
 		loggedInUser,
@@ -82,8 +82,13 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 	// Handle redirect
 	const router = useRouter()
 
-	// Function to check if user is post admin
-	const isPostAdmin = (): boolean => loggedInUser?._id === userInfoDoc?._user_id
+	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)
+
+	useEffect(() => {
+		if (typeof loggedInUser !== 'undefined' && typeof userDoc !== 'undefined') {
+			setIsPostAdmin(loggedInUser?._id === userDoc?._id)
+		}
+	}, [loggedInUser, userDoc])
 
 	const generateShareUrl = (): void => {
 		if (
@@ -112,7 +117,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 		try {
 			setIsLoading(true)
 
-			if (isPostAdmin() && requestId) {
+			if (isPostAdmin && requestId) {
 				const deletePost = await SherutaDB.delete({
 					collection_name: 'requests',
 					document_id: requestId,
@@ -125,7 +130,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 					})
 					setTimeout(() => {
 						router.replace('/')
-					}, 500)
+					}, 1000)
 				} else {
 					showToast({
 						message: 'Failed to delete the post',
@@ -151,7 +156,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 
 	return (
 		<>
-			{postData && Object.keys(postData).length ? (
+			{typeof userDoc !== 'undefined' && Object.values(userDoc || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -190,25 +195,27 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 									>
 										<PopoverBody p={0}>
 											<VStack spacing={2} align="flex-start">
-												{isPostAdmin() && (
-													<Button
-														variant="ghost"
-														isLoading={isLoading}
-														leftIcon={<BiPencil />}
-														onClick={() => {
-															router.push(`${requestId}/edit`)
-														}}
-														width="100%"
-														display="flex"
-														alignItems="center"
-														padding={0}
-														borderRadius="sm"
-														_hover={{ color: 'brand_dark' }}
+												{isPostAdmin && (
+													<Link
+														href={`${requestId}/edit`}
+														style={{ textDecoration: 'none' }}
 													>
-														<Text width={'100%'} textAlign={'left'}>
-															Edit
-														</Text>
-													</Button>
+														<Button
+															variant="ghost"
+															isLoading={isLoading}
+															leftIcon={<BiPencil />}
+															width="100%"
+															display="flex"
+															alignItems="center"
+															padding={0}
+															borderRadius="sm"
+															_hover={{ color: 'brand_dark' }}
+														>
+															<Text width={'100%'} textAlign={'left'}>
+																Edit
+															</Text>
+														</Button>
+													</Link>
 												)}
 												<Button
 													variant="ghost"
@@ -226,7 +233,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 														Share
 													</Text>
 												</Button>
-												{isPostAdmin() && (
+												{isPostAdmin && (
 													<Button
 														variant="ghost"
 														isLoading={isLoading}
@@ -455,43 +462,34 @@ export default function Page({ params }: { params: PageParams }) {
 		}
 	}, [authState.user])
 
-	const requestId = params.request_id
+	const requestId = params?.request_id
 
 	const getRequest = async (): Promise<any> => {
 		try {
 			setIsLoading(true)
 
-			const result = await SherutaDB.get({
+			const result: DocumentData | null = await SherutaDB.get({
 				collection_name: 'requests',
 				document_id: requestId as string,
 			})
 
 			if (
 				result &&
-				Object.keys(result) &&
-				typeof result?._user_ref !== 'undefined'
+				Object.keys(result).length > 0 &&
+				result._user_ref &&
+				result._service_ref &&
+				result._location_keyword_ref
 			) {
 				let userInfoDoc: DocumentData | undefined = undefined
 
-				const [userDoc, serviceTypeDoc, locationKeywordDoc] = await Promise.all(
-					[
-						getDataFromRef(result._user_ref),
-						getDataFromRef(result._service_ref),
-						getDataFromRef(result._location_keyword_ref),
-					],
-				)
-
-				if (userDoc?._id) {
-					userInfoDoc = await UserInfoService.get(userDoc?._id)
+				if (result?._user_ref?._id) {
+					userInfoDoc = await UserInfoService.get(result._user_ref._id)
 				}
 
 				setRequestData((prev) => ({
 					...prev,
 					...result,
-					userDoc,
 					userInfoDoc,
-					serviceTypeDoc,
-					locationKeywordDoc,
 				}))
 
 				setIsLoading(false)

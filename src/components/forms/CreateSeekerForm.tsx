@@ -70,9 +70,10 @@ interface budgetLimits {
 	monthly: number
 	annually: number
 	quarterly: number
-	bi_annually: number
+	'bi-annually': number
 	weekly: number
 }
+
 interface LocationObject {
 	formatted_address?: string
 	geometry?: {
@@ -88,7 +89,7 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
-	bi_annually: 100000,
+	'bi-annually': 100000,
 	annually: 150000,
 }
 
@@ -394,7 +395,7 @@ const CreateSeekerForm: React.FC = () => {
 						<option value="weekly">Weekly</option>
 						<option value="monthly">Monthly</option>
 						<option value="quarterly">Quarterly</option>
-						<option value="bi_annually">Bi-annually</option>
+						<option value="bi-annually">Bi-annually</option>
 						<option value="annually">Annually</option>
 					</Select>
 				</FormControl>

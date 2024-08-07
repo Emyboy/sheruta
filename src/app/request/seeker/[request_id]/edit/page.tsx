@@ -22,6 +22,7 @@ import { FaAngleLeft } from 'react-icons/fa'
 import SherutaDB from '@/firebase/service/index.firebase'
 import { RequestData } from '@/firebase/service/request/request.types'
 import EditSeekerForm from '@/components/forms/EditSeekerForm'
+import { DocumentData } from 'firebase/firestore'
 
 type Props = {
 	params: any
@@ -41,7 +42,7 @@ export default function Page({ params }: Props) {
 		try {
 			setIsLoading(true)
 
-			const result = await SherutaDB.get({
+			const result: DocumentData | null = await SherutaDB.get({
 				collection_name: 'requests',
 				document_id: requestId as string,
 			})

@@ -2,14 +2,9 @@ import ApartmentDetails from '@/components/HostDetails/ApartmentDetails'
 import MediaCarousel from '@/components/HostDetails/MediaCarousel'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { Flex } from '@chakra-ui/react'
-
-const mini_nav_items = [
-	'Apartment Summary',
-	'Discussion',
-	'Verification',
-	'Pay Details',
-]
+import { Box, Flex, Text } from '@chakra-ui/react'
+import Link from 'next/link'
+import { FaAngleLeft } from 'react-icons/fa'
 
 export default async function page({
 	params: { request_id },
@@ -18,8 +13,7 @@ export default async function page({
 }) {
 	let size = {
 		base: '98vw',
-		lg: '1024px',
-		xl: '1440px',
+		xl: '1300px',
 	}
 
 	const request: any = await SherutaDB.get({
@@ -29,22 +23,52 @@ export default async function page({
 
 	return (
 		<>
-			<Flex justifyContent={'center'} alignItems={'center'} minH={'100vh'}>
+			<Flex
+				justifyContent={'start'}
+				alignItems={'center'}
+				flexDir={'column'}
+				minH={'100vh'}
+				pos={'relative'}
+				maxW={size}
+				minW={size}
+				mx={'auto'}
+				gap={DEFAULT_PADDING}
+			>
+				<Flex justifyContent={'flex-start'} w={size}>
+					<Link href={'/'}>
+						<Flex
+							flexDirection={'row'}
+							alignItems={'center'}
+							cursor={'pointer'}
+							gap={2}
+							mt={{ base: '16px', md: '24px' }}
+							pl={'15px'}
+						>
+							<Box>
+								<FaAngleLeft size={'24px'} />
+							</Box>
+							<Text
+								as={'h4'}
+								fontSize={{ base: 'base', md: '24px' }}
+								fontWeight={'medium'}
+							>
+								Go Home
+							</Text>
+						</Flex>
+					</Link>
+				</Flex>
 				<Flex
 					minH={'90vh'}
 					maxH={'90vh'}
-					maxW={size}
-					minW={size}
+					mx={'auto'}
 					overflow={{ lg: 'hidden' }}
 					flexDir={{ base: 'column', lg: 'row' }}
 				>
 					<Flex
 						minW={{ base: '100%', lg: '50%' }}
 						maxW={{ base: '100%', lg: '50%' }}
-						borderRight={'1px'}
-						borderColor={'brand_darker'}
 						flexFlow={'column'}
-						paddingRight={DEFAULT_PADDING}
+						paddingRight={{ base: 0, lg: DEFAULT_PADDING }}
 					>
 						<MediaCarousel
 							video={request.video_url}
