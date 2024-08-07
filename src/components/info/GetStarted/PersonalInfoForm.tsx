@@ -22,8 +22,8 @@ type Props = {
 }
 
 export default function PersonalInfoForm({}: Props) {
-	const { showToast } = useCommon();
-	const { getAuthDependencies } = useAuthContext();
+	const { showToast } = useCommon()
+	const { getAuthDependencies } = useAuthContext()
 	const {
 		authState: { user, flat_share_profile },
 	} = useAuthContext()
@@ -56,7 +56,7 @@ export default function PersonalInfoForm({}: Props) {
 					linkedin,
 				},
 			})
-			await  getAuthDependencies();
+			await getAuthDependencies()
 			setIsLoading(false)
 		} catch (error) {
 			showToast({
