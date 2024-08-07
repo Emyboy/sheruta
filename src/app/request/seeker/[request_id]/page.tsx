@@ -47,6 +47,7 @@ import { useAuthContext } from '@/context/auth.context'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { capitalizeString, timeAgo } from '@/utils/index.utils'
 import useCommon from '@/hooks/useCommon'
+import Link from 'next/link'
 
 interface PageParams {
 	[key: string]: string | undefined
@@ -195,24 +196,26 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 										<PopoverBody p={0}>
 											<VStack spacing={2} align="flex-start">
 												{isPostAdmin && (
-													<Button
-														variant="ghost"
-														isLoading={isLoading}
-														leftIcon={<BiPencil />}
-														onClick={() => {
-															router.push(`${requestId}/edit`)
-														}}
-														width="100%"
-														display="flex"
-														alignItems="center"
-														padding={0}
-														borderRadius="sm"
-														_hover={{ color: 'brand_dark' }}
+													<Link
+														href={`${requestId}/edit`}
+														style={{ textDecoration: 'none' }}
 													>
-														<Text width={'100%'} textAlign={'left'}>
-															Edit
-														</Text>
-													</Button>
+														<Button
+															variant="ghost"
+															isLoading={isLoading}
+															leftIcon={<BiPencil />}
+															width="100%"
+															display="flex"
+															alignItems="center"
+															padding={0}
+															borderRadius="sm"
+															_hover={{ color: 'brand_dark' }}
+														>
+															<Text width={'100%'} textAlign={'left'}>
+																Edit
+															</Text>
+														</Button>
+													</Link>
 												)}
 												<Button
 													variant="ghost"
