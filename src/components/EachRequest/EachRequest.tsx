@@ -26,7 +26,6 @@ import {
 	BiLocationPlus,
 	BiMessageRoundedDetail,
 	BiPhone,
-	BiPlayCircle,
 	BiShare,
 } from 'react-icons/bi'
 import MainTooltip from '../atoms/MainTooltip'
@@ -35,6 +34,7 @@ import useCommon from '@/hooks/useCommon'
 type Props = { request: any }
 
 export default function EachRequest({ request }: Props) {
+
 	const { colorMode } = useColorMode();
 	const { showToast } = useCommon();
 
@@ -105,70 +105,57 @@ export default function EachRequest({ request }: Props) {
 										? 'Looking for apartment'
 										: 'New apartment'}
 							</Text>
-							<Popover>
-								<PopoverTrigger>
-									<Button
-										px={0}
-										bg="none"
-										color="text_muted"
-										display={'flex'}
-										fontWeight={'light'}
-										_hover={{
-											color: 'brand',
-											bg: 'none',
-											_dark: {
-												color: 'brand',
-											},
-										}}
-										_dark={{
-											color: 'dark_lighter',
-										}}
-										fontSize={{
-											md: 'xl',
-											base: 'lg',
-										}}
+							<Box
+								zIndex={9999}
+							>
+								<Popover>
+									<PopoverTrigger>
+										<IconButton
+											fontSize={'24px'}
+											aria-label="Options"
+											icon={<BiDotsHorizontalRounded />}
+										/>
+									</PopoverTrigger>
+									<PopoverContent
+										color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
+										bg={colorMode === 'dark' ? '#202020' : '#fff'}
+										width={'100%'}
+										padding={2}
 									>
-										<BiDotsHorizontalRounded />
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent
-									color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
-									bg={colorMode === 'dark' ? '#202020' : '#fff'}
-									width={'100%'}
-									padding={2}
-								>
-									<PopoverBody p={0}>
-										<Button
-											variant="ghost"
-											leftIcon={<BiShare />}
-											onClick={copyLink}
-											width="100%"
-											display="flex"
-											alignItems="center"
-											padding={0}
-											borderRadius="sm"
-											_hover={{ color: 'brand_dark' }}
-										>
-											<Text width={'100%'} textAlign={'left'}>
-												Share
-											</Text>
-										</Button>
-									</PopoverBody>
-								</PopoverContent>
-							</Popover>
+										<PopoverBody p={0}>
+											<VStack align="flex-start">
+												<Button
+													variant="ghost"
+													leftIcon={<BiShare />}
+													onClick={() => copyShareUrl(`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`)}
+													width="100%"
+													display="flex"
+													alignItems="center"
+													padding={0}
+													borderRadius="sm"
+													_hover={{ color: 'brand_dark' }}
+												>
+													<Text width={'100%'} textAlign={'left'}>
+														Share
+													</Text>
+												</Button>
+											</VStack>
+										</PopoverBody>
+									</PopoverContent>
+								</Popover>
+							</Box>
 						</Flex>
 						<Text color="text_muted" fontSize={'sm'}>
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +
-										request.updatedAt.nanoseconds / 1000000,
+									request.updatedAt.nanoseconds / 1000000,
 								),
 								{ addSuffix: true },
 							)}
 						</Text>
 					</Flex>
 				</Flex>
-
 				<Link
 					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
@@ -408,20 +395,15 @@ const EachRequestImages = ({
 					h={'full'}
 				>
 					{video && (
-						<Flex
+						<Box
 							position={'relative'}
 							overflow={'hidden'}
 							cursor={'pointer'}
 							rounded="md"
-							alignItems={'center'}
-							justifyContent={'center'}
 							onClick={() => handleClick(video, 'video')}
 						>
 							<video src={video} width={'100%'} height={'100%'} />
-							<Box pos="absolute" zIndex={50}>
-								<BiPlayCircle size={'80px'} fill="#00bc73" cursor={'pointer'} />
-							</Box>
-						</Flex>
+						</Box>
 					)}
 					{images.map((imgUrl, i) => (
 						<Box
