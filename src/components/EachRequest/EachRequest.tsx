@@ -35,8 +35,8 @@ import useCommon from '@/hooks/useCommon'
 type Props = { request: any }
 
 export default function EachRequest({ request }: Props) {
-	const { colorMode } = useColorMode();
-	const { showToast } = useCommon();
+	const { colorMode } = useColorMode()
+	const { showToast } = useCommon()
 
 	const copyShareUrl = (url: string): void => {
 		if (
@@ -147,7 +147,11 @@ export default function EachRequest({ request }: Props) {
 										<Button
 											variant="ghost"
 											leftIcon={<BiShare />}
-											onClick={copyLink}
+											onClick={() =>
+												copyShareUrl(
+													`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+												)
+											}
 											width="100%"
 											display="flex"
 											alignItems="center"
