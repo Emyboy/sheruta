@@ -57,7 +57,7 @@ export default class FlatShareProfileService {
 			let result = (await SherutaDB.get({
 				collection_name: DBCollectionName.flatShareProfile,
 				document_id: user_id,
-			})) as FlatShareProfileData
+			})) as unknown as FlatShareProfileData
 
 			if (result && newCredit) {
 				let update = await SherutaDB.update({
@@ -85,7 +85,7 @@ export default class FlatShareProfileService {
 			let result = (await SherutaDB.get({
 				collection_name: DBCollectionName.flatShareProfile,
 				document_id: user_id,
-			})) as FlatShareProfileData
+			})) as unknown as FlatShareProfileData
 
 			if (result && amount && result?.credits >= amount) {
 				let update = await SherutaDB.update({

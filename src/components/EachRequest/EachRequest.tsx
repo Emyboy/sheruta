@@ -7,23 +7,61 @@ import {
 	Box,
 	Button,
 	Flex,
+	IconButton,
 	Image,
+	Popover,
+	PopoverBody,
+	PopoverContent,
+	PopoverTrigger,
 	Text,
+	useColorMode,
+	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import {
 	BiBarChart,
 	BiDotsHorizontalRounded,
+	BiDotsVerticalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
 	BiPhone,
+	BiShare,
 } from 'react-icons/bi'
 import MainTooltip from '../atoms/MainTooltip'
+import useCommon from '@/hooks/useCommon'
 
 type Props = { request: any }
 
 export default function EachRequest({ request }: Props) {
+
+	const { colorMode } = useColorMode();
+	const { showToast } = useCommon();
+
+	const copyShareUrl = (url: string): void => {
+		if (
+			typeof window !== 'undefined' &&
+			typeof window.navigator !== 'undefined' &&
+			typeof window.location !== 'undefined'
+		) {
+			window.navigator.clipboard
+				.writeText(window.location.origin + url)
+				.then(() => {
+					showToast({
+						message: 'Link has been copied successfully',
+						status: 'info',
+					})
+				})
+				.catch((err) => {
+					showToast({
+						message: 'Failed to copy the link',
+						status: 'error',
+					})
+					console.error('Could not copy text: ', err)
+				})
+		}
+	}
+
 	return (
 		<Box
 			position={'relative'}
@@ -43,65 +81,81 @@ export default function EachRequest({ request }: Props) {
 			width={'full'}
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
-				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
-					style={{ textDecoration: 'none' }}
-				>
-					<Flex gap={5} alignItems={'center'}>
-						<Avatar
-							src={request._user_ref.avatar_url}
-							size={{
-								md: 'md',
-								base: 'md',
-							}}
-						>
-							<AvatarBadge boxSize="20px" bg="green.500" />
-						</Avatar>
-						<Flex
-							gap={'0px'}
-							flexDirection={'column'}
-							justifyContent={'flex-start'}
-							flex={1}
-						>
-							<Flex justifyContent={'space-between'} alignItems={'center'}>
-								<Text>
-									{request.title
-										? request.title
-										: request.seeking
-											? 'Looking for apartment'
-											: 'New apartment'}
-								</Text>
-								<Button
-									color="text_muted"
-									p={0}
-									h="10px"
-									_hover={{
-										color: 'black',
-										_dark: {
-											color: 'white',
-										},
-									}}
-									bg="none"
-									fontSize={{
-										md: 'xl',
-										base: 'lg',
-									}}
-								>
-									<BiDotsHorizontalRounded />
-								</Button>
-							</Flex>
-							<Text color="text_muted" fontSize={'sm'}>
-								{formatDistanceToNow(
-									new Date(
-										request.updatedAt.seconds * 1000 +
-											request.updatedAt.nanoseconds / 1000000,
-									),
-									{ addSuffix: true },
-								)}
+				<Flex gap={5} alignItems={'center'}>
+					<Avatar
+						src={request._user_ref.avatar_url}
+						size={{
+							md: 'md',
+							base: 'md',
+						}}
+					>
+						<AvatarBadge boxSize="20px" bg="green.500" />
+					</Avatar>
+					<Flex
+						gap={'0px'}
+						flexDirection={'column'}
+						justifyContent={'flex-start'}
+						flex={1}
+					>
+						<Flex justifyContent={'space-between'} alignItems={'center'}>
+							<Text>
+								{request.title
+									? request.title
+									: request.seeking
+										? 'Looking for apartment'
+										: 'New apartment'}
 							</Text>
+							<Box
+								zIndex={9999}
+							>
+								<Popover>
+									<PopoverTrigger>
+										<IconButton
+											fontSize={'24px'}
+											aria-label="Options"
+											icon={<BiDotsHorizontalRounded />}
+										/>
+									</PopoverTrigger>
+									<PopoverContent
+										color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
+										bg={colorMode === 'dark' ? '#202020' : '#fff'}
+										width={'100%'}
+										padding={2}
+									>
+										<PopoverBody p={0}>
+											<VStack align="flex-start">
+												<Button
+													variant="ghost"
+													leftIcon={<BiShare />}
+													onClick={() => copyShareUrl(`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`)}
+													width="100%"
+													display="flex"
+													alignItems="center"
+													padding={0}
+													borderRadius="sm"
+													_hover={{ color: 'brand_dark' }}
+												>
+													<Text width={'100%'} textAlign={'left'}>
+														Share
+													</Text>
+												</Button>
+											</VStack>
+										</PopoverBody>
+									</PopoverContent>
+								</Popover>
+							</Box>
 						</Flex>
+						<Text color="text_muted" fontSize={'sm'}>
+							{formatDistanceToNow(
+								new Date(
+									request.updatedAt.seconds * 1000 +
+									request.updatedAt.nanoseconds / 1000000,
+								),
+								{ addSuffix: true },
+							)}
+						</Text>
 					</Flex>
-				</Link>
+				</Flex>
 				<Link
 					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
