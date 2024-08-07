@@ -3,6 +3,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Box, Flex, Image } from '@chakra-ui/react'
 import { useState } from 'react'
+import { BiPlayCircle } from 'react-icons/bi'
 
 export default function MediaCarousel({
 	video,
@@ -23,6 +24,7 @@ export default function MediaCarousel({
 			justifyContent={'center'}
 			position={'relative'}
 			bgColor={'dark'}
+			_light={{ bgColor: 'white' }}
 			borderRadius={'16px'}
 			overflow={'hidden'}
 			maxH={'725px'}
@@ -36,15 +38,17 @@ export default function MediaCarousel({
 				left={0}
 				bottom={0}
 				bgColor={'black'}
+				_light={{ bgColor: 'white' }}
 				opacity={'10%'}
-				// backgroundImage={selectedMedia}
+				backgroundImage={selectedMedia}
 			/>
 			<Box
 				position={'relative'}
 				overflow={'hidden'}
 				cursor={'pointer'}
 				rounded="md"
-				bg="dark"
+				bgColor="dark"
+				_light={{ bgColor: 'white' }}
 				h={'100%'}
 				w={'100%'}
 				border={'1.5px'}
@@ -63,7 +67,8 @@ export default function MediaCarousel({
 					</Box>
 				) : (
 					<Flex
-						bg="dark"
+						bgColor="dark"
+						_light={{ bgColor: 'white' }}
 						width={'100%'}
 						height={'100%'}
 						alignItems={'center'}
@@ -83,7 +88,9 @@ export default function MediaCarousel({
 				overflowX={'scroll'}
 			>
 				{video && (
-					<Box
+					<Flex
+						alignItems={'center'}
+						justifyContent={'center'}
 						position={'relative'}
 						overflow={'hidden'}
 						rounded="md"
@@ -98,8 +105,11 @@ export default function MediaCarousel({
 							setType('video')
 						}}
 					>
+						<Box pos="absolute" zIndex={50}>
+							<BiPlayCircle size={'30px'} fill="#00bc73" cursor={'pointer'} />
+						</Box>
 						<video src={video} width={'100%'} height={'100%'} />
-					</Box>
+					</Flex>
 				)}
 				{images.map((imgUrl: any, i: number) => (
 					<Box

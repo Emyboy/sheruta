@@ -23,6 +23,7 @@ type Props = {
 
 export default function PersonalInfoForm({}: Props) {
 	const { showToast } = useCommon()
+	const { getAuthDependencies } = useAuthContext()
 	const {
 		authState: { user, flat_share_profile },
 	} = useAuthContext()
@@ -40,6 +41,7 @@ export default function PersonalInfoForm({}: Props) {
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
 		try {
+			setIsLoading(true)
 			await FlatShareProfileService.update({
 				document_id: user?._id as string,
 				data: {
@@ -54,12 +56,15 @@ export default function PersonalInfoForm({}: Props) {
 					linkedin,
 				},
 			})
+			await getAuthDependencies()
+			setIsLoading(false)
 		} catch (error) {
 			showToast({
 				message: 'Error, please try again',
 				status: 'error',
 			})
 		}
+		setIsLoading(false)
 	}
 
 	return (

@@ -70,8 +70,10 @@ export const createHostRequestDTO = z.object({
 	living_rooms: z.number().nullable(),
 	amenities: z.array(z.string()),
 
-	images_urls: z.array(z.string()),
+	images_urls: z.array(z.string()).min(4),
 	video_url: z.string().nullable(),
+
+	house_rules: z.array(z.string()).nullable(),
 
 	seeking: z.boolean(),
 
@@ -108,7 +110,7 @@ export const createHostRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_user_ref: z.custom<DocumentReference | undefined>(
+	_user_ref: z.custom<DocumentReference>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',

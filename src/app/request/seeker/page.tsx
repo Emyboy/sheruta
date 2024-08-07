@@ -2,14 +2,7 @@
 
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import {
-	Box,
-	Flex,
-	Alert,
-	AlertIcon,
-	Text,
-	IconButton,
-} from '@chakra-ui/react'
+import { Box, Flex, Alert, AlertIcon, Text, IconButton } from '@chakra-ui/react'
 import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
@@ -74,7 +67,7 @@ export default function Page({}: Props) {
 							</Box>
 						</Box>
 						<Box maxWidth="600px" mx="auto">
-							<CreateSeekerForm/>
+							<CreateSeekerForm />
 						</Box>
 					</Box>
 				</ThreeColumnLayout>
