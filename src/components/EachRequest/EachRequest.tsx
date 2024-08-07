@@ -61,15 +61,20 @@ export default function EachRequest({ request }: Props) {
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
-					<Avatar
-						src={request._user_ref.avatar_url}
-						size={{
-							md: 'md',
-							base: 'md',
-						}}
+					<Link
+						href={`/user/${request._user_ref._id}`}
+						style={{ textDecoration: 'none' }}
 					>
-						<AvatarBadge boxSize="20px" bg="green.500" />
-					</Avatar>
+						<Avatar
+							src={request._user_ref.avatar_url}
+							size={{
+								md: 'md',
+								base: 'md',
+							}}
+						>
+							<AvatarBadge boxSize="20px" bg="green.500" />
+						</Avatar>
+					</Link>
 					<Flex
 						gap={'0px'}
 						flexDirection={'column'}
@@ -88,6 +93,7 @@ export default function EachRequest({ request }: Props) {
 								<PopoverTrigger>
 									<Button
 										px={0}
+										colorScheme=""
 										bg="none"
 										color="text_muted"
 										display={'flex'}
@@ -158,10 +164,18 @@ export default function EachRequest({ request }: Props) {
 							as="address"
 							color="brand"
 							fontSize={'sm'}
+							gap={'4px'}
 						>
-							<BiLocationPlus /> {request.google_location_text}
+							<Box>
+								<BiLocationPlus size={'16px'} />
+							</Box>
+							<Truncate
+								text={request.google_location_text}
+								max={70}
+								showReadMore={false}
+							/>
 						</Flex>
-						<Truncate text={request.description} />
+						<Truncate text={request.description} showReadMore={true} />
 					</Flex>
 				</Link>
 				<Link
@@ -397,7 +411,7 @@ const EachRequestImages = ({
 							onClick={() => handleClick(video, 'video')}
 						>
 							<video src={video} width={'100%'} height={'100%'} />
-							<Box pos="absolute" zIndex={50}>
+							<Box pos="absolute" zIndex={10}>
 								<BiPlayCircle size={'80px'} fill="#00bc73" cursor={'pointer'} />
 							</Box>
 						</Flex>
@@ -425,8 +439,16 @@ const EachRequestImages = ({
 	)
 }
 
-const Truncate = ({ text }: { text: string }) => {
-	const maxChars = 200
+const Truncate = ({
+	text,
+	max,
+	showReadMore,
+}: {
+	text: string
+	max?: number
+	showReadMore: boolean
+}) => {
+	const maxChars = max || 200
 
 	const truncatedText =
 		text.length > maxChars ? text.substring(0, maxChars) + '... ' : text
@@ -434,7 +456,7 @@ const Truncate = ({ text }: { text: string }) => {
 	return (
 		<Text>
 			{truncatedText}
-			{text.length > maxChars && (
+			{text.length > maxChars && showReadMore && (
 				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
 					Read more..
 				</Text>
