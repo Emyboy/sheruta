@@ -7,6 +7,7 @@ import {
 	Box,
 	Button,
 	Flex,
+	IconButton,
 	Image,
 	Popover,
 	PopoverBody,
@@ -14,12 +15,14 @@ import {
 	PopoverTrigger,
 	Text,
 	useColorMode,
+	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import {
 	BiBarChart,
 	BiDotsHorizontalRounded,
+	BiDotsVerticalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
 	BiPhone,
@@ -32,15 +35,33 @@ import useCommon from '@/hooks/useCommon'
 type Props = { request: any }
 
 export default function EachRequest({ request }: Props) {
-	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
+	const { colorMode } = useColorMode();
+	const { showToast } = useCommon();
 
-	const copyLink = () => {
-		navigator.clipboard.writeText(
-			`${window.location.origin}/${request.id}/edit`,
-		)
-		showToast({ message: 'Host Link copied to clipboard', status: 'info' })
+	const copyShareUrl = (url: string): void => {
+		if (
+			typeof window !== 'undefined' &&
+			typeof window.navigator !== 'undefined' &&
+			typeof window.location !== 'undefined'
+		) {
+			window.navigator.clipboard
+				.writeText(window.location.origin + url)
+				.then(() => {
+					showToast({
+						message: 'Link has been copied successfully',
+						status: 'info',
+					})
+				})
+				.catch((err) => {
+					showToast({
+						message: 'Failed to copy the link',
+						status: 'error',
+					})
+					console.error('Could not copy text: ', err)
+				})
+		}
 	}
+
 	return (
 		<Box
 			position={'relative'}
