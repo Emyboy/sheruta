@@ -8,6 +8,8 @@ import MessageIcon from '@/assets/svg/message'
 import PhysicalInspectionIcon from '@/assets/svg/physical-inspection-icon'
 import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
+import useCommon from '@/hooks/useCommon'
 import {
 	Avatar,
 	AvatarBadge,
@@ -16,19 +18,30 @@ import {
 	Button,
 	Flex,
 	Input,
+	Popover,
+	PopoverBody,
+	PopoverContent,
+	PopoverTrigger,
 	Select,
 	SimpleGrid,
 	Text,
+	useColorMode,
+	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
+	BiBookmark,
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
+	BiPencil,
 	BiPhone,
+	BiShare,
+	BiTrash,
 } from 'react-icons/bi'
-import { CiBookmarkMinus, CiCircleInfo } from 'react-icons/ci'
+import { CiCircleInfo } from 'react-icons/ci'
 import { FaHouseChimneyUser } from 'react-icons/fa6'
 import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
 import { MdOutlineMailOutline } from 'react-icons/md'
@@ -36,6 +49,11 @@ import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
 
 export default function ApartmentSummary({ request }: { request: any }) {
+	const router = useRouter()
+	const { authState } = useAuthContext()
+	const { colorMode } = useColorMode()
+	const { showToast } = useCommon()
+
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
 
@@ -45,17 +63,25 @@ export default function ApartmentSummary({ request }: { request: any }) {
 	if (showBookInspectionModal)
 		return <BookInspectionModal closeModal={closeModal} />
 
+	const copyLink = () => {
+		navigator.clipboard.writeText(
+			`${window.location.origin}/${request.id}/edit`,
+		)
+		showToast({ message: 'Host Link copied to clipboard', status: 'info' })
+	}
+
 	return (
 		<>
 			<Flex
 				gap={{ base: '8px', sm: 5 }}
 				alignItems={{ base: 'start', sm: 'center' }}
-				flexDir={{ base: 'column', sm: 'row' }}
+				// flexDir={{ base: 'column', sm: 'row' }}
 				p={DEFAULT_PADDING}
 				bgColor={'dark'}
 				_light={{ bgColor: '#FDFDFD' }}
+				justifyContent={'space-between'}
 			>
-				<Flex alignItems={'center'} gap={{ base: '8px', md: '16px' }}>
+				<Flex gap={{ base: '8px', md: '16px' }}>
 					<Avatar
 						src={request._user_ref.avatar_url}
 						size={{
@@ -70,91 +96,164 @@ export default function ApartmentSummary({ request }: { request: any }) {
 							bg="green.500"
 						/>
 					</Avatar>
-					<Text
-						textTransform={'capitalize'}
-						fontSize={{ base: 'sm', md: 'base' }}
-						w={'auto'}
+					<Flex
+						alignItems={'start'}
+						justifyContent={'center'}
+						flexDir={'column'}
 					>
-						{request._user_ref.last_name} {request._user_ref.first_name}
-					</Text>
+						<Text
+							textTransform={'capitalize'}
+							fontSize={{ base: 'sm', md: 'base' }}
+							w={'auto'}
+						>
+							{request._user_ref.last_name} {request._user_ref.first_name}
+						</Text>
+						<Flex ml={'-12px'} mt={'-6px'}>
+							<MainTooltip label="Call me" placement="top">
+								<Button
+									px={0}
+									bg="none"
+									color="text_muted"
+									display={'flex'}
+									fontWeight={'light'}
+									_hover={{
+										color: 'brand',
+										bg: 'none',
+										_dark: {
+											color: 'brand',
+										},
+									}}
+									_dark={{
+										color: 'dark_lighter',
+									}}
+									fontSize={{
+										md: 'xl',
+										base: 'lg',
+									}}
+								>
+									<BiPhone />
+								</Button>
+							</MainTooltip>
+							<MainTooltip label="Message me" placement="top">
+								<Button
+									px={0}
+									bg="none"
+									color="text_muted"
+									display={'flex'}
+									fontWeight={'light'}
+									_hover={{
+										color: 'brand',
+										bg: 'none',
+										_dark: {
+											color: 'brand',
+										},
+									}}
+									_dark={{
+										color: 'dark_lighter',
+									}}
+									fontSize={{
+										md: 'xl',
+										base: 'lg',
+									}}
+									ml={'-8px'}
+								>
+									<MdOutlineMailOutline />
+								</Button>
+							</MainTooltip>
+						</Flex>
+					</Flex>
 				</Flex>
 				<Flex>
-					<MainTooltip label="Call me" placement="top">
-						<Button
-							px={0}
-							bg="none"
-							color="text_muted"
-							display={'flex'}
-							fontWeight={'light'}
-							_hover={{
-								color: 'brand',
-								bg: 'none',
-								_dark: {
+					<Popover>
+						<PopoverTrigger>
+							<Button
+								px={0}
+								bg="none"
+								color="text_muted"
+								display={'flex'}
+								fontWeight={'light'}
+								_hover={{
 									color: 'brand',
-								},
-							}}
-							_dark={{
-								color: 'dark_lighter',
-							}}
-							fontSize={{
-								md: '2xl',
-								base: 'xl',
-							}}
+									bg: 'none',
+									_dark: {
+										color: 'brand',
+									},
+								}}
+								_dark={{
+									color: 'dark_lighter',
+								}}
+								fontSize={{
+									md: 'xl',
+									base: 'lg',
+								}}
+							>
+								<BiDotsHorizontalRounded />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent
+							color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
+							bg={colorMode === 'dark' ? '#202020' : '#fff'}
+							width={'100%'}
+							padding={4}
 						>
-							<BiPhone />
-						</Button>
-					</MainTooltip>
-					<MainTooltip label="Message me" placement="top">
-						<Button
-							px={0}
-							bg="none"
-							color="text_muted"
-							display={'flex'}
-							fontWeight={'light'}
-							_hover={{
-								color: 'brand',
-								bg: 'none',
-								_dark: {
-									color: 'brand',
-								},
-							}}
-							_dark={{
-								color: 'dark_lighter',
-							}}
-							fontSize={{
-								md: '2xl',
-								base: 'xl',
-							}}
-							ml={'-8px'}
-						>
-							<MdOutlineMailOutline />
-						</Button>
-					</MainTooltip>
-					<MainTooltip label="Show more" placement="top">
-						<Button
-							px={0}
-							bg="none"
-							color="text_muted"
-							display={'flex'}
-							fontWeight={'light'}
-							_hover={{
-								color: 'brand',
-								bg: 'none',
-								_dark: {
-									color: 'brand',
-								},
-							}}
-							_dark={{
-								color: 'dark_lighter',
-							}}
-							fontSize={{
-								md: 'xl',
-								base: 'lg',
-							}}
-						>
-							<BiDotsHorizontalRounded />
-						</Button>
-					</MainTooltip>
+							<PopoverBody p={0}>
+								<VStack spacing={1} align="flex-start">
+									<Button
+										variant="ghost"
+										leftIcon={<BiShare />}
+										onClick={copyLink}
+										width="100%"
+										display="flex"
+										alignItems="center"
+										padding={0}
+										borderRadius="sm"
+										_hover={{ color: 'brand_dark' }}
+									>
+										<Text width={'100%'} textAlign={'left'}>
+											Share
+										</Text>
+									</Button>
+									{authState.user?._id === request._user_ref._id && (
+										<>
+											<Button
+												variant="ghost"
+												leftIcon={<BiPencil />}
+												onClick={() => {
+													router.push(`${request.id}/edit`)
+												}}
+												width="100%"
+												display="flex"
+												alignItems="center"
+												padding={0}
+												borderRadius="sm"
+												_hover={{ color: 'brand_dark' }}
+											>
+												<Text width={'100%'} textAlign={'left'}>
+													Edit
+												</Text>
+											</Button>
+											<Button
+												variant="ghost"
+												leftIcon={<BiTrash />}
+												// onClick={() => deletePost()}
+												width="100%"
+												display="flex"
+												alignItems="center"
+												padding={0}
+												borderRadius="sm"
+												_hover={{ color: 'red.500' }}
+												color="red.400"
+											>
+												<Text width={'100%'} textAlign={'left'}>
+													Delete
+												</Text>
+											</Button>
+										</>
+									)}
+								</VStack>
+							</PopoverBody>
+						</PopoverContent>
+					</Popover>
 					<MainTooltip label="Save for later" placement="top">
 						<Button
 							px={0}
@@ -178,7 +277,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 							}}
 							ml={'-8px'}
 						>
-							<CiBookmarkMinus />
+							<BiBookmark />
 						</Button>
 					</MainTooltip>
 				</Flex>
@@ -225,7 +324,11 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					bgColor={'brand_darker'}
 					_light={{ bgColor: '#1117171A' }}
 				/>
-				<Flex justifyContent={'space-between'}>
+				<Flex
+					justifyContent={'space-between'}
+					flexWrap={'wrap'}
+					gap={DEFAULT_PADDING}
+				>
 					<Flex gap={DEFAULT_PADDING}>
 						<Badge
 							bgColor="#E4FAA866"
@@ -300,7 +403,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					borderColor={'brand_darker'}
 					_light={{ borderColor: '#1117171A' }}
 					position={'relative'}
-					paddingTop={{ base: '140px', md: '120px' }}
+					paddingTop={{ base: '190px', sm: '120px' }}
 					paddingBottom={DEFAULT_PADDING}
 					paddingX={'20px'}
 					gap={'16px'}
@@ -330,7 +433,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 								fontWeight={'light'}
 								fontSize={{ base: '16px', md: '18px' }}
 							>
-								Rent Per Room
+								Rent
 							</Text>
 							<Flex alignItems={'center'} flexWrap={'wrap'}>
 								<Text
@@ -519,43 +622,44 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						))}
 					</SimpleGrid>
 				</Flex>
-				<Flex
-					my={{ base: '24px', sm: '32px' }}
-					flexDir={'column'}
-					gap={'20px'}
-					mt={'16px'}
-				>
-					<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'300'}>
-						House Rules
-					</Text>
-					<Box
-						h={'2px'}
-						borderRadius={'4px'}
-						w={'100%'}
-						bgColor={'brand_darker'}
-						_light={{ bgColor: '#1117171A' }}
-					/>
-					<SimpleGrid columns={1} spacingY="16px">
-						{[
-							'No Pets allowed in or outside your apartment',
-							'No loud parties or overnight parties',
-							'No smoking in the premises',
-						].map((rule, i) => (
-							<Flex
-								key={i}
-								gap={'10px'}
-								alignItems={'center'}
-								justifyContent={'start'}
-							>
-								-
-								<Text fontWeight={'300'} fontSize={{ base: 'base', md: 'lg' }}>
-									{rule}
-								</Text>
-							</Flex>
-						))}
-					</SimpleGrid>
-				</Flex>
-				<Flex
+				{request.house_rules && request.house_rules.length && (
+					<Flex
+						my={{ base: '24px', sm: '32px' }}
+						flexDir={'column'}
+						gap={'20px'}
+						mt={'16px'}
+					>
+						<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'300'}>
+							House Rules
+						</Text>
+						<Box
+							h={'2px'}
+							borderRadius={'4px'}
+							w={'100%'}
+							bgColor={'brand_darker'}
+							_light={{ bgColor: '#1117171A' }}
+						/>
+						<SimpleGrid columns={1} spacingY="16px">
+							{request.house_rules.map((rule: string, i: number) => (
+								<Flex
+									key={i}
+									gap={'10px'}
+									alignItems={'center'}
+									justifyContent={'start'}
+								>
+									-
+									<Text
+										fontWeight={'300'}
+										fontSize={{ base: 'base', md: 'lg' }}
+									>
+										{rule}
+									</Text>
+								</Flex>
+							))}
+						</SimpleGrid>
+					</Flex>
+				)}
+				{/* <Flex
 					my={{ base: '24px', sm: '32px' }}
 					flexDir={'column'}
 					gap={DEFAULT_PADDING}
@@ -614,7 +718,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 							Book Inspection
 						</Button>
 					</Flex>
-				</Flex>
+				</Flex> */}
 				<Flex
 					my={'16px'}
 					_light={{
@@ -633,55 +737,57 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					flexDir={{ base: 'column', sm: 'row' }}
 				>
 					<Flex
-						flex={1}
+						flex={'70%'}
 						alignItems={{ base: 'start', md: 'center' }}
-						justifyContent={'center'}
+						justifyContent={'start'}
 						flexDir={{ base: 'column', sm: 'row' }}
 						gap={{ base: '16px', md: '32px' }}
 					>
-						<Avatar
-							src={request._user_ref.avatar_url}
-							w={{
-								md: '100px',
-								base: '60px',
-							}}
-							h={{
-								md: '100px',
-								base: '60px',
-							}}
-						>
-							{/* <AvatarBadge
+						<Flex alignItems={'center'} gap={'16px'} justifyContent={'start'}>
+							<Avatar
+								src={request._user_ref.avatar_url}
+								w={{
+									md: '100px',
+									base: '60px',
+								}}
+								h={{
+									md: '100px',
+									base: '60px',
+								}}
+							>
+								{/* <AvatarBadge
 								boxSize="10px"
 								border={'0px'}
 								bottom={'6px'}
 								bg="green.500"
 							/> */}
-						</Avatar>
-						<Flex
-							flexDir={'column'}
-							alignItems={'start'}
-							justifyContent={'center'}
-						>
-							<Text
-								fontWeight={'400'}
-								fontSize={{ base: '16px', md: '18px' }}
-								_dark={{ color: 'white' }}
-								_light={{ color: '#111717CC' }}
-								textTransform={'capitalize'}
+							</Avatar>
+							<Flex
+								flexDir={'column'}
+								alignItems={'start'}
+								justifyContent={'center'}
 							>
-								{request._user_ref.last_name} {request._user_ref.first_name}
-							</Text>
-							<Text
-								fontWeight={'300'}
-								fontSize={{ base: 'xs', sm: 'sm', md: 'base' }}
-								color={'brand'}
-							>
-								Lagos Nigeria
-							</Text>
+								<Text
+									fontWeight={'400'}
+									fontSize={{ base: '16px', md: '18px' }}
+									_dark={{ color: 'white' }}
+									_light={{ color: '#111717CC' }}
+									textTransform={'capitalize'}
+								>
+									{request._user_ref.last_name} {request._user_ref.first_name}
+								</Text>
+								<Text
+									fontWeight={'300'}
+									fontSize={{ base: 'xs', sm: 'sm', md: 'base' }}
+									color={'brand'}
+								>
+									Lagos Nigeria
+								</Text>
+							</Flex>
 						</Flex>
 					</Flex>
 					<Flex
-						flex={1}
+						flex={'30%'}
 						flexDir={'column'}
 						alignItems={'start'}
 						justifyContent={'center'}

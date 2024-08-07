@@ -73,6 +73,8 @@ export const createHostRequestDTO = z.object({
 	images_urls: z.array(z.string()).min(4),
 	video_url: z.string().nullable(),
 
+	house_rules: z.array(z.string()).nullable(),
+
 	seeking: z.boolean(),
 
 	google_location_object: z.record(z.string(), z.any()),
