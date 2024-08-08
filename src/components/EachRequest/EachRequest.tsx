@@ -192,7 +192,7 @@ export default function EachRequest({ request }: Props) {
 					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
-					<Flex justifyContent={'space-between'}>
+					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
 						<Flex gap={DEFAULT_PADDING}>
 							<Badge
 								colorScheme="green"
