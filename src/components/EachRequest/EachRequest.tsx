@@ -1,4 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import useShareSpace from '@/hooks/useShareSpace'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -7,7 +8,6 @@ import {
 	Box,
 	Button,
 	Flex,
-	IconButton,
 	Image,
 	Popover,
 	PopoverBody,
@@ -15,14 +15,12 @@ import {
 	PopoverTrigger,
 	Text,
 	useColorMode,
-	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import {
 	BiBarChart,
 	BiDotsHorizontalRounded,
-	BiDotsVerticalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
 	BiPhone,
@@ -30,37 +28,12 @@ import {
 	BiShare,
 } from 'react-icons/bi'
 import MainTooltip from '../atoms/MainTooltip'
-import useCommon from '@/hooks/useCommon'
 
 type Props = { request: any }
 
 export default function EachRequest({ request }: Props) {
 	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
-
-	const copyShareUrl = (url: string): void => {
-		if (
-			typeof window !== 'undefined' &&
-			typeof window.navigator !== 'undefined' &&
-			typeof window.location !== 'undefined'
-		) {
-			window.navigator.clipboard
-				.writeText(window.location.origin + url)
-				.then(() => {
-					showToast({
-						message: 'Link has been copied successfully',
-						status: 'info',
-					})
-				})
-				.catch((err) => {
-					showToast({
-						message: 'Failed to copy the link',
-						status: 'error',
-					})
-					console.error('Could not copy text: ', err)
-				})
-		}
-	}
+	const copyShareUrl = useShareSpace()
 
 	return (
 		<Box
@@ -150,6 +123,12 @@ export default function EachRequest({ request }: Props) {
 											onClick={() =>
 												copyShareUrl(
 													`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+													request.title
+														? request.title
+														: request.seeking
+															? 'Looking for apartment'
+															: 'New apartment',
+													request.description,
 												)
 											}
 											width="100%"
