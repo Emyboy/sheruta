@@ -77,11 +77,17 @@ export default function EachRequest({ request }: Props) {
 					>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
 							<Text>
-								{request.title
-									? request.title
-									: request.seeking
-										? 'Looking for apartment'
-										: 'New apartment'}
+								<Truncate
+									text={
+										request.title
+											? request.title
+											: request.seeking
+												? 'Looking for apartment'
+												: 'New apartment'
+									}
+									max={100}
+									showReadMore={false}
+								/>
 							</Text>
 							<Popover>
 								<PopoverTrigger>
@@ -227,7 +233,11 @@ export default function EachRequest({ request }: Props) {
 						images={request.images_urls}
 					/>
 				)}
-				<Flex alignItems={'center'} justifyContent={'space-between'}>
+				<Flex
+					alignItems={{ base: 'start', sm: 'center' }}
+					flexDir={{ base: 'column', sm: 'row' }}
+					justifyContent={'space-between'}
+				>
 					<Flex gap={DEFAULT_PADDING}>
 						<MainTooltip label="Call me" placement="top">
 							<Button
@@ -249,7 +259,8 @@ export default function EachRequest({ request }: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg',
+									sm: 'lg',
+									base: 'base',
 								}}
 							>
 								<BiPhone /> 35
@@ -275,7 +286,8 @@ export default function EachRequest({ request }: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg',
+									sm: 'lg',
+									base: 'base',
 								}}
 							>
 								<BiMessageRoundedDetail /> 35
@@ -301,7 +313,8 @@ export default function EachRequest({ request }: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg',
+									sm: 'lg',
+									base: 'base',
 								}}
 							>
 								<BiBarChart /> 135
@@ -314,10 +327,15 @@ export default function EachRequest({ request }: Props) {
 						}}
 						alignItems={'center'}
 					>
-						<Text fontSize={'lg'} fontWeight={'bold'}>
+						<Text fontSize={{ base: 'base', md: 'lg' }} fontWeight={'bold'}>
 							₦{request.budget.toLocaleString()}
 						</Text>{' '}
-						<Text textTransform={'capitalize'}>/{request.payment_type}</Text>
+						<Text
+							textTransform={'capitalize'}
+							fontSize={{ base: 'sm', md: 'base' }}
+						>
+							/{request.payment_type}
+						</Text>
 					</Flex>
 				</Flex>
 			</Flex>
@@ -378,8 +396,12 @@ const EachRequestImages = ({
 							overflow={'hidden'}
 							rounded="md"
 							bg="dark"
-							w={'60%'}
-							h={'60%'}
+							maxH={'500px'}
+							maxW={'700px'}
+							minH={'500px'}
+							minW={'500px'}
+							w={'100%'}
+							h={'100%'}
 							alignItems={'center'}
 							justifyContent={'center'}
 						>
@@ -415,7 +437,7 @@ const EachRequestImages = ({
 							onClick={() => handleClick(video, 'video')}
 						>
 							<video src={video} width={'100%'} height={'100%'} />
-							<Box pos="absolute" zIndex={10}>
+							<Box pos="absolute" zIndex={0}>
 								<BiPlayCircle size={'80px'} fill="#00bc73" cursor={'pointer'} />
 							</Box>
 						</Flex>
