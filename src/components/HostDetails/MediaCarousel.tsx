@@ -68,8 +68,6 @@ export default function MediaCarousel({
 					<Flex
 						bgColor="dark"
 						_light={{ bgColor: 'white' }}
-						maxH={'725px'}
-						minH={'500px'}
 						w={'100%'}
 						h={'100%'}
 						alignItems={'center'}
@@ -77,9 +75,9 @@ export default function MediaCarousel({
 					>
 						<iframe
 							src={selectedMedia}
-							style={{
-								minHeight: '400px',
-							}}
+							// style={{
+							// 	minHeight: '400px',
+							// }}
 							width={'100%'}
 							height={'100%'}
 						/>

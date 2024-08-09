@@ -94,13 +94,12 @@ export default function EachRequest({ request }: Props) {
 									<Button
 										px={0}
 										colorScheme=""
-										bg="none"
+										bgColor="none"
 										color="text_muted"
 										display={'flex'}
 										fontWeight={'light'}
 										_hover={{
 											color: 'brand',
-											bg: 'none',
 											_dark: {
 												color: 'brand',
 											},
@@ -228,7 +227,7 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				{request.images_urls && (
-					<EachRequestImages
+					<EachRequestMedia
 						video={request.video_url}
 						images={request.images_urls}
 					/>
@@ -343,7 +342,7 @@ export default function EachRequest({ request }: Props) {
 	)
 }
 
-const EachRequestImages = ({
+const EachRequestMedia = ({
 	images,
 	video,
 }: {
@@ -377,6 +376,7 @@ const EachRequestImages = ({
 					justifyContent={'center'}
 					cursor={'pointer'}
 					onClick={close}
+					p={'32px'}
 				>
 					{type === 'img' ? (
 						<Box overflow={'hidden'} rounded="md" bg="dark" w={'60%'} h={'60%'}>
@@ -396,10 +396,10 @@ const EachRequestImages = ({
 							overflow={'hidden'}
 							rounded="md"
 							bg="dark"
-							maxH={'500px'}
+							maxH={'700px'}
 							maxW={'700px'}
 							minH={'500px'}
-							minW={'500px'}
+							minW={'280px'}
 							w={'100%'}
 							h={'100%'}
 							alignItems={'center'}
