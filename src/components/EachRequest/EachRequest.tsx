@@ -1,4 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
 	AvatarBadge,
@@ -6,25 +7,64 @@ import {
 	Box,
 	Button,
 	Flex,
+	IconButton,
 	Image,
+	Popover,
+	PopoverBody,
+	PopoverContent,
+	PopoverTrigger,
 	Text,
+	useColorMode,
+	VStack,
 } from '@chakra-ui/react'
-import React from 'react'
+import { formatDistanceToNow } from 'date-fns'
+import { useState } from 'react'
 import {
 	BiBarChart,
 	BiDotsHorizontalRounded,
+	BiDotsVerticalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
 	BiPhone,
+	BiShare,
 } from 'react-icons/bi'
 import MainTooltip from '../atoms/MainTooltip'
-import { Link } from '@chakra-ui/next-js'
+import useCommon from '@/hooks/useCommon'
 
-type Props = {}
+type Props = { request: any }
 
-export default function EachRequest({}: Props) {
+export default function EachRequest({ request }: Props) {
+
+	const { colorMode } = useColorMode();
+	const { showToast } = useCommon();
+
+	const copyShareUrl = (url: string): void => {
+		if (
+			typeof window !== 'undefined' &&
+			typeof window.navigator !== 'undefined' &&
+			typeof window.location !== 'undefined'
+		) {
+			window.navigator.clipboard
+				.writeText(window.location.origin + url)
+				.then(() => {
+					showToast({
+						message: 'Link has been copied successfully',
+						status: 'info',
+					})
+				})
+				.catch((err) => {
+					showToast({
+						message: 'Failed to copy the link',
+						status: 'error',
+					})
+					console.error('Could not copy text: ', err)
+				})
+		}
+	}
+
 	return (
 		<Box
+			position={'relative'}
 			fontSize={{
 				md: 'md',
 				base: 'sm',
@@ -43,7 +83,7 @@ export default function EachRequest({}: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Avatar
-						src="https://bit.ly/prosper-baba"
+						src={request._user_ref.avatar_url}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -58,72 +98,125 @@ export default function EachRequest({}: Props) {
 						flex={1}
 					>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Text>The first name</Text>
-							<Button
-								color="text_muted"
-								p={0}
-								h="10px"
-								_hover={{
-									color: 'black',
-									_dark: {
-										color: 'white',
-									},
-								}}
-								bg="none"
-								fontSize={{
-									md: 'xl',
-									base: 'lg',
-								}}
+							<Text>
+								{request.title
+									? request.title
+									: request.seeking
+										? 'Looking for apartment'
+										: 'New apartment'}
+							</Text>
+							<Box
+								zIndex={9999}
 							>
-								<BiDotsHorizontalRounded />
-							</Button>
+								<Popover>
+									<PopoverTrigger>
+										<IconButton
+											fontSize={'24px'}
+											aria-label="Options"
+											icon={<BiDotsHorizontalRounded />}
+										/>
+									</PopoverTrigger>
+									<PopoverContent
+										color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
+										bg={colorMode === 'dark' ? '#202020' : '#fff'}
+										width={'100%'}
+										padding={2}
+									>
+										<PopoverBody p={0}>
+											<VStack align="flex-start">
+												<Button
+													variant="ghost"
+													leftIcon={<BiShare />}
+													onClick={() => copyShareUrl(`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`)}
+													width="100%"
+													display="flex"
+													alignItems="center"
+													padding={0}
+													borderRadius="sm"
+													_hover={{ color: 'brand_dark' }}
+												>
+													<Text width={'100%'} textAlign={'left'}>
+														Share
+													</Text>
+												</Button>
+											</VStack>
+										</PopoverBody>
+									</PopoverContent>
+								</Popover>
+							</Box>
 						</Flex>
 						<Text color="text_muted" fontSize={'sm'}>
-							4 hours ago
+							{formatDistanceToNow(
+								new Date(
+									request.updatedAt.seconds * 1000 +
+									request.updatedAt.nanoseconds / 1000000,
+								),
+								{ addSuffix: true },
+							)}
 						</Text>
 					</Flex>
 				</Flex>
-				<Flex flexDirection={'column'}>
-					<Flex
-						alignItems={'center'}
-						as="address"
-						color="brand"
-						fontSize={'sm'}
-					>
-						<BiLocationPlus /> Somewhere in town
+				<Link
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					style={{ textDecoration: 'none' }}
+				>
+					<Flex flexDirection={'column'}>
+						<Flex
+							alignItems={'center'}
+							as="address"
+							color="brand"
+							fontSize={'sm'}
+						>
+							<BiLocationPlus /> {request.google_location_text}
+						</Flex>
+						<Truncate text={request.description} />
 					</Flex>
-					<Text>
-						Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi,
-						distinctio, veritatis ipsa cum perferendis cumque fugit pariatur
-						nobis ab deserunt impedit optio, repellat earum similique. Obcaecati
-						pariatur exercitationem incidunt perspiciatis!{' '}
-						<Link href={'/request/seeker/1234'} as="span" color="brand">
-							Read more..
-						</Link>
-					</Text>
-				</Flex>
-				<Flex justifyContent={'space-between'}>
-					<Flex gap={DEFAULT_PADDING}>
-						<Badge colorScheme="green" rounded="md">
-							Join Paddy
-						</Badge>
-						<Badge colorScheme="orange" rounded="md">
-							Available
-						</Badge>
+				</Link>
+				<Link
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					style={{ textDecoration: 'none' }}
+				>
+					<Flex justifyContent={'space-between'}>
+						<Flex gap={DEFAULT_PADDING}>
+							<Badge
+								colorScheme="green"
+								rounded="md"
+								textTransform={'capitalize'}
+							>
+								{request._service_ref.title}
+							</Badge>
+							{request._category_ref && (
+								<Badge
+									colorScheme="orange"
+									rounded="md"
+									textTransform={'capitalize'}
+								>
+									{request._category_ref.title}
+								</Badge>
+							)}
+						</Flex>
+						{request._property_type_ref && (
+							<Badge
+								border="1px"
+								borderColor={'border-color'}
+								rounded="md"
+								_dark={{
+									borderColor: 'dark_light',
+									color: 'dark_lighter',
+								}}
+								textTransform={'capitalize'}
+							>
+								{request._property_type_ref.title}
+							</Badge>
+						)}
 					</Flex>
-					<Badge
-						border="1px"
-						borderColor={'border-color'}
-						rounded="md"
-						_dark={{
-							borderColor: 'dark_light',
-							color: 'dark_lighter',
-						}}
-					>
-						Private Room
-					</Badge>
-				</Flex>
-				<EachRequestImages />
+				</Link>
+				{request.images_urls && (
+					<EachRequestImages
+						video={request.video_url}
+						images={request.images_urls}
+					/>
+				)}
 				<Flex alignItems={'center'} justifyContent={'space-between'}>
 					<Flex gap={DEFAULT_PADDING}>
 						<MainTooltip label="Call me" placement="top">
@@ -212,9 +305,9 @@ export default function EachRequest({}: Props) {
 						alignItems={'center'}
 					>
 						<Text fontSize={'lg'} fontWeight={'bold'}>
-							₦500,000
+							₦{request.budget.toLocaleString()}
 						</Text>{' '}
-						<Text>/month</Text>
+						<Text textTransform={'capitalize'}>/{request.payment_type}</Text>
 					</Flex>
 				</Flex>
 			</Flex>
@@ -222,39 +315,133 @@ export default function EachRequest({}: Props) {
 	)
 }
 
-const EachRequestImages = () => {
+const EachRequestImages = ({
+	images,
+	video,
+}: {
+	images: string[]
+	video?: string
+}) => {
+	const [clicked, setClicked] = useState(false)
+	const [url, setUrl] = useState<string>('')
+	const [type, setType] = useState<'video' | 'img'>('img')
+
+	const handleClick = (url: string, type: 'video' | 'img') => {
+		setType(type)
+		setUrl(url)
+		setClicked(true)
+	}
+
+	const close = () => setClicked(false)
+
 	return (
-		<Flex
-			h={{
-				md: '300px',
-				base: '200px',
-			}}
-			gap={DEFAULT_PADDING}
-		>
-			<Box position={'relative'} overflow={'hidden'} rounded="md" w={'50%'}>
-				<Image
-					src={'/samples/2.png'}
-					alt="shared space"
-					position={'relative'}
-					w="full"
-				/>
-			</Box>
-			<Flex flexDirection={'column'} gap={DEFAULT_PADDING} w={'50%'} flex={1}>
-				<Box position={'relative'} overflow={'hidden'} rounded="md" bg="dark">
-					<Image
-						src={'/samples/4.png'}
-						alt="shared space"
-						position={'relative'}
-					/>
-				</Box>
-				<Box position={'relative'} overflow={'hidden'} rounded="md" bg="dark">
-					<Image
-						src={'/samples/9.png'}
-						alt="shared space"
-						position={'relative'}
-					/>
-				</Box>
+		<>
+			{clicked && (
+				<Flex
+					pos={'fixed'}
+					bg={'dark'}
+					zIndex={1000}
+					top={0}
+					right={0}
+					left={0}
+					bottom={0}
+					alignItems={'center'}
+					justifyContent={'center'}
+					cursor={'pointer'}
+					onClick={close}
+				>
+					{type === 'img' ? (
+						<Box overflow={'hidden'} rounded="md" bg="dark" w={'60%'} h={'60%'}>
+							<Image
+								src={url}
+								alt="shared space"
+								width={'full'}
+								height={'full'}
+								objectFit={'contain'}
+								objectPosition={'center'}
+							/>
+						</Box>
+					) : (
+						<Flex
+							position={'relative'}
+							zIndex={50}
+							overflow={'hidden'}
+							rounded="md"
+							bg="dark"
+							w={'60%'}
+							h={'60%'}
+							alignItems={'center'}
+							justifyContent={'center'}
+						>
+							<iframe src={url} width={'100%'} height={'100%'} />
+						</Flex>
+					)}
+				</Flex>
+			)}
+			<Flex
+				h={{
+					md: '300px',
+					base: '200px',
+				}}
+				gap={DEFAULT_PADDING}
+				overflowX={'scroll'}
+				alignItems={'center'}
+			>
+				<Flex
+					flexDirection={'column'}
+					gap={DEFAULT_PADDING}
+					w={'90%'}
+					flexWrap={'wrap'}
+					h={'full'}
+				>
+					{video && (
+						<Box
+							position={'relative'}
+							overflow={'hidden'}
+							cursor={'pointer'}
+							rounded="md"
+							onClick={() => handleClick(video, 'video')}
+						>
+							<video src={video} width={'100%'} height={'100%'} />
+						</Box>
+					)}
+					{images.map((imgUrl, i) => (
+						<Box
+							key={i}
+							position={'relative'}
+							overflow={'hidden'}
+							cursor={'pointer'}
+							rounded="md"
+							bg="dark"
+							onClick={() => handleClick(imgUrl, 'img')}
+						>
+							<Image
+								src={imgUrl}
+								alt="image of the shared space"
+								position={'relative'}
+							/>
+						</Box>
+					))}
+				</Flex>
 			</Flex>
-		</Flex>
+		</>
+	)
+}
+
+const Truncate = ({ text }: { text: string }) => {
+	const maxChars = 200
+
+	const truncatedText =
+		text.length > maxChars ? text.substring(0, maxChars) + '... ' : text
+
+	return (
+		<Text>
+			{truncatedText}
+			{text.length > maxChars && (
+				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
+					Read more..
+				</Text>
+			)}
+		</Text>
 	)
 }

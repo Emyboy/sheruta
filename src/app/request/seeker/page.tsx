@@ -2,16 +2,7 @@
 
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import {
-	Box,
-	Flex,
-	Alert,
-	AlertIcon,
-	Text,
-	Button,
-	IconButton,
-} from '@chakra-ui/react'
-import { ArrowBackIcon } from '@chakra-ui/icons'
+import { Box, Flex, Alert, AlertIcon, Text, IconButton } from '@chakra-ui/react'
 import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
@@ -19,7 +10,6 @@ import MainHeader from '@/components/layout/MainHeader'
 import CreateSeekerForm from '@/components/forms/CreateSeekerForm'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BiLeftArrow } from 'react-icons/bi'
 import { FaAngleLeft } from 'react-icons/fa'
 
 type Props = {}
@@ -52,7 +42,7 @@ export default function Page({}: Props) {
 										_active={{ bg: 'transparent' }}
 									/>
 
-									<Text fontSize="3xl" fontWeight="bold">
+									<Text fontSize="2xl" fontWeight="bold">
 										Post Your Flat Request
 									</Text>
 								</Flex>

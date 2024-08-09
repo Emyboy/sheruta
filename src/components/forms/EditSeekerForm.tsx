@@ -10,7 +10,13 @@ import {
 	Flex,
 	useColorMode,
 } from '@chakra-ui/react'
-import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
+import {
+	Timestamp,
+	DocumentReference,
+	DocumentData,
+	getDoc,
+	doc,
+} from 'firebase/firestore'
 import { v4 as generateUId } from 'uuid'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
@@ -20,58 +26,22 @@ import {
 	PaymentPlan,
 	RequestData,
 } from '@/firebase/service/request/request.types'
-import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
+import { ZodError } from 'zod'
+import { db } from '@/firebase'
 
 //get google places API KEY
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-// Define the type for the error objects
-interface ErrorObject {
-	code: string
-	expected?: string
-	received?: string
-	message: string
-	fatal?: boolean
-	path: string[]
-}
-
-type Errors = {
-	[key: string]: ErrorObject
-}
-
-const extractErrors = (errorArray: ErrorObject[]): Errors => {
-	return errorArray.reduce((acc, error) => {
-		const key = error.path[0]
-		acc[key] = {
-			code: error.code,
-			expected: error.expected,
-			received: error.received,
-			message: error.message,
-			fatal: error.fatal,
-			path: error.path,
-		}
-		return acc
-	}, {} as Errors)
-}
-
 const libraries: 'places'[] = ['places']
-
-interface Options {
+interface DocRefs {
 	_service_ref: DocumentReference | undefined
 	_location_keyword_ref: DocumentReference | undefined
 	_state_ref: DocumentReference | undefined
-}
-
-interface budgetLimits {
-	monthly: number
-	annually: number
-	quarterly: number
-	'bi-annually': number
-	weekly: number
+	_user_ref: DocumentReference | undefined
 }
 
 interface LocationObject {
@@ -93,10 +63,9 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	annually: 150000,
 }
 
-interface userInfo {
-	userRef: DocumentReference | undefined
-	state: string | undefined
-	location: string | undefined
+interface Props {
+	editFormData: Partial<RequestData> | undefined
+	requestId: string
 }
 
 // Define the initial state based on the DTO structure
@@ -116,15 +85,18 @@ const initialFormState: Partial<RequestData> = {
 	updatedAt: Timestamp.now(),
 }
 
-const CreateSeekerForm: React.FC = () => {
+// const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
+// 	const recordSnap = await getDoc(docRef)
+
+// 	return recordSnap.exists() ? recordSnap.data() : null
+// }
+
+const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	//color mode
 	const { colorMode } = useColorMode()
 
 	//get the toast plugin
 	const { showToast } = useCommon()
-
-	//state to handle form submission
-	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	//init router
 	const router = useRouter()
@@ -134,23 +106,11 @@ const CreateSeekerForm: React.FC = () => {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
-	//state to hold userInfo value
-	const [userInfo, setUserInfo] = useState<userInfo>({
-		userRef: undefined,
-		state: undefined,
-		location: undefined,
-	})
+	//state to handle form submission
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 
-	// update userRef state when auth state changes
-	useEffect(() => {
-		if (typeof flat_share_profile !== 'undefined') {
-			setUserInfo({
-				userRef: flat_share_profile?._user_ref,
-				state: flat_share_profile?.state,
-				location: flat_share_profile?.location_keyword,
-			})
-		}
-	}, [flat_share_profile])
+	//state for storing form data
+	const [formData, setFormData] = useState(initialFormState)
 
 	//get options
 	const {
@@ -158,10 +118,11 @@ const CreateSeekerForm: React.FC = () => {
 	} = useOptionsContext()
 
 	//state for storing Document Ref for category, services, states, properties
-	const [optionsRef, setOptionsRef] = useState<Options>({
+	const [docRefs, setDocRefs] = useState<DocRefs>({
 		_service_ref: undefined,
 		_state_ref: undefined,
 		_location_keyword_ref: undefined,
+		_user_ref: undefined,
 	})
 
 	//state for storing filtered locations based on the selected state
@@ -175,17 +136,41 @@ const CreateSeekerForm: React.FC = () => {
 		return location_keywords.filter((item) => item._state_id === stateId)
 	}
 
-	//state for storing form data
-	const [formData, setFormData] = useState(initialFormState)
+	useEffect(() => {
+		const fetchData = async () => {
+			if (editFormData && flat_share_profile?._user_id) {
+				setFormData((prev) => ({
+					...prev,
+					...editFormData,
+				}))
+				// Get author's Doc and check if current user is allowed to perform this action
+				if (editFormData._user_ref) {
+					const authorDoc = editFormData._user_ref as unknown as Record<
+						string,
+						any
+					>
+					if (authorDoc?._id !== flat_share_profile?._user_id) {
+						router.push('/')
+					}
+
+					//convert authorDoc | _user_ref back to a DocumentReference
+					const _user_ref = doc(db, 'users', authorDoc._id)
+					setDocRefs((prev) => ({
+						...prev,
+						_user_ref,
+					}))
+				}
+			}
+		}
+
+		fetchData()
+	}, [editFormData, flat_share_profile])
 
 	//state to store budget validation
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 
 	// const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
-
-	//state to store errors when validating with zod
-	const [formErrors, setFormErrors] = useState<Errors>({})
 
 	//state to store google places location data
 	const [autocomplete, setAutocomplete] =
@@ -244,7 +229,7 @@ const CreateSeekerForm: React.FC = () => {
 		}
 
 		const updateOptionsRef = (key: string, refValue: any) => {
-			setOptionsRef((prev) => ({
+			setDocRefs((prev) => ({
 				...prev,
 				[key]: refValue,
 			}))
@@ -252,12 +237,12 @@ const CreateSeekerForm: React.FC = () => {
 
 		switch (id) {
 			case 'budget':
-				const paymentType = formData.payment_type
+				const paymentType = formData?.payment_type
 				if (paymentType) updateBudgetInvalidState(paymentType, Number(value))
 				break
 
 			case 'payment_type':
-				const budget = formData.budget as number
+				const budget = formData?.budget as number
 				if (value) updateBudgetInvalidState(value as PaymentPlan, budget)
 				break
 
@@ -308,27 +293,28 @@ const CreateSeekerForm: React.FC = () => {
 			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
-				...optionsRef,
-				_user_ref: userInfo.userRef,
+				...docRefs,
 			}
 
 			//convert budget to number
 			finalFormData.budget = Number(finalFormData.budget)
 
+			const dataToUpdate = {
+				data: finalFormData,
+				collection_name: 'requests',
+				document_id: requestId,
+			}
+
 			//validate the zod schema with final form data
 			createSeekerRequestDTO.parse(finalFormData)
 
 			//upload data to the collection
-			const res: DocumentData = await SherutaDB.create({
-				collection_name: 'requests',
-				data: finalFormData,
-				document_id: initialFormState.uuid as string,
-			})
+			const res: DocumentData | undefined = await SherutaDB.update(dataToUpdate)
 
 			//check if the request was successful
-			if (Object.keys(res).length) {
+			if (res && Object.keys(res).length) {
 				showToast({
-					message: 'Your request has been posted successfully',
+					message: 'Your request has been updated successfully',
 					status: 'success',
 				})
 
@@ -337,13 +323,11 @@ const CreateSeekerForm: React.FC = () => {
 					router.push('/')
 				}, 1000)
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error(error)
 			if (error instanceof ZodError) {
-				setFormErrors(extractErrors(error.issues as ErrorObject[]))
 				console.error('Zod Validation Error:', error.issues)
 			} else {
-				// Handle other errors
 				showToast({
 					message: 'Error, please try again',
 					status: 'error',
@@ -356,13 +340,7 @@ const CreateSeekerForm: React.FC = () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Flex mb={4} gap={4}>
-				<FormControl
-					isRequired
-					isInvalid={
-						isBudgetInvalid || typeof formErrors?.budget !== 'undefined'
-					}
-					flex="1"
-				>
+				<FormControl isRequired isInvalid={isBudgetInvalid} flex="1">
 					<FormLabel requiredIndicator={null} htmlFor="budget">
 						Budget
 					</FormLabel>
@@ -400,6 +378,7 @@ const CreateSeekerForm: React.FC = () => {
 					</Select>
 				</FormControl>
 			</Flex>
+
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">
 					<FormLabel requiredIndicator={null} htmlFor="state">
@@ -410,7 +389,6 @@ const CreateSeekerForm: React.FC = () => {
 						onChange={handleChange}
 						placeholder="Select a state"
 						bgColor={colorMode}
-						defaultValue={userInfo?.state}
 					>
 						{states &&
 							states.map((state, index: number) => (
@@ -430,7 +408,6 @@ const CreateSeekerForm: React.FC = () => {
 						onChange={handleChange}
 						placeholder="Select a location"
 						bgColor={colorMode}
-						defaultValue={userInfo?.location}
 					>
 						{locations &&
 							locations.map((data, index: number) => (
@@ -495,7 +472,7 @@ const CreateSeekerForm: React.FC = () => {
 					<Textarea
 						id="description"
 						name="description"
-						value={formData.description}
+						defaultValue={formData?.description}
 						onChange={handleChange}
 						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
 						minLength={140}
@@ -513,10 +490,10 @@ const CreateSeekerForm: React.FC = () => {
 				size="lg"
 				width="full"
 			>
-				Submit Request
+				{'Update Request'}
 			</Button>
 		</form>
 	)
 }
 
-export default CreateSeekerForm
+export default EditSeekerForm
