@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect, useState } from 'react'
 import {
 	Button,
@@ -8,13 +10,13 @@ import {
 	Textarea,
 	FormErrorMessage,
 	Flex,
+	Text,
 	useColorMode,
 } from '@chakra-ui/react'
 import {
 	Timestamp,
 	DocumentReference,
 	DocumentData,
-	getDoc,
 	doc,
 } from 'firebase/firestore'
 import { v4 as generateUId } from 'uuid'
@@ -31,8 +33,8 @@ import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
 import { ZodError } from 'zod'
 import { db } from '@/firebase'
+import Link from 'next/link'
 
-//get google places API KEY
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
@@ -68,10 +70,9 @@ interface Props {
 	requestId: string
 }
 
-// Define the initial state based on the DTO structure
 const initialFormState: Partial<RequestData> = {
 	description: '',
-	uuid: generateUId(), //automatically generate a uuid
+	uuid: generateUId(),
 	budget: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
@@ -84,40 +85,36 @@ const initialFormState: Partial<RequestData> = {
 	createdAt: Timestamp.now(),
 	updatedAt: Timestamp.now(),
 }
-
-// const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
-// 	const recordSnap = await getDoc(docRef)
-
-// 	return recordSnap.exists() ? recordSnap.data() : null
-// }
-
+function convertPlainObjectsToTimestamps(data: any): any {
+	if (data && typeof data === 'object') {
+		if (data.seconds !== undefined && data.nanoseconds !== undefined) {
+			return new Timestamp(data.seconds, data.nanoseconds);
+		}
+		// Recursively process arrays and objects
+		for (const key in data) {
+			if (data.hasOwnProperty(key)) {
+				data[key] = convertPlainObjectsToTimestamps(data[key]);
+			}
+		}
+	}
+	return data;
+}
 const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
-	//color mode
 	const { colorMode } = useColorMode()
-
-	//get the toast plugin
 	const { showToast } = useCommon()
-
-	//init router
 	const router = useRouter()
 
-	//get user authentication state
 	const {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
-	//state to handle form submission
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-
-	//state for storing form data
 	const [formData, setFormData] = useState(initialFormState)
 
-	//get options
 	const {
 		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
 
-	//state for storing Document Ref for category, services, states, properties
 	const [docRefs, setDocRefs] = useState<DocRefs>({
 		_service_ref: undefined,
 		_state_ref: undefined,
@@ -125,13 +122,10 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 		_user_ref: undefined,
 	})
 
-	//state for storing filtered locations based on the selected state
 	const [locations, setLocations] = useState<any[]>([])
 
-	//state for storing selected location keyword
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
-	//utility function to filter locations by the selected state using the selected state _state_id
 	const getLocations = (stateId: string): string[] => {
 		return location_keywords.filter((item) => item._state_id === stateId)
 	}
@@ -139,11 +133,14 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (editFormData && flat_share_profile?._user_id) {
+
+				const convertedFormData: DocumentData = convertPlainObjectsToTimestamps(editFormData);
+
 				setFormData((prev) => ({
 					...prev,
-					...editFormData,
+					...convertedFormData
 				}))
-				// Get author's Doc and check if current user is allowed to perform this action
+
 				if (editFormData._user_ref) {
 					const authorDoc = editFormData._user_ref as unknown as Record<
 						string,
@@ -166,13 +163,8 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 		fetchData()
 	}, [editFormData, flat_share_profile])
 
-	//state to store budget validation
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
-
-	// const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
-
-	//state to store google places location data
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
@@ -185,9 +177,8 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 
 	const handlePlaceChanged = () => {
 		if (autocomplete) {
-			//get place
 			const place = autocomplete.getPlace()
-			//get location object
+
 			const locationObject: LocationObject = {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
@@ -199,11 +190,9 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 						}
 					: undefined,
 			}
-			//get locaiton text
 			const locationText = locationObject.formatted_address || ''
-			//update location text state
 			setGoogleLocationText(locationText)
-			//update form data
+
 			setFormData((prev) => ({
 				...prev,
 				google_location_object: locationObject,
@@ -212,7 +201,6 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 		}
 	}
 
-	// Function to handle form input changes
 	const handleChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -283,42 +271,35 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 		}
 	}
 
-	// Function to handle form submission
 	const handleSubmit = async (
 		e: React.FormEvent<HTMLFormElement>,
 	): Promise<any> => {
 		e.preventDefault()
 		try {
 			setIsLoading(true)
-			//create new form data object by retrieving the global form data and options ref
+
 			const finalFormData = {
 				...formData,
 				...docRefs,
+				updatedAt: Timestamp.now()
 			}
 
-			//convert budget to number
 			finalFormData.budget = Number(finalFormData.budget)
 
-			const dataToUpdate = {
+			createSeekerRequestDTO.parse(finalFormData)
+
+			const res: DocumentData | undefined = await SherutaDB.update({
 				data: finalFormData,
 				collection_name: 'requests',
 				document_id: requestId,
-			}
+			})
 
-			//validate the zod schema with final form data
-			createSeekerRequestDTO.parse(finalFormData)
-
-			//upload data to the collection
-			const res: DocumentData | undefined = await SherutaDB.update(dataToUpdate)
-
-			//check if the request was successful
 			if (res && Object.keys(res).length) {
 				showToast({
 					message: 'Your request has been updated successfully',
 					status: 'success',
 				})
 
-				//redirect users after 3secs
 				setTimeout(() => {
 					router.push('/')
 				}, 1000)
@@ -481,17 +462,29 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 				</FormControl>
 			</Flex>
 
-			{/* Submit button */}
-			<Button
-				isLoading={isLoading}
-				loadingText="Please wait..."
-				type="submit"
-				colorScheme="teal"
-				size="lg"
-				width="full"
-			>
-				{'Update Request'}
-			</Button>
+			<Flex flexDir={'column'} gap={'2'} justify={'center'}>
+				<Button
+					isLoading={isLoading}
+					loadingText="Please wait..."
+					type="submit"
+					colorScheme="teal"
+					size="lg"
+					width="full"
+				>
+					{'Update Request'}
+				</Button>
+				<Link href={'/'}>
+					<Text
+						textAlign={'center'}
+						color="gray.600"
+						fontSize="sm"
+						ml={2}
+						textDecoration={'underline'}
+					>
+						Cancel and return to requests list
+					</Text>
+				</Link>
+			</Flex>
 		</form>
 	)
 }
