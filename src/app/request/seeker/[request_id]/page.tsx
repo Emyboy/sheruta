@@ -48,6 +48,7 @@ import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { capitalizeString, timeAgo } from '@/utils/index.utils'
 import useCommon from '@/hooks/useCommon'
 import Link from 'next/link'
+import useShareSpace from '@/hooks/useShareSpace'
 
 interface PageParams {
 	[key: string]: string | undefined
@@ -63,8 +64,10 @@ const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
 
 const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 	const { colorMode } = useColorMode()
-
+	const copyShareUrl = useShareSpace()
 	const { showToast } = useCommon()
+
+	console.log(postData)
 	// Destructure
 	const {
 		updatedAt,
@@ -77,6 +80,9 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 		budget,
 		payment_type,
 		loggedInUser,
+		title,
+		id,
+		seeking,
 	} = postData || {}
 
 	// Handle redirect
@@ -89,29 +95,6 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 			setIsPostAdmin(loggedInUser?._id === userDoc?._id)
 		}
 	}, [loggedInUser, userDoc])
-
-	const generateShareUrl = (): void => {
-		if (
-			typeof window !== 'undefined' &&
-			typeof window.navigator !== 'undefined'
-		) {
-			window.navigator.clipboard
-				.writeText(window.location.href)
-				.then(() => {
-					showToast({
-						message: 'Link has been copied successfully',
-						status: 'info',
-					})
-				})
-				.catch((err) => {
-					showToast({
-						message: 'Failed to copy the link',
-						status: 'error',
-					})
-					console.error('Could not copy text: ', err)
-				})
-		}
-	}
 
 	const deletePost = async (): Promise<void> => {
 		try {
@@ -221,7 +204,17 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 													variant="ghost"
 													isLoading={isLoading}
 													leftIcon={<BiShare />}
-													onClick={() => generateShareUrl()}
+													onClick={() =>
+														copyShareUrl(
+															`/request/${seeking ? 'seeker' : 'host'}/${id}`,
+															title
+																? title
+																: seeking
+																	? 'Looking for apartment'
+																	: 'New apartment',
+															description,
+														)
+													}
 													width="100%"
 													display="flex"
 													alignItems="center"

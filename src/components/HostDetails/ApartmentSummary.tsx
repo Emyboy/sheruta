@@ -47,12 +47,13 @@ import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
 import { MdOutlineMailOutline } from 'react-icons/md'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
+import useShareSpace from '@/hooks/useShareSpace'
 
 export default function ApartmentSummary({ request }: { request: any }) {
 	const router = useRouter()
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
+	const copyShareUrl = useShareSpace()
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
@@ -62,13 +63,6 @@ export default function ApartmentSummary({ request }: { request: any }) {
 
 	if (showBookInspectionModal)
 		return <BookInspectionModal closeModal={closeModal} />
-
-	const copyLink = () => {
-		navigator.clipboard.writeText(
-			`${window.location.origin}/${request.id}/edit`,
-		)
-		showToast({ message: 'Host Link copied to clipboard', status: 'info' })
-	}
 
 	return (
 		<>
@@ -201,7 +195,17 @@ export default function ApartmentSummary({ request }: { request: any }) {
 									<Button
 										variant="ghost"
 										leftIcon={<BiShare />}
-										onClick={copyLink}
+										onClick={() =>
+											copyShareUrl(
+												`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+												request.title
+													? request.title
+													: request.seeking
+														? 'Looking for apartment'
+														: 'New apartment',
+												request.description,
+											)
+										}
 										width="100%"
 										display="flex"
 										alignItems="center"
