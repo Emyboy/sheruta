@@ -15,6 +15,7 @@ import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
 import Summary from './Summary'
 import UploadMedia from './UploadMedia'
+import { useAuthContext } from '@/context/auth.context'
 
 export type HostSpaceFormProps = {
 	next: () => void
@@ -63,6 +64,9 @@ export default function EditHostSpace({ data }: { data: string }) {
 	const request: HostRequestDataDetails = JSON.parse(data)
 	const { optionsState: options } = useOptionsContext()
 	const { appState } = useAppContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>({
 		uuid: request.uuid || '',
@@ -131,6 +135,7 @@ export default function EditHostSpace({ data }: { data: string }) {
 	}, [step])
 
 	useEffect(() => {
+		if (user?._id !== request._user_ref._id) return router.back()
 		if (appState.app_loading) return
 
 		const selectedCategory = options.categories.find(
