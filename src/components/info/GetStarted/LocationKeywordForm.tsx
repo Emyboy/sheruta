@@ -63,7 +63,7 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 	return (
 		<>
 			<Flex
-			// @ts-ignore
+				// @ts-ignore
 				onSubmit={updateLocation}
 				flexDir={'column'}
 				justifyContent={'center'}
