@@ -119,27 +119,11 @@ export default function Summary({
 				...prev,
 				[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
 			}))
-
-			localStorage.setItem(
-				'host_space_form',
-				JSON.stringify({
-					...formData,
-					[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
-				}),
-			)
 		} else {
 			setFormData((prev) => ({
 				...prev,
 				[e.target.name]: e.target.value,
 			}))
-
-			localStorage.setItem(
-				'host_space_form',
-				JSON.stringify({
-					...formData,
-					[e.target.name]: e.target.value,
-				}),
-			)
 		}
 	}
 
@@ -569,32 +553,37 @@ export default function Summary({
 							</Text>
 
 							<SimpleGrid columns={[1, 2, 3]} spacingY="8px">
-								{options.amenities.map((amenity) => (
-									<Checkbox
-										textTransform={'capitalize'}
-										color={'border_color'}
-										colorScheme="green"
-										_light={{ color: 'dark' }}
-										value={amenity.title}
-										key={amenity.id}
-										textColor={'white'}
-										defaultChecked={formData.amenities.includes(amenity.title)}
-										onChange={(e) => {
-											const { checked, value } = e.target
-											if (checked) {
-												const amenities = [...formData.amenities, value]
-												setFormData((prev) => ({ ...prev, amenities }))
-											} else {
-												const amenities = formData.amenities.filter(
-													(amenity) => amenity !== value,
-												)
-												setFormData((prev) => ({ ...prev, amenities }))
-											}
-										}}
-									>
-										{amenity.title}
-									</Checkbox>
-								))}
+								{options.amenities.map((amenity) => {
+									return (
+										<Checkbox
+											type="checkbox"
+											colorScheme="green"
+											textTransform={'capitalize'}
+											color={'border_color'}
+											_light={{ color: 'dark' }}
+											value={amenity.title}
+											key={amenity.id}
+											textColor={'white'}
+											defaultChecked={formData.amenities.includes(
+												amenity.title,
+											)}
+											onChange={(e) => {
+												const { checked, value } = e.target
+												if (checked) {
+													const amenities = [...formData.amenities, value]
+													setFormData((prev) => ({ ...prev, amenities }))
+												} else {
+													const amenities = formData.amenities.filter(
+														(amenity) => amenity !== value,
+													)
+													setFormData((prev) => ({ ...prev, amenities }))
+												}
+											}}
+										>
+											{amenity.title}
+										</Checkbox>
+									)
+								})}
 							</SimpleGrid>
 						</Flex>
 					</Flex>

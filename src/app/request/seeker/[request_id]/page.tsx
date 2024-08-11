@@ -49,6 +49,7 @@ import { capitalizeString, timeAgo } from '@/utils/index.utils'
 import useCommon from '@/hooks/useCommon'
 import Link from 'next/link'
 import useShareSpace from '@/hooks/useShareSpace'
+import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
 
 interface PageParams {
 	[key: string]: string | undefined
@@ -96,7 +97,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 		}
 	}, [loggedInUser, userDoc])
 
-	const deletePost = async (): Promise<void> => {
+	const handleDeletePost = async (): Promise<void> => {
 		try {
 			setIsLoading(true)
 
@@ -231,7 +232,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 														variant="ghost"
 														isLoading={isLoading}
 														leftIcon={<BiTrash />}
-														onClick={() => deletePost()}
+														onClick={handleDeletePost}
 														width="100%"
 														display="flex"
 														alignItems="center"
@@ -444,7 +445,9 @@ export default function Page({ params }: { params: PageParams }) {
 
 	const { authState } = useAuthContext()
 
-	const [requestData, setRequestData] = useState<Partial<DocumentData>>({})
+	const [requestData, setRequestData] = useState<SeekerRequestDataDetails>(
+		{} as SeekerRequestDataDetails,
+	)
 
 	useEffect(() => {
 		if (Object.keys(authState?.user || {}).length) {
@@ -508,26 +511,26 @@ export default function Page({ params }: { params: PageParams }) {
 						<MainLeftNav />
 					</Flex>
 					<Box p={DEFAULT_PADDING}>
-						<Box
-							marginBottom={5}
-							onClick={() => router.replace('/')}
-							cursor={'pointer'}
-						>
-							<Flex align="center" mb={4}>
-								<IconButton
-									aria-label="Search database"
-									icon={<FaAngleLeft />}
-									variant="ghost"
-									_hover={{ bg: 'transparent' }}
-									_focus={{ boxShadow: 'none' }}
-									_active={{ bg: 'transparent' }}
-								/>
-
-								<Text fontSize="2xl" fontWeight="bold">
-									Go Back Home
+						<Link href={'/'}>
+							<Flex
+								flexDirection={'row'}
+								alignItems={'center'}
+								cursor={'pointer'}
+								gap={2}
+								mb={DEFAULT_PADDING}
+							>
+								<Box>
+									<FaAngleLeft size={'24px'} />
+								</Box>
+								<Text
+									as={'h4'}
+									fontSize={{ base: 'base', md: '24px' }}
+									fontWeight={'medium'}
+								>
+									Go Home
 								</Text>
 							</Flex>
-						</Box>
+						</Link>
 						<Post
 							postData={requestData}
 							requestId={requestId}

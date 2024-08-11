@@ -1,4 +1,5 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
+import { StorageReference } from 'firebase/storage'
 import { z } from 'zod'
 
 export interface RequestData {
@@ -48,11 +49,20 @@ export type PaymentPlan =
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
+const isStorageReference = (val: any): val is StorageReference => {
+	return typeof val === 'object' && val !== null
+}
+
+const timestampSchema = z.object({
+	seconds: z.number().int().positive(),
+	nanoseconds: z.number().int().nonnegative().max(999_999_999),
+})
+
 export const createHostRequestDTO = z.object({
 	uuid: z.string(),
 
 	title: z.string().optional(),
-	description: z.string().optional(),
+	description: z.string(),
 	budget: z.number(),
 	service_charge: z.number().nullable(),
 	payment_type: z.enum([
@@ -117,8 +127,14 @@ export const createHostRequestDTO = z.object({
 		},
 	),
 
-	createdAt: z.instanceof(Timestamp),
-	updatedAt: z.instanceof(Timestamp),
+	mediaDataRefs: z.array(
+		z.custom<StorageReference>((val) => isStorageReference(val), {
+			message: 'Please store the media reference',
+		}),
+	),
+
+	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
+	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })
 
 export const createSeekerRequestDTO = z.object({
@@ -129,25 +145,25 @@ export const createSeekerRequestDTO = z.object({
 
 	google_location_object: z.record(z.string(), z.any()),
 	google_location_text: z.string(),
-	_location_keyword_ref: z.custom<DocumentReference>(
+	_location_keyword_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_user_ref: z.custom<DocumentReference>(
+	_user_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_state_ref: z.custom<DocumentReference>(
+	_state_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	_service_ref: z.custom<DocumentReference>(
+	_service_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
@@ -164,9 +180,50 @@ export const createSeekerRequestDTO = z.object({
 
 	seeking: z.boolean(), // true for seekers
 
-	createdAt: z.instanceof(Timestamp),
-	updatedAt: z.instanceof(Timestamp),
+	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
+	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })
 
 export type HostRequestData = z.infer<typeof createHostRequestDTO>
 export type SeekerRequestData = z.infer<typeof createSeekerRequestDTO>
+
+export type HostRequestDataDetails = Omit<
+	HostRequestData,
+	| '_location_keyword_ref'
+	| '_state_ref'
+	| '_service_ref'
+	| '_category_ref'
+	| '_property_type_ref'
+	| '_user_ref'
+> & {
+	id: string
+	_location_keyword_ref: { slug: string }
+	_service_ref: { title: string; about: string; slug: string }
+	_category_ref: { title: string; slug: string }
+	_property_type_ref: { title: string; slug: string }
+	_user_ref: {
+		_id: string
+		avatar_url: string
+		last_name: string
+		first_name: string
+	}
+	_state_ref: { title: string; slug: string }
+}
+
+export type SeekerRequestDataDetails = Omit<
+	SeekerRequestData,
+	'_location_keyword_ref' | '_state_ref' | '_service_ref' | '_user_ref'
+> & {
+	id: string
+	_location_keyword_ref: {}
+	_service_ref: { title: string; about: string }
+	_category_ref: { title: string }
+	_property_type_ref: { title: string }
+	_user_ref: {
+		_id: string
+		avatar_url: string
+		last_name: string
+		first_name: string
+	}
+	_state_ref: {}
+}

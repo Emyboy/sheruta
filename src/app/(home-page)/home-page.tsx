@@ -1,4 +1,5 @@
 'use client'
+
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
 import MainHeader from '@/components/layout/MainHeader'
@@ -20,6 +21,7 @@ type Props = {
 
 export default function HomePage({ locations, states, requests }: Props) {
 	const flatShareRequests = requests ? JSON.parse(requests) : []
+
 	return (
 		<>
 			<MainPageBody>

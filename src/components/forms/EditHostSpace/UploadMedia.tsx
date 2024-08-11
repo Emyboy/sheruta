@@ -1,7 +1,7 @@
 import UploadMediaIcon from '@/assets/svg/upload-media-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB from '@/firebase/service/index.firebase'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
 	createHostRequestDTO,
 	HostRequestData,
@@ -39,10 +39,12 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 	const [length, setLength] = useState(4)
 
 	const [mediaData, setMediaData] = useState<MediaType>({
-		images_urls: [],
-		video_url: null,
+		images_urls: formData.images_urls || [],
+		video_url: formData.video_url || null,
 	})
-	const [mediaDataRefs, setMediaDataRefs] = useState<StorageReference[]>([])
+	const [mediaDataRefs, setMediaDataRefs] = useState<StorageReference[]>(
+		formData.mediaDataRefs || [],
+	)
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -109,7 +111,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
-		const uuid = crypto.randomUUID()
+		const uuid = formData.uuid
 
 		if (mediaData.images_urls.length < length)
 			return toast({
@@ -125,18 +127,28 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 
 		setLoading(true)
 
+		const newImages = mediaData.images_urls.filter((img) =>
+			img.includes('data:image/'),
+		)
+		const oldImages = mediaData.images_urls.filter(
+			(img) => !img.includes('data:image/'),
+		)
+		const newVideo = mediaData.video_url?.includes('data:video/')
+			? mediaData.video_url
+			: null
+
 		try {
 			const userId = user?._id
-			const imageUploadPromises = mediaData.images_urls.map((url, i) =>
+			const imageUploadPromises = newImages.map((url, i) =>
 				SherutaDB.uploadMedia({
 					data: url,
 					storageUrl: `images/requests/${userId}/${uuid}/image_${i}`,
 				}),
 			)
 
-			const videoUploadPromise = mediaData.video_url
+			const videoUploadPromise = newVideo
 				? SherutaDB.uploadMedia({
-						data: mediaData.video_url,
+						data: newVideo,
 						storageUrl: `videos/requests/${userId}/${uuid}/video_0`,
 					})
 				: null
@@ -152,39 +164,47 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 				values.map(async (url) => await SherutaDB.getMediaUrl(url.ref)),
 			)
 
-			let video_url = null
-			if (mediaData.video_url) {
-				video_url = mediaUrls.pop() || null
+			let video_url = mediaData.video_url
+			if (newVideo) {
+				video_url = mediaUrls.pop() || mediaData.video_url
 			}
-			const images_urls = mediaUrls.filter((url) => url !== null)
+			const images_urls = [
+				...oldImages,
+				...mediaUrls.filter((url) => url !== null),
+			]
 
 			const { category, service, state, area, property, ...cleanedFormData } =
 				formData
 
 			let data: HostRequestData = {
 				...cleanedFormData,
-				mediaDataRefs,
+				mediaDataRefs: [...formData.mediaDataRefs, ...mediaDataRefs],
 				seeking: false,
 				video_url,
 				images_urls,
-				uuid,
-				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
 				_user_ref: flat_share_profile?._user_ref,
 			}
 
 			createHostRequestDTO.parse(data)
 
-			await SherutaDB.create({
-				collection_name: 'requests',
+			await SherutaDB.update({
+				collection_name: DBCollectionName.flatShareRequests,
 				data,
 				document_id: uuid,
 			})
 
-			localStorage.removeItem('host_space_form')
-			toast({ status: 'success', title: 'You have successfully added a space' })
+			toast({
+				status: 'success',
+				title: 'You have successfully updated your space',
+			})
+
 			router.push('/')
 		} catch (e) {
+			await Promise.all(
+				mediaDataRefs.map(async (ref) => await SherutaDB.deleteMedia(ref)),
+			)
+
 			if (e instanceof ZodError) {
 				e.errors.forEach((error: any) => {
 					console.log(
@@ -194,9 +214,6 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 			} else {
 				console.log('Unknown error', e)
 			}
-			await Promise.all(
-				mediaDataRefs.map(async (ref) => await SherutaDB.deleteMedia(ref)),
-			)
 			toast({ title: 'Error creating your details', status: 'error' })
 		}
 
@@ -230,7 +247,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 									cursor={'pointer'}
 									size={'32px'}
 									fill="#00bc73"
-									title="add new image"
+									title="add new images"
 								/>
 							</Box>
 						)}
@@ -262,7 +279,6 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 													(_, idx) => i !== idx,
 												)
 												setMediaData((prev) => ({ ...prev, images_urls }))
-												console.log(images_urls)
 											}}
 										>
 											<BiMinusCircle
@@ -272,7 +288,6 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 											/>
 										</Flex>
 									)}
-
 									<FormLabel
 										key={i}
 										htmlFor={i.toString()}
@@ -363,28 +378,24 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 						position={'relative'}
 					>
 						{mediaData.video_url && (
-							<Flex
-								padding={'0.5rem'}
-								alignItems={'center'}
-								justifyContent={'center'}
-								w={6}
-								h={6}
-								borderRadius={999}
-								bgColor={'brand'}
-								color={'white'}
+							<Box
 								alignSelf={'end'}
 								onClick={() =>
 									setMediaData((prev) => ({ ...prev, video_url: null }))
 								}
-								title="Remove image"
+								title="Remove video"
 								position={'absolute'}
 								cursor={'pointer'}
 								top={-2.5}
 								right={0}
 								zIndex={50}
 							>
-								-
-							</Flex>
+								<BiMinusCircle
+									cursor={'pointer'}
+									size={'32px'}
+									fill="#00bc73"
+								/>
+							</Box>
 						)}
 						{mediaData.video_url ? (
 							<video
@@ -440,6 +451,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 				<br />
 				<Button
 					disabled={loading}
+					isLoading={loading}
 					bgColor={'brand'}
 					w={'100%'}
 					type={'submit'}
