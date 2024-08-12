@@ -1,4 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
 import { Link } from '@chakra-ui/next-js'
 import {
@@ -29,7 +30,7 @@ import {
 } from 'react-icons/bi'
 import MainTooltip from '../atoms/MainTooltip'
 
-type Props = { request: any }
+type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
 	const { colorMode } = useColorMode()
@@ -76,19 +77,16 @@ export default function EachRequest({ request }: Props) {
 						flex={1}
 					>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Text>
-								<Truncate
-									text={
-										request.title
-											? request.title
-											: request.seeking
-												? 'Looking for apartment'
-												: 'New apartment'
-									}
-									max={100}
-									showReadMore={false}
-								/>
-							</Text>
+							<Truncate
+								text={
+									request.title || request.seeking
+										? 'Looking for apartment'
+										: 'New apartment'
+								}
+								max={100}
+								showReadMore={false}
+							/>
+
 							<Popover>
 								<PopoverTrigger>
 									<Button
@@ -347,7 +345,7 @@ const EachRequestMedia = ({
 	video,
 }: {
 	images: string[]
-	video?: string
+	video?: string | null
 }) => {
 	const [clicked, setClicked] = useState(false)
 	const [url, setUrl] = useState<string>('')
@@ -396,7 +394,7 @@ const EachRequestMedia = ({
 							overflow={'hidden'}
 							rounded="md"
 							bg="dark"
-							maxH={'700px'}
+							maxH={'60%'}
 							maxW={'700px'}
 							minH={'500px'}
 							minW={'280px'}

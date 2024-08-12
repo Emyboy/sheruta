@@ -118,13 +118,16 @@ export default function ProfilePictureSelector({
 			},
 			async () => {
 				getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-					setLoading(false)
 					console.log('File available at', downloadURL)
 					await UserService.update({
 						data: { avatar_url: downloadURL },
 						document_id: user?._id,
 					})
-					getAuthDependencies()
+					await getAuthDependencies()
+					setLoading(false)
+					if (done) {
+						done()
+					}
 				})
 			},
 		)

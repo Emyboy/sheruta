@@ -10,7 +10,7 @@ import {
 	Text,
 	VStack,
 } from '@chakra-ui/react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Select } from '@chakra-ui/react'
 import { industries } from '@/constants'
 import useCommon from '@/hooks/useCommon'
@@ -21,22 +21,30 @@ type Props = {
 	done?: () => void
 }
 
-export default function PersonalInfoForm({}: Props) {
+export default function PersonalInfoForm({ done }: Props) {
 	const { showToast } = useCommon()
 	const { getAuthDependencies } = useAuthContext()
 	const {
 		authState: { user, flat_share_profile },
 	} = useAuthContext()
 	const [isLoading, setIsLoading] = useState(false)
-	const [occupation, setOccupation] = useState('')
-	const [employment_status, setEmploymentStatus] = useState('')
-	const [work_industry, setWorkIndustry] = useState('')
-	const [religion, setReligion] = useState('')
-	const [tiktok, setTiktok] = useState('')
-	const [facebook, setFacebook] = useState('')
-	const [instagram, setInstagram] = useState('')
-	const [twitter, setTwitter] = useState('')
-	const [linkedin, setLinkedin] = useState('')
+	const [occupation, setOccupation] = useState(
+		flat_share_profile?.occupation || '',
+	)
+	const [employment_status, setEmploymentStatus] = useState(
+		flat_share_profile?.employment_status || '',
+	)
+	const [work_industry, setWorkIndustry] = useState(
+		flat_share_profile?.work_industry || '',
+	)
+	const [religion, setReligion] = useState(flat_share_profile?.religion || '')
+	const [tiktok, setTiktok] = useState(flat_share_profile?.tiktok || '')
+	const [facebook, setFacebook] = useState(flat_share_profile?.facebook || '')
+	const [instagram, setInstagram] = useState(
+		flat_share_profile?.instagram || '',
+	)
+	const [twitter, setTwitter] = useState(flat_share_profile?.twitter || '')
+	const [linkedin, setLinkedin] = useState(flat_share_profile?.linkedin || '')
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
@@ -56,8 +64,19 @@ export default function PersonalInfoForm({}: Props) {
 					linkedin,
 				},
 			})
-			await getAuthDependencies()
+			if (user) {
+				await FlatShareProfileService.update({
+					data: {
+						done_kyc: true,
+					},
+					document_id: user._id,
+				})
+			}
+			// await getAuthDependencies()
 			setIsLoading(false)
+			if (done) {
+				done()
+			}
 		} catch (error) {
 			showToast({
 				message: 'Error, please try again',
@@ -112,7 +131,7 @@ export default function PersonalInfoForm({}: Props) {
 								</Text>
 								<Input
 									id="occupation"
-									value={flat_share_profile?.occupation || ''}
+									value={occupation}
 									required
 									borderColor={'border_color'}
 									_dark={{ borderColor: 'dark_light' }}
@@ -134,9 +153,7 @@ export default function PersonalInfoForm({}: Props) {
 									bg="dark"
 									required
 									onChange={(e) => setEmploymentStatus(e.target.value)}
-									value={
-										flat_share_profile?.employment_status?.toLowerCase() || ''
-									}
+									value={employment_status}
 								>
 									<option value="employed">Employed</option>
 									<option value="unemployed">Unemployed</option>
@@ -161,7 +178,7 @@ export default function PersonalInfoForm({}: Props) {
 									bg="dark"
 									required
 									onChange={(e) => setWorkIndustry(e.target.value)}
-									value={flat_share_profile?.work_industry?.toLowerCase() || ''}
+									value={work_industry}
 								>
 									{industries.map((industry) => (
 										<option key={industry} value={industry.toLowerCase()}>
@@ -184,7 +201,7 @@ export default function PersonalInfoForm({}: Props) {
 									bg="dark"
 									required
 									onChange={(e) => setReligion(e.target.value)}
-									value={flat_share_profile?.religion || ''}
+									value={religion}
 								>
 									<option value="christian">Christian</option>
 									<option value="muslim">Muslim</option>
@@ -215,7 +232,7 @@ export default function PersonalInfoForm({}: Props) {
 										type="text"
 										placeholder="@johndoe"
 										onChange={(e) => setTiktok(e.target.value)}
-										value={flat_share_profile?.tiktok || ''}
+										value={tiktok}
 									/>
 								</InputGroup>
 							</Flex>
@@ -240,7 +257,7 @@ export default function PersonalInfoForm({}: Props) {
 										type="text"
 										placeholder="johndoe"
 										onChange={(e) => setFacebook(e.target.value)}
-										value={flat_share_profile?.facebook || ''}
+										value={facebook}
 									/>
 								</InputGroup>
 							</Flex>
@@ -268,7 +285,7 @@ export default function PersonalInfoForm({}: Props) {
 										placeholder="johndoe"
 										required
 										onChange={(e) => setInstagram(e.target.value)}
-										value={flat_share_profile?.instagram || ''}
+										value={instagram}
 									/>
 								</InputGroup>
 							</Flex>
@@ -293,7 +310,7 @@ export default function PersonalInfoForm({}: Props) {
 										type="text"
 										placeholder="ohndoe"
 										onChange={(e) => setTwitter(e.target.value)}
-										value={flat_share_profile?.twitter || ''}
+										value={twitter}
 									/>
 								</InputGroup>
 							</Flex>
@@ -314,7 +331,7 @@ export default function PersonalInfoForm({}: Props) {
 									_dark={{ borderColor: 'dark_light' }}
 									placeholder="Ex. https://www.linkedin.com/in/xyz"
 									onChange={(e) => setLinkedin(e.target.value)}
-									value={flat_share_profile?.linkedin || ''}
+									value={linkedin}
 								/>
 							</Flex>
 						</Flex>

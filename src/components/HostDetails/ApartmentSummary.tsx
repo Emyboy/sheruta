@@ -1,5 +1,3 @@
-'use client'
-
 import AvailableIcon from '@/assets/svg/available-icon'
 import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import Checked from '@/assets/svg/checked'
@@ -9,7 +7,10 @@ import PhysicalInspectionIcon from '@/assets/svg/physical-inspection-icon'
 import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
+import useShareSpace from '@/hooks/useShareSpace'
+import { deletePost } from '@/utils/actions'
 import {
 	Avatar,
 	AvatarBadge,
@@ -47,16 +48,57 @@ import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
 import { MdOutlineMailOutline } from 'react-icons/md'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
-import useShareSpace from '@/hooks/useShareSpace'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 
-export default function ApartmentSummary({ request }: { request: any }) {
+export default function ApartmentSummary({
+	request,
+}: {
+	request: HostRequestDataDetails
+}) {
 	const router = useRouter()
+
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
+	const { showToast } = useCommon()
 	const copyShareUrl = useShareSpace()
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
+	const [isLoading, setIsLoading] = useState(false)
+
+	const handleDeletePost = async (): Promise<void> => {
+		try {
+			setIsLoading(true)
+
+			if (authState.user?._id === request._user_ref._id && request.id) {
+				// await deletePost(request.id)
+				await SherutaDB.delete({
+					collection_name: DBCollectionName.flatShareRequests,
+					document_id: request.id,
+				})
+
+				showToast({
+					message: 'Post has been deleted successfully',
+					status: 'success',
+				})
+
+				router.push('/')
+			} else {
+				showToast({
+					message: 'You are not authorized to delete this post',
+					status: 'error',
+				})
+			}
+		} catch (err: any) {
+			console.error('Error deleting post:', err)
+			showToast({
+				message: 'Failed to delete the post',
+				status: 'error',
+			})
+		} finally {
+			setIsLoading(false)
+		}
+	}
 
 	const openModal = () => setShowBookInspectionModal(true)
 	const closeModal = () => setShowBookInspectionModal(false)
@@ -69,7 +111,6 @@ export default function ApartmentSummary({ request }: { request: any }) {
 			<Flex
 				gap={{ base: '8px', sm: 5 }}
 				alignItems={{ base: 'start', sm: 'center' }}
-				// flexDir={{ base: 'column', sm: 'row' }}
 				p={DEFAULT_PADDING}
 				bgColor={'dark'}
 				_light={{ bgColor: '#FDFDFD' }}
@@ -195,14 +236,13 @@ export default function ApartmentSummary({ request }: { request: any }) {
 									<Button
 										variant="ghost"
 										leftIcon={<BiShare />}
+										isLoading={isLoading}
 										onClick={() =>
 											copyShareUrl(
 												`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
-												request.title
-													? request.title
-													: request.seeking
-														? 'Looking for apartment'
-														: 'New apartment',
+												request.title || request.seeking
+													? 'Looking for apartment'
+													: 'New apartment',
 												request.description,
 											)
 										}
@@ -222,6 +262,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 											<Button
 												variant="ghost"
 												leftIcon={<BiPencil />}
+												isLoading={isLoading}
 												onClick={() => {
 													router.push(`${request.id}/edit`)
 												}}
@@ -239,7 +280,8 @@ export default function ApartmentSummary({ request }: { request: any }) {
 											<Button
 												variant="ghost"
 												leftIcon={<BiTrash />}
-												// onClick={() => deletePost()}
+												isLoading={isLoading}
+												onClick={handleDeletePost}
 												width="100%"
 												display="flex"
 												alignItems="center"
@@ -518,7 +560,10 @@ export default function ApartmentSummary({ request }: { request: any }) {
 								Service Charge
 							</Text>
 							<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'light'}>
-								₦{request.service_charge.toLocaleString()}
+								₦
+								{request.service_charge
+									? request.service_charge.toLocaleString()
+									: 0}
 							</Text>
 						</Flex>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -529,7 +574,10 @@ export default function ApartmentSummary({ request }: { request: any }) {
 								fontSize={{ base: 'lg', md: '22.55px' }}
 								fontWeight={'normal'}
 							>
-								₦{(request.service_charge + request.budget).toLocaleString()}
+								₦
+								{(
+									request.service_charge || 0 + request.budget
+								).toLocaleString()}
 							</Text>
 						</Flex>
 					</Flex>

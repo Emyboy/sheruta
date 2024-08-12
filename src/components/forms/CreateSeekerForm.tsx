@@ -18,7 +18,7 @@ import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
 	PaymentPlan,
-	RequestData,
+	SeekerRequestData,
 } from '@/firebase/service/request/request.types'
 import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
@@ -100,16 +100,16 @@ interface userInfo {
 }
 
 // Define the initial state based on the DTO structure
-const initialFormState: Partial<RequestData> = {
+const initialFormState: SeekerRequestData = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
 	budget: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
-	_location_keyword_ref: undefined as DocumentReference | undefined,
-	_state_ref: undefined as DocumentReference | undefined,
-	_service_ref: undefined as DocumentReference | undefined,
-	_user_ref: undefined as DocumentReference | undefined,
+	_location_keyword_ref: undefined,
+	_state_ref: undefined,
+	_service_ref: undefined,
+	_user_ref: undefined,
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
