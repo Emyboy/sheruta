@@ -16,7 +16,6 @@ type Props = {
 	params: any
 }
 
-
 export default async function Page({ params }: Props) {
 	const requestId = params.request_id
 

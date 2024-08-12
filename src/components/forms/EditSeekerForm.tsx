@@ -88,16 +88,16 @@ const initialFormState: Partial<RequestData> = {
 function convertPlainObjectsToTimestamps(data: any): any {
 	if (data && typeof data === 'object') {
 		if (data.seconds !== undefined && data.nanoseconds !== undefined) {
-			return new Timestamp(data.seconds, data.nanoseconds);
+			return new Timestamp(data.seconds, data.nanoseconds)
 		}
 		// Recursively process arrays and objects
 		for (const key in data) {
 			if (data.hasOwnProperty(key)) {
-				data[key] = convertPlainObjectsToTimestamps(data[key]);
+				data[key] = convertPlainObjectsToTimestamps(data[key])
 			}
 		}
 	}
-	return data;
+	return data
 }
 const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	const { colorMode } = useColorMode()
@@ -133,12 +133,12 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (editFormData && flat_share_profile?._user_id) {
-
-				const convertedFormData: DocumentData = convertPlainObjectsToTimestamps(editFormData);
+				const convertedFormData: DocumentData =
+					convertPlainObjectsToTimestamps(editFormData)
 
 				setFormData((prev) => ({
 					...prev,
-					...convertedFormData
+					...convertedFormData,
 				}))
 
 				if (editFormData._user_ref) {
@@ -281,7 +281,7 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 			const finalFormData = {
 				...formData,
 				...docRefs,
-				updatedAt: Timestamp.now()
+				updatedAt: Timestamp.now(),
 			}
 
 			finalFormData.budget = Number(finalFormData.budget)

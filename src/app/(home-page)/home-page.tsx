@@ -9,8 +9,24 @@ import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { StateData } from '@/firebase/service/options/states/states.types'
-import { Flex } from '@chakra-ui/react'
+import { Box, Flex, Text } from '@chakra-ui/react'
 import HomeTabs from './HomeTabs'
+import { useState, useEffect, useRef } from 'react'
+import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
+import {
+	collection,
+	DocumentData,
+	getDocs,
+	limit,
+	orderBy,
+	query,
+	startAfter,
+} from 'firebase/firestore'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { lineSpinner } from 'ldrs'
+
+lineSpinner.register()
 
 type Props = {
 	locations: string
@@ -19,7 +35,78 @@ type Props = {
 }
 
 export default function HomePage({ locations, states, requests }: Props) {
-	const flatShareRequests = requests ? JSON.parse(requests) : []
+
+	const [flatShareRequests, setFlatShareRequests] = useState<any[]>([])
+	const [isLoading, setIsLoading] = useState(false)
+	const [hasMore, setHasMore] = useState(true)
+	const [lastVisible, setLastVisible] = useState<DocumentData | null>(null) // Store the last document
+
+	const lastRequestRef = useRef<HTMLDivElement | null>(null)
+	const observer = useRef<IntersectionObserver | null>(null)
+
+	const loadMore = async () => {
+		setIsLoading(true)
+		try {
+			const requestsRef = collection(db, DBCollectionName.flatShareRequests)
+			let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
+
+			if (lastVisible) {
+				requestsQuery = query(requestsQuery, startAfter(lastVisible))
+			}
+
+			const querySnapshot = await getDocs(requestsQuery)
+
+			if (querySnapshot.empty) {
+				setHasMore(false)
+			} else {
+				const newRequests = querySnapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}))
+				setFlatShareRequests((prevRequests) => [
+					...prevRequests,
+					...newRequests,
+				])
+				setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]) // Update last visible document
+			}
+		} catch (error) {
+			console.error('Failed to load more data', error)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	useEffect(() => {
+		if (isLoading) return
+
+		if (observer.current) observer.current.disconnect()
+
+		observer.current = new IntersectionObserver((entries) => {
+			if (entries[0].isIntersecting && hasMore) {
+				loadMore()
+			}
+		})
+
+		if (lastRequestRef.current) observer.current.observe(lastRequestRef.current)
+
+		return () => {
+			if (observer.current) observer.current.disconnect()
+		}
+	}, [isLoading, hasMore, lastRequestRef])
+
+	// Assign ref to the last item
+	const setRef = (node: HTMLDivElement | null) => {
+		if (observer.current) observer.current.disconnect()
+		lastRequestRef.current = node
+		if (node) observer.current?.observe(node)
+	}
+	useEffect(() => {
+		const parsedRequests: [] = requests ? JSON.parse(requests) : []
+		if (parsedRequests.length > 0) {
+			setFlatShareRequests([...parsedRequests])
+		}
+	}, [requests])
+
 	return (
 		<>
 			<MainPageBody>
@@ -31,16 +118,40 @@ export default function HomePage({ locations, states, requests }: Props) {
 						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
 						<Flex flexDirection={'column'} gap={0}>
-							{flatShareRequests.map((request: any, index: number) => {
-								return (
-									<>
-										{index === 3 && <JoinTheCommunity key={index} />}
-										<Flex key={request.uuid} px={DEFAULT_PADDING}>
-											<EachRequest request={request} />
-										</Flex>
-									</>
-								)
-							})}
+
+							{flatShareRequests.map((request: any, index: number) => (
+								<Box
+									key={request.id}
+									ref={index === flatShareRequests.length - 1 ? setRef : null}
+									style={{ transition: 'opacity 0.3s ease-in-out' }}
+								>
+									{index === 3 && <JoinTheCommunity key={index} />}
+									<Flex px={DEFAULT_PADDING}>
+										<EachRequest request={request} />
+									</Flex>
+								</Box>
+							))}
+
+							{isLoading && flatShareRequests.length > 0 && (
+								<Flex justify="center" mt="3">
+									<l-line-spinner
+										size="40"
+										stroke="3"
+										speed="1"
+										color="#80FF00"
+									></l-line-spinner>
+								</Flex>
+							)}
+
+							{!flatShareRequests.length && isLoading && (
+								Array.from({ length: 4 }).map((_, index) => (
+									<SpaceSkeleton key={index} />
+								))
+							)}
+
+							{!hasMore && <Box mt={3}>
+								<Text align={"center"}>You have reached the end of our listing.</Text>
+							</Box>}
 						</Flex>
 					</Flex>
 					<Flex>
