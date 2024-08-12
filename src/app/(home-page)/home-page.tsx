@@ -2,6 +2,8 @@
 
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
+import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
+import Spinner from '@/components/atoms/Spinner'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainPageBody from '@/components/layout/MainPageBody'
@@ -9,11 +11,10 @@ import MainRightNav from '@/components/layout/MainRightNav'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
-import HomeTabs from './HomeTabs'
-import { useState, useEffect, useRef } from 'react'
-import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
 import {
 	collection,
 	DocumentData,
@@ -23,11 +24,8 @@ import {
 	query,
 	startAfter,
 } from 'firebase/firestore'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { lineSpinner } from 'ldrs'
-
-lineSpinner.register()
+import { useEffect, useRef, useState } from 'react'
+import HomeTabs from './HomeTabs'
 
 type Props = {
 	locations: string
@@ -37,7 +35,6 @@ type Props = {
 
 export default function HomePage({ locations, states, requests }: Props) {
 	const [flatShareRequests, setFlatShareRequests] = useState<any[]>([])
-  
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
 	const [lastVisible, setLastVisible] = useState<DocumentData | null>(null) // Store the last document
@@ -101,7 +98,6 @@ export default function HomePage({ locations, states, requests }: Props) {
 		lastRequestRef.current = node
 		if (node) observer.current?.observe(node)
 	}
-  
 	useEffect(() => {
 		const parsedRequests: [] = requests ? JSON.parse(requests) : []
 		if (parsedRequests.length > 0) {
@@ -135,12 +131,7 @@ export default function HomePage({ locations, states, requests }: Props) {
 
 							{isLoading && flatShareRequests.length > 0 && (
 								<Flex justify="center" mt="3">
-									<l-line-spinner
-										size="40"
-										stroke="3"
-										speed="1"
-										color="#80FF00"
-									></l-line-spinner>
+									<Spinner />
 								</Flex>
 							)}
 
