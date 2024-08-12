@@ -25,13 +25,8 @@ import {
 	startAfter,
 } from 'firebase/firestore'
 
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import Spinner from '@/components/atoms/Spinner'
-
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-
 
 type Props = {
 	locations: string
