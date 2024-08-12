@@ -1,4 +1,5 @@
 'use client'
+
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
 import MainHeader from '@/components/layout/MainHeader'
@@ -24,9 +25,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { lineSpinner } from 'ldrs'
-
-lineSpinner.register()
+import Spinner from '@/components/atoms/Spinner'
 
 type Props = {
 	locations: string
@@ -132,12 +131,7 @@ export default function HomePage({ locations, states, requests }: Props) {
 
 							{isLoading && flatShareRequests.length > 0 && (
 								<Flex justify="center" mt="3">
-									<l-line-spinner
-										size="40"
-										stroke="3"
-										speed="1"
-										color="#80FF00"
-									></l-line-spinner>
+									<Spinner />
 								</Flex>
 							)}
 
