@@ -41,10 +41,11 @@ export type FormDataType = {
 	_service_ref: undefined | DocumentReference
 	_category_ref: undefined | DocumentReference
 	images_urls: string[]
+	imagesRefPaths: string[]
 	video_url: string | null
+	videoRefPath: string | null
 	google_location_object: Record<string, any>
 	google_location_text: string
-	mediaDataPaths: string[]
 	createdAt: Timestamp | { seconds: number; nanoseconds: number }
 	state?: string
 	area?: string
@@ -80,7 +81,9 @@ export default function EditHostSpace({ data }: { data: string }) {
 		amenities: request.amenities || [],
 		house_rules: request.house_rules || null,
 		images_urls: request.images_urls || [],
+		imagesRefPaths: request.imagesRefPaths || [],
 		video_url: request.video_url || null,
+		videoRefPath: request.videoRefPath || null,
 		availability_status: request.availability_status || 'available',
 		_location_keyword_ref: undefined,
 		_state_ref: undefined,
@@ -89,7 +92,6 @@ export default function EditHostSpace({ data }: { data: string }) {
 		_property_type_ref: undefined,
 		google_location_object: request.google_location_object || {},
 		google_location_text: request.google_location_text || '',
-		mediaDataPaths: request.mediaDataPaths || [],
 		createdAt: request.createdAt,
 		state: '',
 		area: '',

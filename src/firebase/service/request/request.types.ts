@@ -1,5 +1,4 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
-import { StorageReference } from 'firebase/storage'
 import { z } from 'zod'
 
 export interface RequestData {
@@ -123,7 +122,8 @@ export const createHostRequestDTO = z.object({
 		},
 	),
 
-	mediaDataPaths: z.array(z.string()),
+	imagesRefPaths: z.array(z.string()),
+	videoRefPath: z.string().nullable(),
 
 	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),

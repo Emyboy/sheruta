@@ -48,11 +48,6 @@ export type FormDataType = {
 	property?: string
 }
 
-export type MediaType = {
-	images_urls: string[]
-	video_url: string | null
-}
-
 export default function HostSpace() {
 	const router = useRouter()
 	const { appState } = useAppContext()

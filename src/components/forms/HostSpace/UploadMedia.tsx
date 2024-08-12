@@ -25,9 +25,12 @@ import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { ZodError } from 'zod'
-import { HostSpaceFormProps, MediaType } from '.'
+import { HostSpaceFormProps } from '.'
 
-export default function UploadMedia({ formData }: HostSpaceFormProps) {
+export default function UploadMedia({
+	formData,
+	setFormData,
+}: HostSpaceFormProps) {
 	const toast = useToast()
 	const {
 		authState: { user, flat_share_profile },
@@ -37,11 +40,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 	const [loading, setLoading] = useState(false)
 	const [length, setLength] = useState(4)
 
-	const [mediaData, setMediaData] = useState<MediaType>({
-		images_urls: [],
-		video_url: null,
-	})
-	const [mediaDataPaths, setMediaDataPaths] = useState<string[]>([])
+	const [mediaRefPaths, setMediaRefPaths] = useState<string[]>([])
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -61,9 +60,9 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 		const reader = new FileReader()
 		reader.readAsDataURL(selectedFile)
 		reader.onload = () => {
-			const additionalImgs = [...mediaData.images_urls]
+			const additionalImgs = [...formData.images_urls]
 			additionalImgs[i] = reader.result as string
-			setMediaData((prev) => ({
+			setFormData((prev) => ({
 				...prev,
 				images_urls: additionalImgs,
 			}))
@@ -92,7 +91,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 		const reader = new FileReader()
 		reader.readAsDataURL(selectedFile)
 		reader.onload = () => {
-			setMediaData((prev) => ({
+			setFormData((prev) => ({
 				...prev,
 				video_url: reader.result as string,
 			}))
@@ -110,7 +109,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 		e.preventDefault()
 		const uuid = crypto.randomUUID()
 
-		if (mediaData.images_urls.length < length)
+		if (formData.images_urls.length < length)
 			return toast({
 				title: `Upload at least ${length} images`,
 				status: 'error',
@@ -126,16 +125,16 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 
 		try {
 			const userId = user?._id
-			const imageUploadPromises = mediaData.images_urls.map((url, i) =>
+			const imageUploadPromises = formData.images_urls.map((url, i) =>
 				SherutaDB.uploadMedia({
 					data: url,
 					storageUrl: `images/requests/${userId}/${uuid}/image_${i}`,
 				}),
 			)
 
-			const videoUploadPromise = mediaData.video_url
+			const videoUploadPromise = formData.video_url
 				? SherutaDB.uploadMedia({
-						data: mediaData.video_url,
+						data: formData.video_url,
 						storageUrl: `videos/requests/${userId}/${uuid}/video_0`,
 					})
 				: null
@@ -145,17 +144,20 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 				: imageUploadPromises
 
 			const values = await Promise.all(promises)
-			const newMediaDataPaths = values.map((value) => value.metadata.fullPath)
-			setMediaDataPaths(newMediaDataPaths)
+			const newMediaRefPaths = values.map((value) => value.metadata.fullPath)
+			setMediaRefPaths(newMediaRefPaths)
 
 			const mediaUrls = await Promise.all(
-				newMediaDataPaths.map(async (url) => await SherutaDB.getMediaUrl(url)),
+				newMediaRefPaths.map(async (url) => SherutaDB.getMediaUrl(url)),
 			)
 
 			let video_url = null
-			if (mediaData.video_url) {
+			let videoRefPath = null
+			if (formData.video_url) {
 				video_url = mediaUrls.pop() || null
+				videoRefPath = newMediaRefPaths.pop() || null
 			}
+
 			const images_urls = mediaUrls.filter((url) => url !== null)
 
 			const { category, service, state, area, property, ...cleanedFormData } =
@@ -163,7 +165,8 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 
 			let data: HostRequestData = {
 				...cleanedFormData,
-				mediaDataPaths: newMediaDataPaths,
+				imagesRefPaths: newMediaRefPaths,
+				videoRefPath,
 				seeking: false,
 				video_url,
 				images_urls,
@@ -185,9 +188,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 			toast({ status: 'success', title: 'You have successfully added a space' })
 			router.push('/')
 		} catch (e) {
-			await Promise.all(
-				mediaDataPaths.map(async (url) => SherutaDB.deleteMedia(url)),
-			)
+			await Promise.all(mediaRefPaths.map((url) => SherutaDB.deleteMedia(url)))
 			if (e instanceof ZodError) {
 				e.errors.forEach((error: any) => {
 					console.log(
@@ -220,7 +221,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 						justifyContent={'center'}
 						gap={DEFAULT_PADDING}
 					>
-						{mediaData.images_urls.length >= 4 && length < 8 && (
+						{formData.images_urls.length >= 4 && length < 8 && (
 							<Box
 								alignSelf={'end'}
 								onClick={() => setLength((prev) => prev + 1)}
@@ -261,10 +262,10 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 											p={0}
 											onClick={() => {
 												setLength((prev) => prev - 1)
-												const images_urls = mediaData.images_urls.filter(
+												const images_urls = formData.images_urls.filter(
 													(_, idx) => i !== idx,
 												)
-												setMediaData((prev) => ({ ...prev, images_urls }))
+												setFormData((prev) => ({ ...prev, images_urls }))
 												console.log(images_urls)
 											}}
 										>
@@ -291,9 +292,9 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 											opacity: 25,
 										}}
 									>
-										{mediaData.images_urls[i] ? (
+										{formData.images_urls[i] ? (
 											<Image
-												src={mediaData.images_urls[i]}
+												src={formData.images_urls[i]}
 												alt="additional Image"
 												objectFit="fill"
 												objectPosition="center"
@@ -367,11 +368,11 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 						}}
 						position={'relative'}
 					>
-						{mediaData.video_url && (
+						{formData.video_url && (
 							<Box
 								alignSelf={'end'}
 								onClick={() =>
-									setMediaData((prev) => ({ ...prev, video_url: null }))
+									setFormData((prev) => ({ ...prev, video_url: null }))
 								}
 								title="Remove video"
 								position={'absolute'}
@@ -387,9 +388,9 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 								/>
 							</Box>
 						)}
-						{mediaData.video_url ? (
+						{formData.video_url ? (
 							<video
-								src={mediaData.video_url}
+								src={formData.video_url}
 								className="w-full h-full"
 								width={'100%'}
 								height={'100%'}
