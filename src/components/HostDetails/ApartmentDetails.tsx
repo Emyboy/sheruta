@@ -54,7 +54,7 @@ export default function ApartmentDetails({ request }: { request: string }) {
 								fontWeight="normal"
 								textAlign="center"
 								fontSize={{ base: '12px', md: '16px' }}
-								whiteSpace="nowrap" // Added to prevent text wrapping
+								whiteSpace="nowrap"
 							>
 								{item}
 							</Text>
