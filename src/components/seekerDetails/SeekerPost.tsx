@@ -37,6 +37,7 @@ import useCommon from '@/hooks/useCommon'
 import Link from 'next/link'
 import UserCard from './UserCard'
 import { useAuthContext } from '@/context/auth.context'
+import useShareSpace from '@/hooks/useShareSpace'
 
 interface Props {
 	[key: string]: any
@@ -46,6 +47,7 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
+	const copyShareUrl = useShareSpace()
 	const router = useRouter()
 
 	const {
@@ -75,20 +77,16 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 
 	const handleShare = async () => {
 		try {
-			const shareUrl = window.location.href
-
-			if (navigator.share) {
-				await navigator.share({
-					title: 'Check out this apartment!',
-					url: shareUrl,
-				})
-				console.log('Share successful')
-			} else {
-				await navigator.clipboard.writeText(shareUrl)
-				showToast({
-					message: 'Link has been copied successfully',
-					status: 'info',
-				})
+			if (
+				typeof window !== 'undefined' &&
+				typeof window.location !== 'undefined'
+			) {
+				const shareUrl = window.location.href
+				await copyShareUrl(
+					shareUrl,
+					'Hey! Check out this apartment from Sheruta',
+					'Come, join me and review this apartment from Sheruta',
+				)
 			}
 		} catch (error) {
 			console.error('Error sharing:', error)
