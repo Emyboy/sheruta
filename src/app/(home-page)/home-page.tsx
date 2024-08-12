@@ -35,7 +35,6 @@ type Props = {
 }
 
 export default function HomePage({ locations, states, requests }: Props) {
-
 	const [flatShareRequests, setFlatShareRequests] = useState<any[]>([])
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
@@ -118,7 +117,6 @@ export default function HomePage({ locations, states, requests }: Props) {
 						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
 						<Flex flexDirection={'column'} gap={0}>
-
 							{flatShareRequests.map((request: any, index: number) => (
 								<Box
 									key={request.id}
@@ -143,15 +141,19 @@ export default function HomePage({ locations, states, requests }: Props) {
 								</Flex>
 							)}
 
-							{!flatShareRequests.length && isLoading && (
+							{!flatShareRequests.length &&
+								isLoading &&
 								Array.from({ length: 4 }).map((_, index) => (
 									<SpaceSkeleton key={index} />
-								))
-							)}
+								))}
 
-							{!hasMore && <Box mt={3}>
-								<Text align={"center"}>You have reached the end of our listing.</Text>
-							</Box>}
+							{!hasMore && (
+								<Box mt={3}>
+									<Text align={'center'}>
+										You have reached the end of our listing.
+									</Text>
+								</Box>
+							)}
 						</Flex>
 					</Flex>
 					<Flex>

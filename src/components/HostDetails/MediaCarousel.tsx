@@ -27,9 +27,8 @@ export default function MediaCarousel({
 			_light={{ bgColor: 'white' }}
 			borderRadius={'16px'}
 			overflow={'hidden'}
-			maxH={'725px'}
 			w={'100%'}
-			h={{ base: '500px', md: '100%' }}
+			h={'100%'}
 		>
 			<Box
 				pos={'absolute'}
@@ -69,12 +68,19 @@ export default function MediaCarousel({
 					<Flex
 						bgColor="dark"
 						_light={{ bgColor: 'white' }}
-						width={'100%'}
-						height={'100%'}
+						w={'100%'}
+						h={'100%'}
 						alignItems={'center'}
 						justifyContent={'center'}
 					>
-						<iframe src={selectedMedia} width={'100%'} height={'100%'} />
+						<iframe
+							src={selectedMedia}
+							// style={{
+							// 	minHeight: '400px',
+							// }}
+							width={'100%'}
+							height={'100%'}
+						/>
 					</Flex>
 				)}
 			</Box>
@@ -105,7 +111,7 @@ export default function MediaCarousel({
 							setType('video')
 						}}
 					>
-						<Box pos="absolute" zIndex={50}>
+						<Box pos="absolute" zIndex={0}>
 							<BiPlayCircle size={'30px'} fill="#00bc73" cursor={'pointer'} />
 						</Box>
 						<video src={video} width={'100%'} height={'100%'} />
