@@ -1,68 +1,99 @@
+'use client'
+
 import SherutaDB from '@/firebase/service/index.firebase'
-import { DocumentData } from 'firebase/firestore'
-import MainContainer from '@/components/layout/MainContainer'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+import {
+	Box,
+	Flex,
+	Text,
+	Button,
+	IconButton,
+	Badge,
+	Heading,
+	HStack,
+	Tooltip,
+	Popover,
+	PopoverTrigger,
+	PopoverContent,
+	PopoverBody,
+	VStack,
+	useColorMode,
+	Avatar,
+} from '@chakra-ui/react'
 import React from 'react'
-import MainLeftNav from '@/components/layout/MainLeftNav'
-import { DEFAULT_PADDING } from '@/configs/theme'
-import MainHeader from '@/components/layout/MainHeader'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { useRouter } from 'next/navigation'
+import {
+	BiBookmark,
+	BiDotsHorizontalRounded,
+	BiMap,
+	BiMessageRoundedDetail,
+	BiPencil,
+	BiPhone,
+	BiShare,
+	BiTrash,
+} from 'react-icons/bi'
 import { capitalizeString, timeAgo } from '@/utils/index.utils'
 import useCommon from '@/hooks/useCommon'
 import Link from 'next/link'
+import UserCard from './UserCard'
+import { useAuthContext } from '@/context/auth.context'
 import useShareSpace from '@/hooks/useShareSpace'
-import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
-import SeekerPost from '@/components/seekerDetails/SeekerPost'
-import SuperJSON from 'superjson'
 
-interface PageParams {
-	[key: string]: string | undefined
-}
 interface Props {
 	[key: string]: any
 }
 
-const getDataFromRef = async (docRef: DocumentReference): Promise<any> => {
-	const recordSnap = await getDoc(docRef)
-	return recordSnap.exists() ? recordSnap.data() : null
-}
-
-const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
+const SeekerPost = ({ postData, requestId }: Props) => {
 	const { colorMode } = useColorMode()
-	const copyShareUrl = useShareSpace()
 	const { showToast } = useCommon()
+	const { authState } = useAuthContext()
+	const copyShareUrl = useShareSpace()
+	const router = useRouter()
 
-	console.log(postData)
-	// Destructure
 	const {
 		updatedAt,
 		description,
 		google_location_text,
 		_user_ref: userDoc,
-		userInfoDoc,
 		_service_ref: serviceTypeDoc,
 		_location_keyword_ref: locationKeywordDoc,
 		budget,
 		payment_type,
-		loggedInUser,
-		title,
-		id,
-		seeking,
+		userInfoDoc,
 	} = postData || {}
 
-	// Handle redirect
-	const router = useRouter()
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)
 
 	useEffect(() => {
-		if (typeof loggedInUser !== 'undefined' && typeof userDoc !== 'undefined') {
-			setIsPostAdmin(loggedInUser?._id === userDoc?._id)
+		if (
+			typeof authState.user !== 'undefined' &&
+			typeof userDoc !== 'undefined'
+		) {
+			setIsPostAdmin(authState.user?._id === userDoc?._id)
 		}
-	}, [loggedInUser, userDoc])
+	}, [userDoc, authState])
 
-	const handleDeletePost = async (): Promise<void> => {
+	const handleShare = async () => {
+		try {
+			if (
+				typeof window !== 'undefined' &&
+				typeof window.location !== 'undefined'
+			) {
+				const shareUrl = window.location.href
+				await copyShareUrl(
+					shareUrl,
+					'Hey! Check out this apartment from Sheruta',
+					'Come, join me and review this apartment from Sheruta',
+				)
+			}
+		} catch (error) {
+			console.error('Error sharing:', error)
+		}
+	}
+
+	const deletePost = async (): Promise<void> => {
 		try {
 			setIsLoading(true)
 
@@ -131,6 +162,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 								<Popover>
 									<PopoverTrigger>
 										<IconButton
+											colorScheme={colorMode === 'dark' ? '' : 'gray'}
 											fontSize={'24px'}
 											aria-label="Options"
 											icon={<BiDotsHorizontalRounded />}
@@ -147,7 +179,7 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 												{isPostAdmin && (
 													<Link
 														href={`${requestId}/edit`}
-														style={{ textDecoration: 'none' }}
+														style={{ textDecoration: 'none', width: '100%' }}
 													>
 														<Button
 															variant="ghost"
@@ -166,21 +198,12 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 														</Button>
 													</Link>
 												)}
+
 												<Button
 													variant="ghost"
 													isLoading={isLoading}
 													leftIcon={<BiShare />}
-													onClick={() =>
-														copyShareUrl(
-															`/request/${seeking ? 'seeker' : 'host'}/${id}`,
-															title
-																? title
-																: seeking
-																	? 'Looking for apartment'
-																	: 'New apartment',
-															description,
-														)
-													}
+													onClick={handleShare}
 													width="100%"
 													display="flex"
 													alignItems="center"
@@ -192,12 +215,13 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 														Share
 													</Text>
 												</Button>
+
 												{isPostAdmin && (
 													<Button
 														variant="ghost"
 														isLoading={isLoading}
 														leftIcon={<BiTrash />}
-														onClick={handleDeletePost}
+														onClick={() => deletePost()}
 														width="100%"
 														display="flex"
 														alignItems="center"
@@ -216,8 +240,9 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 									</PopoverContent>
 								</Popover>
 								<IconButton
-									fontSize={'24px'}
-									aria-label="se"
+									colorScheme={colorMode === 'dark' ? '' : 'gray'}
+									fontSize="24px"
+									aria-label="Bookmark"
 									icon={<BiBookmark />}
 								/>
 							</HStack>
@@ -336,101 +361,4 @@ const Post = ({ postData, isLoading, setIsLoading, requestId }: Props) => {
 	)
 }
 
-
-export default function Page({ params }: { params: PageParams }) {
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-
-	const router = useRouter()
-
-	const { authState } = useAuthContext()
-
-	const [requestData, setRequestData] = useState<SeekerRequestDataDetails>(
-		{} as SeekerRequestDataDetails,
-	)
-
-	useEffect(() => {
-		if (Object.keys(authState?.user || {}).length) {
-			setRequestData((prev) => ({
-				...prev,
-				loggedInUser: authState.user,
-			}))
-		}
-	}, [authState.user])
-
-	const requestId = params?.request_id
-
-	const getRequest = async (): Promise<any> => {
-		try {
-			setIsLoading(true)
-
-			const result: DocumentData | null = await SherutaDB.get({
-				collection_name: 'requests',
-				document_id: requestId as string,
-			})
-
-			if (
-				result &&
-				Object.keys(result).length > 0 &&
-				result._user_ref &&
-				result._service_ref &&
-				result._location_keyword_ref
-			) {
-				let userInfoDoc: DocumentData | undefined = undefine
-	let requestData: string | undefined = await getRequestData(requestId)
-
-
-	if (requestData) {
-		requestData = SuperJSON.parse(requestData)
-	}
-
-	return (
-		<Flex justifyContent={'center'}>
-			<MainContainer>
-				<ThreeColumnLayout header={<MainHeader />}>
-					<Flex flexDirection={'column'} w="full">
-						<MainLeftNav />
-					</Flex>
-					<Box p={DEFAULT_PADDING}>
-					
-						<SeekerPost postData={requestData} requestId={requestId} />
-
-					</Box>
-				</ThreeColumnLayout>
-			</MainContainer>
-		</Flex>
-	)
-}
-
-async function getRequestData(requestId: string): Promise<string | undefined> {
-	try {
-		const result: DocumentData | null = await SherutaDB.get({
-			collection_name: 'requests',
-			document_id: requestId,
-		})
-
-		if (
-			result &&
-			Object.keys(result).length > 0 &&
-			result._user_ref &&
-			result._service_ref &&
-			result._location_keyword_ref
-		) {
-			let userInfoDoc: DocumentData | undefined = undefined
-
-			if (result?._user_ref?._id) {
-				userInfoDoc = await UserInfoService.get(result._user_ref._id)
-			}
-
-			return SuperJSON.stringify({
-				...result,
-				userInfoDoc,
-			})
-		}
-
-		return undefined
-	} catch (error: any) {
-		console.error('Error fetching request data:', error)
-	}
-
-	return undefined
-}
+export default SeekerPost

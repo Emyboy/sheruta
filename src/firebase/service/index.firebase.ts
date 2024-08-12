@@ -7,6 +7,7 @@ import {
 	getDocs,
 	limit,
 	orderBy,
+	query,
 	serverTimestamp,
 	setDoc,
 	updateDoc,
@@ -67,12 +68,13 @@ export default class SherutaDB {
 		_limit: number
 	}): Promise<any> {
 		const collectionRef = collection(db, collection_name)
-		const querySnapshot = await getDocs(
-			collectionRef,
-			// @ts-ignore
-			orderBy('updatedAt', 'desc'),
-			limit(_limit),
-		)
+
+		// Chain the query constraints with the `query` function
+		const q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
+
+		// console.log(q)
+
+		const querySnapshot = await getDocs(q)
 
 		const documents = querySnapshot.docs.map(async (doc) => {
 			const docData = { ...doc.data() }
