@@ -66,5 +66,5 @@ export const flatShareProfileDefaults = {
 	credits: 0,
 	habits: [],
 	interests: [],
-	done_kyc: false
+	done_kyc: false,
 }
