@@ -49,10 +49,6 @@ export type PaymentPlan =
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
-const isStorageReference = (val: any): val is StorageReference => {
-	return typeof val === 'object' && val !== null
-}
-
 const timestampSchema = z.object({
 	seconds: z.number().int().positive(),
 	nanoseconds: z.number().int().nonnegative().max(999_999_999),
@@ -127,11 +123,7 @@ export const createHostRequestDTO = z.object({
 		},
 	),
 
-	mediaDataRefs: z.array(
-		z.custom<StorageReference>((val) => isStorageReference(val), {
-			message: 'Please store the media reference',
-		}),
-	),
+	mediaDataPaths: z.array(z.string()),
 
 	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),

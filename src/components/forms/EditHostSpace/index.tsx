@@ -1,6 +1,7 @@
 'use client'
 
 import { useAppContext } from '@/context/app.context'
+import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import {
 	AvailabilityStatus,
@@ -9,13 +10,11 @@ import {
 } from '@/firebase/service/request/request.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { DocumentReference, Timestamp } from '@firebase/firestore'
-import { StorageReference } from 'firebase/storage'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
 import Summary from './Summary'
 import UploadMedia from './UploadMedia'
-import { useAuthContext } from '@/context/auth.context'
 
 export type HostSpaceFormProps = {
 	next: () => void
@@ -45,7 +44,7 @@ export type FormDataType = {
 	video_url: string | null
 	google_location_object: Record<string, any>
 	google_location_text: string
-	mediaDataRefs: StorageReference[]
+	mediaDataPaths: string[]
 	createdAt: Timestamp | { seconds: number; nanoseconds: number }
 	state?: string
 	area?: string
@@ -90,7 +89,7 @@ export default function EditHostSpace({ data }: { data: string }) {
 		_property_type_ref: undefined,
 		google_location_object: request.google_location_object || {},
 		google_location_text: request.google_location_text || '',
-		mediaDataRefs: request.mediaDataRefs || [],
+		mediaDataPaths: request.mediaDataPaths || [],
 		createdAt: request.createdAt,
 		state: '',
 		area: '',

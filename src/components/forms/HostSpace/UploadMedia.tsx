@@ -20,7 +20,6 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { Timestamp } from 'firebase/firestore'
-import { StorageReference } from 'firebase/storage'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
@@ -42,7 +41,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 		images_urls: [],
 		video_url: null,
 	})
-	const [mediaDataRefs, setMediaDataRefs] = useState<StorageReference[]>([])
+	const [mediaDataPaths, setMediaDataPaths] = useState<string[]>([])
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -146,10 +145,11 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 				: imageUploadPromises
 
 			const values = await Promise.all(promises)
-			setMediaDataRefs(values.map((value) => value.ref))
+			const newMediaDataPaths = values.map((value) => value.metadata.fullPath)
+			setMediaDataPaths(newMediaDataPaths)
 
 			const mediaUrls = await Promise.all(
-				values.map(async (url) => await SherutaDB.getMediaUrl(url.ref)),
+				newMediaDataPaths.map(async (url) => await SherutaDB.getMediaUrl(url)),
 			)
 
 			let video_url = null
@@ -163,7 +163,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 
 			let data: HostRequestData = {
 				...cleanedFormData,
-				mediaDataRefs,
+				mediaDataPaths: newMediaDataPaths,
 				seeking: false,
 				video_url,
 				images_urls,
@@ -185,6 +185,9 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 			toast({ status: 'success', title: 'You have successfully added a space' })
 			router.push('/')
 		} catch (e) {
+			await Promise.all(
+				mediaDataPaths.map(async (url) => SherutaDB.deleteMedia(url)),
+			)
 			if (e instanceof ZodError) {
 				e.errors.forEach((error: any) => {
 					console.log(
@@ -194,9 +197,6 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 			} else {
 				console.log('Unknown error', e)
 			}
-			await Promise.all(
-				mediaDataRefs.map(async (ref) => await SherutaDB.deleteMedia(ref)),
-			)
 			toast({ title: 'Error creating your details', status: 'error' })
 		}
 
@@ -234,15 +234,18 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 								/>
 							</Box>
 						)}
-						<Grid templateColumns={'repeat(2, 1fr)'} gap={6}>
+						<Grid
+							templateColumns={{ base: 'repeat(1,fr)', sm: 'repeat(2, 1fr)' }}
+							gap={6}
+						>
 							{Array.from({
 								length,
 							}).map((_, i) => (
 								<GridItem
 									w={'100%'}
 									position={'relative'}
-									maxH={240}
-									maxW={240}
+									maxH={250}
+									maxW={250}
 									borderRadius={'8px'}
 									key={`media-${i}`}
 								>
@@ -276,7 +279,8 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 									<FormLabel
 										key={i}
 										htmlFor={i.toString()}
-										height={240}
+										height={250}
+										width={250}
 										display={'flex'}
 										transition={'all'}
 										transitionDuration={'300ms'}
@@ -293,8 +297,8 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 												alt="additional Image"
 												objectFit="fill"
 												objectPosition="center"
-												width={240}
-												height={240}
+												width={250}
+												height={250}
 												style={{ borderRadius: '8px' }}
 											/>
 										) : (
@@ -309,6 +313,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 												border={'1px'}
 												borderStyle={'dashed'}
 												backgroundColor={'gray'}
+												_light={{ bgColor: 'lightgray' }}
 												padding={'8px'}
 												position={'relative'}
 											>
@@ -348,7 +353,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 
 					<FormLabel
 						htmlFor={'video'}
-						height={240}
+						height={250}
 						paddingInline={7}
 						w={'100%'}
 						borderRadius={'8px'}
@@ -363,28 +368,24 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 						position={'relative'}
 					>
 						{mediaData.video_url && (
-							<Flex
-								padding={'0.5rem'}
-								alignItems={'center'}
-								justifyContent={'center'}
-								w={6}
-								h={6}
-								borderRadius={999}
-								bgColor={'brand'}
-								color={'white'}
+							<Box
 								alignSelf={'end'}
 								onClick={() =>
 									setMediaData((prev) => ({ ...prev, video_url: null }))
 								}
-								title="Remove image"
+								title="Remove video"
 								position={'absolute'}
 								cursor={'pointer'}
 								top={-2.5}
 								right={0}
 								zIndex={50}
 							>
-								-
-							</Flex>
+								<BiMinusCircle
+									cursor={'pointer'}
+									size={'32px'}
+									fill="#00bc73"
+								/>
+							</Box>
 						)}
 						{mediaData.video_url ? (
 							<video
@@ -405,6 +406,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 								border={'1px'}
 								borderStyle={'dashed'}
 								backgroundColor={'gray'}
+								_light={{ bgColor: 'lightgray' }}
 								padding={'8px'}
 							>
 								<Flex
@@ -440,6 +442,7 @@ export default function UploadMedia({ formData }: HostSpaceFormProps) {
 				<br />
 				<Button
 					disabled={loading}
+					isLoading={loading}
 					bgColor={'brand'}
 					w={'100%'}
 					type={'submit'}

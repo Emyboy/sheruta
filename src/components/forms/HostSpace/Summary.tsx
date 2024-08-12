@@ -636,7 +636,11 @@ export default function Summary({
 										pos={'absolute'}
 										top={'-8px'}
 										right={'-8px'}
-										bgColor={'dark'}
+										_dark={{
+											bgColor: 'dark',
+										}}
+										bgColor="white"
+										rounded={'full'}
 									>
 										<BiMinusCircle
 											onClick={() => removeHouseRule(i)}

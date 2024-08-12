@@ -158,9 +158,12 @@ export default class SherutaDB {
 		return snapshot
 	}
 
-	static async getMediaUrl(ref: StorageReference) {
+	static async getMediaUrl(url: string) {
+		const storage = getStorage()
+		const storageRef = ref(storage, url)
+
 		try {
-			const url = await getDownloadURL(ref)
+			const url = await getDownloadURL(storageRef)
 
 			return url
 		} catch (error) {
@@ -169,9 +172,12 @@ export default class SherutaDB {
 		}
 	}
 
-	static async deleteMedia(ref: StorageReference) {
+	static async deleteMedia(url: string) {
+		const storage = getStorage()
+		const storageRef = ref(storage, url)
+
 		try {
-			await deleteObject(ref)
+			await deleteObject(storageRef)
 			return Promise.resolve(true)
 		} catch (error) {
 			return Promise.reject(error)
