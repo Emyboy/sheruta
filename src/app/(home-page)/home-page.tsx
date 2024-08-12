@@ -2,6 +2,8 @@
 
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
+import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
+import Spinner from '@/components/atoms/Spinner'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainPageBody from '@/components/layout/MainPageBody'
@@ -9,11 +11,10 @@ import MainRightNav from '@/components/layout/MainRightNav'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
-import HomeTabs from './HomeTabs'
-import { useState, useEffect, useRef } from 'react'
-import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
 import {
 	collection,
 	DocumentData,
@@ -23,9 +24,14 @@ import {
 	query,
 	startAfter,
 } from 'firebase/firestore'
+
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import Spinner from '@/components/atoms/Spinner'
+
+import { useEffect, useRef, useState } from 'react'
+import HomeTabs from './HomeTabs'
+
 
 type Props = {
 	locations: string

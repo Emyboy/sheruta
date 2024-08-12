@@ -4,6 +4,7 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { FaAngleLeft } from 'react-icons/fa'
 
 export default async function page({
@@ -20,6 +21,10 @@ export default async function page({
 		document_id: request_id,
 		collection_name: DBCollectionName.flatShareRequests,
 	})
+
+	// TODO: set an error page to redirect them home
+
+	if (!request) redirect('/')
 
 	return (
 		<>
