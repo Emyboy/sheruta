@@ -4,6 +4,7 @@ import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { CACHE_TTL } from '@/constants'
 
 export const revalidate = CACHE_TTL?.SHORT
+
 export default async function page() {
 	let locations = await SherutaDB.getAll({
 		collection_name: DBCollectionName.locationKeyWords,
@@ -12,7 +13,7 @@ export default async function page() {
 
 	let requests = await SherutaDB.getAll({
 		collection_name: DBCollectionName.flatShareRequests,
-		_limit: 10,
+		_limit: 30,
 	})
 
 	return (

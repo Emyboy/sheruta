@@ -91,6 +91,7 @@ const EachTab = ({ label, slug }: { label: string; slug: string }) => {
 				}}
 				p={DEFAULT_PADDING}
 				w="100%"
+				style={{ textWrap: 'nowrap' }}
 			>
 				{label}
 				{/* <Text>{label}</Text> */}
