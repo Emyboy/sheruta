@@ -7,6 +7,7 @@ const FlatShareProfileDataSchema = z.object({
 	_user_id: z.string(),
 	_user_ref: z.any(),
 	seeking: z.boolean().nullable(),
+	done_kyc: z.boolean(),
 	budget: z.number().nullable(),
 	credits: z.number(),
 	occupation: z.string().nullable().optional(),
@@ -44,6 +45,7 @@ export type UpdateFlatShareProfileDataDTO = {
 	credits?: number
 	habits?: any[]
 	interests?: any[]
+	done_kyc: boolean
 }
 
 export const flatShareProfileDefaults = {
@@ -64,4 +66,5 @@ export const flatShareProfileDefaults = {
 	credits: 0,
 	habits: [],
 	interests: [],
+	done_kyc: false
 }
