@@ -21,22 +21,30 @@ type Props = {
 	done?: () => void
 }
 
-export default function PersonalInfoForm({done}: Props) {
+export default function PersonalInfoForm({ done }: Props) {
 	const { showToast } = useCommon()
 	const { getAuthDependencies } = useAuthContext()
 	const {
 		authState: { user, flat_share_profile },
 	} = useAuthContext()
 	const [isLoading, setIsLoading] = useState(false)
-	const [occupation, setOccupation] = useState(flat_share_profile?.occupation || '')
-	const [employment_status, setEmploymentStatus] = useState(flat_share_profile?.employment_status || '')
-	const [work_industry, setWorkIndustry] = useState(flat_share_profile?.work_industry || '')
+	const [occupation, setOccupation] = useState(
+		flat_share_profile?.occupation || '',
+	)
+	const [employment_status, setEmploymentStatus] = useState(
+		flat_share_profile?.employment_status || '',
+	)
+	const [work_industry, setWorkIndustry] = useState(
+		flat_share_profile?.work_industry || '',
+	)
 	const [religion, setReligion] = useState(flat_share_profile?.religion || '')
 	const [tiktok, setTiktok] = useState(flat_share_profile?.tiktok || '')
 	const [facebook, setFacebook] = useState(flat_share_profile?.facebook || '')
-	const [instagram, setInstagram] = useState(flat_share_profile?.instagram || '')
+	const [instagram, setInstagram] = useState(
+		flat_share_profile?.instagram || '',
+	)
 	const [twitter, setTwitter] = useState(flat_share_profile?.twitter || '')
-	const [linkedin, setLinkedin] = useState(flat_share_profile?.linkedin ||  '')
+	const [linkedin, setLinkedin] = useState(flat_share_profile?.linkedin || '')
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
@@ -56,17 +64,17 @@ export default function PersonalInfoForm({done}: Props) {
 					linkedin,
 				},
 			})
-			if(user){
+			if (user) {
 				await FlatShareProfileService.update({
 					data: {
-						done_kyc: true
+						done_kyc: true,
 					},
-					document_id: user._id
+					document_id: user._id,
 				})
 			}
 			// await getAuthDependencies()
 			setIsLoading(false)
-			if(done){
+			if (done) {
 				done()
 			}
 		} catch (error) {
@@ -145,9 +153,7 @@ export default function PersonalInfoForm({done}: Props) {
 									bg="dark"
 									required
 									onChange={(e) => setEmploymentStatus(e.target.value)}
-									value={
-										employment_status
-									}
+									value={employment_status}
 								>
 									<option value="employed">Employed</option>
 									<option value="unemployed">Unemployed</option>

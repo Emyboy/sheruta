@@ -51,7 +51,6 @@ export default function GetStarted() {
 		return null
 	}
 
-
 	if (
 		!flat_share_profile?.budget ||
 		!user_info?.gender ||
@@ -76,7 +75,7 @@ export default function GetStarted() {
 					alignItems={'center'}
 					overflowY={'auto'}
 				>
-					{step > 0  && step < allSteps().length -1 ? (
+					{step > 0 && step < allSteps().length - 1 ? (
 						<Flex
 							position={'fixed'}
 							h={'5px'}
@@ -95,7 +94,7 @@ export default function GetStarted() {
 							/>
 						</Flex>
 					) : null}
-					{step > 1 && step < allSteps().length -1 ? (
+					{step > 1 && step < allSteps().length - 1 ? (
 						<>
 							<Flex
 								cursor={'pointer'}

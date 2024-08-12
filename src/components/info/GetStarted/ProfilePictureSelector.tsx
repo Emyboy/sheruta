@@ -124,8 +124,8 @@ export default function ProfilePictureSelector({
 						document_id: user?._id,
 					})
 					await getAuthDependencies()
-					setLoading(false);
-					if(done){
+					setLoading(false)
+					if (done) {
 						done()
 					}
 				})
