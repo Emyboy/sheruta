@@ -62,10 +62,17 @@ export default function HomePage({ locations, states, requests }: Props) {
 					id: doc.id,
 					...doc.data(),
 				}))
-				setFlatShareRequests((prevRequests) => [
-					...prevRequests,
-					...newRequests,
-				])
+
+				setFlatShareRequests((prevRequests) => {
+					const existingIds = new Set(prevRequests.map((request) => request.id))
+
+					const filteredNewRequests = newRequests.filter(
+						(request) => !existingIds.has(request.id),
+					)
+
+					return [...prevRequests, ...filteredNewRequests]
+				})
+
 				setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]) // Update last visible document
 			}
 		} catch (error) {
