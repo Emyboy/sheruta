@@ -28,6 +28,7 @@ import {
 	BiPlayCircle,
 	BiShare,
 } from 'react-icons/bi'
+import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
 
 type Props = { request: HostRequestDataDetails }
@@ -57,11 +58,11 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request._user_ref._id}`}
+						href={`/user/${request.flat_share_profile._id}`}
 						style={{ textDecoration: 'none' }}
 					>
 						<Avatar
-							src={request._user_ref.avatar_url}
+							src={request.flat_share_profile.avatar_url}
 							size={{
 								md: 'md',
 								base: 'md',
@@ -70,23 +71,22 @@ export default function EachRequest({ request }: Props) {
 							<AvatarBadge boxSize="20px" bg="green.500" />
 						</Avatar>
 					</Link>
-					<Flex
-						gap={'0px'}
-						flexDirection={'column'}
-						justifyContent={'flex-start'}
-						flex={1}
-					>
+					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Truncate
-								text={
-									request.title || request.seeking
-										? 'Looking for apartment'
-										: 'New apartment'
-								}
-								max={100}
-								showReadMore={false}
-							/>
-
+							<Link
+								href={`/user/${request.flat_share_profile._id}`}
+								style={{ textDecoration: 'none' }}
+							>
+								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+									<Text>
+										{request.flat_share_profile.last_name}{' '}
+										{request.flat_share_profile.first_name}
+									</Text>
+									{request.flat_share_profile.done_kyc && (
+										<LuBadgeCheck fill="#00bc73" />
+									)}
+								</Flex>
+							</Link>
 							<Popover>
 								<PopoverTrigger>
 									<Button
@@ -126,11 +126,9 @@ export default function EachRequest({ request }: Props) {
 											onClick={() =>
 												copyShareUrl(
 													`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
-													request.title
-														? request.title
-														: request.seeking
-															? 'Looking for apartment'
-															: 'New apartment',
+													request.seeking
+														? 'Looking for apartment'
+														: 'New apartment',
 													request.description,
 												)
 											}
@@ -149,7 +147,7 @@ export default function EachRequest({ request }: Props) {
 								</PopoverContent>
 							</Popover>
 						</Flex>
-						<Text color="text_muted" fontSize={'sm'}>
+						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +

@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { ZodError } from 'zod'
-import { HostSpaceFormProps, MediaType } from '.'
+import { HostSpaceFormProps } from '.'
 
 export default function UploadMedia({
 	formData,
@@ -33,7 +33,7 @@ export default function UploadMedia({
 }: HostSpaceFormProps) {
 	const toast = useToast()
 	const {
-		authState: { user, flat_share_profile },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
 	const router = useRouter()
 
@@ -122,7 +122,10 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (!user?._id || !flat_share_profile?._user_ref)
+		if (
+			(!user?._id || !flat_share_profile?._user_ref) &&
+			formData.flat_share_profile._id === user?._id
+		)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -198,7 +201,6 @@ export default function UploadMedia({
 				video_url,
 				images_urls,
 				updatedAt: Timestamp.now(),
-				_user_ref: flat_share_profile?._user_ref,
 			}
 
 			createHostRequestDTO.parse(data)

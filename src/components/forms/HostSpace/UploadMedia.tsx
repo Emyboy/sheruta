@@ -33,7 +33,7 @@ export default function UploadMedia({
 }: HostSpaceFormProps) {
 	const toast = useToast()
 	const {
-		authState: { user, flat_share_profile },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
 	const router = useRouter()
 
@@ -115,7 +115,7 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (!user?._id || !flat_share_profile?._user_ref)
+		if (!flat_share_profile || !user)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -124,7 +124,7 @@ export default function UploadMedia({
 		setLoading(true)
 
 		try {
-			const userId = user?._id
+			const userId = user._id
 			const imageUploadPromises = formData.images_urls.map((url, i) =>
 				SherutaDB.uploadMedia({
 					data: url,
@@ -163,6 +163,9 @@ export default function UploadMedia({
 			const { category, service, state, area, property, ...cleanedFormData } =
 				formData
 
+			const { done_kyc } = flat_share_profile
+			const { _id, first_name, last_name, avatar_url } = user
+
 			let data: HostRequestData = {
 				...cleanedFormData,
 				imagesRefPaths: newMediaRefPaths,
@@ -173,7 +176,13 @@ export default function UploadMedia({
 				uuid,
 				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
-				_user_ref: flat_share_profile?._user_ref,
+				flat_share_profile: {
+					done_kyc,
+					_id,
+					first_name,
+					last_name,
+					avatar_url,
+				},
 			}
 
 			createHostRequestDTO.parse(data)

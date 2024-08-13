@@ -4,7 +4,6 @@ import {
 	Box,
 	Button,
 	Checkbox,
-	CheckboxGroup,
 	Flex,
 	FormControl,
 	FormLabel,
@@ -17,8 +16,8 @@ import {
 } from '@chakra-ui/react'
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
-import { HostSpaceFormProps } from '.'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
+import { HostSpaceFormProps } from '.'
 
 const libraries: 'places'[] = ['places']
 
@@ -78,6 +77,14 @@ export default function Summary({
 				google_location_object: locationObject,
 				google_location_text: locationText,
 			}))
+			localStorage.setItem(
+				'host_space_form',
+				JSON.stringify({
+					...formData,
+					google_location_object: locationObject,
+					google_location_text: locationText,
+				}),
+			)
 		}
 	}
 
@@ -88,6 +95,13 @@ export default function Summary({
 
 		setHouseRules(updatedRules)
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
+		localStorage.setItem(
+			'host_space_form',
+			JSON.stringify({
+				...formData,
+				house_rules: updatedRules,
+			}),
+		)
 	}
 
 	const handleHouseRuleChange = (
@@ -101,6 +115,13 @@ export default function Summary({
 		setHouseRules(updatedRules)
 
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
+		localStorage.setItem(
+			'host_space_form',
+			JSON.stringify({
+				...formData,
+				house_rules: updatedRules,
+			}),
+		)
 	}
 
 	const handleChange = (
@@ -229,29 +250,6 @@ export default function Summary({
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Title
-							</Text>
-							<Input
-								onChange={handleChange}
-								required
-								minLength={5}
-								value={formData.title}
-								name="title"
-								_placeholder={{ color: 'text_muted' }}
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								placeholder="TITLE HERE"
-							/>
-						</Flex>
-					</Flex>
-					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={3}
-						>
-							<Text color={'text_muted'} fontSize={'base'}>
 								Apartment Description
 							</Text>
 							<Textarea
@@ -259,6 +257,7 @@ export default function Summary({
 								required
 								minLength={20}
 								value={formData.description}
+								_placeholder={{ color: 'text_muted' }}
 								name="description"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -584,11 +583,25 @@ export default function Summary({
 											if (checked) {
 												const amenities = [...formData.amenities, value]
 												setFormData((prev) => ({ ...prev, amenities }))
+												localStorage.setItem(
+													'host_space_form',
+													JSON.stringify({
+														...formData,
+														amenities,
+													}),
+												)
 											} else {
 												const amenities = formData.amenities.filter(
 													(amenity) => amenity !== value,
 												)
 												setFormData((prev) => ({ ...prev, amenities }))
+												localStorage.setItem(
+													'host_space_form',
+													JSON.stringify({
+														...formData,
+														amenities,
+													}),
+												)
 											}
 										}}
 									>
@@ -742,6 +755,8 @@ export default function Summary({
 								>
 									<Input
 										_placeholder={{ color: 'text_muted' }}
+										borderColor={'border_color'}
+										_dark={{ borderColor: 'dark_light' }}
 										id="address"
 										type="text"
 										placeholder="Enter a location"
