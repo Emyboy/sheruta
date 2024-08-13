@@ -12,6 +12,7 @@ import {
 	BiWallet,
 	BiWrench,
 } from 'react-icons/bi'
+import Link from 'next/link'
 
 type Props = {}
 
@@ -31,7 +32,9 @@ export default function MainLeftNav({}: Props) {
 				bse: 'center',
 			}}
 		>
-			<EachNav Icon={BiMessageSquareDetail} label="Chat rooms" />
+			<Link href={'/groups'}>
+				<EachNav Icon={BiMessageSquareDetail} label="Chat rooms" />
+			</Link>
 			<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			<EachNav Icon={BiWallet} label="Wallet" />
 			<EachNav Icon={BiWrench} label="Settings" />
