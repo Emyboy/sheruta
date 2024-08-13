@@ -19,12 +19,12 @@ import {
 	createSeekerRequestDTO,
 	PaymentPlan,
 	SeekerRequestData,
+	userSchema,
 } from '@/firebase/service/request/request.types'
 import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
-
 //get google places API KEY
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
@@ -94,7 +94,6 @@ const budgetLimits: Record<PaymentPlan, number> = {
 }
 
 interface userInfo {
-	userRef: DocumentReference | undefined
 	state: string | undefined
 	location: string | undefined
 }
@@ -109,7 +108,13 @@ const initialFormState: SeekerRequestData = {
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
-	_user_ref: undefined,
+	flat_share_profile: {
+		done_kyc: false,
+		_id: '',
+		first_name: '',
+		last_name: '',
+		avatar_url: '',
+	},
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -131,26 +136,38 @@ const CreateSeekerForm: React.FC = () => {
 
 	//get user authentication state
 	const {
-		authState: { flat_share_profile },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
 
 	//state to hold userInfo value
 	const [userInfo, setUserInfo] = useState<userInfo>({
-		userRef: undefined,
 		state: undefined,
 		location: undefined,
 	})
 
 	// update userRef state when auth state changes
 	useEffect(() => {
-		if (typeof flat_share_profile !== 'undefined') {
+		if (flat_share_profile && user) {
+			const { done_kyc } = flat_share_profile
+			const { _id, first_name, last_name, avatar_url } = user
+
 			setUserInfo({
-				userRef: flat_share_profile?._user_ref,
 				state: flat_share_profile?.state,
 				location: flat_share_profile?.location_keyword,
 			})
+
+			setFormData((prev: SeekerRequestData) => ({
+				...prev,
+				flat_share_profile: {
+					done_kyc,
+					_id,
+					first_name,
+					last_name,
+					avatar_url,
+				},
+			}))
 		}
-	}, [flat_share_profile])
+	}, [flat_share_profile, user])
 
 	//get options
 	const {
@@ -304,12 +321,23 @@ const CreateSeekerForm: React.FC = () => {
 	): Promise<any> => {
 		e.preventDefault()
 		try {
+			if (
+				!flat_share_profile ||
+				!user ||
+				Object.keys(flat_share_profile || {}).length === 0 ||
+				Object.keys(user || {}).length === 0
+			) {
+				return showToast({
+					message: 'Please login and try again',
+					status: 'error',
+				})
+			}
+
 			setIsLoading(true)
 			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
 				...optionsRef,
-				_user_ref: userInfo.userRef,
 			}
 
 			//convert budget to number

@@ -109,12 +109,12 @@ export default function HomePage({ locations, states, requests }: Props) {
 		if (node) observer.current?.observe(node)
 	}
 
-	// useEffect(() => {
-	// 	const parsedRequests: [] = requests ? JSON.parse(requests) : []
-	// 	if (parsedRequests.length > 0) {
-	// 		setFlatShareRequests([...parsedRequests])
-	// 	}
-	// }, [requests])
+	useEffect(() => {
+		const parsedRequests: [] = requests ? JSON.parse(requests) : []
+		if (parsedRequests.length > 0) {
+			setFlatShareRequests([...parsedRequests])
+		}
+	}, [requests])
 
 	return (
 		<>
@@ -130,7 +130,7 @@ export default function HomePage({ locations, states, requests }: Props) {
 							{flatShareRequests.map((request: any, index: number) => (
 								<Box
 									key={request.id}
-									// ref={index === flatShareRequests.length - 1 ? setRef : null}
+									ref={index === flatShareRequests.length - 1 ? setRef : null}
 									style={{ transition: 'opacity 0.3s ease-in-out' }}
 								>
 									{index === 3 && <JoinTheCommunity key={index} />}
