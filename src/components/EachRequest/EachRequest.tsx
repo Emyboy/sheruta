@@ -52,7 +52,6 @@ export default function EachRequest({ request }: Props) {
 				bg: 'dark',
 				borderColor: 'dark_light',
 			}}
-			key={Math.random()}
 			width={'full'}
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>

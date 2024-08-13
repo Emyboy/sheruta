@@ -16,14 +16,15 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 		getAuthDependencies,
 	} = useAuthContext()
 	const { showToast } = useCommon()
-	const { optionsState: {interests} } = useOptionsContext();
+	const {
+		optionsState: { interests },
+	} = useOptionsContext()
 	const [loading, setLoading] = useState(false)
 	const [fetching, setFetching] = useState(false)
 	const [selectedHabits, setSelectedHabits] = useState<HabitData[]>([])
 
 	const getAllHabits = async () => {
 		try {
-
 			const documents: HabitData[] = []
 			let refs = flat_share_profile?.interests as any[]
 
