@@ -12,6 +12,7 @@ type Props = {
 	subHeading?: string | null
 	image_url?: string | null
 	isLoading?: boolean
+	backRoute?: string
 }
 
 export default function MainBackHeader({
@@ -19,6 +20,7 @@ export default function MainBackHeader({
 	subHeading,
 	isLoading,
 	image_url,
+	backRoute,
 }: Props) {
 	const router = useRouter()
 	return (
@@ -32,7 +34,12 @@ export default function MainBackHeader({
 			<MainIconBtn
 				Icon={BiChevronLeft}
 				label="Go back"
-				onClick={() => router.back()}
+				onClick={() => {
+					if (backRoute) {
+						return router.push(backRoute)
+					}
+					router.back()
+				}}
 			/>
 			<Flex flexDirection={'column'} maxW={'full'}>
 				{heading && (

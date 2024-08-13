@@ -11,5 +11,5 @@ export interface HabitData {
 	id: string
 	title: string
 	slug: string
-	ref: DocumentReference
+	_ref: DocumentReference
 }
