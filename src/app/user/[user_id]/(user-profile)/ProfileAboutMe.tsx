@@ -1,10 +1,15 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Badge, Flex, Text } from '@chakra-ui/react'
 import React from 'react'
+import { getDoc } from 'firebase/firestore'
 
-type Props = {}
+type Props = {
+	data: any
+}
 
-export default function ProfileAboutMe({}: Props) {
+export default function ProfileAboutMe({ data }: Props) {
+	console.log(data.interests)
+
 	return (
 		<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 			<Text>

@@ -17,7 +17,7 @@ export default function UserProfilePage({ data }: Props) {
 				<ProfileHero data={data} />
 			</MainSection>
 			<MainSection heading="About me">
-				<ProfileAboutMe />
+				<ProfileAboutMe data={data} />
 			</MainSection>
 			<PersonalInfo />
 			<MainSection heading="My Postings" borderBottom={0}>

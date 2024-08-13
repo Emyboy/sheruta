@@ -31,6 +31,5 @@ export const industries = [
 	'Media space',
 	'Entreprenuer space',
 	'Commerce space',
-	'Sciences space'
-	
+	'Sciences space',
 ]

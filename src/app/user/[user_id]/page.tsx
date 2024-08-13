@@ -22,13 +22,13 @@ export const revalidate = CACHE_TTL.LONG
 export default async function page(props: any) {
 	const { params } = props
 	const { user_id } = params
-	const emekasId =  'J5vmicZSnmZDDk2iqKskCIEPFhe2';
+	const emekasId = 'J5vmicZSnmZDDk2iqKskCIEPFhe2'
 
 	async function getUserProfile() {
 		try {
 			const flatShareProfilesSnapshot = await getDoc(
-				doc(db, 'flat_share_profiles', emekasId)
-			);
+				doc(db, 'flat_share_profiles', emekasId),
+			)
 			const flat_share_profiles = flatShareProfilesSnapshot.data()
 			const [flatShareProfileDocs, userDoc, userInfoDocs] = await Promise.all([
 				// getDocs(
@@ -67,12 +67,12 @@ export default async function page(props: any) {
 			// 	userDoc,
 			// 	userInfoDocs,
 			// )
-			console.log(
-				'fltatshare profile:......................................................:',
-		
-				flat_share_profiles,
-				
-			)
+			// console.log(
+			// 	'fltatshare profile:......................................................:',
+
+			// 	flat_share_profiles,
+
+			// )
 
 			return {
 				flatShareProfile: formattedFlatShareProfile,

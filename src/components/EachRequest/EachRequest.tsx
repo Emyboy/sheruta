@@ -34,9 +34,8 @@ import useCommon from '@/hooks/useCommon'
 type Props = { request: any }
 
 export default function EachRequest({ request }: Props) {
-
-	const { colorMode } = useColorMode();
-	const { showToast } = useCommon();
+	const { colorMode } = useColorMode()
+	const { showToast } = useCommon()
 
 	const copyShareUrl = (url: string): void => {
 		if (
@@ -83,7 +82,7 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Avatar
-						src={request._user_ref.avatar_url}
+						src={request._user_ref?.avatar_url}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -105,9 +104,7 @@ export default function EachRequest({ request }: Props) {
 										? 'Looking for apartment'
 										: 'New apartment'}
 							</Text>
-							<Box
-								zIndex={9999}
-							>
+							<Box zIndex={9999}>
 								<Popover>
 									<PopoverTrigger>
 										<IconButton
@@ -127,7 +124,11 @@ export default function EachRequest({ request }: Props) {
 												<Button
 													variant="ghost"
 													leftIcon={<BiShare />}
-													onClick={() => copyShareUrl(`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`)}
+													onClick={() =>
+														copyShareUrl(
+															`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+														)
+													}
 													width="100%"
 													display="flex"
 													alignItems="center"
@@ -149,7 +150,7 @@ export default function EachRequest({ request }: Props) {
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +
-									request.updatedAt.nanoseconds / 1000000,
+										request.updatedAt.nanoseconds / 1000000,
 								),
 								{ addSuffix: true },
 							)}
