@@ -60,49 +60,10 @@ export default function ApartmentSummary({
 
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
-	const copyShareUrl = useShareSpace()
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
-	const [isLoading, setIsLoading] = useState(false)
-
-	const handleDeletePost = async (): Promise<void> => {
-		try {
-			setIsLoading(true)
-
-			if (
-				authState.user?._id === request.flat_share_profile._id &&
-				request.id
-			) {
-				// await deletePost(request.id)
-				await SherutaDB.delete({
-					collection_name: DBCollectionName.flatShareRequests,
-					document_id: request.id,
-				})
-
-				showToast({
-					message: 'Post has been deleted successfully',
-					status: 'success',
-				})
-
-				router.push('/')
-			} else {
-				showToast({
-					message: 'You are not authorized to delete this post',
-					status: 'error',
-				})
-			}
-		} catch (err: any) {
-			console.error('Error deleting post:', err)
-			showToast({
-				message: 'Failed to delete the post',
-				status: 'error',
-			})
-		} finally {
-			setIsLoading(false)
-		}
-	}
 
 	const openModal = () => setShowBookInspectionModal(true)
 	const closeModal = () => setShowBookInspectionModal(false)
@@ -350,7 +311,12 @@ export default function ApartmentSummary({
 												leftIcon={<BiTrash />}
 												isLoading={isLoading}
 												bgColor="none"
-												onClick={handleDeletePost}
+												onClick={() =>
+													handleDeletePost({
+														requestId: request.id,
+														userId: request.flat_share_profile._id,
+													})
+												}
 												width="100%"
 												display="flex"
 												alignItems="center"
