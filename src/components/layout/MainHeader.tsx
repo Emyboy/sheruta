@@ -30,6 +30,7 @@ export default function MainHeader({}: Props) {
 					justifyContent={'center'}
 					h="full"
 					bg="white"
+					zIndex={600}
 					_dark={{
 						bg: 'dark',
 						borderColor: 'dark_light',
