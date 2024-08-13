@@ -16,6 +16,7 @@ import {
 	PopoverTrigger,
 	Text,
 	useColorMode,
+	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
@@ -24,18 +25,25 @@ import {
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
+	BiPencil,
 	BiPhone,
 	BiPlayCircle,
 	BiShare,
+	BiTrash,
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
+import useCommon from '@/hooks/useCommon'
+import { useAuthContext } from '@/context/auth.context'
+import { useRouter } from 'next/navigation'
 
 type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
+	const router = useRouter()
 	const { colorMode } = useColorMode()
-	const copyShareUrl = useShareSpace()
+	const { authState } = useAuthContext()
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	return (
 		<Box
@@ -116,32 +124,102 @@ export default function EachRequest({ request }: Props) {
 									color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
 									bg={colorMode === 'dark' ? '#202020' : '#fff'}
 									width={'100%'}
-									padding={2}
+									padding={4}
 								>
 									<PopoverBody p={0}>
-										<Button
-											variant="ghost"
-											leftIcon={<BiShare />}
-											onClick={() =>
-												copyShareUrl(
-													`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
-													request.seeking
-														? 'Looking for apartment'
-														: 'New apartment',
-													request.description,
-												)
-											}
-											width="100%"
-											display="flex"
-											alignItems="center"
-											padding={0}
-											borderRadius="sm"
-											_hover={{ color: 'brand_dark' }}
-										>
-											<Text width={'100%'} textAlign={'left'}>
-												Share
-											</Text>
-										</Button>
+										<VStack spacing={1} align="flex-start">
+											<Button
+												variant="ghost"
+												leftIcon={<BiShare />}
+												isLoading={isLoading}
+												bgColor="none"
+												onClick={() =>
+													copyShareUrl(
+														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+														request.seeking
+															? 'Looking for apartment'
+															: 'New apartment',
+														request.description,
+													)
+												}
+												width="100%"
+												display="flex"
+												alignItems="center"
+												padding={0}
+												borderRadius="sm"
+												_hover={{
+													bgColor: 'none',
+													color: 'brand_dark',
+												}}
+												_active={{
+													bgColor: 'none',
+												}}
+											>
+												<Text width={'100%'} textAlign={'left'}>
+													Share
+												</Text>
+											</Button>
+											{authState.user?._id ===
+												request.flat_share_profile._id && (
+												<>
+													<Button
+														variant="ghost"
+														leftIcon={<BiPencil />}
+														isLoading={isLoading}
+														_active={{
+															bgColor: 'none',
+														}}
+														_hover={{
+															bgColor: 'none',
+															color: 'brand_dark',
+														}}
+														onClick={() => {
+															router.push(
+																`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
+															)
+														}}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Edit
+														</Text>
+													</Button>
+													<Button
+														variant="ghost"
+														leftIcon={<BiTrash />}
+														isLoading={isLoading}
+														bgColor="none"
+														_active={{
+															bgColor: 'none',
+														}}
+														onClick={() =>
+															handleDeletePost({
+																requestId: request.id,
+																userId: request.flat_share_profile._id,
+															})
+														}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+														_hover={{
+															bgColor: 'none',
+															color: 'red.500',
+														}}
+														color="red.400"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Delete
+														</Text>
+													</Button>
+												</>
+											)}
+										</VStack>
 									</PopoverBody>
 								</PopoverContent>
 							</Popover>

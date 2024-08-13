@@ -424,8 +424,9 @@ export default function UploadMedia({
 								}}
 								bgColor={'dark'}
 								top={-2.5}
-								right={0}
+								right={'-8px'}
 								zIndex={50}
+								rounded={999}
 							>
 								<BiMinusCircle
 									cursor={'pointer'}
@@ -437,7 +438,7 @@ export default function UploadMedia({
 						{formData.video_url ? (
 							<video
 								src={formData.video_url}
-								className="w-full h-full"
+								style={{ borderRadius: '8px' }}
 								width={'100%'}
 								height={'100%'}
 							/>
