@@ -16,6 +16,7 @@ import {
 	PopoverTrigger,
 	Text,
 	useColorMode,
+	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
@@ -24,17 +25,25 @@ import {
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
+	BiPencil,
 	BiPhone,
 	BiPlayCircle,
 	BiShare,
+	BiTrash,
 } from 'react-icons/bi'
+import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
+import useCommon from '@/hooks/useCommon'
+import { useAuthContext } from '@/context/auth.context'
+import { useRouter } from 'next/navigation'
 
 type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
+	const router = useRouter()
 	const { colorMode } = useColorMode()
-	const copyShareUrl = useShareSpace()
+	const { authState } = useAuthContext()
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	return (
 		<Box
@@ -51,17 +60,16 @@ export default function EachRequest({ request }: Props) {
 				bg: 'dark',
 				borderColor: 'dark_light',
 			}}
-			key={Math.random()}
 			width={'full'}
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request._user_ref._id}`}
+						href={`/user/${request.flat_share_profile._id}`}
 						style={{ textDecoration: 'none' }}
 					>
 						<Avatar
-							src={request._user_ref.avatar_url}
+							src={request.flat_share_profile.avatar_url}
 							size={{
 								md: 'md',
 								base: 'md',
@@ -70,23 +78,25 @@ export default function EachRequest({ request }: Props) {
 							<AvatarBadge boxSize="20px" bg="green.500" />
 						</Avatar>
 					</Link>
-					<Flex
-						gap={'0px'}
-						flexDirection={'column'}
-						justifyContent={'flex-start'}
-						flex={1}
-					>
+					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Truncate
-								text={
-									request.title || request.seeking
-										? 'Looking for apartment'
-										: 'New apartment'
-								}
-								max={100}
-								showReadMore={false}
-							/>
-
+							<Link
+								href={`/user/${request.flat_share_profile._id}`}
+								style={{ textDecoration: 'none' }}
+							>
+								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+									<Text
+										textTransform={'capitalize'}
+										fontSize={{ base: 'base', md: 'lg' }}
+									>
+										{request.flat_share_profile.last_name}{' '}
+										{request.flat_share_profile.first_name}
+									</Text>
+									{request.flat_share_profile.done_kyc && (
+										<LuBadgeCheck fill="#00bc73" />
+									)}
+								</Flex>
+							</Link>
 							<Popover>
 								<PopoverTrigger>
 									<Button
@@ -117,39 +127,107 @@ export default function EachRequest({ request }: Props) {
 									color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
 									bg={colorMode === 'dark' ? '#202020' : '#fff'}
 									width={'100%'}
-									padding={2}
+									padding={4}
 								>
 									<PopoverBody p={0}>
-										<Button
-											variant="ghost"
-											leftIcon={<BiShare />}
-											onClick={() =>
-												copyShareUrl(
-													`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
-													request.title
-														? request.title
-														: request.seeking
+										<VStack spacing={1} align="flex-start">
+											<Button
+												variant="ghost"
+												leftIcon={<BiShare />}
+												isLoading={isLoading}
+												bgColor="none"
+												onClick={() =>
+													copyShareUrl(
+														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+														request.seeking
 															? 'Looking for apartment'
 															: 'New apartment',
-													request.description,
-												)
-											}
-											width="100%"
-											display="flex"
-											alignItems="center"
-											padding={0}
-											borderRadius="sm"
-											_hover={{ color: 'brand_dark' }}
-										>
-											<Text width={'100%'} textAlign={'left'}>
-												Share
-											</Text>
-										</Button>
+														request.description,
+													)
+												}
+												width="100%"
+												display="flex"
+												alignItems="center"
+												padding={0}
+												borderRadius="sm"
+												_hover={{
+													bgColor: 'none',
+													color: 'brand_dark',
+												}}
+												_active={{
+													bgColor: 'none',
+												}}
+											>
+												<Text width={'100%'} textAlign={'left'}>
+													Share
+												</Text>
+											</Button>
+											{authState.user?._id ===
+												request.flat_share_profile._id && (
+												<>
+													<Button
+														variant="ghost"
+														leftIcon={<BiPencil />}
+														isLoading={isLoading}
+														_active={{
+															bgColor: 'none',
+														}}
+														_hover={{
+															bgColor: 'none',
+															color: 'brand_dark',
+														}}
+														onClick={() => {
+															router.push(
+																`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
+															)
+														}}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Edit
+														</Text>
+													</Button>
+													<Button
+														variant="ghost"
+														leftIcon={<BiTrash />}
+														isLoading={isLoading}
+														bgColor="none"
+														_active={{
+															bgColor: 'none',
+														}}
+														onClick={() =>
+															handleDeletePost({
+																requestId: request.id,
+																userId: request.flat_share_profile._id,
+															})
+														}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+														_hover={{
+															bgColor: 'none',
+															color: 'red.500',
+														}}
+														color="red.400"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Delete
+														</Text>
+													</Button>
+												</>
+											)}
+										</VStack>
 									</PopoverBody>
 								</PopoverContent>
 							</Popover>
 						</Flex>
-						<Text color="text_muted" fontSize={'sm'}>
+						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +

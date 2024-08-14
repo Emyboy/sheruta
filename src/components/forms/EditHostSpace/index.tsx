@@ -7,6 +7,7 @@ import {
 	AvailabilityStatus,
 	HostRequestDataDetails,
 	PaymentPlan,
+	userSchema,
 } from '@/firebase/service/request/request.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { DocumentReference, Timestamp } from '@firebase/firestore'
@@ -24,7 +25,6 @@ export type HostSpaceFormProps = {
 
 export type FormDataType = {
 	uuid: string
-	title: string
 	description: string
 	service_charge: number | null
 	budget: number
@@ -47,16 +47,12 @@ export type FormDataType = {
 	google_location_object: Record<string, any>
 	google_location_text: string
 	createdAt: Timestamp | { seconds: number; nanoseconds: number }
+	flat_share_profile: userSchema
 	state?: string
 	area?: string
 	service?: string
 	category?: string
 	property?: string
-}
-
-export type MediaType = {
-	images_urls: string[]
-	video_url: string | null
 }
 
 export default function EditHostSpace({ data }: { data: string }) {
@@ -70,7 +66,6 @@ export default function EditHostSpace({ data }: { data: string }) {
 
 	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>({
 		uuid: request.uuid || '',
-		title: request.title || '',
 		description: request.description || '',
 		service_charge: request.service_charge || 0,
 		budget: request.budget || 0,
@@ -93,6 +88,7 @@ export default function EditHostSpace({ data }: { data: string }) {
 		google_location_object: request.google_location_object || {},
 		google_location_text: request.google_location_text || '',
 		createdAt: request.createdAt,
+		flat_share_profile: request.flat_share_profile,
 		state: '',
 		area: '',
 		service: '',
@@ -136,7 +132,7 @@ export default function EditHostSpace({ data }: { data: string }) {
 	}, [step])
 
 	useEffect(() => {
-		if (user?._id !== request._user_ref._id) return router.back()
+		if (user?._id !== request.flat_share_profile._id) return router.back()
 		if (appState.app_loading) return
 
 		const selectedCategory = options.categories.find(

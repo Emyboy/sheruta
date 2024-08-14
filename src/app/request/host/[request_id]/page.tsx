@@ -73,7 +73,7 @@ export default async function page({
 						minW={{ base: '100%', lg: '50%' }}
 						maxW={{ base: '100%', lg: '50%' }}
 						flexFlow={'column'}
-						paddingRight={{ base: 0, lg: DEFAULT_PADDING }}
+						// paddingRight={{ base: 0, lg: DEFAULT_PADDING }}
 					>
 						<MediaCarousel
 							video={request.video_url}
@@ -81,7 +81,13 @@ export default async function page({
 						/>
 					</Flex>
 
-					<Flex flex={1} flexDir={'column'}>
+					<Flex
+						flex={1}
+						position={'relative'}
+						minW={{ base: '100%', lg: '50%' }}
+						maxW={{ base: '100%', lg: '50%' }}
+						flexDir={'column'}
+					>
 						<ApartmentDetails request={JSON.stringify(request)} />
 					</Flex>
 				</Flex>

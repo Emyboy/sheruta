@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { ZodError } from 'zod'
-import { HostSpaceFormProps, MediaType } from '.'
+import { HostSpaceFormProps } from '.'
 
 export default function UploadMedia({
 	formData,
@@ -33,7 +33,7 @@ export default function UploadMedia({
 }: HostSpaceFormProps) {
 	const toast = useToast()
 	const {
-		authState: { user, flat_share_profile },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
 	const router = useRouter()
 
@@ -112,7 +112,7 @@ export default function UploadMedia({
 		}
 	}
 
-	const handleSubmit = async (e: any) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		const uuid = formData.uuid
 
@@ -122,7 +122,10 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (!user?._id || !flat_share_profile?._user_ref)
+		if (
+			(!user?._id || !flat_share_profile?._user_ref) &&
+			formData.flat_share_profile._id === user?._id
+		)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -172,11 +175,14 @@ export default function UploadMedia({
 				mediaRefPaths.map((url) => SherutaDB.getMediaUrl(url)),
 			)
 
-			let video_url = null
-			let videoRefPath = null
-			if (formData.video_url) {
-				video_url = mediaUrls.pop() || null
-				videoRefPath = newMediaRefPaths.pop() || null
+			let video_url = formData.video_url
+			if (newVideo) {
+				video_url = mediaUrls.pop() || formData.video_url
+			}
+
+			let videoRefPath = formData.videoRefPath
+			if (newVideo) {
+				videoRefPath = newMediaRefPaths.pop() || formData.videoRefPath
 			}
 
 			setFormData((prev) => ({
@@ -190,7 +196,7 @@ export default function UploadMedia({
 			const { category, service, state, area, property, ...cleanedFormData } =
 				formData
 
-			let data: HostRequestData = {
+			const data: HostRequestData = {
 				...cleanedFormData,
 				imagesRefPaths: [...oldMediaRefPaths, ...newMediaRefPaths],
 				videoRefPath,
@@ -198,8 +204,9 @@ export default function UploadMedia({
 				video_url,
 				images_urls,
 				updatedAt: Timestamp.now(),
-				_user_ref: flat_share_profile?._user_ref,
 			}
+
+			console.log('data before parse', data)
 
 			createHostRequestDTO.parse(data)
 
@@ -229,7 +236,7 @@ export default function UploadMedia({
 			} else {
 				console.log('Unknown error', e)
 			}
-			toast({ title: 'Error creating your details', status: 'error' })
+			toast({ title: 'Error updating your details', status: 'error' })
 		}
 
 		setLoading(false)
@@ -422,8 +429,9 @@ export default function UploadMedia({
 								}}
 								bgColor={'dark'}
 								top={-2.5}
-								right={0}
+								right={'-8px'}
 								zIndex={50}
+								rounded={999}
 							>
 								<BiMinusCircle
 									cursor={'pointer'}
@@ -435,7 +443,7 @@ export default function UploadMedia({
 						{formData.video_url ? (
 							<video
 								src={formData.video_url}
-								className="w-full h-full"
+								style={{ borderRadius: '8px' }}
 								width={'100%'}
 								height={'100%'}
 							/>
@@ -498,7 +506,7 @@ export default function UploadMedia({
 					alignItems={'center'}
 					justifyContent={'center'}
 				>
-					{loading ? <Spinner /> : 'Submit'}
+					{loading ? <Spinner /> : 'Update'}
 				</Button>
 			</Flex>
 		</>
