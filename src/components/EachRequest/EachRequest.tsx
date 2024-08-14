@@ -57,11 +57,11 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request._user_ref._id}`}
+						href={`/user/${request._user_ref?._id}`}
 						style={{ textDecoration: 'none' }}
 					>
 						<Avatar
-							src={request._user_ref.avatar_url}
+							src={request._user_ref?.avatar_url}
 							size={{
 								md: 'md',
 								base: 'md',
