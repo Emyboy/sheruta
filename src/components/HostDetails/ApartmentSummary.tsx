@@ -913,6 +913,7 @@ export default function ApartmentSummary({
 						</Text>
 					</Flex>
 				</SimpleGrid>
+				
 			</Flex>
 		</>
 	)
