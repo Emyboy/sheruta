@@ -8,9 +8,8 @@ import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
-import { deletePost } from '@/utils/actions'
+import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
 	AvatarBadge,
@@ -45,10 +44,10 @@ import {
 import { CiCircleInfo } from 'react-icons/ci'
 import { FaHouseChimneyUser } from 'react-icons/fa6'
 import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
+import { LuBadgeCheck } from 'react-icons/lu'
 import { MdOutlineMailOutline } from 'react-icons/md'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 
 export default function ApartmentSummary({
 	request,
@@ -59,46 +58,10 @@ export default function ApartmentSummary({
 
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
-	const copyShareUrl = useShareSpace()
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
-	const [isLoading, setIsLoading] = useState(false)
-
-	const handleDeletePost = async (): Promise<void> => {
-		try {
-			setIsLoading(true)
-
-			if (authState.user?._id === request._user_ref._id && request.id) {
-				// await deletePost(request.id)
-				await SherutaDB.delete({
-					collection_name: DBCollectionName.flatShareRequests,
-					document_id: request.id,
-				})
-
-				showToast({
-					message: 'Post has been deleted successfully',
-					status: 'success',
-				})
-
-				router.push('/')
-			} else {
-				showToast({
-					message: 'You are not authorized to delete this post',
-					status: 'error',
-				})
-			}
-		} catch (err: any) {
-			console.error('Error deleting post:', err)
-			showToast({
-				message: 'Failed to delete the post',
-				status: 'error',
-			})
-		} finally {
-			setIsLoading(false)
-		}
-	}
 
 	const openModal = () => setShowBookInspectionModal(true)
 	const closeModal = () => setShowBookInspectionModal(false)
@@ -115,10 +78,65 @@ export default function ApartmentSummary({
 				bgColor={'dark'}
 				_light={{ bgColor: '#FDFDFD' }}
 				justifyContent={'space-between'}
+				position={'relative'}
 			>
+				<Flex
+					pos={'fixed'}
+					padding={DEFAULT_PADDING}
+					right={0}
+					bottom={0}
+					left={{ base: 0, lg: '50%' }}
+					zIndex={50}
+					paddingY={DEFAULT_PADDING}
+					paddingX={'20px'}
+					bg={'dark'}
+					justifyContent={'space-between'}
+					flexDir={{ base: 'column', sm: 'row' }}
+					gap={{ base: '24px', sm: '16px' }}
+					alignItems={{ base: 'start', sm: 'center' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						boxShadow: '0 2px 3px rgba(0, 0, 0, 0.5)',
+					}}
+					boxShadow="0 2px 3px rgba(255, 255, 255, 0.5)"
+				>
+					<Flex flexDir={'column'}>
+						<Text fontWeight={'light'} fontSize={{ base: '16px', md: '18px' }}>
+							Rent
+						</Text>
+						<Flex alignItems={'center'} flexWrap={'wrap'}>
+							<Text
+								fontSize={{ base: '18px', md: '24px' }}
+								fontWeight={'extrabold'}
+							>
+								₦{request.budget.toLocaleString()}
+							</Text>{' '}
+							<Text
+								fontSize={{ base: 'lg', md: 'xl' }}
+								fontWeight={'200'}
+								textTransform={'capitalize'}
+							>
+								/{request.payment_type}
+							</Text>
+						</Flex>
+					</Flex>
+					<Button
+						rounded={DEFAULT_PADDING}
+						paddingX={{ base: '28px', md: '38px' }}
+						h={{ base: '48px', md: '52px' }}
+						paddingY={{ base: '12px', md: DEFAULT_PADDING }}
+						bgColor={'black'}
+						_light={{ color: 'white' }}
+						onClick={openModal}
+						fontSize={{ base: 'sm', md: 'base' }}
+					>
+						Book Inspection
+					</Button>
+				</Flex>
+
 				<Flex gap={{ base: '8px', md: '16px' }}>
 					<Avatar
-						src={request._user_ref.avatar_url}
+						src={request.flat_share_profile.avatar_url}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -136,13 +154,23 @@ export default function ApartmentSummary({
 						justifyContent={'center'}
 						flexDir={'column'}
 					>
-						<Text
-							textTransform={'capitalize'}
-							fontSize={{ base: 'sm', md: 'base' }}
-							w={'auto'}
+						<Link
+							href={`/user/${request.flat_share_profile._id}`}
+							style={{ textDecoration: 'none' }}
 						>
-							{request._user_ref.last_name} {request._user_ref.first_name}
-						</Text>
+							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+								<Text
+									textTransform={'capitalize'}
+									fontSize={{ base: 'base', md: 'lg' }}
+								>
+									{request.flat_share_profile.last_name}{' '}
+									{request.flat_share_profile.first_name}
+								</Text>
+								{request.flat_share_profile.done_kyc && (
+									<LuBadgeCheck fill="#00bc73" />
+								)}
+							</Flex>
+						</Link>
 						<Flex ml={'-12px'} mt={'-6px'}>
 							<MainTooltip label="Call me" placement="top">
 								<Button
@@ -237,10 +265,11 @@ export default function ApartmentSummary({
 										variant="ghost"
 										leftIcon={<BiShare />}
 										isLoading={isLoading}
+										bgColor="none"
 										onClick={() =>
 											copyShareUrl(
 												`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
-												request.title || request.seeking
+												request.seeking
 													? 'Looking for apartment'
 													: 'New apartment',
 												request.description,
@@ -257,12 +286,13 @@ export default function ApartmentSummary({
 											Share
 										</Text>
 									</Button>
-									{authState.user?._id === request._user_ref._id && (
+									{authState.user?._id === request.flat_share_profile._id && (
 										<>
 											<Button
 												variant="ghost"
 												leftIcon={<BiPencil />}
 												isLoading={isLoading}
+												bgColor="none"
 												onClick={() => {
 													router.push(`${request.id}/edit`)
 												}}
@@ -281,7 +311,13 @@ export default function ApartmentSummary({
 												variant="ghost"
 												leftIcon={<BiTrash />}
 												isLoading={isLoading}
-												onClick={handleDeletePost}
+												bgColor="none"
+												onClick={() =>
+													handleDeletePost({
+														requestId: request.id,
+														userId: request.flat_share_profile._id,
+													})
+												}
 												width="100%"
 												display="flex"
 												alignItems="center"
@@ -448,68 +484,11 @@ export default function ApartmentSummary({
 					border={'1px'}
 					borderColor={'brand_darker'}
 					_light={{ borderColor: '#1117171A' }}
-					position={'relative'}
-					paddingTop={{ base: '190px', sm: '120px' }}
-					paddingBottom={DEFAULT_PADDING}
+					paddingY={DEFAULT_PADDING}
 					paddingX={'20px'}
 					gap={'16px'}
 					flexDir={'column'}
 				>
-					<Flex
-						pos={'absolute'}
-						padding={DEFAULT_PADDING}
-						top={DEFAULT_PADDING}
-						right={'-17px'}
-						left={'-17px'}
-						paddingY={DEFAULT_PADDING}
-						paddingX={'20px'}
-						bg={'dark'}
-						justifyContent={'space-between'}
-						flexDir={{ base: 'column', sm: 'row' }}
-						gap={{ base: '24px', sm: '16px' }}
-						alignItems={{ base: 'start', sm: 'center' }}
-						_light={{
-							bgColor: '#FDFDFD',
-							boxShadow: '0 2px 3px rgba(0, 0, 0, 0.5)',
-						}}
-						boxShadow="0 2px 3px rgba(255, 255, 255, 0.5)"
-					>
-						<Flex flexDir={'column'}>
-							<Text
-								fontWeight={'light'}
-								fontSize={{ base: '16px', md: '18px' }}
-							>
-								Rent
-							</Text>
-							<Flex alignItems={'center'} flexWrap={'wrap'}>
-								<Text
-									fontSize={{ base: '18px', md: '24px' }}
-									fontWeight={'extrabold'}
-								>
-									₦{request.budget.toLocaleString()}
-								</Text>{' '}
-								<Text
-									fontSize={{ base: 'lg', md: 'xl' }}
-									fontWeight={'200'}
-									textTransform={'capitalize'}
-								>
-									/{request.payment_type}
-								</Text>
-							</Flex>
-						</Flex>
-						<Button
-							rounded={DEFAULT_PADDING}
-							paddingX={{ base: '28px', md: '38px' }}
-							h={{ base: '48px', md: '52px' }}
-							paddingY={{ base: '12px', md: DEFAULT_PADDING }}
-							bgColor={'black'}
-							_light={{ color: 'white' }}
-							onClick={openModal}
-							fontSize={{ base: 'sm', md: 'base' }}
-						>
-							Book Inspection
-						</Button>
-					</Flex>
 					<Flex flexDir={'column'} gap={'24px'} w={'100%'}>
 						<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'light'}>
 							Price Break down
@@ -797,7 +776,7 @@ export default function ApartmentSummary({
 					>
 						<Flex alignItems={'center'} gap={'16px'} justifyContent={'start'}>
 							<Avatar
-								src={request._user_ref.avatar_url}
+								src={request.flat_share_profile.avatar_url}
 								w={{
 									md: '100px',
 									base: '60px',
@@ -826,7 +805,8 @@ export default function ApartmentSummary({
 									_light={{ color: '#111717CC' }}
 									textTransform={'capitalize'}
 								>
-									{request._user_ref.last_name} {request._user_ref.first_name}
+									{request.flat_share_profile.last_name}{' '}
+									{request.flat_share_profile.first_name}
 								</Text>
 								<Text
 									fontWeight={'300'}
@@ -933,6 +913,7 @@ export default function ApartmentSummary({
 						</Text>
 					</Flex>
 				</SimpleGrid>
+				
 			</Flex>
 		</>
 	)

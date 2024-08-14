@@ -20,7 +20,6 @@ export type HostSpaceFormProps = {
 }
 
 export type FormDataType = {
-	title: string
 	description: string
 	service_charge: number | null
 	budget: number
@@ -53,7 +52,6 @@ export default function HostSpace() {
 	const { appState } = useAppContext()
 
 	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>({
-		title: '',
 		description: '',
 		service_charge: 0,
 		budget: 0,

@@ -16,14 +16,15 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 		getAuthDependencies,
 	} = useAuthContext()
 	const { showToast } = useCommon()
-	const { optionsState: { habits } } = useOptionsContext();
+	const {
+		optionsState: { habits },
+	} = useOptionsContext()
 	const [loading, setLoading] = useState(false)
 	const [fetching, setFetching] = useState(false)
 	const [selectedHabits, setSelectedHabits] = useState<HabitData[]>([])
 
 	const getAllHabits = async () => {
 		try {
-
 			const documents: HabitData[] = []
 			let refs = flat_share_profile?.habits as any[]
 			if (refs && refs.length > 0) {
