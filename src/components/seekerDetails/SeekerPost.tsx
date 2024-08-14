@@ -47,7 +47,7 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
-	const copyShareUrl = useShareSpace()
+	const {copyShareUrl} = useShareSpace()
 	const router = useRouter()
 
 	const {
