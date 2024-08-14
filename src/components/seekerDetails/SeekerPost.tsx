@@ -47,21 +47,21 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
-	const {copyShareUrl} = useShareSpace()
+	const { copyShareUrl } = useShareSpace()
 	const router = useRouter()
 
 	const {
 		updatedAt,
 		description,
 		google_location_text,
-		_user_ref: userDoc,
+		flat_share_profile: userDoc,
 		_service_ref: serviceTypeDoc,
 		_location_keyword_ref: locationKeywordDoc,
 		budget,
 		payment_type,
 		userInfoDoc,
 	} = postData || {}
-
+	
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)

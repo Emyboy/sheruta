@@ -106,7 +106,10 @@ function convertPlainObjectsToTimestamps(data: any): any {
 	return data
 }
 
-const EditSeekerForm: React.FC<{ editFormData: SeekerRequestData, requestId: string }> = ({ editFormData, requestId }) => {
+const EditSeekerForm: React.FC<{
+	editFormData: SeekerRequestData
+	requestId: string
+}> = ({ editFormData, requestId }) => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const router = useRouter()
@@ -141,19 +144,20 @@ const EditSeekerForm: React.FC<{ editFormData: SeekerRequestData, requestId: str
 		const fetchData = async () => {
 			if (editFormData && flat_share_profile?._user_id) {
 				try {
-					const convertedFormData = convertPlainObjectsToTimestamps(editFormData);
+					const convertedFormData =
+						convertPlainObjectsToTimestamps(editFormData)
 
 					if (editFormData.flat_share_profile) {
-						const authorDoc = editFormData.flat_share_profile;
+						const authorDoc = editFormData.flat_share_profile
 
 						// If user IDs don't match, redirect
 						if (authorDoc?._id !== flat_share_profile?._user_id) {
-							router.push('/');
-							return;
+							router.push('/')
+							return
 						}
 
-						const { done_kyc } = flat_share_profile;
-						const { _id, first_name, last_name, avatar_url } = authorDoc;
+						const { done_kyc } = flat_share_profile
+						const { _id, first_name, last_name, avatar_url } = authorDoc
 
 						setFormData((prev) => ({
 							...prev,
@@ -165,26 +169,25 @@ const EditSeekerForm: React.FC<{ editFormData: SeekerRequestData, requestId: str
 								last_name,
 								avatar_url,
 							},
-						}));
+						}))
 
 						// Convert authorDoc back to DocumentReference
-						const _user_ref = doc(db, 'users', authorDoc._id);
+						const _user_ref = doc(db, 'users', authorDoc._id)
 
 						// Set document reference state
 						setDocRefs((prev) => ({
 							...prev,
 							_user_ref,
-						}));
+						}))
 					}
 				} catch (error) {
-					console.error("Error fetching data: ", error);
+					console.error('Error fetching data: ', error)
 				}
 			}
-		};
+		}
 
-		fetchData();
-	}, [editFormData, flat_share_profile, router]);
-
+		fetchData()
+	}, [editFormData, flat_share_profile, router])
 
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
@@ -206,11 +209,11 @@ const EditSeekerForm: React.FC<{ editFormData: SeekerRequestData, requestId: str
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''

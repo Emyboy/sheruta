@@ -26,7 +26,7 @@ export default async function Page({ params }: Props) {
 	} else {
 		redirect('/')
 	}
-	
+
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>

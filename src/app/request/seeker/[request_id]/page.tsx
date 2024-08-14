@@ -50,14 +50,14 @@ async function getRequestData(requestId: string): Promise<string | undefined> {
 		if (
 			result &&
 			Object.keys(result).length > 0 &&
-			result._user_ref &&
+			result.flat_share_profile &&
 			result._service_ref &&
 			result._location_keyword_ref
 		) {
 			let userInfoDoc: DocumentData | undefined = undefined
 
-			if (result?._user_ref?._id) {
-				userInfoDoc = await UserInfoService.get(result._user_ref._id)
+			if (result?.flat_share_profile?._id) {
+				userInfoDoc = await UserInfoService.get(result.flat_share_profile._id)
 			}
 
 			return SuperJSON.stringify({
