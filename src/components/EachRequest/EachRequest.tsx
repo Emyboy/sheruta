@@ -85,7 +85,10 @@ export default function EachRequest({ request }: Props) {
 								style={{ textDecoration: 'none' }}
 							>
 								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
-									<Text>
+									<Text
+										textTransform={'capitalize'}
+										fontSize={{ base: 'base', md: 'lg' }}
+									>
 										{request.flat_share_profile.last_name}{' '}
 										{request.flat_share_profile.first_name}
 									</Text>

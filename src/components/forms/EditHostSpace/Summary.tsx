@@ -1,24 +1,32 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useOptionsContext } from '@/context/options.context'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import {
+	createHostRequestDTO,
+	HostRequestData,
+} from '@/firebase/service/request/request.types'
 import {
 	Box,
 	Button,
 	Checkbox,
-	CheckboxGroup,
 	Flex,
 	FormControl,
 	FormLabel,
 	Input,
 	Select,
 	SimpleGrid,
+	Spinner,
 	Text,
 	Textarea,
+	useToast,
 	VStack,
 } from '@chakra-ui/react'
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
+import { Timestamp } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import { HostSpaceFormProps } from '.'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
+import { HostSpaceFormProps } from '.'
 
 const libraries: 'places'[] = ['places']
 
@@ -33,12 +41,12 @@ interface LocationObject {
 	[key: string]: any
 }
 
-export default function Summary({
-	next,
-	formData,
-	setFormData,
-}: HostSpaceFormProps) {
+export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	const { optionsState: options } = useOptionsContext()
+	const toast = useToast()
+	const router = useRouter()
+
+	const [loading, setLoading] = useState(false)
 
 	const [houseRules, setHouseRules] = useState<string[]>(
 		formData.house_rules ? formData.house_rules : [''],
@@ -130,57 +138,61 @@ export default function Summary({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
+		setLoading(true)
+
 		const selectedCategory = options.categories.find(
 			(category) => category.id === formData.category,
 		)
-		if (selectedCategory) {
-			setFormData((prev) => ({
-				...prev,
-				_category_ref: selectedCategory._ref,
-			}))
-		}
-
 		const selectedService = options.services.find(
 			(service) => service.id === formData.service,
 		)
-		if (selectedService) {
-			setFormData((prev) => ({
-				...prev,
-				_service_ref: selectedService._ref,
-			}))
-		}
-
 		const selectedLocation = filteredLocationOptions.find(
 			(location) => location.id === formData.area,
 		)
-		if (selectedLocation) {
-			setFormData((prev) => ({
-				...prev,
-				_location_keyword_ref: selectedLocation._ref,
-			}))
-		}
-
 		const selectedState = options.states.find(
 			(state) => state.id === formData.state,
 		)
-		if (selectedState) {
-			setFormData((prev) => ({
-				...prev,
-				_state_ref: selectedState._ref,
-			}))
-		}
-
 		const selectedProperty = options.property_types.find(
 			(property) => property.id === formData.property,
 		)
-		if (selectedProperty) {
-			setFormData((prev) => ({
-				...prev,
+
+		try {
+			const { category, service, state, area, property, ...cleanedFormData } =
+				formData
+
+			const data: HostRequestData = {
+				...cleanedFormData,
+				_location_keyword_ref: selectedLocation._ref,
+				_state_ref: selectedState._ref,
+				_service_ref: selectedService._ref,
+				_category_ref: selectedCategory._ref,
 				_property_type_ref: selectedProperty._ref,
-			}))
+				seeking: false,
+				updatedAt: Timestamp.now(),
+			}
+
+			console.log('data before parse', data)
+
+			createHostRequestDTO.parse(data)
+
+			await SherutaDB.update({
+				collection_name: DBCollectionName.flatShareRequests,
+				data,
+				document_id: formData.uuid,
+			})
+
+			toast({
+				status: 'success',
+				title: 'You have successfully updated your space',
+			})
+
+			router.push('/')
+		} catch (e) {
+			console.log('Unknown error', e)
+			toast({ title: 'Error updating your details', status: 'error' })
 		}
 
-		next()
+		setLoading(false)
 	}
 
 	useEffect(() => {
@@ -710,6 +722,7 @@ export default function Summary({
 										_placeholder={{ color: 'text_muted' }}
 										id="address"
 										type="text"
+										required
 										placeholder="Enter a location"
 										name="google_location_text"
 										value={formData.google_location_text}
@@ -721,11 +734,9 @@ export default function Summary({
 					)}
 				</VStack>
 				<br />
-				<Button
-					bgColor={'brand'}
-					color={'white'}
-					type={'submit'}
-				>{`Next`}</Button>
+				<Button bgColor={'brand'} color={'white'} type={'submit'}>
+					{loading ? <Spinner /> : 'Update'}
+				</Button>
 			</Flex>
 		</>
 	)

@@ -140,8 +140,6 @@ export default function UploadMedia({
 			? formData.video_url
 			: null
 
-		console.log(newImages, newVideo)
-
 		try {
 			const userId = user?._id
 			const imageUploadPromises = newImages.map((url, i) =>
@@ -172,8 +170,6 @@ export default function UploadMedia({
 			const mediaRefPaths = newVideo
 				? [...oldMediaRefPaths, ...newMediaRefPaths]
 				: [...newMediaRefPaths, ...oldMediaRefPaths]
-
-			console.log(mediaRefPaths)
 
 			const mediaUrls = await Promise.all(
 				mediaRefPaths.map((url) => SherutaDB.getMediaUrl(url)),
@@ -510,7 +506,7 @@ export default function UploadMedia({
 					alignItems={'center'}
 					justifyContent={'center'}
 				>
-					{loading ? <Spinner /> : 'Submit'}
+					{loading ? <Spinner /> : 'Update'}
 				</Button>
 			</Flex>
 		</>
