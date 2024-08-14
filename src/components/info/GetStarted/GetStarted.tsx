@@ -11,12 +11,13 @@ import InterestsSelector from '@/components/info/GetStarted/InterestsSelector'
 import ProfilePictureSelector from '@/components/info/GetStarted/ProfilePictureSelector'
 import PersonalInfoForm from './PersonalInfoForm'
 import LocationKeywordForm from './LocationKeywordForm'
+import GetStartedCompleted from '@/components/info/GetStarted/GetStartedCompleted'
 
 export default function GetStarted() {
 	const {
 		authState: { user, flat_share_profile, user_info },
 	} = useAuthContext()
-	const [step, setStep] = useState(8)
+	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
 
 	const next = () => {
@@ -34,6 +35,7 @@ export default function GetStarted() {
 			<ProfilePictureSelector key={'profile-pics'} done={next} />,
 			<LocationKeywordForm key={'location-keyword'} done={next} />,
 			<PersonalInfoForm key={'personal-info'} done={next} />,
+			<GetStartedCompleted key={'completed'} done={next} />,
 		]
 	}
 
@@ -43,16 +45,18 @@ export default function GetStarted() {
 		setPercentage(calculatedPercentage)
 	}, [step])
 
-	return null
+	// return null
 
 	if (!user) {
 		return null
 	}
+
 	if (
 		!flat_share_profile?.budget ||
 		!user_info?.gender ||
-		!flat_share_profile?.verified ||
-		!user_info?.done_kyc
+		!flat_share_profile?.occupation ||
+		!flat_share_profile?.budget ||
+		!flat_share_profile?.done_kyc
 	) {
 		// return null
 		return (
@@ -71,7 +75,7 @@ export default function GetStarted() {
 					alignItems={'center'}
 					overflowY={'auto'}
 				>
-					{step > 0 ? (
+					{step > 0 && step < allSteps().length - 1 ? (
 						<Flex
 							position={'fixed'}
 							h={'5px'}
@@ -90,7 +94,7 @@ export default function GetStarted() {
 							/>
 						</Flex>
 					) : null}
-					{step > 1 ? (
+					{step > 1 && step < allSteps().length - 1 ? (
 						<>
 							<Flex
 								cursor={'pointer'}

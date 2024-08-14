@@ -4,6 +4,7 @@ import {
 	Box,
 	Button,
 	Checkbox,
+	CheckboxGroup,
 	Flex,
 	FormControl,
 	FormLabel,
@@ -16,8 +17,8 @@ import {
 } from '@chakra-ui/react'
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
-import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
+import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 
 const libraries: 'places'[] = ['places']
 
@@ -77,14 +78,6 @@ export default function Summary({
 				google_location_object: locationObject,
 				google_location_text: locationText,
 			}))
-			localStorage.setItem(
-				'host_space_form',
-				JSON.stringify({
-					...formData,
-					google_location_object: locationObject,
-					google_location_text: locationText,
-				}),
-			)
 		}
 	}
 
@@ -95,13 +88,6 @@ export default function Summary({
 
 		setHouseRules(updatedRules)
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
-		localStorage.setItem(
-			'host_space_form',
-			JSON.stringify({
-				...formData,
-				house_rules: updatedRules,
-			}),
-		)
 	}
 
 	const handleHouseRuleChange = (
@@ -115,13 +101,6 @@ export default function Summary({
 		setHouseRules(updatedRules)
 
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
-		localStorage.setItem(
-			'host_space_form',
-			JSON.stringify({
-				...formData,
-				house_rules: updatedRules,
-			}),
-		)
 	}
 
 	const handleChange = (
@@ -140,27 +119,11 @@ export default function Summary({
 				...prev,
 				[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
 			}))
-
-			localStorage.setItem(
-				'host_space_form',
-				JSON.stringify({
-					...formData,
-					[e.target.name]: Number(e.target.value.replace(/[^0-9]/g, '')),
-				}),
-			)
 		} else {
 			setFormData((prev) => ({
 				...prev,
 				[e.target.name]: e.target.value,
 			}))
-
-			localStorage.setItem(
-				'host_space_form',
-				JSON.stringify({
-					...formData,
-					[e.target.name]: e.target.value,
-				}),
-			)
 		}
 	}
 
@@ -250,33 +213,6 @@ export default function Summary({
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-<<<<<<< HEAD
-								Title
-							</Text>
-							<Input
-								onChange={handleChange}
-								required
-								minLength={5}
-								value={formData.title}
-								name="title"
-								_placeholder={{ color: 'text_muted' }}
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Title here"
-							/>
-						</Flex>
-					</Flex>
-
-					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={3}
-						>
-							<Text color={'text_muted'} fontSize={'base'}>
-=======
->>>>>>> marvellous
 								Apartment Description
 							</Text>
 							<Textarea
@@ -284,7 +220,6 @@ export default function Summary({
 								required
 								minLength={20}
 								value={formData.description}
-								_placeholder={{ color: 'text_muted' }}
 								name="description"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
@@ -376,7 +311,7 @@ export default function Summary({
 								</option>
 							</Select>
 						</Flex>
-						{/* <Flex
+						<Flex
 							justifyContent={'flex-start'}
 							flexDir={'column'}
 							w="full"
@@ -407,7 +342,7 @@ export default function Summary({
 									Reserved
 								</option>
 							</Select>
-						</Flex> */}
+						</Flex>
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -595,46 +530,37 @@ export default function Summary({
 							</Text>
 
 							<SimpleGrid columns={[1, 2, 3]} spacingY="8px">
-								{options.amenities.map((amenity) => (
-									<Checkbox
-										textTransform={'capitalize'}
-										color={'border_color'}
-										colorScheme="green"
-										_light={{ color: 'dark' }}
-										value={amenity.title}
-										key={amenity.id}
-										textColor={'white'}
-										defaultChecked={formData.amenities.includes(amenity.title)}
-										onChange={(e) => {
-											const { checked, value } = e.target
-											if (checked) {
-												const amenities = [...formData.amenities, value]
-												setFormData((prev) => ({ ...prev, amenities }))
-												localStorage.setItem(
-													'host_space_form',
-													JSON.stringify({
-														...formData,
-														amenities,
-													}),
-												)
-											} else {
-												const amenities = formData.amenities.filter(
-													(amenity) => amenity !== value,
-												)
-												setFormData((prev) => ({ ...prev, amenities }))
-												localStorage.setItem(
-													'host_space_form',
-													JSON.stringify({
-														...formData,
-														amenities,
-													}),
-												)
-											}
-										}}
-									>
-										{amenity.title}
-									</Checkbox>
-								))}
+								{options.amenities.map((amenity) => {
+									return (
+										<Checkbox
+											type="checkbox"
+											colorScheme="green"
+											textTransform={'capitalize'}
+											color={'border_color'}
+											_light={{ color: 'dark' }}
+											value={amenity.title}
+											key={amenity.id}
+											textColor={'white'}
+											defaultChecked={formData.amenities.includes(
+												amenity.title,
+											)}
+											onChange={(e) => {
+												const { checked, value } = e.target
+												if (checked) {
+													const amenities = [...formData.amenities, value]
+													setFormData((prev) => ({ ...prev, amenities }))
+												} else {
+													const amenities = formData.amenities.filter(
+														(amenity) => amenity !== value,
+													)
+													setFormData((prev) => ({ ...prev, amenities }))
+												}
+											}}
+										>
+											{amenity.title}
+										</Checkbox>
+									)
+								})}
 							</SimpleGrid>
 						</Flex>
 					</Flex>
@@ -728,6 +654,7 @@ export default function Summary({
 								))}
 							</Select>
 						</Flex>
+
 						<Flex
 							justifyContent={'flex-start'}
 							flexDir={'column'}
@@ -763,6 +690,7 @@ export default function Summary({
 							</Select>
 						</Flex>
 					</Flex>
+
 					{formData.area && (
 						<LoadScript
 							googleMapsApiKey={
@@ -772,7 +700,7 @@ export default function Summary({
 						>
 							<FormControl mt={'-1.5rem'}>
 								<FormLabel htmlFor="address">
-									Where in {formData.area}?
+									Choose a more descriptive location in {formData.area}?
 								</FormLabel>
 								<Autocomplete
 									onLoad={handleLoad}
@@ -780,8 +708,6 @@ export default function Summary({
 								>
 									<Input
 										_placeholder={{ color: 'text_muted' }}
-										borderColor={'border_color'}
-										_dark={{ borderColor: 'dark_light' }}
 										id="address"
 										type="text"
 										placeholder="Enter a location"
@@ -793,30 +719,6 @@ export default function Summary({
 							</FormControl>
 						</LoadScript>
 					)}
-					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={3}
-						>
-							<Text color={'text_muted'} fontSize={'base'}>
-								Apartment Description
-							</Text>
-							<Textarea
-								onChange={handleChange}
-								required
-								minLength={20}
-								value={formData.description}
-								name="description"
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Summary Here"
-								resize={'vertical'}
-								height={160}
-							/>
-						</Flex>
-					</Flex>
 				</VStack>
 				<br />
 				<Button

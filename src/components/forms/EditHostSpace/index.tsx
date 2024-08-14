@@ -1,12 +1,16 @@
 'use client'
 
 import { useAppContext } from '@/context/app.context'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
 import {
 	AvailabilityStatus,
+	HostRequestDataDetails,
 	PaymentPlan,
+	userSchema,
 } from '@/firebase/service/request/request.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
-import { DocumentReference } from '@firebase/firestore'
+import { DocumentReference, Timestamp } from '@firebase/firestore'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
@@ -20,6 +24,7 @@ export type HostSpaceFormProps = {
 }
 
 export type FormDataType = {
+	uuid: string
 	description: string
 	service_charge: number | null
 	budget: number
@@ -36,10 +41,13 @@ export type FormDataType = {
 	_service_ref: undefined | DocumentReference
 	_category_ref: undefined | DocumentReference
 	images_urls: string[]
+	imagesRefPaths: string[]
 	video_url: string | null
+	videoRefPath: string | null
 	google_location_object: Record<string, any>
 	google_location_text: string
-
+	createdAt: Timestamp | { seconds: number; nanoseconds: number }
+	flat_share_profile: userSchema
 	state?: string
 	area?: string
 	service?: string
@@ -47,30 +55,40 @@ export type FormDataType = {
 	property?: string
 }
 
-export default function HostSpace() {
+export default function EditHostSpace({ data }: { data: string }) {
 	const router = useRouter()
+	const request: HostRequestDataDetails = JSON.parse(data)
+	const { optionsState: options } = useOptionsContext()
 	const { appState } = useAppContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>({
-		description: '',
-		service_charge: 0,
-		budget: 0,
-		payment_type: 'monthly',
-		bathrooms: 0,
-		toilets: 0,
-		living_rooms: 0,
-		amenities: [],
-		house_rules: null,
-		images_urls: [],
-		video_url: null,
-		availability_status: 'available',
+		uuid: request.uuid || '',
+		description: request.description || '',
+		service_charge: request.service_charge || 0,
+		budget: request.budget || 0,
+		payment_type: request.payment_type || 'monthly',
+		bathrooms: request.bathrooms || 0,
+		toilets: request.toilets || 0,
+		living_rooms: request.living_rooms || 0,
+		amenities: request.amenities || [],
+		house_rules: request.house_rules || null,
+		images_urls: request.images_urls || [],
+		imagesRefPaths: request.imagesRefPaths || [],
+		video_url: request.video_url || null,
+		videoRefPath: request.videoRefPath || null,
+		availability_status: request.availability_status || 'available',
 		_location_keyword_ref: undefined,
 		_state_ref: undefined,
 		_service_ref: undefined,
 		_category_ref: undefined,
 		_property_type_ref: undefined,
-		google_location_object: {},
-		google_location_text: '',
+		google_location_object: request.google_location_object || {},
+		google_location_text: request.google_location_text || '',
+		createdAt: request.createdAt,
+		flat_share_profile: request.flat_share_profile,
 		state: '',
 		area: '',
 		service: '',
@@ -105,20 +123,68 @@ export default function HostSpace() {
 		/>,
 	]
 
-	const allStepNames = (): string[] => ['About Apartment', 'Upload Media']
-
-	useEffect(() => {
-		const formData = localStorage.getItem('host_space_form')
-
-		if (formData && !appState.app_loading)
-			setHostSpaceData(JSON.parse(formData))
-	}, [appState.app_loading])
+	const allStepNames = (): string[] => ['Edit Apartment Details', 'Edit Media']
 
 	useEffect(() => {
 		const totalSteps = allSteps().length
 		const calculatedPercentage = (step / totalSteps) * 100
 		setPercentage(calculatedPercentage)
 	}, [step])
+
+	useEffect(() => {
+		if (user?._id !== request.flat_share_profile._id) return router.back()
+		if (appState.app_loading) return
+
+		const selectedCategory = options.categories.find(
+			(category) => category.id === request._category_ref.slug,
+		)
+		if (selectedCategory) {
+			setHostSpaceData((prev) => ({
+				...prev,
+				category: selectedCategory.id,
+			}))
+		}
+
+		const selectedService = options.services.find(
+			(service) => service.id === request._service_ref.slug,
+		)
+		if (selectedService) {
+			setHostSpaceData((prev) => ({
+				...prev,
+				service: selectedService.id,
+			}))
+		}
+
+		const selectedProperty = options.property_types.find(
+			(property) => property.id === request._property_type_ref.slug,
+		)
+		if (selectedProperty) {
+			setHostSpaceData((prev) => ({
+				...prev,
+				property: selectedProperty.id,
+			}))
+		}
+
+		const selectedState = options.states.find(
+			(state) => state.slug === request._state_ref.slug,
+		)
+		if (selectedState) {
+			setHostSpaceData((prev) => ({
+				...prev,
+				state: selectedState.id,
+			}))
+		}
+
+		const selectedLocation = options.location_keywords.find(
+			(location) => location.id === request._location_keyword_ref.slug,
+		)
+		if (selectedLocation) {
+			setHostSpaceData((prev) => ({
+				...prev,
+				area: selectedLocation.id,
+			}))
+		}
+	}, [appState.app_loading])
 
 	return (
 		<Flex

@@ -1,4 +1,6 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import useShareSpace from '@/hooks/useShareSpace'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -7,7 +9,6 @@ import {
 	Box,
 	Button,
 	Flex,
-	IconButton,
 	Image,
 	Popover,
 	PopoverBody,
@@ -22,44 +23,27 @@ import { useState } from 'react'
 import {
 	BiBarChart,
 	BiDotsHorizontalRounded,
-	BiDotsVerticalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
+	BiPencil,
 	BiPhone,
+	BiPlayCircle,
 	BiShare,
+	BiTrash,
 } from 'react-icons/bi'
+import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
 import useCommon from '@/hooks/useCommon'
+import { useAuthContext } from '@/context/auth.context'
+import { useRouter } from 'next/navigation'
 
-type Props = { request: any }
+type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
+	const router = useRouter()
 	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
-
-	const copyShareUrl = (url: string): void => {
-		if (
-			typeof window !== 'undefined' &&
-			typeof window.navigator !== 'undefined' &&
-			typeof window.location !== 'undefined'
-		) {
-			window.navigator.clipboard
-				.writeText(window.location.origin + url)
-				.then(() => {
-					showToast({
-						message: 'Link has been copied successfully',
-						status: 'info',
-					})
-				})
-				.catch((err) => {
-					showToast({
-						message: 'Failed to copy the link',
-						status: 'error',
-					})
-					console.error('Could not copy text: ', err)
-				})
-		}
-	}
+	const { authState } = useAuthContext()
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	return (
 		<Box
@@ -76,77 +60,171 @@ export default function EachRequest({ request }: Props) {
 				bg: 'dark',
 				borderColor: 'dark_light',
 			}}
-			key={Math.random()}
 			width={'full'}
 		>
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
-					<Avatar
-						src={request._user_ref?.avatar_url}
-						size={{
-							md: 'md',
-							base: 'md',
-						}}
+					<Link
+						href={`/user/${request.flat_share_profile._id}`}
+						style={{ textDecoration: 'none' }}
 					>
-						<AvatarBadge boxSize="20px" bg="green.500" />
-					</Avatar>
-					<Flex
-						gap={'0px'}
-						flexDirection={'column'}
-						justifyContent={'flex-start'}
-						flex={1}
-					>
+						<Avatar
+							src={request.flat_share_profile.avatar_url}
+							size={{
+								md: 'md',
+								base: 'md',
+							}}
+						>
+							<AvatarBadge boxSize="20px" bg="green.500" />
+						</Avatar>
+					</Link>
+					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Text>
-								{request.title
-									? request.title
-									: request.seeking
-										? 'Looking for apartment'
-										: 'New apartment'}
-							</Text>
-							<Box zIndex={9999}>
-								<Popover>
-									<PopoverTrigger>
-										<IconButton
-											fontSize={'24px'}
-											aria-label="Options"
-											icon={<BiDotsHorizontalRounded />}
-										/>
-									</PopoverTrigger>
-									<PopoverContent
-										color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
-										bg={colorMode === 'dark' ? '#202020' : '#fff'}
-										width={'100%'}
-										padding={2}
+							<Link
+								href={`/user/${request.flat_share_profile._id}`}
+								style={{ textDecoration: 'none' }}
+							>
+								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+									<Text>
+										{request.flat_share_profile.last_name}{' '}
+										{request.flat_share_profile.first_name}
+									</Text>
+									{request.flat_share_profile.done_kyc && (
+										<LuBadgeCheck fill="#00bc73" />
+									)}
+								</Flex>
+							</Link>
+							<Popover>
+								<PopoverTrigger>
+									<Button
+										px={0}
+										colorScheme=""
+										bgColor="none"
+										color="text_muted"
+										display={'flex'}
+										fontWeight={'light'}
+										_hover={{
+											color: 'brand',
+											_dark: {
+												color: 'brand',
+											},
+										}}
+										_dark={{
+											color: 'dark_lighter',
+										}}
+										fontSize={{
+											md: 'xl',
+											base: 'lg',
+										}}
 									>
-										<PopoverBody p={0}>
-											<VStack align="flex-start">
-												<Button
-													variant="ghost"
-													leftIcon={<BiShare />}
-													onClick={() =>
-														copyShareUrl(
-															`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
-														)
-													}
-													width="100%"
-													display="flex"
-													alignItems="center"
-													padding={0}
-													borderRadius="sm"
-													_hover={{ color: 'brand_dark' }}
-												>
-													<Text width={'100%'} textAlign={'left'}>
-														Share
-													</Text>
-												</Button>
-											</VStack>
-										</PopoverBody>
-									</PopoverContent>
-								</Popover>
-							</Box>
+										<BiDotsHorizontalRounded />
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent
+									color={colorMode === 'dark' ? '#F0F0F0' : '#000'}
+									bg={colorMode === 'dark' ? '#202020' : '#fff'}
+									width={'100%'}
+									padding={4}
+								>
+									<PopoverBody p={0}>
+										<VStack spacing={1} align="flex-start">
+											<Button
+												variant="ghost"
+												leftIcon={<BiShare />}
+												isLoading={isLoading}
+												bgColor="none"
+												onClick={() =>
+													copyShareUrl(
+														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+														request.seeking
+															? 'Looking for apartment'
+															: 'New apartment',
+														request.description,
+													)
+												}
+												width="100%"
+												display="flex"
+												alignItems="center"
+												padding={0}
+												borderRadius="sm"
+												_hover={{
+													bgColor: 'none',
+													color: 'brand_dark',
+												}}
+												_active={{
+													bgColor: 'none',
+												}}
+											>
+												<Text width={'100%'} textAlign={'left'}>
+													Share
+												</Text>
+											</Button>
+											{authState.user?._id ===
+												request.flat_share_profile._id && (
+												<>
+													<Button
+														variant="ghost"
+														leftIcon={<BiPencil />}
+														isLoading={isLoading}
+														_active={{
+															bgColor: 'none',
+														}}
+														_hover={{
+															bgColor: 'none',
+															color: 'brand_dark',
+														}}
+														onClick={() => {
+															router.push(
+																`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
+															)
+														}}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Edit
+														</Text>
+													</Button>
+													<Button
+														variant="ghost"
+														leftIcon={<BiTrash />}
+														isLoading={isLoading}
+														bgColor="none"
+														_active={{
+															bgColor: 'none',
+														}}
+														onClick={() =>
+															handleDeletePost({
+																requestId: request.id,
+																userId: request.flat_share_profile._id,
+															})
+														}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+														_hover={{
+															bgColor: 'none',
+															color: 'red.500',
+														}}
+														color="red.400"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Delete
+														</Text>
+													</Button>
+												</>
+											)}
+										</VStack>
+									</PopoverBody>
+								</PopoverContent>
+							</Popover>
 						</Flex>
-						<Text color="text_muted" fontSize={'sm'}>
+						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +
@@ -157,6 +235,7 @@ export default function EachRequest({ request }: Props) {
 						</Text>
 					</Flex>
 				</Flex>
+
 				<Link
 					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
@@ -167,17 +246,25 @@ export default function EachRequest({ request }: Props) {
 							as="address"
 							color="brand"
 							fontSize={'sm'}
+							gap={'4px'}
 						>
-							<BiLocationPlus /> {request.google_location_text}
+							<Box>
+								<BiLocationPlus size={'16px'} />
+							</Box>
+							<Truncate
+								text={request.google_location_text}
+								max={70}
+								showReadMore={false}
+							/>
 						</Flex>
-						<Truncate text={request.description} />
+						<Truncate text={request.description} showReadMore={true} />
 					</Flex>
 				</Link>
 				<Link
 					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
 					style={{ textDecoration: 'none' }}
 				>
-					<Flex justifyContent={'space-between'}>
+					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
 						<Flex gap={DEFAULT_PADDING}>
 							<Badge
 								colorScheme="green"
@@ -213,12 +300,16 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				{request.images_urls && (
-					<EachRequestImages
+					<EachRequestMedia
 						video={request.video_url}
 						images={request.images_urls}
 					/>
 				)}
-				<Flex alignItems={'center'} justifyContent={'space-between'}>
+				<Flex
+					alignItems={{ base: 'start', sm: 'center' }}
+					flexDir={{ base: 'column', sm: 'row' }}
+					justifyContent={'space-between'}
+				>
 					<Flex gap={DEFAULT_PADDING}>
 						<MainTooltip label="Call me" placement="top">
 							<Button
@@ -240,7 +331,8 @@ export default function EachRequest({ request }: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg',
+									sm: 'lg',
+									base: 'base',
 								}}
 							>
 								<BiPhone /> 35
@@ -266,7 +358,8 @@ export default function EachRequest({ request }: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg',
+									sm: 'lg',
+									base: 'base',
 								}}
 							>
 								<BiMessageRoundedDetail /> 35
@@ -292,7 +385,8 @@ export default function EachRequest({ request }: Props) {
 								}}
 								fontSize={{
 									md: 'xl',
-									base: 'lg',
+									sm: 'lg',
+									base: 'base',
 								}}
 							>
 								<BiBarChart /> 135
@@ -305,10 +399,15 @@ export default function EachRequest({ request }: Props) {
 						}}
 						alignItems={'center'}
 					>
-						<Text fontSize={'lg'} fontWeight={'bold'}>
+						<Text fontSize={{ base: 'base', md: 'lg' }} fontWeight={'bold'}>
 							₦{request.budget.toLocaleString()}
 						</Text>{' '}
-						<Text textTransform={'capitalize'}>/{request.payment_type}</Text>
+						<Text
+							textTransform={'capitalize'}
+							fontSize={{ base: 'sm', md: 'base' }}
+						>
+							/{request.payment_type}
+						</Text>
 					</Flex>
 				</Flex>
 			</Flex>
@@ -316,12 +415,12 @@ export default function EachRequest({ request }: Props) {
 	)
 }
 
-const EachRequestImages = ({
+const EachRequestMedia = ({
 	images,
 	video,
 }: {
 	images: string[]
-	video?: string
+	video?: string | null
 }) => {
 	const [clicked, setClicked] = useState(false)
 	const [url, setUrl] = useState<string>('')
@@ -350,6 +449,7 @@ const EachRequestImages = ({
 					justifyContent={'center'}
 					cursor={'pointer'}
 					onClick={close}
+					p={'32px'}
 				>
 					{type === 'img' ? (
 						<Box overflow={'hidden'} rounded="md" bg="dark" w={'60%'} h={'60%'}>
@@ -369,8 +469,12 @@ const EachRequestImages = ({
 							overflow={'hidden'}
 							rounded="md"
 							bg="dark"
-							w={'60%'}
-							h={'60%'}
+							maxH={'60%'}
+							maxW={'700px'}
+							minH={'500px'}
+							minW={'280px'}
+							w={'100%'}
+							h={'100%'}
 							alignItems={'center'}
 							justifyContent={'center'}
 						>
@@ -396,15 +500,20 @@ const EachRequestImages = ({
 					h={'full'}
 				>
 					{video && (
-						<Box
+						<Flex
 							position={'relative'}
 							overflow={'hidden'}
 							cursor={'pointer'}
 							rounded="md"
+							alignItems={'center'}
+							justifyContent={'center'}
 							onClick={() => handleClick(video, 'video')}
 						>
 							<video src={video} width={'100%'} height={'100%'} />
-						</Box>
+							<Box pos="absolute" zIndex={0}>
+								<BiPlayCircle size={'80px'} fill="#00bc73" cursor={'pointer'} />
+							</Box>
+						</Flex>
 					)}
 					{images.map((imgUrl, i) => (
 						<Box
@@ -429,8 +538,16 @@ const EachRequestImages = ({
 	)
 }
 
-const Truncate = ({ text }: { text: string }) => {
-	const maxChars = 200
+const Truncate = ({
+	text,
+	max,
+	showReadMore,
+}: {
+	text: string
+	max?: number
+	showReadMore: boolean
+}) => {
+	const maxChars = max || 200
 
 	const truncatedText =
 		text.length > maxChars ? text.substring(0, maxChars) + '... ' : text
@@ -438,7 +555,7 @@ const Truncate = ({ text }: { text: string }) => {
 	return (
 		<Text>
 			{truncatedText}
-			{text.length > maxChars && (
+			{text.length > maxChars && showReadMore && (
 				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
 					Read more..
 				</Text>

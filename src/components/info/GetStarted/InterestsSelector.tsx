@@ -8,6 +8,7 @@ import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-
 import { useAuthContext } from '@/context/auth.context'
 import DotsLoading from '@/components/info/GetStarted/DotsLoading'
 import { getDoc } from 'firebase/firestore'
+import { useOptionsContext } from '@/context/options.context'
 
 export default function InterestsSelector({ done }: { done?: () => void }) {
 	const {
@@ -15,19 +16,15 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 		getAuthDependencies,
 	} = useAuthContext()
 	const { showToast } = useCommon()
-	const [habits, setHabits] = useState<HabitData[]>([])
+	const {
+		optionsState: { interests },
+	} = useOptionsContext()
 	const [loading, setLoading] = useState(false)
 	const [fetching, setFetching] = useState(false)
 	const [selectedHabits, setSelectedHabits] = useState<HabitData[]>([])
 
 	const getAllHabits = async () => {
 		try {
-			setFetching(true)
-			let res = await SherutaDB.getAll({
-				collection_name: DBCollectionName.interests,
-				_limit: 50,
-			})
-
 			const documents: HabitData[] = []
 			let refs = flat_share_profile?.interests as any[]
 
@@ -39,7 +36,7 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 						documents.push({
 							//@ts-ignore
 							...docSnapshot.data(),
-							ref: docSnapshot.ref,
+							_ref: docSnapshot.ref,
 							id: docSnapshot.id,
 						} as HabitData)
 					} catch (error) {
@@ -49,10 +46,7 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 			}
 
 			setSelectedHabits(documents)
-			setHabits(res)
-			setFetching(false)
 		} catch (e) {
-			setFetching(false)
 			showToast({
 				message: 'Error, please try again',
 				status: 'error',
@@ -73,7 +67,7 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 		if (user) {
 			setLoading(true)
 			await FlatShareProfileService.update({
-				data: { interests: selectedHabits.map((val) => val.ref) },
+				data: { interests: selectedHabits.map((val) => val._ref) },
 				document_id: user?._id,
 			})
 			await getAuthDependencies()
@@ -118,7 +112,7 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 				py={10}
 				className={'animate__animated animate__fadeIn'}
 			>
-				{habits.map((habit) => {
+				{interests.map((habit) => {
 					return (
 						<EachOption
 							isActive={

@@ -1,5 +1,3 @@
-'use client'
-
 import AvailableIcon from '@/assets/svg/available-icon'
 import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import Checked from '@/assets/svg/checked'
@@ -9,7 +7,11 @@ import PhysicalInspectionIcon from '@/assets/svg/physical-inspection-icon'
 import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
+import useShareSpace from '@/hooks/useShareSpace'
+import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
 	AvatarBadge,
@@ -44,15 +46,21 @@ import {
 import { CiCircleInfo } from 'react-icons/ci'
 import { FaHouseChimneyUser } from 'react-icons/fa6'
 import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
+import { LuBadgeCheck } from 'react-icons/lu'
 import { MdOutlineMailOutline } from 'react-icons/md'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
 
-export default function ApartmentSummary({ request }: { request: any }) {
+export default function ApartmentSummary({
+	request,
+}: {
+	request: HostRequestDataDetails
+}) {
 	const router = useRouter()
+
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
@@ -63,27 +71,74 @@ export default function ApartmentSummary({ request }: { request: any }) {
 	if (showBookInspectionModal)
 		return <BookInspectionModal closeModal={closeModal} />
 
-	const copyLink = () => {
-		navigator.clipboard.writeText(
-			`${window.location.origin}/${request.id}/edit`,
-		)
-		showToast({ message: 'Host Link copied to clipboard', status: 'info' })
-	}
-
 	return (
 		<>
 			<Flex
 				gap={{ base: '8px', sm: 5 }}
 				alignItems={{ base: 'start', sm: 'center' }}
-				// flexDir={{ base: 'column', sm: 'row' }}
 				p={DEFAULT_PADDING}
 				bgColor={'dark'}
 				_light={{ bgColor: '#FDFDFD' }}
 				justifyContent={'space-between'}
+				position={'relative'}
 			>
+				<Flex
+					pos={'fixed'}
+					padding={DEFAULT_PADDING}
+					right={0}
+					bottom={0}
+					left={{ base: 0, lg: '50%' }}
+					zIndex={50}
+					paddingY={DEFAULT_PADDING}
+					paddingX={'20px'}
+					bg={'dark'}
+					justifyContent={'space-between'}
+					flexDir={{ base: 'column', sm: 'row' }}
+					gap={{ base: '24px', sm: '16px' }}
+					alignItems={{ base: 'start', sm: 'center' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						boxShadow: '0 2px 3px rgba(0, 0, 0, 0.5)',
+					}}
+					boxShadow="0 2px 3px rgba(255, 255, 255, 0.5)"
+				>
+					<Flex flexDir={'column'}>
+						<Text fontWeight={'light'} fontSize={{ base: '16px', md: '18px' }}>
+							Rent
+						</Text>
+						<Flex alignItems={'center'} flexWrap={'wrap'}>
+							<Text
+								fontSize={{ base: '18px', md: '24px' }}
+								fontWeight={'extrabold'}
+							>
+								₦{request.budget.toLocaleString()}
+							</Text>{' '}
+							<Text
+								fontSize={{ base: 'lg', md: 'xl' }}
+								fontWeight={'200'}
+								textTransform={'capitalize'}
+							>
+								/{request.payment_type}
+							</Text>
+						</Flex>
+					</Flex>
+					<Button
+						rounded={DEFAULT_PADDING}
+						paddingX={{ base: '28px', md: '38px' }}
+						h={{ base: '48px', md: '52px' }}
+						paddingY={{ base: '12px', md: DEFAULT_PADDING }}
+						bgColor={'black'}
+						_light={{ color: 'white' }}
+						onClick={openModal}
+						fontSize={{ base: 'sm', md: 'base' }}
+					>
+						Book Inspection
+					</Button>
+				</Flex>
+
 				<Flex gap={{ base: '8px', md: '16px' }}>
 					<Avatar
-						src={request._user_ref.avatar_url}
+						src={request.flat_share_profile.avatar_url}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -101,13 +156,20 @@ export default function ApartmentSummary({ request }: { request: any }) {
 						justifyContent={'center'}
 						flexDir={'column'}
 					>
-						<Text
-							textTransform={'capitalize'}
-							fontSize={{ base: 'sm', md: 'base' }}
-							w={'auto'}
+						<Link
+							href={`/user/${request.flat_share_profile._id}`}
+							style={{ textDecoration: 'none' }}
 						>
-							{request._user_ref.last_name} {request._user_ref.first_name}
-						</Text>
+							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+								<Text>
+									{request.flat_share_profile.last_name}{' '}
+									{request.flat_share_profile.first_name}
+								</Text>
+								{request.flat_share_profile.done_kyc && (
+									<LuBadgeCheck fill="#00bc73" />
+								)}
+							</Flex>
+						</Link>
 						<Flex ml={'-12px'} mt={'-6px'}>
 							<MainTooltip label="Call me" placement="top">
 								<Button
@@ -201,7 +263,17 @@ export default function ApartmentSummary({ request }: { request: any }) {
 									<Button
 										variant="ghost"
 										leftIcon={<BiShare />}
-										onClick={copyLink}
+										isLoading={isLoading}
+										bgColor="none"
+										onClick={() =>
+											copyShareUrl(
+												`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+												request.seeking
+													? 'Looking for apartment'
+													: 'New apartment',
+												request.description,
+											)
+										}
 										width="100%"
 										display="flex"
 										alignItems="center"
@@ -213,11 +285,13 @@ export default function ApartmentSummary({ request }: { request: any }) {
 											Share
 										</Text>
 									</Button>
-									{authState.user?._id === request._user_ref._id && (
+									{authState.user?._id === request.flat_share_profile._id && (
 										<>
 											<Button
 												variant="ghost"
 												leftIcon={<BiPencil />}
+												isLoading={isLoading}
+												bgColor="none"
 												onClick={() => {
 													router.push(`${request.id}/edit`)
 												}}
@@ -235,7 +309,14 @@ export default function ApartmentSummary({ request }: { request: any }) {
 											<Button
 												variant="ghost"
 												leftIcon={<BiTrash />}
-												// onClick={() => deletePost()}
+												isLoading={isLoading}
+												bgColor="none"
+												onClick={() =>
+													handleDeletePost({
+														requestId: request.id,
+														userId: request.flat_share_profile._id,
+													})
+												}
 												width="100%"
 												display="flex"
 												alignItems="center"
@@ -402,68 +483,11 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					border={'1px'}
 					borderColor={'brand_darker'}
 					_light={{ borderColor: '#1117171A' }}
-					position={'relative'}
-					paddingTop={{ base: '190px', sm: '120px' }}
-					paddingBottom={DEFAULT_PADDING}
+					paddingY={DEFAULT_PADDING}
 					paddingX={'20px'}
 					gap={'16px'}
 					flexDir={'column'}
 				>
-					<Flex
-						pos={'absolute'}
-						padding={DEFAULT_PADDING}
-						top={DEFAULT_PADDING}
-						right={'-17px'}
-						left={'-17px'}
-						paddingY={DEFAULT_PADDING}
-						paddingX={'20px'}
-						bg={'dark'}
-						justifyContent={'space-between'}
-						flexDir={{ base: 'column', sm: 'row' }}
-						gap={{ base: '24px', sm: '16px' }}
-						alignItems={{ base: 'start', sm: 'center' }}
-						_light={{
-							bgColor: '#FDFDFD',
-							boxShadow: '0 2px 3px rgba(0, 0, 0, 0.5)',
-						}}
-						boxShadow="0 2px 3px rgba(255, 255, 255, 0.5)"
-					>
-						<Flex flexDir={'column'}>
-							<Text
-								fontWeight={'light'}
-								fontSize={{ base: '16px', md: '18px' }}
-							>
-								Rent
-							</Text>
-							<Flex alignItems={'center'} flexWrap={'wrap'}>
-								<Text
-									fontSize={{ base: '18px', md: '24px' }}
-									fontWeight={'extrabold'}
-								>
-									₦{request.budget.toLocaleString()}
-								</Text>{' '}
-								<Text
-									fontSize={{ base: 'lg', md: 'xl' }}
-									fontWeight={'200'}
-									textTransform={'capitalize'}
-								>
-									/{request.payment_type}
-								</Text>
-							</Flex>
-						</Flex>
-						<Button
-							rounded={DEFAULT_PADDING}
-							paddingX={{ base: '28px', md: '38px' }}
-							h={{ base: '48px', md: '52px' }}
-							paddingY={{ base: '12px', md: DEFAULT_PADDING }}
-							bgColor={'black'}
-							_light={{ color: 'white' }}
-							onClick={openModal}
-							fontSize={{ base: 'sm', md: 'base' }}
-						>
-							Book Inspection
-						</Button>
-					</Flex>
 					<Flex flexDir={'column'} gap={'24px'} w={'100%'}>
 						<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'light'}>
 							Price Break down
@@ -514,7 +538,10 @@ export default function ApartmentSummary({ request }: { request: any }) {
 								Service Charge
 							</Text>
 							<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'light'}>
-								₦{request.service_charge.toLocaleString()}
+								₦
+								{request.service_charge
+									? request.service_charge.toLocaleString()
+									: 0}
 							</Text>
 						</Flex>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -525,7 +552,10 @@ export default function ApartmentSummary({ request }: { request: any }) {
 								fontSize={{ base: 'lg', md: '22.55px' }}
 								fontWeight={'normal'}
 							>
-								₦{(request.service_charge + request.budget).toLocaleString()}
+								₦
+								{(
+									request.service_charge || 0 + request.budget
+								).toLocaleString()}
 							</Text>
 						</Flex>
 					</Flex>
@@ -745,7 +775,7 @@ export default function ApartmentSummary({ request }: { request: any }) {
 					>
 						<Flex alignItems={'center'} gap={'16px'} justifyContent={'start'}>
 							<Avatar
-								src={request._user_ref.avatar_url}
+								src={request.flat_share_profile.avatar_url}
 								w={{
 									md: '100px',
 									base: '60px',
@@ -774,7 +804,8 @@ export default function ApartmentSummary({ request }: { request: any }) {
 									_light={{ color: '#111717CC' }}
 									textTransform={'capitalize'}
 								>
-									{request._user_ref.last_name} {request._user_ref.first_name}
+									{request.flat_share_profile.last_name}{' '}
+									{request.flat_share_profile.first_name}
 								</Text>
 								<Text
 									fontWeight={'300'}

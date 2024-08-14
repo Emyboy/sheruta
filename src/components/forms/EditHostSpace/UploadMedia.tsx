@@ -1,7 +1,7 @@
 import UploadMediaIcon from '@/assets/svg/upload-media-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB from '@/firebase/service/index.firebase'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
 	createHostRequestDTO,
 	HostRequestData,
@@ -40,12 +40,17 @@ export default function UploadMedia({
 	const [loading, setLoading] = useState(false)
 	const [length, setLength] = useState(4)
 
-	const [mediaRefPaths, setMediaRefPaths] = useState<string[]>([])
+	const [mediaRefPath, setMediaRefPaths] = useState<string[]>([])
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
 		i: number,
 	) => {
+		const updatedMediaPaths = formData.imagesRefPaths.filter(
+			(url) => !url.includes(`image_${i}`),
+		)
+		setFormData((prev) => ({ ...prev, imagesRefPaths: updatedMediaPaths }))
+
 		if (!e.target.files) return
 		const selectedFile = e.target.files[0]
 
@@ -77,6 +82,8 @@ export default function UploadMedia({
 	}
 
 	const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFormData((prev) => ({ ...prev, videoRefPath: null }))
+
 		if (!e.target.files) return
 		const selectedFile = e.target.files[0]
 
@@ -107,7 +114,7 @@ export default function UploadMedia({
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
-		const uuid = crypto.randomUUID()
+		const uuid = formData.uuid
 
 		if (formData.images_urls.length < length)
 			return toast({
@@ -115,7 +122,10 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (!flat_share_profile || !user)
+		if (
+			(!user?._id || !flat_share_profile?._user_ref) &&
+			formData.flat_share_profile._id === user?._id
+		)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -123,18 +133,25 @@ export default function UploadMedia({
 
 		setLoading(true)
 
+		const newImages = formData.images_urls.filter((img) =>
+			img.includes('data:image/'),
+		)
+		const newVideo = formData.video_url?.includes('data:video/')
+			? formData.video_url
+			: null
+
 		try {
-			const userId = user._id
-			const imageUploadPromises = formData.images_urls.map((url, i) =>
+			const userId = user?._id
+			const imageUploadPromises = newImages.map((url, i) =>
 				SherutaDB.uploadMedia({
 					data: url,
-					storageUrl: `images/requests/${userId}/${uuid}/image_${i}`,
+					storageUrl: `images/requests/${userId}/${uuid}/image_${i + formData.imagesRefPaths.length + 8}`,
 				}),
 			)
 
-			const videoUploadPromise = formData.video_url
+			const videoUploadPromise = newVideo
 				? SherutaDB.uploadMedia({
-						data: formData.video_url,
+						data: newVideo,
 						storageUrl: `videos/requests/${userId}/${uuid}/video_0`,
 					})
 				: null
@@ -144,11 +161,18 @@ export default function UploadMedia({
 				: imageUploadPromises
 
 			const values = await Promise.all(promises)
+
 			const newMediaRefPaths = values.map((value) => value.metadata.fullPath)
 			setMediaRefPaths(newMediaRefPaths)
 
+			const oldMediaRefPaths = [...formData.imagesRefPaths]
+
+			const mediaRefPaths = newVideo
+				? [...oldMediaRefPaths, ...newMediaRefPaths]
+				: [...newMediaRefPaths, ...oldMediaRefPaths]
+
 			const mediaUrls = await Promise.all(
-				newMediaRefPaths.map(async (url) => SherutaDB.getMediaUrl(url)),
+				mediaRefPaths.map((url) => SherutaDB.getMediaUrl(url)),
 			)
 
 			let video_url = null
@@ -158,46 +182,46 @@ export default function UploadMedia({
 				videoRefPath = newMediaRefPaths.pop() || null
 			}
 
+			setFormData((prev) => ({
+				...prev,
+				imagesRefPaths: [...oldMediaRefPaths, ...newMediaRefPaths],
+				videoRefPath,
+			}))
+
 			const images_urls = mediaUrls.filter((url) => url !== null)
 
 			const { category, service, state, area, property, ...cleanedFormData } =
 				formData
 
-			const { done_kyc } = flat_share_profile
-			const { _id, first_name, last_name, avatar_url } = user
-
 			let data: HostRequestData = {
 				...cleanedFormData,
-				imagesRefPaths: newMediaRefPaths,
+				imagesRefPaths: [...oldMediaRefPaths, ...newMediaRefPaths],
 				videoRefPath,
 				seeking: false,
 				video_url,
 				images_urls,
-				uuid,
-				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
-				flat_share_profile: {
-					done_kyc,
-					_id,
-					first_name,
-					last_name,
-					avatar_url,
-				},
 			}
 
 			createHostRequestDTO.parse(data)
 
-			await SherutaDB.create({
-				collection_name: 'requests',
+			await SherutaDB.update({
+				collection_name: DBCollectionName.flatShareRequests,
 				data,
 				document_id: uuid,
 			})
 
-			localStorage.removeItem('host_space_form')
-			toast({ status: 'success', title: 'You have successfully added a space' })
+			toast({
+				status: 'success',
+				title: 'You have successfully updated your space',
+			})
+
 			router.push('/')
 		} catch (e) {
-			await Promise.all(mediaRefPaths.map((url) => SherutaDB.deleteMedia(url)))
+			await Promise.all(
+				mediaRefPath.map((path) => path && SherutaDB.deleteMedia(path)),
+			)
+
 			if (e instanceof ZodError) {
 				e.errors.forEach((error: any) => {
 					console.log(
@@ -240,7 +264,7 @@ export default function UploadMedia({
 									cursor={'pointer'}
 									size={'32px'}
 									fill="#00bc73"
-									title="add new image"
+									title="add new images"
 								/>
 							</Box>
 						)}
@@ -267,6 +291,9 @@ export default function UploadMedia({
 											top={'-12px'}
 											right={'0'}
 											bgColor={'dark'}
+											_light={{
+												bgColor: 'white',
+											}}
 											rounded={'full'}
 											p={0}
 											onClick={() => {
@@ -274,18 +301,24 @@ export default function UploadMedia({
 												const images_urls = formData.images_urls.filter(
 													(_, idx) => i !== idx,
 												)
+												const updatedMediaPaths =
+													formData.imagesRefPaths.filter(
+														(url) => !url.includes(`image_${i}`),
+													)
+												setFormData((prev) => ({
+													...prev,
+													imagesRefPaths: updatedMediaPaths,
+												}))
 												setFormData((prev) => ({ ...prev, images_urls }))
-												console.log(images_urls)
 											}}
 										>
 											<BiMinusCircle
 												size={'24px'}
 												fill="#00bc73"
-												title="remove house rule"
+												title="remove image"
 											/>
 										</Flex>
 									)}
-
 									<FormLabel
 										key={i}
 										htmlFor={i.toString()}
@@ -364,7 +397,6 @@ export default function UploadMedia({
 					<FormLabel
 						htmlFor={'video'}
 						height={250}
-						paddingInline={7}
 						w={'100%'}
 						borderRadius={'8px'}
 						display={'flex'}
@@ -380,12 +412,17 @@ export default function UploadMedia({
 						{formData.video_url && (
 							<Box
 								alignSelf={'end'}
-								onClick={() =>
+								onClick={() => {
+									setFormData((prev) => ({ ...prev, videoRefPath: null }))
 									setFormData((prev) => ({ ...prev, video_url: null }))
-								}
+								}}
 								title="Remove video"
 								position={'absolute'}
 								cursor={'pointer'}
+								_light={{
+									bgColor: 'white',
+								}}
+								bgColor={'dark'}
 								top={-2.5}
 								right={'-8px'}
 								zIndex={50}

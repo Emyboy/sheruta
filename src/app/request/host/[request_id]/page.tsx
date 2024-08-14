@@ -4,6 +4,7 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { FaAngleLeft } from 'react-icons/fa'
 
 export default async function page({
@@ -20,6 +21,10 @@ export default async function page({
 		document_id: request_id,
 		collection_name: DBCollectionName.flatShareRequests,
 	})
+
+	// TODO: set an error page to redirect them home
+
+	if (!request) redirect('/')
 
 	return (
 		<>
@@ -68,7 +73,7 @@ export default async function page({
 						minW={{ base: '100%', lg: '50%' }}
 						maxW={{ base: '100%', lg: '50%' }}
 						flexFlow={'column'}
-						paddingRight={{ base: 0, lg: DEFAULT_PADDING }}
+						// paddingRight={{ base: 0, lg: DEFAULT_PADDING }}
 					>
 						<MediaCarousel
 							video={request.video_url}
@@ -76,7 +81,13 @@ export default async function page({
 						/>
 					</Flex>
 
-					<Flex flex={1} flexDir={'column'}>
+					<Flex
+						flex={1}
+						position={'relative'}
+						minW={{ base: '100%', lg: '50%' }}
+						maxW={{ base: '100%', lg: '50%' }}
+						flexDir={'column'}
+					>
 						<ApartmentDetails request={JSON.stringify(request)} />
 					</Flex>
 				</Flex>
