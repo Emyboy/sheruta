@@ -25,6 +25,7 @@ import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
+	LocationObject,
 	PaymentPlan,
 	RequestData,
 } from '@/firebase/service/request/request.types'
@@ -44,17 +45,6 @@ interface DocRefs {
 	_location_keyword_ref: DocumentReference | undefined
 	_state_ref: DocumentReference | undefined
 	_user_ref: DocumentReference | undefined
-}
-
-interface LocationObject {
-	formatted_address?: string
-	geometry?: {
-		location?: {
-			lat: number
-			lng: number
-		}
-	}
-	[key: string]: any
 }
 
 const budgetLimits: Record<PaymentPlan, number> = {

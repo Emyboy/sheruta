@@ -18,19 +18,9 @@ import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
+import { LocationObject } from '@/firebase/service/request/request.types'
 
 const libraries: 'places'[] = ['places']
-
-interface LocationObject {
-	formatted_address?: string
-	geometry?: {
-		location?: {
-			lat: number
-			lng: number
-		}
-	}
-	[key: string]: any
-}
 
 export default function Summary({
 	next,

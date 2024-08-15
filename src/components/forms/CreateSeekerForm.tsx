@@ -17,8 +17,10 @@ import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
+	LocationObject,
 	PaymentPlan,
 	SeekerRequestData,
+	userSchema,
 } from '@/firebase/service/request/request.types'
 import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
@@ -74,17 +76,6 @@ interface budgetLimits {
 	weekly: number
 }
 
-interface LocationObject {
-	formatted_address?: string
-	geometry?: {
-		location?: {
-			lat: number
-			lng: number
-		}
-	}
-	[key: string]: any
-}
-
 const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
 	monthly: 25000,
@@ -109,7 +100,7 @@ const initialFormState: SeekerRequestData = {
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
-	_user_ref: undefined,
+	flat_share_profile: {} as userSchema,
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -131,7 +122,7 @@ const CreateSeekerForm: React.FC = () => {
 
 	//get user authentication state
 	const {
-		authState: { flat_share_profile },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
 
 	//state to hold userInfo value
@@ -305,11 +296,23 @@ const CreateSeekerForm: React.FC = () => {
 		e.preventDefault()
 		try {
 			setIsLoading(true)
+
+			if (!flat_share_profile?._user_id || !user?._id)
+				return showToast({
+					message: 'Please log in to make a request',
+					status: 'error',
+				})
 			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
 				...optionsRef,
-				_user_ref: userInfo.userRef,
+				flat_share_profile: {
+					done_kyc: flat_share_profile?.done_kyc,
+					_id: user._id,
+					avatar_url: user.avatar_url,
+					first_name: user.first_name,
+					last_name: user.last_name,
+				},
 			}
 
 			//convert budget to number

@@ -1,3 +1,5 @@
+'use client'
+
 import AvailableIcon from '@/assets/svg/available-icon'
 import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import Checked from '@/assets/svg/checked'
@@ -28,6 +30,7 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
+import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -913,7 +916,34 @@ export default function ApartmentSummary({
 						</Text>
 					</Flex>
 				</SimpleGrid>
-				
+				{request.google_location_object.geometry?.location && (
+					<Flex
+						padding={DEFAULT_PADDING}
+						h={'450px'}
+						w={'100%'}
+						rounded={'16px'}
+						overflow={'hidden'}
+						mb={'100px'}
+						flexDirection={'column'}
+						gap={'16px'}
+					>
+						<APIProvider
+							apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string}
+						>
+							<Map
+								style={{ width: '100%', height: '100%', borderRadius: '16px' }}
+								center={request.google_location_object.geometry.location}
+								defaultZoom={15}
+								// gestureHandling={'greedy'}
+								disableDefaultUI={true}
+							>
+								<Marker
+									position={request.google_location_object.geometry.location}
+								/>
+							</Map>
+						</APIProvider>
+					</Flex>
+				)}
 			</Flex>
 		</>
 	)
