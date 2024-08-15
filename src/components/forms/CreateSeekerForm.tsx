@@ -19,17 +19,16 @@ import {
 	createSeekerRequestDTO,
 	PaymentPlan,
 	SeekerRequestData,
+	userSchema,
 } from '@/firebase/service/request/request.types'
 import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
 
-//get google places API KEY
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-// Define the type for the error objects
 interface ErrorObject {
 	code: string
 	expected?: string
@@ -94,12 +93,10 @@ const budgetLimits: Record<PaymentPlan, number> = {
 }
 
 interface userInfo {
-	userRef: DocumentReference | undefined
 	state: string | undefined
 	location: string | undefined
 }
 
-// Define the initial state based on the DTO structure
 const initialFormState: SeekerRequestData = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
@@ -109,7 +106,13 @@ const initialFormState: SeekerRequestData = {
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
-	_user_ref: undefined,
+	flat_share_profile: {
+		done_kyc: false,
+		_id: '',
+		first_name: '',
+		last_name: '',
+		avatar_url: '',
+	},
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -117,77 +120,69 @@ const initialFormState: SeekerRequestData = {
 }
 
 const CreateSeekerForm: React.FC = () => {
-	//color mode
 	const { colorMode } = useColorMode()
-
-	//get the toast plugin
 	const { showToast } = useCommon()
-
-	//state to handle form submission
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-
-	//init router
 	const router = useRouter()
 
-	//get user authentication state
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const {
-		authState: { flat_share_profile },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
 
-	//state to hold userInfo value
 	const [userInfo, setUserInfo] = useState<userInfo>({
-		userRef: undefined,
 		state: undefined,
 		location: undefined,
 	})
 
-	// update userRef state when auth state changes
-	useEffect(() => {
-		if (typeof flat_share_profile !== 'undefined') {
-			setUserInfo({
-				userRef: flat_share_profile?._user_ref,
-				state: flat_share_profile?.state,
-				location: flat_share_profile?.location_keyword,
-			})
-		}
-	}, [flat_share_profile])
-
-	//get options
 	const {
 		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
 
-	//state for storing Document Ref for category, services, states, properties
+	useEffect(() => {
+		if (flat_share_profile && user) {
+			const { done_kyc } = flat_share_profile
+			const { _id, first_name, last_name, avatar_url } = user
+
+			setUserInfo({
+				state: flat_share_profile?.state,
+				location: flat_share_profile?.location_keyword,
+			})
+
+			setFormData((prev: SeekerRequestData) => ({
+				...prev,
+				flat_share_profile: {
+					done_kyc,
+					_id,
+					first_name,
+					last_name,
+					avatar_url,
+				},
+			}))
+		}
+	}, [flat_share_profile, user])
+
 	const [optionsRef, setOptionsRef] = useState<Options>({
 		_service_ref: undefined,
 		_state_ref: undefined,
 		_location_keyword_ref: undefined,
 	})
 
-	//state for storing filtered locations based on the selected state
 	const [locations, setLocations] = useState<any[]>([])
 
-	//state for storing selected location keyword
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
-	//utility function to filter locations by the selected state using the selected state _state_id
 	const getLocations = (stateId: string): string[] => {
 		return location_keywords.filter((item) => item._state_id === stateId)
 	}
 
-	//state for storing form data
 	const [formData, setFormData] = useState(initialFormState)
 
-	//state to store budget validation
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 
-	// const [googleLocationObject, setGoogleLocationObject] = useState<any>(null)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
 
-	//state to store errors when validating with zod
 	const [formErrors, setFormErrors] = useState<Errors>({})
 
-	//state to store google places location data
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
@@ -200,9 +195,7 @@ const CreateSeekerForm: React.FC = () => {
 
 	const handlePlaceChanged = () => {
 		if (autocomplete) {
-			//get place
 			const place = autocomplete.getPlace()
-			//get location object
 			const locationObject: LocationObject = {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
@@ -214,11 +207,8 @@ const CreateSeekerForm: React.FC = () => {
 						}
 					: undefined,
 			}
-			//get locaiton text
 			const locationText = locationObject.formatted_address || ''
-			//update location text state
 			setGoogleLocationText(locationText)
-			//update form data
 			setFormData((prev) => ({
 				...prev,
 				google_location_object: locationObject,
@@ -227,7 +217,6 @@ const CreateSeekerForm: React.FC = () => {
 		}
 	}
 
-	// Function to handle form input changes
 	const handleChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -298,41 +287,44 @@ const CreateSeekerForm: React.FC = () => {
 		}
 	}
 
-	// Function to handle form submission
 	const handleSubmit = async (
 		e: React.FormEvent<HTMLFormElement>,
 	): Promise<any> => {
 		e.preventDefault()
 		try {
+			if (
+				!flat_share_profile ||
+				!user ||
+				Object.keys(flat_share_profile || {}).length === 0 ||
+				Object.keys(user || {}).length === 0
+			) {
+				return showToast({
+					message: 'Please login and try again',
+					status: 'error',
+				})
+			}
+
 			setIsLoading(true)
-			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
 				...optionsRef,
-				_user_ref: userInfo.userRef,
 			}
 
-			//convert budget to number
 			finalFormData.budget = Number(finalFormData.budget)
-
-			//validate the zod schema with final form data
 			createSeekerRequestDTO.parse(finalFormData)
 
-			//upload data to the collection
 			const res: DocumentData = await SherutaDB.create({
 				collection_name: 'requests',
 				data: finalFormData,
 				document_id: initialFormState.uuid as string,
 			})
 
-			//check if the request was successful
 			if (Object.keys(res).length) {
 				showToast({
 					message: 'Your request has been posted successfully',
 					status: 'success',
 				})
 
-				//redirect users after 3secs
 				setTimeout(() => {
 					router.push('/')
 				}, 1000)
@@ -343,7 +335,6 @@ const CreateSeekerForm: React.FC = () => {
 				setFormErrors(extractErrors(error.issues as ErrorObject[]))
 				console.error('Zod Validation Error:', error.issues)
 			} else {
-				// Handle other errors
 				showToast({
 					message: 'Error, please try again',
 					status: 'error',
@@ -504,7 +495,6 @@ const CreateSeekerForm: React.FC = () => {
 				</FormControl>
 			</Flex>
 
-			{/* Submit button */}
 			<Button
 				isLoading={isLoading}
 				loadingText="Please wait..."
