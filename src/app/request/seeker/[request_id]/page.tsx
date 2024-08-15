@@ -1,24 +1,27 @@
-'use client'
-
+import SherutaDB from '@/firebase/service/index.firebase'
+import { DocumentData } from 'firebase/firestore'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex, Alert, AlertIcon, Text, IconButton } from '@chakra-ui/react'
+import { Box, Flex } from '@chakra-ui/react'
 import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import MainHeader from '@/components/layout/MainHeader'
-import CreateSeekerForm from '@/components/forms/CreateSeekerForm'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
-import { FaAngleLeft } from 'react-icons/fa'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import SeekerPost from '@/components/seekerDetails/SeekerPost'
+import SuperJSON from 'superjson'
 
-type Props = {}
+export default async function Page({
+	params,
+}: {
+	params: { request_id: string }
+}) {
+	const requestId = params.request_id
 
-export default function Page({}: Props) {
-	const router = useRouter()
+	let requestData: string | undefined = await getRequestData(requestId)
 
-	const handleBackClick = () => {
-		router.back()
+	if (requestData) {
+		requestData = SuperJSON.parse(requestData)
 	}
 
 	return (
@@ -29,49 +32,44 @@ export default function Page({}: Props) {
 						<MainLeftNav />
 					</Flex>
 					<Box p={DEFAULT_PADDING}>
-						<Box marginBottom={10}>
-							<Box marginBottom={10}>
-								<Flex align="center" mb={4}>
-									<IconButton
-										onClick={handleBackClick}
-										aria-label="Search database"
-										icon={<FaAngleLeft />}
-										variant="ghost"
-										_hover={{ bg: 'transparent' }}
-										_focus={{ boxShadow: 'none' }}
-										_active={{ bg: 'transparent' }}
-									/>
-
-									<Text fontSize="2xl" fontWeight="bold">
-										Post Your Flat Request
-									</Text>
-								</Flex>
-								<Text marginBottom={3} color="gray">
-									Looking for flat? Post your request and have like minded
-									people reach out to you.
-								</Text>
-								<Alert status="info">
-									<Flex direction="row" alignItems="center">
-										<AlertIcon />
-										<span>
-											{
-												'Have a vacant space? Increase occupancy rate by posting visuals. '
-											}
-											<NextLink href={'/request/host'}>
-												<Text as="u">Click here</Text>
-											</NextLink>
-											{' to post with visuals.'}
-										</span>
-									</Flex>
-								</Alert>
-							</Box>
-						</Box>
-						<Box maxWidth="600px" mx="auto">
-							<CreateSeekerForm />
-						</Box>
+						<SeekerPost postData={requestData} requestId={requestId} />
 					</Box>
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
 	)
+}
+
+async function getRequestData(requestId: string): Promise<string | undefined> {
+	try {
+		const result: DocumentData | null = await SherutaDB.get({
+			collection_name: 'requests',
+			document_id: requestId,
+		})
+
+		if (
+			result &&
+			Object.keys(result).length > 0 &&
+			result.flat_share_profile &&
+			result._service_ref &&
+			result._location_keyword_ref
+		) {
+			let userInfoDoc: DocumentData | undefined = undefined
+
+			if (result?.flat_share_profile?._id) {
+				userInfoDoc = await UserInfoService.get(result.flat_share_profile._id)
+			}
+
+			return SuperJSON.stringify({
+				...result,
+				userInfoDoc,
+			})
+		}
+
+		return undefined
+	} catch (error: any) {
+		console.error('Error fetching request data:', error)
+	}
+
+	return undefined
 }
