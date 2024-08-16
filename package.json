@@ -41,6 +41,7 @@
 		"react-paystack": "^5.0.0",
 		"sharp": "^0.33.4",
 		"superjson": "^2.2.1",
+		"use-debounce": "^10.0.2",
 		"uuid": "^10.0.0",
 		"uuidv4": "^6.2.13",
 		"zod": "^3.23.8"

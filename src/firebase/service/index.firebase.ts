@@ -11,6 +11,7 @@ import {
 	serverTimestamp,
 	setDoc,
 	updateDoc,
+	where,
 } from 'firebase/firestore'
 import {
 	deleteObject,
@@ -63,16 +64,63 @@ export default class SherutaDB {
 	static async getAll({
 		collection_name,
 		_limit = 20,
+		queryObj = {},
 	}: {
 		collection_name: string
 		_limit: number
+		queryObj?: {
+			budget?: string
+			service?: string
+			location?: string
+			state?: string
+			payment_type?: string
+		}
 	}): Promise<any> {
 		const collectionRef = collection(db, collection_name)
 
-		// Chain the query constraints with the `query` function
-		const q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
+		let q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
+		if (queryObj.budget) {
+			const budgetRanges = queryObj.budget
+				.split(',')
+				.map((range) => range.split('-').map(Number))
+				.sort((a, b) => a[0] - b[0])
 
-		// console.log(q)
+			q = query(
+				q,
+				where('budget', '>=', budgetRanges[0][0]),
+				where('budget', '<=', budgetRanges[budgetRanges.length - 1][1]),
+			)
+		}
+
+		if (queryObj.payment_type) {
+			const paymentTypes = queryObj.payment_type.split(',')
+
+			q = query(q, where('payment_type', 'in', paymentTypes))
+		}
+
+		if (queryObj.service) {
+			const serviceRefs = queryObj.service
+				.split(',')
+				.map((service) => doc(db, `/services/${service}`))
+
+			q = query(q, where('_service_ref', 'in', serviceRefs))
+		}
+
+		if (queryObj.location) {
+			const locationRefs = queryObj.location
+				.split(',')
+				.map((location) => doc(db, `/location_keywords/${location}`))
+
+			q = query(q, where('_location_keyword_ref', 'in', locationRefs))
+		}
+
+		if (queryObj.state) {
+			const stateRefs = queryObj.state
+				.split(',')
+				.map((state) => doc(db, `/states/${state}`))
+
+			q = query(q, where('_state_ref', 'in', stateRefs))
+		}
 
 		const querySnapshot = await getDocs(q)
 

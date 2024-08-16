@@ -249,7 +249,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Budget
+								Rent
 							</Text>
 							<Input
 								_placeholder={{ color: 'text_muted' }}

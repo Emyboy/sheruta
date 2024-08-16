@@ -265,7 +265,7 @@ export default function Summary({
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Budget
+								Rent
 							</Text>
 							<Input
 								_placeholder={{ color: 'text_muted' }}
