@@ -14,6 +14,8 @@ import {
 	getDocs,
 	query,
 	where,
+	DocumentReference,
+	DocumentSnapshot,
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 
@@ -26,10 +28,6 @@ export default async function page(props: any) {
 
 	async function getUserProfile() {
 		try {
-			const flatShareProfilesSnapshot = await getDoc(
-				doc(db, 'flat_share_profiles', emekasId),
-			)
-			const flat_share_profiles = flatShareProfilesSnapshot.data()
 			const [flatShareProfileDocs, userDoc, userInfoDocs] = await Promise.all([
 				// getDocs(
 				// 	query(
@@ -41,9 +39,13 @@ export default async function page(props: any) {
 				// getDocs(
 				// 	query(collection(db, 'userInfos'), where('_user_id', '==', user_id)),
 				// ),
+				//  getDoc(
+				// 	doc(db, 'flat_share_profiles', user_id),
+				// ),
+
 				getDocs(
 					query(
-						collection(db, 'flatShareProfile'),
+						collection(db, 'flat_share_profiles'),
 						where('_user_id', '==', user_id),
 					),
 				),
@@ -61,21 +63,31 @@ export default async function page(props: any) {
 				? null
 				: userInfoDocs.docs[0].data()
 
-			// console.log(
-			// 	'Expected data:',
-			// 	flatShareProfileDocs,
-			// 	userDoc,
-			// 	userInfoDocs,
-			// )
-			// console.log(
-			// 	'fltatshare profile:......................................................:',
+			const arrayDocRef: DocumentReference[] =
+				formattedFlatShareProfile?.interests
 
-			// 	flat_share_profiles,
+			let interestsData: any = []
 
-			// )
+			if (formattedFlatShareProfile?.interests) {
+				const arrayDocRef =
+					formattedFlatShareProfile.interests as DocumentReference[]
+				const docSnapshots = await Promise.all(
+					arrayDocRef.map((docRef) => getDoc(docRef)),
+				)
+				interestsData = docSnapshots
+					.map((docSnapshot: DocumentSnapshot) =>
+						docSnapshot.exists() ? docSnapshot.data() : null,
+					)
+					.filter((data) => data !== null)
+			}
 
 			return {
-				flatShareProfile: formattedFlatShareProfile,
+				flatShareProfile: formattedFlatShareProfile
+					? {
+							...formattedFlatShareProfile,
+							interests: interestsData,
+						}
+					: null,
 				user: formattedUserDoc,
 				userInfo: formattedUserInfoDoc,
 			}
@@ -86,7 +98,10 @@ export default async function page(props: any) {
 	}
 
 	const user = await getUserProfile()
-	console.log('user profile:', user)
+	console.log(
+		'user profile....................:',
+		user.flatShareProfile?.interests,
+	)
 
 	return (
 		<Flex justifyContent={'center'}>
