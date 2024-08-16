@@ -60,7 +60,7 @@ export default function ProfileHero({ data }: Props) {
 				<Flex alignItems={'center'} gap={1} color="text_muted">
 					<BiBriefcase />
 					<Text as="span" color="text_muted">
-						Software Developer
+						{data.flatShareProfile.occupation}
 					</Text>
 				</Flex>
 				<Flex

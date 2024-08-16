@@ -250,33 +250,6 @@ export default function Summary({
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-<<<<<<< HEAD
-								Title
-							</Text>
-							<Input
-								onChange={handleChange}
-								required
-								minLength={5}
-								value={formData.title}
-								name="title"
-								_placeholder={{ color: 'text_muted' }}
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Title here"
-							/>
-						</Flex>
-					</Flex>
-
-					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={3}
-						>
-							<Text color={'text_muted'} fontSize={'base'}>
-=======
->>>>>>> marvellous
 								Apartment Description
 							</Text>
 							<Textarea

@@ -18,6 +18,7 @@ import {
 	DocumentSnapshot,
 } from 'firebase/firestore'
 import { db } from '@/firebase'
+import { promise } from 'zod'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -81,11 +82,29 @@ export default async function page(props: any) {
 					.filter((data) => data !== null)
 			}
 
+			let locationValue: any = {};
+
+			try{
+				const locationKeywordDocRef = formattedFlatShareProfile?.location_keyword as DocumentReference;
+				
+				const docSnapshot = await getDoc(locationKeywordDocRef);
+
+				if (docSnapshot.exists()) {
+					locationValue = docSnapshot.data()
+				  } else {
+					console.log("Location keyword document does not exist.");
+				  }
+				}catch (error) {
+					console.error("Error fetching document:", error);
+				  }
+
+
 			return {
 				flatShareProfile: formattedFlatShareProfile
 					? {
 							...formattedFlatShareProfile,
 							interests: interestsData,
+							area: locationValue
 						}
 					: null,
 				user: formattedUserDoc,
@@ -100,7 +119,7 @@ export default async function page(props: any) {
 	const user = await getUserProfile()
 	console.log(
 		'user profile....................:',
-		user.flatShareProfile?.interests,
+		user.flatShareProfile?.area
 	)
 
 	return (
