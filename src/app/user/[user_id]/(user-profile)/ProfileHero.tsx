@@ -71,7 +71,7 @@ export default function ProfileHero({ data }: Props) {
 				>
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>
-						Lekki, Lagos, Nigeria
+					{`${data.flatShareProfile?.area.name} Nigeria`}
 					</Text>
 				</Flex>
 				<Flex gap={DEFAULT_PADDING}>

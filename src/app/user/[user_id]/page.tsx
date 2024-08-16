@@ -119,7 +119,7 @@ export default async function page(props: any) {
 	const user = await getUserProfile()
 	console.log(
 		'user profile....................:',
-		user.flatShareProfile?.area
+		user.flatShareProfile
 	)
 
 	return (
