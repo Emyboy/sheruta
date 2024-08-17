@@ -21,24 +21,34 @@ export default function PersonalInfo({}: Props) {
 				<Flex flexWrap={'wrap'}>
 					<EachPersonalInfo
 						Icon={BiBriefcase}
-						heading="The heading"
+						heading="Preferred Location"
 						subHeading="N 200,000/month"
 					/>
 					<EachPersonalInfo
 						Icon={BiBriefcase}
-						heading="The heading"
+						heading="Budget"
 						subHeading="N 200,000/month"
 					/>
 					<EachPersonalInfo
 						Icon={BiBriefcase}
-						heading="The heading"
+						heading="Search Staus"
+						subHeading="Host"
+					/>
+					<EachPersonalInfo
+						Icon={BiBriefcase}
+						heading="Work Industry"
 						subHeading="N 200,000/month"
 					/>
 					<EachPersonalInfo
 						Icon={BiBriefcase}
-						heading="The heading"
+						heading="Religion"
 						subHeading="N 200,000/month"
 					/>
+					<EachPersonalInfo
+						Icon={BiBriefcase}
+						heading="Looking for"
+						subHeading="N 200,000/month"
+					/> 
 				</Flex>
 			</MainSection>
 			<MainSection heading="Social media">

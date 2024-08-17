@@ -7,10 +7,9 @@ type Props = {
 }
 
 export default function ProfileAboutMe({ data }: Props) {
-
 	type Interest = {
-		title: string;
-	  };
+		title: string
+	}
 
 	let userInterests: Interest[] = data.flatShareProfile?.interests
 
@@ -23,27 +22,22 @@ export default function ProfileAboutMe({ data }: Props) {
 				tempore officiis.
 			</Text>
 			<Flex flexWrap={'wrap'} gap={2}>
-				
-				{userInterests.map(item =>{
-
-return (
-	<Badge
-		key={Math.random()}
-		bg="border_color"
-		px={3}
-		rounded={'md'}
-		_dark={{
-			color: 'border_color',
-			bg: 'dark_light',
-		}}
-	>
-		{item.title}
-	</Badge>
-)
-				}
-
-
-				)}
+				{userInterests.map((item) => {
+					return (
+						<Badge
+							key={Math.random()}
+							bg="border_color"
+							px={3}
+							rounded={'md'}
+							_dark={{
+								color: 'border_color',
+								bg: 'dark_light',
+							}}
+						>
+							{item.title}
+						</Badge>
+					)
+				})}
 			</Flex>
 		</Flex>
 	)
