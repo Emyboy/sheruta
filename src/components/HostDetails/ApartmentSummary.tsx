@@ -30,7 +30,6 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -51,6 +50,7 @@ import { LuBadgeCheck } from 'react-icons/lu'
 import { MdOutlineMailOutline } from 'react-icons/md'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
+import SearchLocation from './SearchLocation'
 
 export default function ApartmentSummary({
 	request,
@@ -579,41 +579,43 @@ export default function ApartmentSummary({
 						Book Inspection
 					</Button>
 				</Flex>
-				<Flex
-					my={{ base: '24px', sm: '32px' }}
-					flexDir={'column'}
-					gap={'20px'}
-					mt={'16px'}
-				>
-					<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'300'}>
-						Amenities
-					</Text>
-					<Box
-						h={'2px'}
-						borderRadius={'4px'}
-						w={'100%'}
-						bgColor={'brand_darker'}
-						_light={{ bgColor: '#1117171A' }}
-					/>
-					<SimpleGrid columns={[2, null, 3]} spacingY="16px">
-						{request.amenities.map((amenity: string, i: number) => (
-							<Flex
-								key={i}
-								gap={'10px'}
-								alignItems={'center'}
-								justifyContent={'start'}
-							>
-								<Text
-									textTransform={'capitalize'}
-									fontWeight={'300'}
-									fontSize={{ base: 'base', md: 'lg' }}
+				{request.amenities && request.amenities.length && (
+					<Flex
+						my={{ base: '24px', sm: '32px' }}
+						flexDir={'column'}
+						gap={'20px'}
+						mt={'16px'}
+					>
+						<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'300'}>
+							Amenities
+						</Text>
+						<Box
+							h={'2px'}
+							borderRadius={'4px'}
+							w={'100%'}
+							bgColor={'brand_darker'}
+							_light={{ bgColor: '#1117171A' }}
+						/>
+						<SimpleGrid columns={[2, null, 3]} spacingY="16px">
+							{request.amenities.map((amenity, i) => (
+								<Flex
+									key={i}
+									gap={'10px'}
+									alignItems={'center'}
+									justifyContent={'start'}
 								>
-									{amenity}
-								</Text>
-							</Flex>
-						))}
-					</SimpleGrid>
-				</Flex>
+									<Text
+										textTransform={'capitalize'}
+										fontWeight={'300'}
+										fontSize={{ base: 'base', md: 'lg' }}
+									>
+										{amenity}
+									</Text>
+								</Flex>
+							))}
+						</SimpleGrid>
+					</Flex>
+				)}
 				<Flex
 					my={{ base: '24px', sm: '32px' }}
 					flexDir={'column'}
@@ -890,7 +892,7 @@ export default function ApartmentSummary({
 						</Text>
 					</Flex>
 				</SimpleGrid>
-				<SimpleGrid mt={'16px'} mb={'48px'} columns={1} spacingY="16px">
+				<SimpleGrid mt={'16px'} columns={1} spacingY="16px">
 					<Flex gap={'10px'} alignItems={'center'} justifyContent={'start'}>
 						<IoIosPeople color="00BC73" size={'24px'} />
 
@@ -917,32 +919,7 @@ export default function ApartmentSummary({
 					</Flex>
 				</SimpleGrid>
 				{request.google_location_object.geometry?.location && (
-					<Flex
-						padding={DEFAULT_PADDING}
-						h={'450px'}
-						w={'100%'}
-						rounded={'16px'}
-						overflow={'hidden'}
-						mb={'100px'}
-						flexDirection={'column'}
-						gap={'16px'}
-					>
-						<APIProvider
-							apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string}
-						>
-							<Map
-								style={{ width: '100%', height: '100%', borderRadius: '16px' }}
-								center={request.google_location_object.geometry.location}
-								defaultZoom={15}
-								// gestureHandling={'greedy'}
-								disableDefaultUI={true}
-							>
-								<Marker
-									position={request.google_location_object.geometry.location}
-								/>
-							</Map>
-						</APIProvider>
-					</Flex>
+					<SearchLocation />
 				)}
 			</Flex>
 		</>

@@ -1,7 +1,6 @@
 import NoApartmentIcon from '@/assets/svg/no-apartment-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Flex, Text } from '@chakra-ui/react'
-import React from 'react'
 
 export default function NoApartment() {
 	return (
