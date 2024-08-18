@@ -1,20 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import {
-	Button,
-	FormControl,
-	FormLabel,
-	Input,
-	Select,
-	Textarea,
-	FormErrorMessage,
-	Flex,
-	useColorMode,
-} from '@chakra-ui/react'
-import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
-import { v4 as generateUId } from 'uuid'
-import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import { libraries } from '@/constants'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
 import SherutaDB from '@/firebase/service/index.firebase'
-import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
 	LocationObject,
@@ -22,10 +9,24 @@ import {
 	SeekerRequestData,
 	userSchema,
 } from '@/firebase/service/request/request.types'
-import { z, ZodError } from 'zod'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
+import useCommon from '@/hooks/useCommon'
+import {
+	Button,
+	Flex,
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
+	Input,
+	Select,
+	Textarea,
+	useColorMode,
+} from '@chakra-ui/react'
+import { Autocomplete, LoadScript } from '@react-google-maps/api'
+import { DocumentData, DocumentReference, Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
+import React, { useCallback, useEffect, useState } from 'react'
+import { v4 as generateUId } from 'uuid'
+import { ZodError } from 'zod'
 
 //get google places API KEY
 const GOOGLE_PLACES_API_KEY: string | undefined =
@@ -59,8 +60,6 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 		return acc
 	}, {} as Errors)
 }
-
-const libraries: 'places'[] = ['places']
 
 interface Options {
 	_service_ref: DocumentReference | undefined
@@ -182,14 +181,13 @@ const CreateSeekerForm: React.FC = () => {
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (
-		autocompleteInstance: google.maps.places.Autocomplete,
-	) => {
-		setAutocomplete(autocompleteInstance)
-		console.log('Autocomplete Loaded:', autocompleteInstance)
-	}
+	const handleLoad = useCallback(
+		(autocompleteInstance: google.maps.places.Autocomplete) =>
+			setAutocomplete(autocompleteInstance),
+		[],
+	)
 
-	const handlePlaceChanged = () => {
+	const handlePlaceChanged = useCallback(() => {
 		if (autocomplete) {
 			//get place
 			const place = autocomplete.getPlace()
@@ -216,7 +214,7 @@ const CreateSeekerForm: React.FC = () => {
 				google_location_text: locationText,
 			}))
 		}
-	}
+	}, [googleLocationText, autocomplete])
 
 	// Function to handle form input changes
 	const handleChange = (

@@ -918,9 +918,12 @@ export default function ApartmentSummary({
 						</Text>
 					</Flex>
 				</SimpleGrid>
-				{request.google_location_object.geometry?.location && (
-					<SearchLocation />
-				)}
+				{request.google_location_object.geometry?.location &&
+					!request.seeking && (
+						<SearchLocation
+							location={request.google_location_object.geometry.location}
+						/>
+					)}
 			</Flex>
 		</>
 	)

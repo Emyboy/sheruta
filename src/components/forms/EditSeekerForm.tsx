@@ -1,45 +1,45 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import {
-	Button,
-	FormControl,
-	FormLabel,
-	Input,
-	Select,
-	Textarea,
-	FormErrorMessage,
-	Flex,
-	Text,
-	useColorMode,
-} from '@chakra-ui/react'
-import {
-	Timestamp,
-	DocumentReference,
-	DocumentData,
-	doc,
-} from 'firebase/firestore'
-import { v4 as generateUId } from 'uuid'
-import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import { libraries } from '@/constants'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
+import { db } from '@/firebase'
 import SherutaDB from '@/firebase/service/index.firebase'
-import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
 	LocationObject,
 	PaymentPlan,
 	RequestData,
 } from '@/firebase/service/request/request.types'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
-import { useRouter } from 'next/navigation'
-import { ZodError } from 'zod'
-import { db } from '@/firebase'
+import useCommon from '@/hooks/useCommon'
+import {
+	Button,
+	Flex,
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
+	Input,
+	Select,
+	Text,
+	Textarea,
+	useColorMode,
+} from '@chakra-ui/react'
+import { Autocomplete, LoadScript } from '@react-google-maps/api'
+import {
+	doc,
+	DocumentData,
+	DocumentReference,
+	Timestamp,
+} from 'firebase/firestore'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import React, { useCallback, useEffect, useState } from 'react'
+import { v4 as generateUId } from 'uuid'
+import { ZodError } from 'zod'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-const libraries: 'places'[] = ['places']
 interface DocRefs {
 	_service_ref: DocumentReference | undefined
 	_location_keyword_ref: DocumentReference | undefined
@@ -158,14 +158,13 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (
-		autocompleteInstance: google.maps.places.Autocomplete,
-	) => {
-		setAutocomplete(autocompleteInstance)
-		console.log('Autocomplete Loaded:', autocompleteInstance)
-	}
+	const handleLoad = useCallback(
+		(autocompleteInstance: google.maps.places.Autocomplete) =>
+			setAutocomplete(autocompleteInstance),
+		[],
+	)
 
-	const handlePlaceChanged = () => {
+	const handlePlaceChanged = useCallback(() => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
 
@@ -189,7 +188,7 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 				google_location_text: locationText,
 			}))
 		}
-	}
+	}, [googleLocationText, autocomplete])
 
 	const handleChange = (
 		e: React.ChangeEvent<

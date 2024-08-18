@@ -18,7 +18,6 @@ import {
 	getDownloadURL,
 	getStorage,
 	ref,
-	StorageReference,
 	uploadString,
 } from 'firebase/storage'
 import moment from 'moment'

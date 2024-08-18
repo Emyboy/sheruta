@@ -51,3 +51,5 @@ export const industries = [
 	'Waste Management',
 	'Wholesale',
 ]
+
+export const libraries: 'places'[] = ['places']

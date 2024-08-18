@@ -1,4 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { libraries } from '@/constants'
 import { useOptionsContext } from '@/context/options.context'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
@@ -24,11 +25,9 @@ import {
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
-
-const libraries: 'places'[] = ['places']
 
 interface LocationObject {
 	formatted_address?: string
@@ -59,10 +58,13 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (autocompleteInstance: google.maps.places.Autocomplete) =>
-		setAutocomplete(autocompleteInstance)
+	const handleLoad = useCallback(
+		(autocompleteInstance: google.maps.places.Autocomplete) =>
+			setAutocomplete(autocompleteInstance),
+		[],
+	)
 
-	const handlePlaceChanged = () => {
+	const handlePlaceChanged = useCallback(() => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
 
@@ -87,7 +89,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				google_location_text: locationText,
 			}))
 		}
-	}
+	}, [autocomplete, formData.google_location_text])
 
 	const addHouseRule = () => setHouseRules((prev) => [...prev, ''])
 
