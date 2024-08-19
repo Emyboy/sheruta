@@ -20,6 +20,8 @@ import { useAuthContext } from '@/context/auth.context'
 import MainLeftNav from './MainLeftNav'
 import { useAppContext } from '@/context/app.context'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import SearchPageFilter from '@/app/search/(components)/SearchPageFilter'
 
 type Props = {}
 
@@ -115,6 +117,7 @@ export default function MobileHeader({}: Props) {
 const Drawer = () => {
 	const { appState, setAppState } = useAppContext()
 	const { show_left_nav } = appState
+	const pathname = usePathname()
 
 	return (
 		<>
@@ -134,11 +137,16 @@ const Drawer = () => {
 				_dark={{
 					borderColor: 'dark_light',
 				}}
+				overflowY={'auto'}
 			>
 				<Flex flexDirection={'column'} w="full">
 					<NavProfile />
 					<Box px={DEFAULT_PADDING}>
-						<MainLeftNav />
+						{pathname.startsWith('/search') ? (
+							<SearchPageFilter />
+						) : (
+							<MainLeftNav />
+						)}
 					</Box>
 				</Flex>
 			</Box>
@@ -176,6 +184,7 @@ const NavProfile = () => {
 				borderColor={'border_color'}
 				_dark={{
 					borderColor: 'dark_light',
+					bgColor: 'dark',
 				}}
 				alignItems={'center'}
 				gap={DEFAULT_PADDING}
