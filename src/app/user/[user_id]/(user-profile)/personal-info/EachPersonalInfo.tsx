@@ -3,8 +3,8 @@ import React from 'react'
 
 type Props = {
 	Icon: any
-	heading: string
-	subHeading: string
+	heading: string | null
+	subHeading: string | number| null
 }
 
 export default function EachPersonalInfo({ Icon, heading, subHeading }: Props) {

@@ -8,6 +8,7 @@ import EachRequest from '@/components/EachRequest/EachRequest'
 
 type Props = {
 	data: any
+	
 }
 
 export default function UserProfilePage({ data }: Props) {
@@ -19,7 +20,7 @@ export default function UserProfilePage({ data }: Props) {
 			<MainSection heading="About me">
 				<ProfileAboutMe data={data} />
 			</MainSection>
-			<PersonalInfo />
+			<PersonalInfo data={data} />
 			<MainSection heading="My Postings" borderBottom={0}>
 				{/* <EachRequest />
 				<EachRequest />

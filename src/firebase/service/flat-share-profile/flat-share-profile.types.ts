@@ -24,6 +24,7 @@ const FlatShareProfileDataSchema = z.object({
 	interests: z.array(z.any()),
 	religion: z.string().nullable(),
 	verified: z.boolean(),
+	bio: z.string().nullable(),
 })
 
 export type FlatShareProfileData = z.infer<typeof FlatShareProfileDataSchema>
@@ -67,4 +68,5 @@ export const flatShareProfileDefaults = {
 	habits: [],
 	interests: [],
 	done_kyc: false,
+	bio: null,
 }

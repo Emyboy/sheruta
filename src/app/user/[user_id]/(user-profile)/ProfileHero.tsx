@@ -1,3 +1,4 @@
+
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { Box, Button, Flex, Text } from '@chakra-ui/react'
@@ -9,14 +10,27 @@ import {
 	BiMessageRoundedDetail,
 	BiSolidBadgeCheck,
 	BiSolidLocationPlus,
+	BiMaleFemale,
+	BiGroup,
+	BiStore,
 } from 'react-icons/bi'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import { UserInfo } from '@/firebase/service/user-info/user-info.types';
+import { useRouter } from 'next/navigation'
 
 type Props = {
 	data: any
+
 }
 
-export default function ProfileHero({ data }: Props) {
+export default function ProfileHero({ data}: Props) {
 	const _user: AuthUser = data.user
+	const userFlatshareProfile: FlatShareProfileData = data.flatShareProfile
+
+	const _userInfo: UserInfo = data.userInfo
+
+
+	
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>
 			<Box
@@ -60,9 +74,22 @@ export default function ProfileHero({ data }: Props) {
 				<Flex alignItems={'center'} gap={1} color="text_muted">
 					<BiBriefcase />
 					<Text as="span" color="text_muted">
-						{data.flatShareProfile.occupation}
+						{userFlatshareProfile?.occupation}
 					</Text>
 				</Flex>
+				<Flex alignItems={'center'} gap={1} color="text_muted">
+					<BiStore />
+					<Text as="span" color="text_muted">
+						{userFlatshareProfile?.seeking ? 'Seeker' : 'I have an apartment'}
+					</Text>
+				</Flex>
+				<Flex alignItems={'center'} gap={1} color="text_muted">
+					<BiGroup />
+					<Text as="span" color="text_muted">
+						{_userInfo?.gender}
+					</Text>
+				</Flex>
+
 				<Flex
 					alignItems={'center'}
 					gap={1}
@@ -74,6 +101,7 @@ export default function ProfileHero({ data }: Props) {
 						{`${data.flatShareProfile?.area.name} Nigeria`}
 					</Text>
 				</Flex>
+
 				<Flex gap={DEFAULT_PADDING}>
 					<Button>Call Me</Button>
 					<Link href={`/messages/${_user._id}`}>

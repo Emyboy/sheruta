@@ -11,10 +11,18 @@ import {
 import MainSection from '@/components/atoms/MainSection'
 import MainTooltip from '@/components/atoms/MainTooltip'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { Data } from '@react-google-maps/api'
+import { FlatShareProfileData, FlatShareProfileDataDTO } from '@/firebase/service/flat-share-profile/flat-share-profile.types';
+import Link from 'next/link'
 
-type Props = {}
+type Props = {
+	data: any
+}
 
-export default function PersonalInfo({}: Props) {
+export default function PersonalInfo({ data }: Props) {
+
+	const _userFlatshareProfile : FlatShareProfileData = data.flatShareProfile
+	
 	return (
 		<Flex flexDir={'column'}>
 			<MainSection heading="Additional Information">
@@ -27,45 +35,49 @@ export default function PersonalInfo({}: Props) {
 					<EachPersonalInfo
 						Icon={BiBriefcase}
 						heading="Budget"
-						subHeading="N 200,000/month"
-					/>
-					<EachPersonalInfo
-						Icon={BiBriefcase}
-						heading="Search Staus"
-						subHeading="Host"
+						subHeading={_userFlatshareProfile?.budget}
 					/>
 					<EachPersonalInfo
 						Icon={BiBriefcase}
 						heading="Work Industry"
-						subHeading="N 200,000/month"
+						subHeading={_userFlatshareProfile?.work_industry}
 					/>
 					<EachPersonalInfo
 						Icon={BiBriefcase}
 						heading="Religion"
-						subHeading="N 200,000/month"
+						subHeading={_userFlatshareProfile?.religion}
 					/>
 					<EachPersonalInfo
 						Icon={BiBriefcase}
-						heading="Looking for"
-						subHeading="N 200,000/month"
-					/> 
+						heading="Gender Preference"
+						subHeading="mmmmmmm "
+					/>
+					<EachPersonalInfo
+						Icon={BiBriefcase}
+						heading="Employment Status"
+						subHeading={data.flatShareProfile.employment_status}
+					/>
 				</Flex>
 			</MainSection>
 			<MainSection heading="Social media">
 				<Flex flexWrap={'wrap'} gap={DEFAULT_PADDING}>
-					<EachSocialMedia label="Twitter" Icon={BiLogoTwitter} />
-					<EachSocialMedia label="Instagram" Icon={BiLogoInstagramAlt} />
-					<EachSocialMedia label="Follow" Icon={BiLogoFacebook} />
-					<EachSocialMedia label="LinkedIn" Icon={BiLogoLinkedinSquare} />
+					<EachSocialMedia label="Twitter" Icon={BiLogoTwitter} data=""/>
+					<EachSocialMedia label="Instagram" Icon={BiLogoInstagramAlt} data=""/>
+					<EachSocialMedia label="Facebook" Icon={BiLogoFacebook} data=""/>
+					<EachSocialMedia label="LinkedIn" Icon={BiLogoLinkedinSquare} data=""/>
 				</Flex>
 			</MainSection>
 		</Flex>
 	)
 }
 
-const EachSocialMedia = ({ Icon, label }: { Icon: any; label: string }) => {
+const EachSocialMedia = ({ Icon, label, data }: { Icon: any; label: string; data: any }) => {
+
+	// const _userSocials: FlatShareProfileData = data.flatShareProfile
+	// console.log(_userSocials.instagram)
 	return (
 		<MainTooltip label={label} placement="top">
+			<Link href="/your-link" passHref>
 			<Flex
 				h={10}
 				w={10}
@@ -87,6 +99,7 @@ const EachSocialMedia = ({ Icon, label }: { Icon: any; label: string }) => {
 			>
 				<Icon size={25} />
 			</Flex>
+			</Link>
 		</MainTooltip>
 	)
 }

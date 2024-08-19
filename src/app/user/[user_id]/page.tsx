@@ -1,3 +1,5 @@
+
+
 import React from 'react'
 import UserProfilePage from './(user-profile)/UserProfilePage'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
@@ -19,40 +21,31 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { promise } from 'zod'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 
 export const revalidate = CACHE_TTL.LONG
 
 export default async function page(props: any) {
 	const { params } = props
 	const { user_id } = params
-	const emekasId = 'J5vmicZSnmZDDk2iqKskCIEPFhe2'
+	
 
 	async function getUserProfile() {
 		try {
 			const [flatShareProfileDocs, userDoc, userInfoDocs] = await Promise.all([
-				// getDocs(
-				// 	query(
-				// 		collection(db, 'flatShareProfile'),
-				// 		where('_user_id', '==', user_id),
-				// 	),
-				// ),
-				// getDoc(doc(db, 'users', user_id)),
-				// getDocs(
-				// 	query(collection(db, 'userInfos'), where('_user_id', '==', user_id)),
-				// ),
-				//  getDoc(
-				// 	doc(db, 'flat_share_profiles', user_id),
-				// ),
 
 				getDocs(
 					query(
-						collection(db, 'flat_share_profiles'),
+						collection(db, DBCollectionName.flatShareProfile),
 						where('_user_id', '==', user_id),
 					),
 				),
-				getDoc(doc(db, 'users', user_id)),
+				getDoc(doc(db, DBCollectionName.users, user_id)),
 				getDocs(
-					query(collection(db, 'userInfos'), where('_user_id', '==', user_id)),
+					query(
+						collection(db, DBCollectionName.userInfos),
+						where('_user_id', '==', user_id),
+					),
 				),
 			])
 
@@ -96,15 +89,12 @@ export default async function page(props: any) {
 				console.error('Error fetching document:', error)
 			}
 
-		
-
 			return {
 				flatShareProfile: formattedFlatShareProfile
 					? {
 							...formattedFlatShareProfile,
 							interests: interestsData,
 							area: locationValue,
-						
 						}
 					: null,
 				user: formattedUserDoc,
@@ -117,7 +107,24 @@ export default async function page(props: any) {
 	}
 
 	const user = await getUserProfile()
-	console.log('user area....................:', user.flatShareProfile)
+	console.log(
+		'Flatshare....................:',
+		user.flatShareProfile,
+		'User...........................:',
+		user.user,
+		'User Info:..........................:',
+		user.userInfo,
+	)
+
+	// const handleCall = () => {
+	// 	const phoneNumber = user.userInfo?.primary_phone_number;
+		
+	// 	if (phoneNumber) {
+	// 	  window.location.href = `tel:${phoneNumber}`;
+	// 	} else {
+	// 	  console.error("Phone number is null or undefined.");
+	// 	}
+	//   };
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -126,7 +133,7 @@ export default async function page(props: any) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{user ? <UserProfilePage data={user} /> : <PageNotFound />}
+					{user ? <UserProfilePage data={user}/> : <PageNotFound />}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
