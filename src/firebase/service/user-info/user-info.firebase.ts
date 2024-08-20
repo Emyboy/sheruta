@@ -21,6 +21,10 @@ export default class UserInfoService {
 				primary_phone_number: phone_number,
 				whatsapp_phone_number: null,
 				done_kyc: false,
+				is_verified: false,
+				phone_number_verified: false,
+				date_of_birth: null,
+				nin: null
 			}
 			let result = await SherutaDB.create({
 				collection_name: DBCollectionName.userInfos,
