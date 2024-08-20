@@ -35,7 +35,9 @@ export default function MainLeftNav({}: Props) {
 			<Link href={'/groups'}>
 				<EachNav Icon={BiMessageSquareDetail} label="Chat rooms" />
 			</Link>
-			<EachNav Icon={BiCalendarAlt} label="Inspections" />
+			<Link href={'/inspections'}>
+				<EachNav Icon={BiCalendarAlt} label="Inspections" />
+			</Link>
 			<EachNav Icon={BiWallet} label="Wallet" />
 			<EachNav Icon={BiWrench} label="Settings" />
 			<Divider

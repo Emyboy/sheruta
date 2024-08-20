@@ -23,7 +23,7 @@ import {
 import moment from 'moment'
 import { db } from '..'
 
-interface createDTO {
+export interface createDTO {
 	collection_name: string
 	data: object
 	document_id: string
@@ -245,6 +245,7 @@ export const DBCollectionName = {
 
 	messages: 'messages',
 	conversations: 'conversations',
+	inspections: 'inspections',
 
 	// options
 	propertyTypes: 'property_types',
