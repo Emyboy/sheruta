@@ -62,7 +62,7 @@ const UserVerification = () => {
 					Users Verification
 				</Text>
 				<Text fontSize="md" color={descriptionColor}>
-					Sheruta requires you to provide accurate information and upload a valid government-issued ID. Please note that there is a fee for verifying your account.
+					Sheruta requires you to provide accurate information and upload a valid government-issued ID. Please note that you will be charged {creditTable.VERIFICATION} credits to attempt the verification process.
 				</Text>
 
 				<HStack
