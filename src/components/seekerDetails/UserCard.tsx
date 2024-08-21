@@ -32,7 +32,9 @@ const UserCard = ({
 						<Text fontWeight="bold" color="white">
 							{name}
 						</Text>
-						{(userInfoDoc?.is_verified) ? <Icon as={BiSolidBadgeCheck} color="blue.500" ml={1} /> : null}
+						{userInfoDoc?.is_verified ? (
+							<Icon as={BiSolidBadgeCheck} color="blue.500" ml={1} />
+						) : null}
 					</Flex>
 					<Text color="#fff" fontSize="sm">
 						@{handle}

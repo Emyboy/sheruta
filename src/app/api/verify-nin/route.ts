@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import axios from 'axios'
 
 export async function POST(req: Request) {
-
 	const { nin, lastname } = await req.json()
 
 	if (!nin || !lastname) {
@@ -23,8 +22,10 @@ export async function POST(req: Request) {
 			},
 		)
 
-		return NextResponse.json(response.data, { status: 200, statusText: "NIN Account Lookup Successful" })
-
+		return NextResponse.json(response.data, {
+			status: 200,
+			statusText: 'NIN Account Lookup Successful',
+		})
 	} catch (error: any) {
 		console.error('Error verifying NIN:', error.response?.data || error.message)
 

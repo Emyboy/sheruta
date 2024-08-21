@@ -25,7 +25,9 @@ const UserVerification = () => {
 
 	const { isOpen, onOpen, onClose } = useDisclosure()
 
-	const { authState: { user_info, flat_share_profile } } = useAuthContext()
+	const {
+		authState: { user_info, flat_share_profile },
+	} = useAuthContext()
 
 	const { showToast } = useCommon()
 
@@ -33,27 +35,24 @@ const UserVerification = () => {
 	const [hasEnoughCredits, setHasEnoughCredits] = useState<boolean>(false)
 
 	useEffect(() => {
-		if (typeof user_info?.is_verified !== "undefined" && typeof user_info?.is_verified === "boolean") {
+		if (
+			typeof user_info?.is_verified !== 'undefined' &&
+			typeof user_info?.is_verified === 'boolean'
+		) {
 			setIsVerified(user_info.is_verified)
 		}
 	}, [user_info])
 
 	useEffect(() => {
-		if (flat_share_profile?.credits as number >= creditTable.VERIFICATION) {
+		if ((flat_share_profile?.credits as number) >= creditTable.VERIFICATION) {
 			setHasEnoughCredits(true)
 		}
 	}, [flat_share_profile])
 
-
 	const circleBgColor = useColorModeValue('#e4faa85c', '#e4faa814')
 
 	return (
-		<Flex
-			direction="column"
-			align="center"
-			justify="center"
-			bg="gray.50"
-		>
+		<Flex direction="column" align="center" justify="center" bg="gray.50">
 			<VStack spacing={2} textAlign="center">
 				<Circle bgColor={circleBgColor} minW={'130px'} minH={'130px'}>
 					<Icon as={BiUser} w={16} h={16} color="green.400" />
@@ -62,7 +61,9 @@ const UserVerification = () => {
 					Users Verification
 				</Text>
 				<Text fontSize="md" color={descriptionColor}>
-					Sheruta requires you to provide accurate information and upload a valid government-issued ID. Please note that you will be charged {creditTable.VERIFICATION} credits to attempt the verification process.
+					Sheruta requires you to provide accurate information and upload a
+					valid government-issued ID. Please note that you will be charged{' '}
+					{creditTable.VERIFICATION} credits for every 4 verification attempts.
 				</Text>
 
 				<HStack
@@ -73,20 +74,44 @@ const UserVerification = () => {
 					flexWrap={['wrap', 'nowrap']} // wrap on mobile, nowrap on larger screens
 				>
 					<VerificationCard
-						onOpen={() => showToast({ message: "This feature is coming soon.", status: "info" })}
+						onOpen={() =>
+							showToast({
+								message: 'This feature is coming soon.',
+								status: 'info',
+							})
+						}
 						icon={BiMobileAlt}
 						text="Verify Phone"
 						subText="coming soon..."
 					/>
 					<VerificationCard
-						onOpen={(!isVerified && hasEnoughCredits) ? onOpen : (!hasEnoughCredits) ? () => showToast({ message: "You don't have enough credits.", status: "info" }) : () => showToast({ message: "Your account has been verified already", status: "info" })}
+						onOpen={
+							!isVerified && hasEnoughCredits
+								? onOpen
+								: !hasEnoughCredits
+									? () =>
+											showToast({
+												message: "You don't have enough credits.",
+												status: 'info',
+											})
+									: () =>
+											showToast({
+												message: 'Your account has been verified already',
+												status: 'info',
+											})
+						}
 						icon={BiIdCard}
 						text="Verify NIN"
 						subText="National Identification Number"
 					/>
 				</HStack>
 			</VStack>
-			<VerifyNIN hasEnoughCredits={hasEnoughCredits} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
+			<VerifyNIN
+				hasEnoughCredits={hasEnoughCredits}
+				isOpen={isOpen}
+				onClose={onClose}
+				// onOpen={onOpen}
+			/>
 		</Flex>
 	)
 }
@@ -103,8 +128,7 @@ const VerificationCard = ({
 	onOpen: () => void
 }) => {
 	return (
-		<Box
-			_hover={{ transform: 'scale(1.03)' }}>
+		<Box _hover={{ transform: 'scale(1.03)' }}>
 			<VStack
 				border="1px"
 				borderColor="#00BC73"
@@ -118,7 +142,7 @@ const VerificationCard = ({
 				_hover={{ borderColor: 'green.400' }}
 				cursor={'pointer'}
 				onClick={onOpen}
-				boxShadow={"xl"}
+				boxShadow={'xl'}
 			>
 				<Circle bgColor={'#00BC731A'} minW={'50px'} minH={'50px'}>
 					<Icon as={icon} w={8} h={8} color="green.400" />

@@ -15,7 +15,6 @@ import {
 	ModalHeader,
 	ModalBody,
 	ModalCloseButton,
-	ModalFooter,
 	Alert,
 	AlertIcon,
 	useColorModeValue,
@@ -27,6 +26,8 @@ import { NINResponseDTO } from '../types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import usePayment from '@/hooks/usePayment'
 import { creditTable } from '@/constants'
+import UserService from '@/firebase/service/user/user.firebase'
+import { Timestamp } from 'firebase/firestore'
 
 const doesGenderMatch = (NINGender: string, dbGender: string): boolean => {
 	if (NINGender === 'm' && dbGender === 'male') {
@@ -38,14 +39,110 @@ const doesGenderMatch = (NINGender: string, dbGender: string): boolean => {
 	}
 }
 
+const UpdateNameForm = ({ setShowNameUpdate, setError, loading, setLoading }: {
+	setShowNameUpdate: (arg: boolean) => void
+	setError: (arg: string | null) => void
+	setLoading: (arg: boolean) => void
+	loading: boolean
+}) => {
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+
+	const { authState: { user, user_info, user_settings, auth_loading, flat_share_profile }, setAuthState } = useAuthContext();
+	const { showToast } = useCommon()
+
+	useEffect(() => {
+		if (user) {
+			setFirstName(user.first_name)
+			setLastName(user.last_name)
+		}
+	}, [user])
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		try {
+			setLoading(true);
+
+			await UserService.update({ document_id: user?._id as string, data: { last_name: lastName, first_name: firstName } })
+
+			showToast({
+				message: 'Your name has been updated',
+				status: 'success'
+			})
+			setAuthState({
+				user: {
+					...user, 
+					last_name: lastName,
+					first_name: firstName,
+					_id: user?._id as string,
+					last_seen: user?.last_seen as Timestamp,
+					email: user?.email as string,
+					providerId: user?.providerId as string,
+					avatar_url: user?.avatar_url as string
+				},
+				user_info,
+				user_settings,
+				flat_share_profile,
+				auth_loading,
+			});
+
+			setShowNameUpdate(false)
+			setError(null)
+			setLoading(false)
+		} catch (err: any) {
+			showToast({
+				status: 'error',
+				message: "Your name was not updated"
+			})
+			setLoading(false)
+		}
+	};
+
+	return (
+		<form id="update_name" onSubmit={handleSubmit}>
+			<VStack spacing={4}>
+				<FormControl id="first-name">
+					<FormLabel>First Name</FormLabel>
+					<Input
+						defaultValue={firstName}
+						type="text"
+						onChange={(e) => setFirstName(e.target.value)}
+						placeholder="Enter your first name"
+					/>
+				</FormControl>
+
+				<FormControl id="last-name">
+					<FormLabel>Last Name</FormLabel>
+					<Input
+						defaultValue={lastName}
+						type="text"
+						onChange={(e) => setLastName(e.target.value)}
+						placeholder="Enter your last name"
+					/>
+				</FormControl>
+				<Button
+					mt={3}
+					mb={5}
+					isLoading={loading}
+					colorScheme="green"
+					onClick={handleSubmit}
+					width="full"
+				>
+					Update Name
+				</Button>
+			</VStack>
+		</form>
+	);
+};
+
 const VerifyNIN = ({
 	isOpen,
-	onOpen,
+	// onOpen,
 	onClose,
 	hasEnoughCredits,
 }: {
 	isOpen: boolean
-	onOpen: () => void
+	// onOpen: () => void
 	onClose: () => void
 	hasEnoughCredits: boolean
 }) => {
@@ -55,14 +152,19 @@ const VerifyNIN = ({
 	const [userId, setUserId] = useState<string>('')
 	const { showToast } = useCommon()
 	const [loading, setLoading] = useState<boolean>(false)
+	const [verificationAttempts, setVerificationAttempts] = useState<number>(0)
+	const [showNameUpdate, setShowNameUpdate] = useState<boolean>(false);
+
 	const {
 		authState: { user, user_info },
 	} = useAuthContext()
 
 	const [_, paymentActions] = usePayment()
-	const modalBg = useColorModeValue('white', 'black')
+	const modalBg = useColorModeValue('white', '#777676')
 
-	useEffect(() => {
+	const [error, setError] = useState<string | null>(null)
+
+	useEffect(() => {              
 		if (Object.keys(user || {}).length > 0 && user) {
 			const hasLastName: boolean =
 				typeof user?.last_name != 'undefined' &&
@@ -112,20 +214,25 @@ const VerifyNIN = ({
 				Object.keys(response.data.data || {}).length > 0
 			) {
 
-				//initiate debit whether NIN belongs to the user or not
-				await paymentActions.decrementCredit({
-					amount: creditTable.VERIFICATION,
-					user_id: user?._id as string,
-				})
+				setVerificationAttempts(verificationAttempts + 1)
+
+				if (verificationAttempts >= 4) {
+					//initiate debit whether NIN belongs to the user or not
+					await paymentActions.decrementCredit({
+						amount: creditTable.VERIFICATION,
+						user_id: user?._id as string,
+					})
+
+					setVerificationAttempts(0)
+				}
 
 				const data: NINResponseDTO = response.data.data
 
 				//check if lastname and gender matches
-				if (
-					data?.lastname == lastname &&
-					doesGenderMatch(data.gender, gender as string)
-				) {
+				const lastNameMatches: boolean = data?.lastname == lastname;
+				const genderMatches: boolean = doesGenderMatch(data.gender, gender as string);
 
+				if (lastNameMatches && genderMatches) {
 					//TODO: Handle scenarios where there can be an existing NIN on the database already
 					await UserInfoService.update({
 						data: { is_verified: true, date_of_birth: data.birthdate, nin },
@@ -135,21 +242,30 @@ const VerifyNIN = ({
 						message: 'Your account has been verified successfully.',
 						status: 'success',
 					})
-
+					setError(null)
 					onClose()
 					setLoading(false)
 
 					window.location.reload()
 				} else {
+					//Only show the form if the lastname does not match with the one in the database
+					if (!lastNameMatches) {
+						setError('Your NIN verification failed because of an identity error. Please update your name and try again.');
+						setShowNameUpdate(true)
+					}
+
 					showToast({
-						message: 'NIN verification failed [Identity Clash]',
+						message: 'NIN verification failed',
 						status: 'error',
 					})
+
 					setLoading(false)
 				}
 			} else {
+				setError('Your NIN verification failed because there was no response from the server. Please reload this page.');
+
 				showToast({
-					message: 'NIN verification failed [No Response Data]',
+					message: 'NIN verification failed',
 					status: 'error',
 				})
 				setLoading(false)
@@ -173,13 +289,12 @@ const VerifyNIN = ({
 					<ModalCloseButton />
 					<ModalBody bg={modalBg}>
 						<Box>
-							<Alert mb={5} status={'info'} variant="subtle">
+							<Alert mb={5} status={(error) ? 'error' : 'info'} variant="subtle">
 								<AlertIcon />
-								To avoid extra costs, please ensure that the NIN is correct and
-								belongs to you
+								{(error) ? error : "To avoid extra costs, please ensure that the NIN is correct and belongs to you"}
 							</Alert>
 
-							<form onSubmit={handleSubmit}>
+							{(showNameUpdate) ? <UpdateNameForm setShowNameUpdate={setShowNameUpdate} setError={setError} loading={loading} setLoading={setLoading} /> : <form id='verify_nin' onSubmit={handleSubmit}>
 								<VStack spacing={4}>
 									<FormControl
 										id="nin"
@@ -197,20 +312,21 @@ const VerifyNIN = ({
 											Please enter a valid 11-digit NIN
 										</FormErrorMessage>
 									</FormControl>
+
+									<Button
+										mt={3}
+										mb={5}
+										isLoading={loading}
+										colorScheme="green"
+										onClick={handleSubmit}
+										width="full"
+									>
+										Verify NIN
+									</Button>
 								</VStack>
-							</form>
+							</form>}
 						</Box>
 					</ModalBody>
-					<ModalFooter>
-						<Button
-							isLoading={loading}
-							colorScheme="green"
-							onClick={handleSubmit}
-							width="full"
-						>
-							Verify NIN
-						</Button>
-					</ModalFooter>
 				</ModalContent>
 			</Modal>
 		</>

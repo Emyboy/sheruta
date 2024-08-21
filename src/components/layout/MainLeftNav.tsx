@@ -17,8 +17,8 @@ import Link from 'next/link'
 
 type Props = {}
 
-export default function MainLeftNav({}: Props) {
-	const { logout } = useAuthContext()
+export default function MainLeftNav({ }: Props) {
+	const { logout, authState: { user_info } } = useAuthContext()
 	return (
 		<Flex
 			flexDirection={'column'}
@@ -39,9 +39,9 @@ export default function MainLeftNav({}: Props) {
 			<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			<EachNav Icon={BiWallet} label="Wallet" />
 			<EachNav Icon={BiWrench} label="Settings" />
-			<Link href="/verification">
+			{(!user_info?.is_verified) ? <Link href="/verification">
 				<EachNav Icon={BiCheckShield} label="Verification" />
-			</Link>
+			</Link> : null}
 			<Divider
 				color="border_color"
 				_dark={{

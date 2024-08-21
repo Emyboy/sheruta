@@ -19,7 +19,7 @@ import { useToast } from '@chakra-ui/react'
 import { useAppContext } from './app.context'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
-interface AuthState {
+export interface AuthState {
 	user: AuthUser | null
 	user_info: UserInfo | null
 	user_settings: null
@@ -67,11 +67,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	}
 
 	const setAuthState = (newState: Partial<AuthState>): void => {
-		setState({
-			...state,
+		setState((prevState) => ({
+			...prevState,
 			...newState,
-		})
-	}
+		}));
+	};
 
 	const createUser = (user: RegisterDTO): void => {
 		// setState({ user, user_info: userInfo })
