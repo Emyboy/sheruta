@@ -70,8 +70,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 		setState((prevState) => ({
 			...prevState,
 			...newState,
-		}));
-	};
+		}))
+	}
 
 	const createUser = (user: RegisterDTO): void => {
 		// setState({ user, user_info: userInfo })

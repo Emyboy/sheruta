@@ -39,16 +39,30 @@ const doesGenderMatch = (NINGender: string, dbGender: string): boolean => {
 	}
 }
 
-const UpdateNameForm = ({ setShowNameUpdate, setError, loading, setLoading }: {
+const UpdateNameForm = ({
+	setShowNameUpdate,
+	setError,
+	loading,
+	setLoading,
+}: {
 	setShowNameUpdate: (arg: boolean) => void
 	setError: (arg: string | null) => void
 	setLoading: (arg: boolean) => void
 	loading: boolean
 }) => {
-	const [firstName, setFirstName] = useState("");
-	const [lastName, setLastName] = useState("");
+	const [firstName, setFirstName] = useState('')
+	const [lastName, setLastName] = useState('')
 
-	const { authState: { user, user_info, user_settings, auth_loading, flat_share_profile }, setAuthState } = useAuthContext();
+	const {
+		authState: {
+			user,
+			user_info,
+			user_settings,
+			auth_loading,
+			flat_share_profile,
+		},
+		setAuthState,
+	} = useAuthContext()
 	const { showToast } = useCommon()
 
 	useEffect(() => {
@@ -59,32 +73,35 @@ const UpdateNameForm = ({ setShowNameUpdate, setError, loading, setLoading }: {
 	}, [user])
 
 	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+		e.preventDefault()
 		try {
-			setLoading(true);
+			setLoading(true)
 
-			await UserService.update({ document_id: user?._id as string, data: { last_name: lastName, first_name: firstName } })
+			await UserService.update({
+				document_id: user?._id as string,
+				data: { last_name: lastName, first_name: firstName },
+			})
 
 			showToast({
 				message: 'Your name has been updated',
-				status: 'success'
+				status: 'success',
 			})
 			setAuthState({
 				user: {
-					...user, 
+					...user,
 					last_name: lastName,
 					first_name: firstName,
 					_id: user?._id as string,
 					last_seen: user?.last_seen as Timestamp,
 					email: user?.email as string,
 					providerId: user?.providerId as string,
-					avatar_url: user?.avatar_url as string
+					avatar_url: user?.avatar_url as string,
 				},
 				user_info,
 				user_settings,
 				flat_share_profile,
 				auth_loading,
-			});
+			})
 
 			setShowNameUpdate(false)
 			setError(null)
@@ -92,11 +109,11 @@ const UpdateNameForm = ({ setShowNameUpdate, setError, loading, setLoading }: {
 		} catch (err: any) {
 			showToast({
 				status: 'error',
-				message: "Your name was not updated"
+				message: 'Your name was not updated',
 			})
 			setLoading(false)
 		}
-	};
+	}
 
 	return (
 		<form id="update_name" onSubmit={handleSubmit}>
@@ -132,8 +149,8 @@ const UpdateNameForm = ({ setShowNameUpdate, setError, loading, setLoading }: {
 				</Button>
 			</VStack>
 		</form>
-	);
-};
+	)
+}
 
 const VerifyNIN = ({
 	isOpen,
@@ -153,18 +170,18 @@ const VerifyNIN = ({
 	const { showToast } = useCommon()
 	const [loading, setLoading] = useState<boolean>(false)
 	const [verificationAttempts, setVerificationAttempts] = useState<number>(0)
-	const [showNameUpdate, setShowNameUpdate] = useState<boolean>(false);
-
+	const [showNameUpdate, setShowNameUpdate] = useState<boolean>(false)
+	const modalContentColor = useColorModeValue('#fff', '#2D3748')
 	const {
 		authState: { user, user_info },
 	} = useAuthContext()
 
 	const [_, paymentActions] = usePayment()
-	const modalBg = useColorModeValue('white', '#777676')
+	const modalBg = useColorModeValue('white', '#1a1a1a')
 
 	const [error, setError] = useState<string | null>(null)
 
-	useEffect(() => {              
+	useEffect(() => {
 		if (Object.keys(user || {}).length > 0 && user) {
 			const hasLastName: boolean =
 				typeof user?.last_name != 'undefined' &&
@@ -213,7 +230,6 @@ const VerifyNIN = ({
 				response?.data?.data &&
 				Object.keys(response.data.data || {}).length > 0
 			) {
-
 				setVerificationAttempts(verificationAttempts + 1)
 
 				if (verificationAttempts >= 4) {
@@ -229,8 +245,11 @@ const VerifyNIN = ({
 				const data: NINResponseDTO = response.data.data
 
 				//check if lastname and gender matches
-				const lastNameMatches: boolean = data?.lastname == lastname;
-				const genderMatches: boolean = doesGenderMatch(data.gender, gender as string);
+				const lastNameMatches: boolean = data?.lastname == lastname
+				const genderMatches: boolean = doesGenderMatch(
+					data.gender,
+					gender as string,
+				)
 
 				if (lastNameMatches && genderMatches) {
 					//TODO: Handle scenarios where there can be an existing NIN on the database already
@@ -246,11 +265,13 @@ const VerifyNIN = ({
 					onClose()
 					setLoading(false)
 
-					window.location.reload()
+					window.location.replace('/')
 				} else {
 					//Only show the form if the lastname does not match with the one in the database
 					if (!lastNameMatches) {
-						setError('Your NIN verification failed because of an identity error. Please update your name and try again.');
+						setError(
+							'Your NIN verification failed because of an identity error. Please update your name and try again.',
+						)
 						setShowNameUpdate(true)
 					}
 
@@ -262,7 +283,9 @@ const VerifyNIN = ({
 					setLoading(false)
 				}
 			} else {
-				setError('Your NIN verification failed because there was no response from the server. Please reload this page.');
+				setError(
+					'Your NIN verification failed because there was no response from the server. Please reload this page.',
+				)
 
 				showToast({
 					message: 'NIN verification failed',
@@ -284,47 +307,58 @@ const VerifyNIN = ({
 		<>
 			<Modal isOpen={isOpen} onClose={onClose} isCentered>
 				<ModalOverlay />
-				<ModalContent>
+				<ModalContent bgColor={modalBg}>
 					<ModalHeader>Verify Your NIN</ModalHeader>
 					<ModalCloseButton />
-					<ModalBody bg={modalBg}>
+					<ModalBody>
 						<Box>
-							<Alert mb={5} status={(error) ? 'error' : 'info'} variant="subtle">
+							<Alert mb={5} status={error ? 'error' : 'info'} variant="subtle">
 								<AlertIcon />
-								{(error) ? error : "To avoid extra costs, please ensure that the NIN is correct and belongs to you"}
+								{error
+									? error
+									: 'To avoid extra costs, please ensure that the NIN is correct and belongs to you'}
 							</Alert>
 
-							{(showNameUpdate) ? <UpdateNameForm setShowNameUpdate={setShowNameUpdate} setError={setError} loading={loading} setLoading={setLoading} /> : <form id='verify_nin' onSubmit={handleSubmit}>
-								<VStack spacing={4}>
-									<FormControl
-										id="nin"
-										isInvalid={nin.length !== 11 && nin.length > 0}
-									>
-										<FormLabel>Enter your NIN</FormLabel>
-										<Input
-											type="text"
-											value={nin}
-											onChange={(e) => setNin(e.target.value)}
-											placeholder="Enter your 11-digit NIN"
-											maxLength={11}
-										/>
-										<FormErrorMessage>
-											Please enter a valid 11-digit NIN
-										</FormErrorMessage>
-									</FormControl>
+							{showNameUpdate ? (
+								<UpdateNameForm
+									setShowNameUpdate={setShowNameUpdate}
+									setError={setError}
+									loading={loading}
+									setLoading={setLoading}
+								/>
+							) : (
+								<form id="verify_nin" onSubmit={handleSubmit}>
+									<VStack spacing={4}>
+										<FormControl
+											id="nin"
+											isInvalid={nin.length !== 11 && nin.length > 0}
+										>
+											<FormLabel>Enter your NIN</FormLabel>
+											<Input
+												type="text"
+												value={nin}
+												onChange={(e) => setNin(e.target.value)}
+												placeholder="Enter your 11-digit NIN"
+												maxLength={11}
+											/>
+											<FormErrorMessage>
+												Please enter a valid 11-digit NIN
+											</FormErrorMessage>
+										</FormControl>
 
-									<Button
-										mt={3}
-										mb={5}
-										isLoading={loading}
-										colorScheme="green"
-										onClick={handleSubmit}
-										width="full"
-									>
-										Verify NIN
-									</Button>
-								</VStack>
-							</form>}
+										<Button
+											mt={3}
+											mb={5}
+											isLoading={loading}
+											colorScheme="green"
+											onClick={handleSubmit}
+											width="full"
+										>
+											Verify NIN
+										</Button>
+									</VStack>
+								</form>
+							)}
 						</Box>
 					</ModalBody>
 				</ModalContent>
