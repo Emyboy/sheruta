@@ -4,7 +4,7 @@ import React from 'react'
 type Props = {
 	Icon: any
 	heading: string | null
-	subHeading: string | number| null
+	subHeading: string | number | null
 }
 
 export default function EachPersonalInfo({ Icon, heading, subHeading }: Props) {

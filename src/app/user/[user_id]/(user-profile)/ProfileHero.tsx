@@ -1,3 +1,4 @@
+'use client'
 
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
@@ -15,22 +16,27 @@ import {
 	BiStore,
 } from 'react-icons/bi'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
-import { UserInfo } from '@/firebase/service/user-info/user-info.types';
-import { useRouter } from 'next/navigation'
+import { UserInfo } from '@/firebase/service/user-info/user-info.types'
 
 type Props = {
 	data: any
-
+	userProfile: any
 }
 
-export default function ProfileHero({ data}: Props) {
+export default function ProfileHero({ data, userProfile }: Props) {
+	console.log('data..................:', data)
+	console.log('User Profile..................:', userProfile)
+
 	const _user: AuthUser = data.user
-	const userFlatshareProfile: FlatShareProfileData = data.flatShareProfile
+	const userFlatshareProfile: FlatShareProfileData =
+		userProfile.flatShareProfile
 
-	const _userInfo: UserInfo = data.userInfo
+	const _userInfo: UserInfo = userProfile.userInfo
 
+	const handleCall = () => {
+		window.location.href = `tel:${_userInfo.primary_phone_number}`
+	}
 
-	
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>
 			<Box
@@ -67,9 +73,11 @@ export default function ProfileHero({ data}: Props) {
 					<Text isTruncated fontSize={'x-large'} textTransform={'capitalize'}>
 						{_user?.first_name} {_user?.last_name}
 					</Text>
-					<Flex alignItems={'center'} color={'blue.400'} h="full">
-						<BiSolidBadgeCheck size={25} />
-					</Flex>
+					{_userInfo?.isVerified ? (
+						<Flex alignItems={'center'} color={'green.400'} h="full">
+							<BiSolidBadgeCheck size={25} />
+						</Flex>
+					) : null}
 				</Flex>
 				<Flex alignItems={'center'} gap={1} color="text_muted">
 					<BiBriefcase />
@@ -98,12 +106,12 @@ export default function ProfileHero({ data}: Props) {
 				>
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>
-						{`${data.flatShareProfile?.area.name} Nigeria`}
+						{`${userProfile.flatShareProfile?.area.name} Nigeria`}
 					</Text>
 				</Flex>
 
 				<Flex gap={DEFAULT_PADDING}>
-					<Button>Call Me</Button>
+					<Button onClick={handleCall}>Call Me</Button>
 					<Link href={`/messages/${_user._id}`}>
 						<Button>
 							<BiMessageRoundedDetail size={25} />

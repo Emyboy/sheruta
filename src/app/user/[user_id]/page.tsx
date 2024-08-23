@@ -1,5 +1,3 @@
-
-
 import React from 'react'
 import UserProfilePage from './(user-profile)/UserProfilePage'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
@@ -18,6 +16,7 @@ import {
 	where,
 	DocumentReference,
 	DocumentSnapshot,
+	DocumentData,
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { promise } from 'zod'
@@ -28,19 +27,33 @@ export const revalidate = CACHE_TTL.LONG
 export default async function page(props: any) {
 	const { params } = props
 	const { user_id } = params
-	
+
+	async function getUserData() {
+		try {
+			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
+
+			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
+
+			console.log(formattedUserDoc)
+
+			return { user: formattedUserDoc }
+		} catch (error) {
+			console.error('Error getting user profile:', error)
+			throw new Error('Failed to get user profile')
+		}
+	}
+
+	const user = await getUserData()
 
 	async function getUserProfile() {
 		try {
-			const [flatShareProfileDocs, userDoc, userInfoDocs] = await Promise.all([
-
+			const [flatShareProfileDocs, userInfoDocs] = await Promise.all([
 				getDocs(
 					query(
 						collection(db, DBCollectionName.flatShareProfile),
 						where('_user_id', '==', user_id),
 					),
 				),
-				getDoc(doc(db, DBCollectionName.users, user_id)),
 				getDocs(
 					query(
 						collection(db, DBCollectionName.userInfos),
@@ -49,27 +62,53 @@ export default async function page(props: any) {
 				),
 			])
 
-			const formattedFlatShareProfile = flatShareProfileDocs.empty
-				? null
-				: flatShareProfileDocs.docs[0].data()
-			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
-			const formattedUserInfoDoc = userInfoDocs.empty
-				? null
-				: userInfoDocs.docs[0].data()
+			const formattedFlatShareProfile = flatShareProfileDocs.docs[0].data()
+				? flatShareProfileDocs.docs[0].data()
+				: null
+
+			const formattedUserInfoDoc = userInfoDocs.docs[0].data()
+				? userInfoDocs.docs[0].data()
+				: null
 
 			let interestsData: any = []
 
-			if (formattedFlatShareProfile?.interests) {
-				const arrayDocRef =
-					formattedFlatShareProfile.interests as DocumentReference[]
-				const docSnapshots = await Promise.all(
-					arrayDocRef.map((docRef) => getDoc(docRef)),
-				)
-				interestsData = docSnapshots
-					.map((docSnapshot: DocumentSnapshot) =>
-						docSnapshot.exists() ? docSnapshot.data() : null,
+			try {
+				if (formattedFlatShareProfile?.interests) {
+					const arrayDocRef =
+						formattedFlatShareProfile.interests as DocumentReference[]
+
+					const docSnapshots = await Promise.all(
+						arrayDocRef.map((docRef) => getDoc(docRef)),
 					)
-					.filter((data) => data !== null)
+
+					interestsData = docSnapshots
+						.map((docSnapshot: DocumentSnapshot) =>
+							docSnapshot.exists() ? docSnapshot.data() : null,
+						)
+						.filter((data) => data !== null)
+				}
+			} catch (error) {
+				console.error('Error fetching document:', error)
+			}
+
+			let habitsData: any = []
+
+			try {
+				if (formattedFlatShareProfile?.habits) {
+					const arrayDocRef =
+						formattedFlatShareProfile.habits as DocumentReference[]
+
+					const docSnapshots = await Promise.all(
+						arrayDocRef.map((docRef) => getDoc(docRef)),
+					)
+					habitsData = docSnapshots
+						.map((docSnapshot: DocumentSnapshot) =>
+							docSnapshot.exists() ? docSnapshot.data() : null,
+						)
+						.filter((data) => data !== null)
+				}
+			} catch (error) {
+				console.error('Error fetching document:', error)
 			}
 
 			let locationValue: any = null
@@ -89,42 +128,28 @@ export default async function page(props: any) {
 				console.error('Error fetching document:', error)
 			}
 
-			return {
+			const user = {
 				flatShareProfile: formattedFlatShareProfile
 					? {
 							...formattedFlatShareProfile,
 							interests: interestsData,
 							area: locationValue,
+							habits: habitsData,
 						}
 					: null,
-				user: formattedUserDoc,
 				userInfo: formattedUserInfoDoc,
 			}
+
+			// Convert to JSON and then back to a plain object
+			const plainUser = JSON.stringify(user)
+
+			return plainUser
 		} catch (error) {
-			console.error('Error getting user profile:', error)
-			throw new Error('Failed to get user profile')
+			console.error('Error fetching document:', error)
 		}
 	}
 
-	const user = await getUserProfile()
-	console.log(
-		'Flatshare....................:',
-		user.flatShareProfile,
-		'User...........................:',
-		user.user,
-		'User Info:..........................:',
-		user.userInfo,
-	)
-
-	// const handleCall = () => {
-	// 	const phoneNumber = user.userInfo?.primary_phone_number;
-		
-	// 	if (phoneNumber) {
-	// 	  window.location.href = `tel:${phoneNumber}`;
-	// 	} else {
-	// 	  console.error("Phone number is null or undefined.");
-	// 	}
-	//   };
+	const otherInfos = await getUserProfile()
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -133,7 +158,11 @@ export default async function page(props: any) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{user ? <UserProfilePage data={user}/> : <PageNotFound />}
+					{user ? (
+						<UserProfilePage data={user} userId={otherInfos} />
+					) : (
+						<PageNotFound />
+					)}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
