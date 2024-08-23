@@ -16,7 +16,10 @@ import {
 	InspectionData,
 	InspectionDataSchema,
 } from '@/firebase/service/inspections/inspections.types'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import {
+	HostRequestDataDetails,
+	userSchema,
+} from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
 import { Link } from '@chakra-ui/next-js'
 import {
@@ -63,6 +66,8 @@ import MainTooltip from '../atoms/MainTooltip'
 import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
+import useCommon from '@/hooks/useCommon'
+import { Router } from 'next/router'
 
 export default function ApartmentSummary({
 	request,
@@ -86,8 +91,8 @@ export default function ApartmentSummary({
 			<BookInspectionModal
 				closeModal={closeModal}
 				showBookInspectionModal={showBookInspectionModal}
-				seeker_id={authState.user?._id ? authState.user?._id : ''}
-				host_id={request.flat_share_profile._id || ''}
+				host_details={request.flat_share_profile}
+				inspection_location={request.google_location_text}
 			/>
 			<Flex
 				gap={{ base: '8px', sm: 5 }}
@@ -947,17 +952,18 @@ export default function ApartmentSummary({
 const BookInspectionModal = ({
 	closeModal,
 	showBookInspectionModal,
-	host_id,
-	seeker_id,
+	host_details,
+	inspection_location,
 }: {
 	closeModal: () => void
 	showBookInspectionModal: boolean
-	host_id: string
-	seeker_id: string
+	host_details: userSchema
+	inspection_location: string
 }) => {
+	const { authState } = useAuthContext()
+	const { showToast } = useCommon()
+	const router = useRouter()
 	const [inspectionData, setInspectionData] = useState({
-		host_id,
-		seeker_id,
 		inspection_date: undefined,
 		inspection_time: undefined,
 		inspection_type: '',
@@ -975,23 +981,45 @@ const BookInspectionModal = ({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
+		if (!authState.user?._id)
+			return showToast({
+				message: 'please login to book an inspection',
+				status: 'error',
+			})
 		setShowCreditInfo(true)
 	}
 
 	const createInspection = async () => {
+		if (!authState.user?._id)
+			return showToast({
+				message: 'please login to book an inspection',
+				status: 'error',
+			})
+
 		setLoading(true)
 
 		const uuid = crypto.randomUUID()
 
 		const data: InspectionData = {
-			host_id: inspectionData.host_id,
-			seeker_id: inspectionData.seeker_id,
+			host_details: {
+				id: host_details._id,
+				first_name: host_details.first_name,
+				last_name: host_details.last_name,
+			},
+			seeker_details: {
+				id: authState.user._id,
+				first_name: authState.user.first_name,
+				last_name: authState.user.last_name,
+			},
 			inspection_type: inspectionData.inspection_type as 'virtual' | 'physical',
 			inspection_date: Timestamp.fromDate(
 				new Date(
 					`${inspectionData.inspection_date}T${inspectionData.inspection_time}:00`,
 				),
 			),
+			isCancelled: false,
+			hasOccured: false,
+			inspection_location,
 		}
 
 		InspectionDataSchema.parse(data)
@@ -1002,8 +1030,18 @@ const BookInspectionModal = ({
 				data,
 				document_id: uuid,
 			})
+
+			showToast({
+				message: 'You have succesfully booked an inspection',
+				status: 'success',
+			})
+			router.push('/inspections')
 		} catch (error) {
 			console.log(error)
+			showToast({
+				message: 'Error booking inspection',
+				status: 'error',
+			})
 		}
 
 		setLoading(false)
