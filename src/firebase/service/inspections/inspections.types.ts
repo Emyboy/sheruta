@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore'
+import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
 
 export const InspectionDataSchema = z.object({
@@ -20,3 +20,11 @@ export const InspectionDataSchema = z.object({
 })
 
 export type InspectionData = z.infer<typeof InspectionDataSchema>
+
+export type returnedInspectionData = InspectionData & {
+	createdAt: Timestamp
+	deleteDate: Timestamp
+	updatedAt: Timestamp
+	id: string
+	ref: DocumentReference
+}

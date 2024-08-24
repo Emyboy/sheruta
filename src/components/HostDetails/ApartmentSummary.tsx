@@ -20,6 +20,7 @@ import {
 	HostRequestDataDetails,
 	userSchema,
 } from '@/firebase/service/request/request.types'
+import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
 import { Link } from '@chakra-ui/next-js'
 import {
@@ -66,8 +67,6 @@ import MainTooltip from '../atoms/MainTooltip'
 import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
-import useCommon from '@/hooks/useCommon'
-import { Router } from 'next/router'
 
 export default function ApartmentSummary({
 	request,

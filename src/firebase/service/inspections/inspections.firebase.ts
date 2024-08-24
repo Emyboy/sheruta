@@ -3,10 +3,12 @@ import {
 	doc,
 	getDoc,
 	getDocs,
+	limit,
 	or,
 	query,
 	serverTimestamp,
 	setDoc,
+	updateDoc,
 	where,
 } from 'firebase/firestore'
 import moment from 'moment'
@@ -50,5 +52,16 @@ export default class InspectionServices {
 			id: doc.id,
 			...doc.data(),
 		}))
+	}
+
+	static async update(data: createDTO) {
+		const ref = doc(db, data.collection_name, data.document_id)
+		await updateDoc(ref, {
+			...data.data,
+			updatedAt: serverTimestamp(),
+		})
+
+		const docSnap = await getDoc(ref)
+		return docSnap.data()
 	}
 }

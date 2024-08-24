@@ -5,14 +5,18 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
-import { InspectionData } from '@/firebase/service/inspections/inspections.types'
 import useCommon from '@/hooks/useCommon'
-import { Box, Flex, Text } from '@chakra-ui/react'
-import { DocumentData, DocumentReference } from 'firebase/firestore'
+import { Flex, Text } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import InspectionCard from './InspectionCard'
+import { returnedInspectionData } from '@/firebase/service/inspections/inspections.types'
 
-type inspectionCategoryType = 'upcoming' | 'missed' | 'past' | 'cancelled'
+export type inspectionCategoryType =
+	| 'upcoming'
+	| 'missed'
+	| 'past'
+	| 'cancelled'
 
 const inspectionCategories: inspectionCategoryType[] = [
 	'upcoming',
@@ -28,17 +32,16 @@ export default function MyInspections() {
 	const router = useRouter()
 	const { showToast } = useCommon()
 
-	const [inspections, setInspections] = useState<any[]>([])
+	const [inspections, setInspections] = useState<returnedInspectionData[]>([])
 	const [filteredInspections, setFilteredInspections] =
-		useState<any[]>(inspections)
+		useState<returnedInspectionData[]>(inspections)
 	const [inspectionCategory, setInspectionCategory] =
 		useState<inspectionCategoryType>('upcoming')
 
 	const fetchYourInspections = async (id: string) => {
 		try {
 			const res = await InspectionServices.getYourInspections(id)
-			setInspections(res)
-			console.log(res)
+			setInspections(res as returnedInspectionData[])
 		} catch (error) {
 			console.error('Error', error)
 		}
@@ -89,7 +92,6 @@ export default function MyInspections() {
 		if (!inspections.length) return
 
 		const sortedInspections = filterInspections()
-		console.log(sortedInspections)
 		setFilteredInspections(sortedInspections)
 	}, [
 		inspectionCategory,
@@ -128,15 +130,15 @@ export default function MyInspections() {
 				pt={DEFAULT_PADDING}
 				px={{
 					base: `calc(${DEFAULT_PADDING} * 1)`,
-					sm: `calc(${DEFAULT_PADDING} * 2)`,
-					md: `calc(${DEFAULT_PADDING} * 3)`,
+					sm: `calc(${DEFAULT_PADDING} * 1.5)`,
+					md: `calc(${DEFAULT_PADDING} * 2)`,
 				}}
 				pb={0}
 				alignItems={'start'}
 				gap={{
 					base: `calc(${DEFAULT_PADDING} * 1)`,
-					sm: `calc(${DEFAULT_PADDING} * 2)`,
-					md: `calc(${DEFAULT_PADDING} * 3)`,
+					sm: `calc(${DEFAULT_PADDING} * 1.5)`,
+					md: `calc(${DEFAULT_PADDING} * 2)`,
 				}}
 				w={'full'}
 				borderColor={'border_color'}
@@ -184,7 +186,28 @@ export default function MyInspections() {
 				>
 					You have no {inspectionCategory} inspections
 				</Text>
-			) : null}
+			) : (
+				<Flex
+					flexDir={'column'}
+					w={'100%'}
+					justifyContent={'center'}
+					gap={'24px'}
+					px={{
+						base: `calc(${DEFAULT_PADDING} * 1)`,
+						sm: `calc(${DEFAULT_PADDING} * 1.5)`,
+						md: `calc(${DEFAULT_PADDING} * 2)`,
+					}}
+				>
+					{filteredInspections.map((inspection, i) => (
+						<InspectionCard
+							{...inspection}
+							inspectionCategory={inspectionCategory}
+							currentUserId={authState.user?._id || ''}
+							key={i}
+						/>
+					))}
+				</Flex>
+			)}
 		</Flex>
 	)
 }
