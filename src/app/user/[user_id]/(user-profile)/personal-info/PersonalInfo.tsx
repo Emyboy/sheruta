@@ -38,42 +38,41 @@ export default function PersonalInfo({ userProfile }: Props) {
 	}
 	const habits: Habits[] = userProfile.flatShareProfile.habits
 
-	const instagramUrl = `https://instagram.com/${_userFlatshareProfile.instagram}`
-	const facebookUrl = `https://facebook.com/${_userFlatshareProfile.facebook}`
-	const twitterUrl = `https://x.com/${_userFlatshareProfile.twitter}`
-	const linkedinUrl = `https://linkedin.com/in/${_userFlatshareProfile.linkedin}`
-	const tiktokUrl = `https://tiktok.com/@${_userFlatshareProfile.tiktok}`
+	const instagramUrl = `https://instagram.com/${_userFlatshareProfile.socials?.instagram}`
+	const facebookUrl = `https://facebook.com/${_userFlatshareProfile.socials?.facebook}`
+	const twitterUrl = `https://x.com/${_userFlatshareProfile.socials?.twitter}`
+	const linkedinUrl = `https://linkedin.com/in/${_userFlatshareProfile.socials?.linkedin}`
+	const tiktokUrl = `https://tiktok.com/@${_userFlatshareProfile.socials?.tiktok}`
 
-	const handleInstagramClick = () => {
-		window.open(
-			`https://instagram.com/${_userFlatshareProfile.instagram}`,
-			'_blank',
-		)
-	}
+	// const handleInstagramClick = () => {
+	// 	window.open(
+	// 		`https://instagram.com/${_userFlatshareProfile.instagram}`,
+	// 		'_blank',
+	// 	)
+	// }
 
-	const handleFacebookClick = () => {
-		window.open(
-			`https://facebook.com/${_userFlatshareProfile.facebook}`,
-			'_blank',
-		)
-	}
+	// const handleFacebookClick = () => {
+	// 	window.open(
+	// 		`https://facebook.com/${_userFlatshareProfile.facebook}`,
+	// 		'_blank',
+	// 	)
+	// }
 
-	const handleTwitterClick = () => {
-		window.open(`https://x.com/${_userFlatshareProfile.twitter}`, '_blank')
-	}
+	// const handleTwitterClick = () => {
+	// 	window.open(`https://x.com/${_userFlatshareProfile.twitter}`, '_blank')
+	// }
 
-	const handleLinkedInClick = () => {
-		window.open(
-			`https://linkedin.com/in/${_userFlatshareProfile.linkedin}`,
-			'_blank',
-		)
-	}
+	// const handleLinkedInClick = () => {
+	// 	window.open(
+	// 		`https://linkedin.com/in/${_userFlatshareProfile.linkedin}`,
+	// 		'_blank',
+	// 	)
+	// }
 
-	const handleTiktokClick = () => {
-		window.open(`https://tiktok.com/@${_userFlatshareProfile.tiktok}`)
-	}
+	// const handleTiktokClick = () => {
+	// 	window.open(`https://tiktok.com/@${_userFlatshareProfile.tiktok}`)
+	// }
 
-	console.log('Habits:.....................', habits)
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING}>
 			<MainSection heading="Additional Information">
@@ -81,7 +80,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 					<EachPersonalInfo
 						Icon={BiMapPin}
 						heading="Preferred Location"
-						subHeading={userProfile.flatShareProfile.area.name}
+						subHeading={userProfile.flatShareProfile.area}
 					/>
 					<EachPersonalInfo
 						Icon={BiMoney}
@@ -101,7 +100,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 					<EachPersonalInfo
 						Icon={BiSolidGroup}
 						heading="Gender Preference"
-						subHeading="mmmmmmm "
+						subHeading="To be fixed"
 					/>
 					<EachPersonalInfo
 						Icon={BiSolidIdCard}
@@ -134,7 +133,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 			</MainSection>
 			<MainSection heading="Social media">
 				<Flex flexWrap={'wrap'} gap={DEFAULT_PADDING}>
-					{_userFlatshareProfile.twitter === '' ? null : (
+					{_userFlatshareProfile.socials?.twitter === '' ? null : (
 						<EachSocialMedia
 							label="Twitter"
 							Icon={BiLogoTwitter}
@@ -142,7 +141,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 							url={twitterUrl}
 						/>
 					)}
-					{_userFlatshareProfile.instagram === '' ? null : (
+					{_userFlatshareProfile.socials?.instagram === '' ? null : (
 						<EachSocialMedia
 							label="Instagram"
 							Icon={BiLogoInstagramAlt}
@@ -150,7 +149,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 							url={instagramUrl}
 						/>
 					)}
-					{_userFlatshareProfile.facebook === '' ? null : (
+					{_userFlatshareProfile.socials?.facebook === '' ? null : (
 						<EachSocialMedia
 							label="Instagram"
 							Icon={BiLogoFacebook}
@@ -158,7 +157,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 							url={facebookUrl}
 						/>
 					)}
-					{_userFlatshareProfile.linkedin === '' ? null : (
+					{_userFlatshareProfile.socials?.linkedin === '' ? null : (
 						<EachSocialMedia
 							label="LinkedIn"
 							Icon={BiLogoLinkedinSquare}
@@ -167,9 +166,9 @@ export default function PersonalInfo({ userProfile }: Props) {
 						/>
 					)}
 
-					{_userFlatshareProfile.tiktok === '' ? null : (
+					{_userFlatshareProfile.socials?.tiktok === '' ? null : (
 						<EachSocialMedia
-							label="LinkedIn"
+							label="Tiktok"
 							Icon={BiLogoTiktok}
 							data=""
 							url={tiktokUrl}

@@ -21,8 +21,6 @@ export default function ProfileAboutMe({ userProfile }: Props) {
 
 	const userBio: string | null = userProfile.flatshareProfile?.bio || null
 
-	console.log('User bio....................................', userBio)
-
 	return (
 		<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 			<Text>

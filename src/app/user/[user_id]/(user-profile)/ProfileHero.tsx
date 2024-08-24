@@ -24,9 +24,6 @@ type Props = {
 }
 
 export default function ProfileHero({ data, userProfile }: Props) {
-	console.log('data..................:', data)
-	console.log('User Profile..................:', userProfile)
-
 	const _user: AuthUser = data.user
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
@@ -97,7 +94,6 @@ export default function ProfileHero({ data, userProfile }: Props) {
 						{_userInfo?.gender}
 					</Text>
 				</Flex>
-
 				<Flex
 					alignItems={'center'}
 					gap={1}
@@ -106,7 +102,7 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				>
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>
-						{`${userProfile.flatShareProfile?.area.name} Nigeria`}
+						{`${userProfile.flatShareProfile?.area} Nigeria`}
 					</Text>
 				</Flex>
 
