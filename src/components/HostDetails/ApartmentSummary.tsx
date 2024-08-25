@@ -10,6 +10,7 @@ import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
 import {
@@ -1030,10 +1031,10 @@ const BookInspectionModal = ({
 					data,
 					document_id: uuid,
 				}),
-				InspectionServices.deductCredits({
+				FlatShareProfileService.decrementCredit({
 					collection_name: DBCollectionName.flatShareProfile,
 					document_id: authState.user._id,
-					credits:
+					newCredit:
 						inspectionData.inspection_type === 'virtual'
 							? creditTable.VIRTUAL_INSPECTION
 							: 0,

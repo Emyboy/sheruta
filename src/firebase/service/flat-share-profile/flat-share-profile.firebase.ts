@@ -1,11 +1,17 @@
-import { DocumentReference, doc, getDoc } from 'firebase/firestore'
+import { db } from '@/firebase'
+import {
+	doc,
+	DocumentReference,
+	getDoc,
+	increment,
+	updateDoc,
+} from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
 import {
 	FlatShareProfileData,
 	flatShareProfileDefaults,
 	UpdateFlatShareProfileDataDTO,
 } from './flat-share-profile.types'
-import { db } from '@/firebase'
 
 export default class FlatShareProfileService {
 	static async create({
@@ -46,81 +52,37 @@ export default class FlatShareProfileService {
 		}
 	}
 
-	static async incrementCredit({
-		newCredit,
-		user_id,
-	}: {
+	static async incrementCredit(data: {
+		collection_name: string
+		document_id: string
 		newCredit: number
-		user_id: string
-	}): Promise<FlatShareProfileData | null> {
-		// const ref = doc(db, data.collection_name, data.document_id)
-
-		// try {
-		// 	await updateDoc(ref, {
-		// 		credits: increment(data.credits),
-		// 	})
-		// 	return Promise.resolve(true)
-		// } catch (error) {
-		// 	return Promise.resolve(false)
-		// }
+	}): Promise<boolean> {
+		const ref = doc(db, data.collection_name, data.document_id)
 
 		try {
-			let result = (await SherutaDB.get({
-				collection_name: DBCollectionName.flatShareProfile,
-				document_id: user_id,
-			})) as unknown as FlatShareProfileData
-
-			if (result && newCredit) {
-				let update = await SherutaDB.update({
-					collection_name: DBCollectionName.flatShareProfile,
-					data: { credits: result?.credits + newCredit },
-					document_id: user_id,
-				})
-				return update as FlatShareProfileData
-			} else {
-				return null
-			}
+			await updateDoc(ref, {
+				credits: increment(data.newCredit),
+			})
+			return Promise.resolve(true)
 		} catch (error) {
-			return Promise.reject(error)
+			return Promise.resolve(false)
 		}
 	}
 
-	static async decrementCredit({
-		user_id,
-		amount,
-	}: {
-		user_id: string
-		amount: number
-	}): Promise<FlatShareProfileData | null> {
-		// const ref = doc(db, data.collection_name, data.document_id)
-
-		// try {
-		// 	await updateDoc(ref, {
-		// 		credits: increment(data.credits * -1),
-		// 	})
-		// 	return Promise.resolve(true)
-		// } catch (error) {
-		// 	return Promise.resolve(false)
-		// }
+	static async decrementCredit(data: {
+		collection_name: string
+		document_id: string
+		newCredit: number
+	}): Promise<boolean> {
+		const ref = doc(db, data.collection_name, data.document_id)
 
 		try {
-			let result = (await SherutaDB.get({
-				collection_name: DBCollectionName.flatShareProfile,
-				document_id: user_id,
-			})) as unknown as FlatShareProfileData
-
-			if (result && amount && result?.credits >= amount) {
-				let update = await SherutaDB.update({
-					collection_name: DBCollectionName.flatShareProfile,
-					data: { credits: result?.credits - amount },
-					document_id: user_id,
-				})
-				return update as FlatShareProfileData
-			} else {
-				return Promise.reject(null)
-			}
+			await updateDoc(ref, {
+				credits: increment(data.newCredit * -1),
+			})
+			return Promise.resolve(true)
 		} catch (error) {
-			return Promise.reject(error)
+			return Promise.resolve(false)
 		}
 	}
 

@@ -2,7 +2,9 @@ import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import CloseIcon from '@/assets/svg/close-icon-dark'
 import Spinner from '@/components/atoms/Spinner'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
 import {
@@ -29,7 +31,6 @@ import { CiCalendarDate, CiFlag1, CiLocationOn } from 'react-icons/ci'
 import { IoTimeOutline } from 'react-icons/io5'
 import { MdOutlineCancel } from 'react-icons/md'
 import { inspectionCategoryType } from './MyInspections'
-import { creditTable } from '@/constants'
 
 type InspectionProps = returnedInspectionData & {
 	currentUserId: string
@@ -357,9 +358,9 @@ const CancelBookingModal = ({
 								data,
 								document_id: id,
 							}),
-							InspectionServices.returnCredits({
+							FlatShareProfileService.incrementCredit({
 								collection_name: DBCollectionName.flatShareProfile,
-								credits: creditTable.VIRTUAL_INSPECTION,
+								newCredit: creditTable.VIRTUAL_INSPECTION,
 								document_id: authState.user._id,
 							}),
 						]
