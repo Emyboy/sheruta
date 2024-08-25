@@ -38,11 +38,11 @@ export default function PersonalInfo({ userProfile }: Props) {
 	}
 	const habits: Habits[] = userProfile.flatShareProfile.habits
 
-	const instagramUrl = `https://instagram.com/${_userFlatshareProfile.socials?.instagram}`
-	const facebookUrl = `https://facebook.com/${_userFlatshareProfile.socials?.facebook}`
-	const twitterUrl = `https://x.com/${_userFlatshareProfile.socials?.twitter}`
-	const linkedinUrl = `https://linkedin.com/in/${_userFlatshareProfile.socials?.linkedin}`
-	const tiktokUrl = `https://tiktok.com/@${_userFlatshareProfile.socials?.tiktok}`
+	const instagramUrl = `https://instagram.com/${_userFlatshareProfile?.instagram}`
+	const facebookUrl = `https://facebook.com/${_userFlatshareProfile?.facebook}`
+	const twitterUrl = `https://x.com/${_userFlatshareProfile?.twitter}`
+	const linkedinUrl = `https://linkedin.com/in/${_userFlatshareProfile?.linkedin}`
+	const tiktokUrl = `https://tiktok.com/@${_userFlatshareProfile?.tiktok}`
 
 	// const handleInstagramClick = () => {
 	// 	window.open(
@@ -133,7 +133,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 			</MainSection>
 			<MainSection heading="Social media">
 				<Flex flexWrap={'wrap'} gap={DEFAULT_PADDING}>
-					{_userFlatshareProfile.socials?.twitter === '' ? null : (
+					{_userFlatshareProfile?.twitter === '' ? null : (
 						<EachSocialMedia
 							label="Twitter"
 							Icon={BiLogoTwitter}
@@ -141,7 +141,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 							url={twitterUrl}
 						/>
 					)}
-					{_userFlatshareProfile.socials?.instagram === '' ? null : (
+					{_userFlatshareProfile?.instagram === '' ? null : (
 						<EachSocialMedia
 							label="Instagram"
 							Icon={BiLogoInstagramAlt}
@@ -149,7 +149,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 							url={instagramUrl}
 						/>
 					)}
-					{_userFlatshareProfile.socials?.facebook === '' ? null : (
+					{_userFlatshareProfile?.facebook === '' ? null : (
 						<EachSocialMedia
 							label="Instagram"
 							Icon={BiLogoFacebook}
@@ -157,7 +157,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 							url={facebookUrl}
 						/>
 					)}
-					{_userFlatshareProfile.socials?.linkedin === '' ? null : (
+					{_userFlatshareProfile?.linkedin === '' ? null : (
 						<EachSocialMedia
 							label="LinkedIn"
 							Icon={BiLogoLinkedinSquare}
@@ -166,7 +166,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 						/>
 					)}
 
-					{_userFlatshareProfile.socials?.tiktok === '' ? null : (
+					{_userFlatshareProfile?.tiktok === '' ? null : (
 						<EachSocialMedia
 							label="Tiktok"
 							Icon={BiLogoTiktok}

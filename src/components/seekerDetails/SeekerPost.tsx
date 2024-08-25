@@ -61,7 +61,7 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 		payment_type,
 		userInfoDoc,
 	} = postData || {}
-	
+
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)

@@ -156,7 +156,7 @@ export default async function page(props: any) {
 								tiktok: formattedFlatShareProfile.tiktok,
 								facebook: formattedFlatShareProfile.facebook,
 								linkedin: formattedFlatShareProfile.linkedin,
-								instagram: formattedFlatShareProfile.instagram
+								instagram: formattedFlatShareProfile.instagram,
 							},
 							seeking: formattedFlatShareProfile.seeking,
 							employment_status: formattedFlatShareProfile.employment_status,

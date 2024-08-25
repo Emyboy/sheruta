@@ -14,7 +14,6 @@ interface Props {
 export default async function UserProfilePage({ data, userId }: Props) {
 	const userProfile = JSON.parse(userId)
 
-
 	return (
 		<Flex flexDir={'column'}>
 			<MainSection>
