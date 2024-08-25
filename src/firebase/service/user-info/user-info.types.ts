@@ -23,4 +23,5 @@ export interface UserInfoDTO {
 	phone_number_verified: boolean
 	date_of_birth: string | null
 	nin: string | null
+	is_verified: boolean | null
 }

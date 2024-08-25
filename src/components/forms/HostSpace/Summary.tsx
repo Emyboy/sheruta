@@ -349,7 +349,7 @@ export default function Summary({
 								</option>
 							</Select>
 						</Flex>
-						<Flex
+						{/* <Flex
 							justifyContent={'flex-start'}
 							flexDir={'column'}
 							w="full"
@@ -380,7 +380,7 @@ export default function Summary({
 									Reserved
 								</option>
 							</Select>
-						</Flex>
+						</Flex> */}
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -701,7 +701,6 @@ export default function Summary({
 								))}
 							</Select>
 						</Flex>
-
 						<Flex
 							justifyContent={'flex-start'}
 							flexDir={'column'}
@@ -737,7 +736,6 @@ export default function Summary({
 							</Select>
 						</Flex>
 					</Flex>
-
 					{formData.area && (
 						<LoadScript
 							googleMapsApiKey={
@@ -747,7 +745,7 @@ export default function Summary({
 						>
 							<FormControl mt={'-1.5rem'}>
 								<FormLabel htmlFor="address">
-									Choose a more descriptive location in {formData.area}?
+									Where in {formData.area}?
 								</FormLabel>
 								<Autocomplete
 									onLoad={handleLoad}
@@ -768,6 +766,30 @@ export default function Summary({
 							</FormControl>
 						</LoadScript>
 					)}
+					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={3}
+						>
+							<Text color={'text_muted'} fontSize={'base'}>
+								Apartment Description
+							</Text>
+							<Textarea
+								onChange={handleChange}
+								required
+								minLength={20}
+								value={formData.description}
+								name="description"
+								borderColor={'border_color'}
+								_dark={{ borderColor: 'dark_light' }}
+								placeholder="Summary Here"
+								resize={'vertical'}
+								height={160}
+							/>
+						</Flex>
+					</Flex>
 				</VStack>
 				<br />
 				<Button

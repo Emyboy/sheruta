@@ -1,3 +1,5 @@
+'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { Box, Button, Flex, Text } from '@chakra-ui/react'
@@ -9,14 +11,29 @@ import {
 	BiMessageRoundedDetail,
 	BiSolidBadgeCheck,
 	BiSolidLocationPlus,
+	BiMaleFemale,
+	BiGroup,
+	BiStore,
 } from 'react-icons/bi'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import { UserInfo } from '@/firebase/service/user-info/user-info.types'
 
 type Props = {
 	data: any
+	userProfile: any
 }
 
-export default function ProfileHero({ data }: Props) {
+export default function ProfileHero({ data, userProfile }: Props) {
 	const _user: AuthUser = data.user
+	const userFlatshareProfile: FlatShareProfileData =
+		userProfile.flatShareProfile
+
+	const _userInfo: UserInfo = userProfile.userInfo
+
+	const handleCall = () => {
+		window.location.href = `tel:${_userInfo.primary_phone_number}`
+	}
+
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>
 			<Box
@@ -53,14 +70,28 @@ export default function ProfileHero({ data }: Props) {
 					<Text isTruncated fontSize={'x-large'} textTransform={'capitalize'}>
 						{_user?.first_name} {_user?.last_name}
 					</Text>
-					<Flex alignItems={'center'} color={'blue.400'} h="full">
-						<BiSolidBadgeCheck size={25} />
-					</Flex>
+					{_userInfo?.isVerified ? (
+						<Flex alignItems={'center'} color={'green.400'} h="full">
+							<BiSolidBadgeCheck size={25} />
+						</Flex>
+					) : null}
 				</Flex>
 				<Flex alignItems={'center'} gap={1} color="text_muted">
 					<BiBriefcase />
 					<Text as="span" color="text_muted">
-						Software Developer
+						{userFlatshareProfile?.occupation}
+					</Text>
+				</Flex>
+				<Flex alignItems={'center'} gap={1} color="text_muted">
+					<BiStore />
+					<Text as="span" color="text_muted">
+						{userFlatshareProfile?.seeking ? 'Seeker' : 'I have an apartment'}
+					</Text>
+				</Flex>
+				<Flex alignItems={'center'} gap={1} color="text_muted">
+					<BiGroup />
+					<Text as="span" color="text_muted">
+						{_userInfo?.gender}
 					</Text>
 				</Flex>
 				<Flex
@@ -71,11 +102,12 @@ export default function ProfileHero({ data }: Props) {
 				>
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>
-						Lekki, Lagos, Nigeria
+						{`${userProfile.flatShareProfile?.area} Nigeria`}
 					</Text>
 				</Flex>
+
 				<Flex gap={DEFAULT_PADDING}>
-					<Button>Call Me</Button>
+					<Button onClick={handleCall}>Call Me</Button>
 					<Link href={`/messages/${_user._id}`}>
 						<Button>
 							<BiMessageRoundedDetail size={25} />
