@@ -112,7 +112,7 @@ export default function UploadMedia({
 		}
 	}
 
-	const handleSubmit = async (e: any) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		const uuid = formData.uuid
 
@@ -175,11 +175,14 @@ export default function UploadMedia({
 				mediaRefPaths.map((url) => SherutaDB.getMediaUrl(url)),
 			)
 
-			let video_url = null
-			let videoRefPath = null
-			if (formData.video_url) {
-				video_url = mediaUrls.pop() || null
-				videoRefPath = newMediaRefPaths.pop() || null
+			let video_url = formData.video_url
+			if (newVideo) {
+				video_url = mediaUrls.pop() || formData.video_url
+			}
+
+			let videoRefPath = formData.videoRefPath
+			if (newVideo) {
+				videoRefPath = newMediaRefPaths.pop() || formData.videoRefPath
 			}
 
 			setFormData((prev) => ({
@@ -193,7 +196,7 @@ export default function UploadMedia({
 			const { category, service, state, area, property, ...cleanedFormData } =
 				formData
 
-			let data: HostRequestData = {
+			const data: HostRequestData = {
 				...cleanedFormData,
 				imagesRefPaths: [...oldMediaRefPaths, ...newMediaRefPaths],
 				videoRefPath,
@@ -202,6 +205,8 @@ export default function UploadMedia({
 				images_urls,
 				updatedAt: Timestamp.now(),
 			}
+
+			console.log('data before parse', data)
 
 			createHostRequestDTO.parse(data)
 
@@ -231,7 +236,7 @@ export default function UploadMedia({
 			} else {
 				console.log('Unknown error', e)
 			}
-			toast({ title: 'Error creating your details', status: 'error' })
+			toast({ title: 'Error updating your details', status: 'error' })
 		}
 
 		setLoading(false)
@@ -501,7 +506,7 @@ export default function UploadMedia({
 					alignItems={'center'}
 					justifyContent={'center'}
 				>
-					{loading ? <Spinner /> : 'Submit'}
+					{loading ? <Spinner /> : 'Update'}
 				</Button>
 			</Flex>
 		</>

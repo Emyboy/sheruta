@@ -7,9 +7,7 @@ import PhysicalInspectionIcon from '@/assets/svg/physical-inspection-icon'
 import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
 import { Link } from '@chakra-ui/next-js'
 import {
@@ -161,7 +159,10 @@ export default function ApartmentSummary({
 							style={{ textDecoration: 'none' }}
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
-								<Text>
+								<Text
+									textTransform={'capitalize'}
+									fontSize={{ base: 'base', md: 'lg' }}
+								>
 									{request.flat_share_profile.last_name}{' '}
 									{request.flat_share_profile.first_name}
 								</Text>

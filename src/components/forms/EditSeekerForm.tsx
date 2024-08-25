@@ -19,7 +19,6 @@ import {
 	DocumentData,
 	doc,
 } from 'firebase/firestore'
-import { v4 as generateUId } from 'uuid'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
@@ -27,6 +26,7 @@ import {
 	createSeekerRequestDTO,
 	PaymentPlan,
 	RequestData,
+	SeekerRequestData,
 } from '@/firebase/service/request/request.types'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
@@ -70,16 +70,22 @@ interface Props {
 	requestId: string
 }
 
-const initialFormState: Partial<RequestData> = {
+const initialFormState: SeekerRequestData = {
 	description: '',
-	uuid: generateUId(),
+	uuid: '',
 	budget: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
 	_location_keyword_ref: undefined as DocumentReference | undefined,
 	_state_ref: undefined as DocumentReference | undefined,
 	_service_ref: undefined as DocumentReference | undefined,
-	_user_ref: undefined as DocumentReference | undefined,
+	flat_share_profile: {
+		done_kyc: false,
+		_id: '',
+		first_name: '',
+		last_name: '',
+		avatar_url: '',
+	},
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -99,7 +105,11 @@ function convertPlainObjectsToTimestamps(data: any): any {
 	}
 	return data
 }
-const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
+
+const EditSeekerForm: React.FC<{
+	editFormData: SeekerRequestData
+	requestId: string
+}> = ({ editFormData, requestId }) => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const router = useRouter()
@@ -133,35 +143,51 @@ const EditSeekerForm: React.FC<Props> = ({ editFormData, requestId }) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (editFormData && flat_share_profile?._user_id) {
-				const convertedFormData: DocumentData =
-					convertPlainObjectsToTimestamps(editFormData)
+				try {
+					const convertedFormData =
+						convertPlainObjectsToTimestamps(editFormData)
 
-				setFormData((prev) => ({
-					...prev,
-					...convertedFormData,
-				}))
+					if (editFormData.flat_share_profile) {
+						const authorDoc = editFormData.flat_share_profile
 
-				if (editFormData._user_ref) {
-					const authorDoc = editFormData._user_ref as unknown as Record<
-						string,
-						any
-					>
-					if (authorDoc?._id !== flat_share_profile?._user_id) {
-						router.push('/')
+						// If user IDs don't match, redirect
+						if (authorDoc?._id !== flat_share_profile?._user_id) {
+							router.push('/')
+							return
+						}
+
+						const { done_kyc } = flat_share_profile
+						const { _id, first_name, last_name, avatar_url } = authorDoc
+
+						setFormData((prev) => ({
+							...prev,
+							...convertedFormData,
+							flat_share_profile: {
+								done_kyc,
+								_id,
+								first_name,
+								last_name,
+								avatar_url,
+							},
+						}))
+
+						// Convert authorDoc back to DocumentReference
+						const _user_ref = doc(db, 'users', authorDoc._id)
+
+						// Set document reference state
+						setDocRefs((prev) => ({
+							...prev,
+							_user_ref,
+						}))
 					}
-
-					//convert authorDoc | _user_ref back to a DocumentReference
-					const _user_ref = doc(db, 'users', authorDoc._id)
-					setDocRefs((prev) => ({
-						...prev,
-						_user_ref,
-					}))
+				} catch (error) {
+					console.error('Error fetching data: ', error)
 				}
 			}
 		}
 
 		fetchData()
-	}, [editFormData, flat_share_profile])
+	}, [editFormData, flat_share_profile, router])
 
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')

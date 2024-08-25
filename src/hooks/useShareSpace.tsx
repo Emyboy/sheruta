@@ -3,6 +3,7 @@ import useCommon from './useCommon'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import { useRouter } from 'next/navigation'
+import { deletePost } from '@/utils/actions'
 
 export default function useShareSpace() {
 	const { showToast } = useCommon()
@@ -66,7 +67,7 @@ export default function useShareSpace() {
 					status: 'success',
 				})
 
-				router.push('/')
+				router.refresh()
 			} else {
 				showToast({
 					message: 'You are not authorized to delete this post',
