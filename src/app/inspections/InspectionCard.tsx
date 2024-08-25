@@ -1,5 +1,3 @@
-
-
 import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import CloseIcon from '@/assets/svg/close-icon-dark'
 import Spinner from '@/components/atoms/Spinner'
@@ -31,7 +29,7 @@ import { CiCalendarDate, CiFlag1, CiLocationOn } from 'react-icons/ci'
 import { IoTimeOutline } from 'react-icons/io5'
 import { MdOutlineCancel } from 'react-icons/md'
 import { inspectionCategoryType } from './MyInspections'
-import Link from 'next/link'
+import { creditTable } from '@/constants'
 
 type InspectionProps = returnedInspectionData & {
 	currentUserId: string
@@ -62,7 +60,7 @@ export default function InspectionCard({
 	currentUserId,
 	inspectionCategory,
 }: InspectionProps) {
-const router = useRouter()
+	const router = useRouter()
 
 	const [showRescheduleInspectionModal, setShowRescheduleInspectionModal] =
 		useState(false)
@@ -115,7 +113,7 @@ const router = useRouter()
 					gap={DEFAULT_PADDING}
 					justifyContent={'space-between'}
 				>
-					<Text fontSize={{base:'sm', sm:'base', md:'lg'}} flex={1} >
+					<Text fontSize={{ base: 'sm', sm: 'base', md: 'lg' }} flex={1}>
 						New Apartment Inspection with{' '}
 						<Text as={'span'} color={'brand'}>
 							{currentUserId === host_details.id
@@ -135,13 +133,15 @@ const router = useRouter()
 						<Box>
 							<CiFlag1 />
 						</Box>
-						<Hide below='sm'> 
-
-						Flag Booking
-						</Hide>
+						<Hide below="sm">Flag Booking</Hide>
 					</Text>
 				</Flex>
-				<Flex alignItems={'center'} flexWrap={'wrap'} justifyContent={'start'} gap={{base:'16px', md:'24px'}}>
+				<Flex
+					alignItems={'center'}
+					flexWrap={'wrap'}
+					justifyContent={'start'}
+					gap={{ base: '16px', md: '24px' }}
+				>
 					<Text
 						display={'flex'}
 						fontSize={{ base: 'xs', md: 'sm' }}
@@ -203,8 +203,7 @@ const router = useRouter()
 							fontWeight={300}
 							color={'#FFA500'}
 							textDecoration={'underline'}
-						fontSize={{ base: 'sm', md: 'base' }}
-
+							fontSize={{ base: 'sm', md: 'base' }}
 						>
 							Reschedule
 						</Flex>
@@ -217,78 +216,83 @@ const router = useRouter()
 					flexWrap={'wrap'}
 					flexDir={'column'}
 				>
-										<Flex	w={'100%'}  justifyContent={'space-between'} alignItems={'center'} gap={'16px'}>
+					<Flex
+						w={'100%'}
+						justifyContent={'space-between'}
+						alignItems={'center'}
+						gap={'16px'}
+					>
 						<Text
 							display={'flex'}
 							_dark={{ color: 'text_muted' }}
 							fontWeight={300}
 							_light={{ color: '#11171799' }}
 							textTransform={'capitalize'}
-						fontSize={{ base: 'xs', sm:'sm', md: 'base' }}
-
+							fontSize={{ base: 'xs', sm: 'sm', md: 'base' }}
 						>
 							{inspection_type} Inspection
 						</Text>
-					{inspectionCategory === 'upcoming' && (
-						<Text
+						{inspectionCategory === 'upcoming' && (
+							<Text
+								display={'flex'}
+								alignSelf={'end'}
+								_dark={{ color: 'text_muted' }}
+								fontWeight={300}
+								_light={{ color: '#11171799' }}
+								gap={'4px'}
+								alignItems={'center'}
+								justifyContent={'center'}
+								cursor={'pointer'}
+								onClick={openCancelBookingModal}
+								fontSize={{ base: 'xs', sm: 'sm', md: 'base' }}
+							>
+								<Box>
+									<MdOutlineCancel color="red" />
+								</Box>
+								Cancel Booking
+							</Text>
+						)}
+					</Flex>
+					<Flex alignItems={'center'} gap={2}>
+						<Button
+							isDisabled={inspectionCategory !== 'upcoming'}
+							rounded={'8px'}
 							display={'flex'}
-							alignSelf={'end'}
-							_dark={{ color: 'text_muted' }}
-							fontWeight={300}
-							_light={{ color: '#11171799' }}
-							gap={'4px'}
 							alignItems={'center'}
 							justifyContent={'center'}
-							cursor={'pointer'}
-							onClick={openCancelBookingModal}
-												fontSize={{ base: 'xs', sm:'sm', md: 'base' }}
-
-
+							py={'15px'}
+							px={'30px'}
+							w={'100%'}
+							bgColor={'brand'}
+							color={'white'}
+							fontSize={{ base: 'sm', md: 'base' }}
+							onClick={() =>
+								router.push(
+									`/messages/${
+										currentUserId === host_details.id
+											? seeker_details.id
+											: host_details.id
+									}`,
+								)
+							}
 						>
-							<Box>
-								<MdOutlineCancel color="red" />
-							</Box>
-							Cancel Booking
-						</Text>
-					)}
+							Send Message
+						</Button>
+						<Button
+							isDisabled={inspectionCategory !== 'upcoming'}
+							rounded={'8px'}
+							display={'flex'}
+							alignItems={'center'}
+							justifyContent={'center'}
+							p={'15px'}
+							_dark={{ bgColor: 'black' }}
+							bgColor={'#111717CC'}
+							color={'white'}
+							fontSize={{ base: 'sm', md: 'base' }}
+						>
+							Call
+						</Button>
 					</Flex>
-						<Flex alignItems={'center'} gap={2}>
-							<Button
-								disabled={inspectionCategory !== 'upcoming'}
-								rounded={'8px'}
-								display={'flex'}
-								alignItems={'center'}
-								justifyContent={'center'}
-								py={'15px'}
-								px={'30px'}
-								w={'100%'}
-								bgColor={'brand'}
-								color={'white'}								
-								fontSize={{ base: 'sm', md: 'base' }}
-								onClick={() => router.push(`/messages/${currentUserId === host_details.id 
-								? seeker_details.id
-								: host_details.id}`)}
-							>
-								Send Message
-							</Button>
-					
-							<Button
-								disabled={(inspectionCategory !== 'upcoming')}
-					
-								rounded={'8px'}
-								display={'flex'}
-								alignItems={'center'}
-								justifyContent={'center'}
-								p={'15px'}
-								_dark={{ bgColor: 'black' }}
-								bgColor={'#111717CC'}
-								color={'white'}
-								fontSize={{ base: 'sm', md: 'base' }}
-							>
-								Call
-							</Button>
-						</Flex>
-
 				</Flex>
 			</Flex>
 		</>
@@ -303,7 +307,6 @@ const CancelBookingModal = ({
 	host_details,
 	inspection_location,
 	inspection_type,
-	isCancelled,
 	seeker_details,
 	id,
 }: cancelBookingModalProps) => {
@@ -316,11 +319,12 @@ const CancelBookingModal = ({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		if (!authState.user?._id)
+		if (!authState.user?._id) {
 			return showToast({
-				message: 'please login to reschedule an inspection',
+				message: 'Please login to reschedule an inspection',
 				status: 'error',
 			})
+		}
 
 		setLoading(true)
 
@@ -334,30 +338,56 @@ const CancelBookingModal = ({
 			inspection_location,
 		}
 
-		InspectionDataSchema.parse(data)
-
 		try {
-			await InspectionServices.update({
-				collection_name: DBCollectionName.inspections,
-				data,
-				document_id: id,
-			})
-
-			showToast({
-				message: 'You have succesfully rescheduled your inspection',
-				status: 'success',
-			})
-			router.push('/inspections')
+			InspectionDataSchema.parse(data)
 		} catch (error) {
-			console.log(error)
-			showToast({
-				message: 'Error rescheduling inspection',
+			setLoading(false)
+			return showToast({
+				message: 'Invalid data',
 				status: 'error',
 			})
 		}
 
-		setLoading(false)
-		closeCancelBookingModal()
+		try {
+			const promises =
+				authState.user._id === host_details.id && inspection_type === 'virtual'
+					? [
+							InspectionServices.update({
+								collection_name: DBCollectionName.inspections,
+								data,
+								document_id: id,
+							}),
+							InspectionServices.returnCredits({
+								collection_name: DBCollectionName.flatShareProfile,
+								credits: creditTable.VIRTUAL_INSPECTION,
+								document_id: authState.user._id,
+							}),
+						]
+					: [
+							InspectionServices.update({
+								collection_name: DBCollectionName.inspections,
+								data,
+								document_id: id,
+							}),
+						]
+
+			await Promise.all(promises)
+
+			showToast({
+				message: 'You have successfully cancelled your inspection',
+				status: 'success',
+			})
+			router.push('/inspections')
+		} catch (error) {
+			console.error(error)
+			showToast({
+				message: 'Error cancelling inspection',
+				status: 'error',
+			})
+		} finally {
+			setLoading(false)
+			closeCancelBookingModal()
+		}
 	}
 
 	if (loading)

@@ -53,6 +53,17 @@ export default class FlatShareProfileService {
 		newCredit: number
 		user_id: string
 	}): Promise<FlatShareProfileData | null> {
+		// const ref = doc(db, data.collection_name, data.document_id)
+
+		// try {
+		// 	await updateDoc(ref, {
+		// 		credits: increment(data.credits),
+		// 	})
+		// 	return Promise.resolve(true)
+		// } catch (error) {
+		// 	return Promise.resolve(false)
+		// }
+
 		try {
 			let result = (await SherutaDB.get({
 				collection_name: DBCollectionName.flatShareProfile,
@@ -81,6 +92,17 @@ export default class FlatShareProfileService {
 		user_id: string
 		amount: number
 	}): Promise<FlatShareProfileData | null> {
+		// const ref = doc(db, data.collection_name, data.document_id)
+
+		// try {
+		// 	await updateDoc(ref, {
+		// 		credits: increment(data.credits * -1),
+		// 	})
+		// 	return Promise.resolve(true)
+		// } catch (error) {
+		// 	return Promise.resolve(false)
+		// }
+
 		try {
 			let result = (await SherutaDB.get({
 				collection_name: DBCollectionName.flatShareProfile,

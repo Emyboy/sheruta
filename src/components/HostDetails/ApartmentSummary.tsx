@@ -1024,11 +1024,21 @@ const BookInspectionModal = ({
 		InspectionDataSchema.parse(data)
 
 		try {
-			await InspectionServices.create({
-				collection_name: DBCollectionName.inspections,
-				data,
-				document_id: uuid,
-			})
+			await Promise.all([
+				InspectionServices.create({
+					collection_name: DBCollectionName.inspections,
+					data,
+					document_id: uuid,
+				}),
+				InspectionServices.deductCredits({
+					collection_name: DBCollectionName.flatShareProfile,
+					document_id: authState.user._id,
+					credits:
+						inspectionData.inspection_type === 'virtual'
+							? creditTable.VIRTUAL_INSPECTION
+							: 0,
+				}),
+			])
 
 			showToast({
 				message: 'You have succesfully booked an inspection',

@@ -3,6 +3,7 @@ import {
 	doc,
 	getDoc,
 	getDocs,
+	increment,
 	limit,
 	or,
 	query,
@@ -63,5 +64,39 @@ export default class InspectionServices {
 
 		const docSnap = await getDoc(ref)
 		return docSnap.data()
+	}
+
+	static async returnCredits(data: {
+		collection_name: string
+		document_id: string
+		credits: number
+	}): Promise<boolean> {
+		const ref = doc(db, data.collection_name, data.document_id)
+
+		try {
+			await updateDoc(ref, {
+				credits: increment(data.credits),
+			})
+			return Promise.resolve(true)
+		} catch (error) {
+			return Promise.resolve(false)
+		}
+	}
+
+	static async deductCredits(data: {
+		collection_name: string
+		document_id: string
+		credits: number
+	}): Promise<boolean> {
+		const ref = doc(db, data.collection_name, data.document_id)
+
+		try {
+			await updateDoc(ref, {
+				credits: increment(data.credits * -1),
+			})
+			return Promise.resolve(true)
+		} catch (error) {
+			return Promise.resolve(false)
+		}
 	}
 }
