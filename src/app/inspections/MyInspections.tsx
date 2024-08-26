@@ -6,9 +6,7 @@ import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
 import { returnedInspectionData } from '@/firebase/service/inspections/inspections.types'
-import useCommon from '@/hooks/useCommon'
 import { Flex, Text } from '@chakra-ui/react'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import InspectionCard from './InspectionCard'
 
@@ -28,9 +26,6 @@ const inspectionCategories: inspectionCategoryType[] = [
 export default function MyInspections() {
 	const { authState } = useAuthContext()
 	const { appState } = useAppContext()
-
-	const router = useRouter()
-	const { showToast } = useCommon()
 
 	const [inspections, setInspections] = useState<returnedInspectionData[]>([])
 	const [filteredInspections, setFilteredInspections] =

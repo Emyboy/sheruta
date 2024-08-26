@@ -749,7 +749,7 @@ const ResheduleInspectionModal = ({
 						textColor={'white'}
 						fontSize={{ base: 'sm', md: 'base' }}
 					>
-						Proceed to Payment
+						Reschedule Booking
 					</Button>
 				</Flex>
 			</ModalContent>

@@ -8,7 +8,7 @@ import {
 	Text,
 	useColorMode,
 } from '@chakra-ui/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import MainBodyContent from './MainBodyContent'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import NextLink from 'next/link'
@@ -30,6 +30,12 @@ export default function MobileHeader({}: Props) {
 	const { authState, loginWithGoogle } = useAuthContext()
 	const { user, flat_share_profile } = authState
 	const { setAppState } = useAppContext()
+
+	const pathname = usePathname()
+
+	useEffect(() => {
+		if (pathname.startsWith('/search')) setAppState({ show_left_nav: true })
+	}, [])
 
 	return (
 		<Show below="lg">

@@ -2,6 +2,7 @@
 
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Button, Flex, Text } from '@chakra-ui/react'
+import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { TbCircleLetterX } from 'react-icons/tb'
@@ -71,22 +72,24 @@ export default function ListOfFilters({ length }: { length: number }) {
 					{length ? `${length} Results` : 'No Apartment'}
 				</Text>
 
-				<Button
-					display={'flex'}
-					gap={2}
-					alignItems={'center'}
-					justifyContent={'center'}
-					fontSize={{ base: 'sm', md: 'base' }}
-					fontWeight={300}
-					color={'brand'}
-					bgColor={'transparent'}
-					p={0}
-					_hover={{ bgColor: 'transparent' }}
-					onClick={() => replace(pathname)}
-				>
-					Clear Filters
-					<TbCircleLetterX size={'16px'} />
-				</Button>
+				<Link href={'/'}>
+					<Button
+						display={'flex'}
+						gap={2}
+						alignItems={'center'}
+						justifyContent={'center'}
+						fontSize={{ base: 'sm', md: 'base' }}
+						fontWeight={300}
+						color={'brand'}
+						bgColor={'transparent'}
+						p={0}
+						_hover={{ bgColor: 'transparent' }}
+						onClick={() => replace(pathname)}
+					>
+						Clear Filters
+						<TbCircleLetterX size={'16px'} />
+					</Button>
+				</Link>
 			</Flex>
 		</Flex>
 	)

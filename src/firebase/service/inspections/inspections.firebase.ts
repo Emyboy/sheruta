@@ -5,6 +5,7 @@ import {
 	getDoc,
 	getDocs,
 	or,
+	orderBy,
 	query,
 	serverTimestamp,
 	setDoc,
@@ -42,6 +43,7 @@ export default class InspectionServices {
 				where('host_details.id', '==', id),
 				where('seeker_details.id', '==', id),
 			),
+			orderBy('inspection_date', 'asc'),
 		)
 
 		const docsSnapshot = await getDocs(q)
