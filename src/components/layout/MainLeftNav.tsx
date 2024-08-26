@@ -6,6 +6,7 @@ import { Box, Divider, Flex, Hide, Text, Icon } from '@chakra-ui/react'
 import React from 'react'
 import {
 	BiCalendarAlt,
+	BiCheckShield,
 	BiLogInCircle,
 	BiMessageSquareDetail,
 	BiRocket,
@@ -17,7 +18,10 @@ import Link from 'next/link'
 type Props = {}
 
 export default function MainLeftNav({}: Props) {
-	const { logout } = useAuthContext()
+	const {
+		logout,
+		authState: { user_info },
+	} = useAuthContext()
 	return (
 		<Flex
 			flexDirection={'column'}
@@ -38,6 +42,11 @@ export default function MainLeftNav({}: Props) {
 			<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			<EachNav Icon={BiWallet} label="Wallet" />
 			<EachNav Icon={BiWrench} label="Settings" />
+			{!user_info?.is_verified ? (
+				<Link href="/verification">
+					<EachNav Icon={BiCheckShield} label="Verification" />
+				</Link>
+			) : null}
 			<Divider
 				color="border_color"
 				_dark={{

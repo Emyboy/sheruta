@@ -25,8 +25,8 @@ import { useRouter } from 'next/navigation'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
+	BiEnvelope,
 	BiMap,
-	BiMessageRoundedDetail,
 	BiPencil,
 	BiPhone,
 	BiShare,
@@ -308,7 +308,7 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 									<Tooltip
 										bgColor={colorMode === 'dark' ? '#fff' : 'gray.300'}
 										hasArrow
-										label={`Message ${userDoc?.first_name}`}
+										label={`Dm ${userDoc?.first_name}`}
 										color={colorMode === 'dark' ? 'black' : 'black'}
 									>
 										<IconButton
@@ -316,7 +316,7 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 											aria-label={`Message ${userDoc?.first_name}`}
 											border="none"
 											fontSize="24px"
-											icon={<BiMessageRoundedDetail />}
+											icon={<BiEnvelope />}
 											onClick={() => {
 												router.replace(`/messages/${userInfoDoc?._user_id}`)
 											}}
