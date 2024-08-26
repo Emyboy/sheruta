@@ -6,6 +6,10 @@ export interface UserInfo {
 	gender?: 'male' | 'female' | null
 	primary_phone_number: string | null
 	whatsapp_phone_number: string | null
+	is_verified: boolean
+	phone_number_verified: boolean
+	date_of_birth: string | null
+	nin: string | null
 }
 
 export interface UserInfoDTO {
@@ -15,4 +19,9 @@ export interface UserInfoDTO {
 	primary_phone_number: null | string
 	whatsapp_phone_number: null
 	done_kyc: boolean
+	is_verified: boolean
+	phone_number_verified: boolean
+	date_of_birth: string | null
+	nin: string | null
+	is_verified: boolean | null
 }

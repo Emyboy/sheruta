@@ -3,7 +3,6 @@
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { Box, Flex, Alert, AlertIcon, Text, IconButton } from '@chakra-ui/react'
-import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import MainHeader from '@/components/layout/MainHeader'
@@ -20,7 +19,6 @@ export default function Page({}: Props) {
 	const handleBackClick = () => {
 		router.back()
 	}
-
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>

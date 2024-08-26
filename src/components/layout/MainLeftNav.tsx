@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
 	BiCalendarAlt,
+	BiCheckShield,
 	BiLogInCircle,
 	BiMessageSquareDetail,
 	BiWallet,
@@ -17,7 +18,10 @@ import {
 type Props = {}
 
 export default function MainLeftNav({}: Props) {
-	const { logout } = useAuthContext()
+	const {
+		logout,
+		authState: { user_info },
+	} = useAuthContext()
 	return (
 		<Flex
 			flexDirection={'column'}
@@ -40,6 +44,11 @@ export default function MainLeftNav({}: Props) {
 			</Link>
 			<EachNav Icon={BiWallet} label="Wallet" />
 			<EachNav Icon={BiWrench} label="Settings" />
+			{!user_info?.is_verified ? (
+				<Link href="/verification">
+					<EachNav Icon={BiCheckShield} label="Verification" />
+				</Link>
+			) : null}
 			<Divider
 				color="border_color"
 				_dark={{

@@ -1,20 +1,49 @@
+'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Badge, Flex, Text } from '@chakra-ui/react'
-import React from 'react'
+import React, { useState } from 'react'
+import {
+	FlatShareProfileData,
+	flatShareProfileDefaults,
+} from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
-type Props = {}
+type Props = {
+	userProfile: any
+}
 
-export default function ProfileAboutMe({}: Props) {
+export default function ProfileAboutMe({ userProfile }: Props) {
+	type Interest = {
+		title: string
+	}
+
+	let userInterests: Interest[] = userProfile.flatShareProfile?.interests
+
+	const userBio: string | null = userProfile.flatshareProfile?.bio || null
+
 	return (
 		<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 			<Text>
-				Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptates
-				placeat possimus cumque ab suscipit. Sequi porro beatae doloribus,
-				accusamus repudiandae unde laborum tenetur eius soluta eos deserunt qui
-				tempore officiis.
+				{userBio
+					? userBio
+					: 'Hi! I am a user of Sheruta. You should go through my profile and see if we are a match'}
 			</Text>
-			<Flex flexWrap={'wrap'} gap={2}>
-				{new Array(14).fill(null).map((_) => {
+			<Flex flexWrap={'wrap'} gap={3}>
+				<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
+					<Badge
+						key={Math.random()}
+						bg="border_color"
+						px={3}
+						rounded={'md'}
+						_dark={{
+							color: 'border_color',
+							bg: 'dark_light',
+						}}
+					>
+						<Text color="border_color">Interests</Text>
+					</Badge>
+				</Flex>
+				{userInterests.map((item) => {
 					return (
 						<Badge
 							key={Math.random()}
@@ -26,7 +55,7 @@ export default function ProfileAboutMe({}: Props) {
 								bg: 'dark_light',
 							}}
 						>
-							New f
+							{item.title}
 						</Badge>
 					)
 				})}
