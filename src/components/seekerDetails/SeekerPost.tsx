@@ -1,27 +1,31 @@
 'use client'
 
+import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
-import { useEffect, useState } from 'react'
+import useCommon from '@/hooks/useCommon'
+import useShareSpace from '@/hooks/useShareSpace'
+import { capitalizeString, timeAgo } from '@/utils/index.utils'
 import {
-	Box,
-	Flex,
-	Text,
-	Button,
-	IconButton,
+	Avatar,
 	Badge,
+	Box,
+	Button,
+	Flex,
 	Heading,
 	HStack,
-	Tooltip,
+	IconButton,
 	Popover,
-	PopoverTrigger,
-	PopoverContent,
 	PopoverBody,
-	VStack,
+	PopoverContent,
+	PopoverTrigger,
+	Text,
+	Tooltip,
 	useColorMode,
-	Avatar,
+	VStack,
 } from '@chakra-ui/react'
-import React from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -32,12 +36,7 @@ import {
 	BiShare,
 	BiTrash,
 } from 'react-icons/bi'
-import { capitalizeString, timeAgo } from '@/utils/index.utils'
-import useCommon from '@/hooks/useCommon'
-import Link from 'next/link'
 import UserCard from './UserCard'
-import { useAuthContext } from '@/context/auth.context'
-import useShareSpace from '@/hooks/useShareSpace'
 
 interface Props {
 	[key: string]: any
@@ -47,7 +46,8 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
-	const copyShareUrl = useShareSpace()
+	const { copyShareUrl } = useShareSpace()
+
 	const router = useRouter()
 
 	const {
@@ -74,24 +74,6 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 			setIsPostAdmin(authState.user?._id === userDoc?._id)
 		}
 	}, [userDoc, authState])
-
-	const handleShare = async () => {
-		try {
-			if (
-				typeof window !== 'undefined' &&
-				typeof window.location !== 'undefined'
-			) {
-				const shareUrl = window.location.href
-				await copyShareUrl(
-					shareUrl,
-					'Hey! Check out this apartment from Sheruta',
-					'Come, join me and review this apartment from Sheruta',
-				)
-			}
-		} catch (error) {
-			console.error('Error sharing:', error)
-		}
-	}
 
 	const deletePost = async (): Promise<void> => {
 		try {
@@ -203,7 +185,13 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 													variant="ghost"
 													isLoading={isLoading}
 													leftIcon={<BiShare />}
-													onClick={handleShare}
+													onClick={() =>
+														copyShareUrl(
+															window.location.href,
+															'Hey! Check out this apartment from Sheruta',
+															'Come, join me and review this apartment from Sheruta',
+														)
+													}
 													width="100%"
 													display="flex"
 													alignItems="center"
