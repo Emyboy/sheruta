@@ -1,3 +1,5 @@
+'use client'
+
 import { Flex, Hide } from '@chakra-ui/react'
 import Link from 'next/link'
 import React from 'react'

@@ -5,12 +5,12 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
+import { returnedInspectionData } from '@/firebase/service/inspections/inspections.types'
 import useCommon from '@/hooks/useCommon'
 import { Flex, Text } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import InspectionCard from './InspectionCard'
-import { returnedInspectionData } from '@/firebase/service/inspections/inspections.types'
 
 export type inspectionCategoryType =
 	| 'upcoming'

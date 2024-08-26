@@ -1,5 +1,6 @@
 import MainContainer from '@/components/layout/MainContainer'
 import MainHeader from '@/components/layout/MainHeader'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
@@ -29,6 +30,7 @@ export default async function page({ searchParams }: Props) {
 					</Flex>
 					<SearchPage requests={JSON.stringify(requests)} />
 				</ThreeColumnLayout>
+				<MobileNavFooter />
 			</MainContainer>
 		</Flex>
 	)

@@ -27,7 +27,7 @@ export default function CreditInfo({ credit, onUse }: Props) {
 				</Box>
 			)
 		}
-		
+
 		return (
 			<>
 				<Flex justifyContent={'center'} alignItems={'center'} w="full">
