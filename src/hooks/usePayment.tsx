@@ -2,8 +2,8 @@
 
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
-import { useToast } from '@chakra-ui/react'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { ToastId, useToast } from '@chakra-ui/react'
 import { useState } from 'react'
 
 interface PaymentState {
@@ -14,11 +14,11 @@ interface PaymentActions {
 	decrementCredit: (params: {
 		amount: number
 		user_id: string
-	}) => Promise<FlatShareProfileData | null>
+	}) => Promise<boolean | ToastId>
 	incrementCredit: (params: {
 		amount: number
 		user_id: string
-	}) => Promise<FlatShareProfileData | null>
+	}) => Promise<boolean | ToastId>
 }
 
 type PaymentHook = () => [PaymentState, PaymentActions]
@@ -36,16 +36,25 @@ const usePayment: PaymentHook = () => {
 	}: {
 		amount: number
 		user_id: string
-	}): Promise<FlatShareProfileData | null> => {
+	}) => {
+		if (!authState.flat_share_profile)
+			return toast({ title: 'Error, please login and again', status: 'error' })
+
 		try {
 			setPaymentState({ isLoading: true })
 			let result = await FlatShareProfileService.decrementCredit({
-				amount,
-				user_id,
+				collection_name: DBCollectionName.flatShareProfile,
+				newCredit: amount,
+				document_id: user_id,
 			})
 			setPaymentState({ isLoading: false })
 			if (result) {
-				setAuthState({ flat_share_profile: result })
+				setAuthState({
+					flat_share_profile: {
+						...authState.flat_share_profile,
+						credits: authState.flat_share_profile?.credits - amount,
+					},
+				})
 			}
 			return result
 		} catch (error) {
@@ -61,16 +70,25 @@ const usePayment: PaymentHook = () => {
 	}: {
 		amount: number
 		user_id: string
-	}): Promise<FlatShareProfileData | null> => {
+	}) => {
+		if (!authState.flat_share_profile)
+			return toast({ title: 'Error, please login and again', status: 'error' })
+
 		try {
 			setPaymentState({ isLoading: true })
 			let result = await FlatShareProfileService.incrementCredit({
+				collection_name: DBCollectionName.flatShareProfile,
 				newCredit: amount,
-				user_id,
+				document_id: user_id,
 			})
 			setPaymentState({ isLoading: false })
 			if (result) {
-				setAuthState({ flat_share_profile: result })
+				setAuthState({
+					flat_share_profile: {
+						...authState.flat_share_profile,
+						credits: authState.flat_share_profile.credits + amount,
+					},
+				})
 			}
 			return result
 		} catch (error) {

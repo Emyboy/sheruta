@@ -1,3 +1,5 @@
+import { formatDuration, intervalToDuration } from 'date-fns'
+
 export const hasEmptyValue = (obj: any): boolean => {
 	for (const key in obj) {
 		if (obj[key] === '' || obj[key] === null || obj[key] === undefined) {
@@ -63,4 +65,22 @@ export function timeAgo(updatedAt: {
 export const capitalizeString = (str: string): string => {
 	if (!str) return str
 	return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+export function convertSeconds(seconds: number) {
+	let formattedDuration
+
+	if (seconds < 3600) {
+		const duration = intervalToDuration({ start: 0, end: seconds * 1000 })
+		formattedDuration = formatDuration(duration, {
+			format: ['minutes', 'seconds'],
+		})
+	} else {
+		const duration = intervalToDuration({ start: 0, end: seconds * 1000 })
+		formattedDuration = formatDuration(duration, {
+			format: ['hours', 'minutes', 'seconds'],
+		})
+	}
+
+	return formattedDuration
 }

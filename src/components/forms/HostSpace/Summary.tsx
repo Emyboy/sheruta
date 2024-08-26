@@ -1,5 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { libraries } from '@/constants'
 import { useOptionsContext } from '@/context/options.context'
+import { LocationObject } from '@/firebase/service/request/request.types'
 import {
 	Box,
 	Button,
@@ -15,22 +17,9 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
-
-const libraries: 'places'[] = ['places']
-
-interface LocationObject {
-	formatted_address?: string
-	geometry?: {
-		location?: {
-			lat: number
-			lng: number
-		}
-	}
-	[key: string]: any
-}
 
 export default function Summary({
 	next,
@@ -50,10 +39,13 @@ export default function Summary({
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (autocompleteInstance: google.maps.places.Autocomplete) =>
-		setAutocomplete(autocompleteInstance)
+	const handleLoad = useCallback(
+		(autocompleteInstance: google.maps.places.Autocomplete) =>
+			setAutocomplete(autocompleteInstance),
+		[],
+	)
 
-	const handlePlaceChanged = () => {
+	const handlePlaceChanged = useCallback(() => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
 
@@ -86,7 +78,7 @@ export default function Summary({
 				}),
 			)
 		}
-	}
+	}, [autocomplete, formData.google_location_text])
 
 	const addHouseRule = () => setHouseRules((prev) => [...prev, ''])
 
@@ -275,7 +267,7 @@ export default function Summary({
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Budget
+								Rent
 							</Text>
 							<Input
 								_placeholder={{ color: 'text_muted' }}

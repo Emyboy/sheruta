@@ -75,9 +75,9 @@ export default function MediaCarousel({
 					>
 						<iframe
 							src={selectedMedia}
-							// style={{
-							// 	minHeight: '400px',
-							// }}
+							style={{
+								minHeight: '300px',
+							}}
 							width={'100%'}
 							height={'100%'}
 						/>

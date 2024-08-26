@@ -4,7 +4,7 @@ export const creditTable = {
 	GROUP_MESSAGE: 50,
 	PERSONAL_INFO_VIEW: 500,
 	CALLS: 70,
-	VIRTUAL_INSPECTION: 600,
+	VIRTUAL_INSPECTION: 1950,
 }
 
 export const FUNCTION_URL = process.env.NEXT_PUBLIC_CLOUD_FUNCTION_URL
@@ -34,3 +34,5 @@ export const industries = [
 	'Commerce space',
 	'Sciences space',
 ]
+
+export const libraries: 'places'[] = ['places']
