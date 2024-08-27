@@ -1144,8 +1144,11 @@ const BookInspectionModal = ({
 	}
 
 	return (
-		<Modal isOpen={showBookInspectionModal} onClose={closeModal} size={'95vh'}>
-			<ModalOverlay />
+		<Modal isOpen={showBookInspectionModal} onClose={closeModal} size={'full'}>
+			<ModalOverlay
+				bg="blackAlpha.300"
+				backdropFilter="blur(10px) hue-rotate(90deg)"
+			/>
 			<ModalContent
 				w={{
 					base: '90vw',
