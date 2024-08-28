@@ -5,8 +5,6 @@ import {
 	VStack,
 	Avatar,
 	Text,
-	HStack,
-	Button,
 	Input,
 	IconButton,
 	Flex,
@@ -16,32 +14,37 @@ import {
 	useColorModeValue,
 	Circle,
 } from '@chakra-ui/react'
-import { ArrowForwardIcon } from '@chakra-ui/icons'
 import { DocumentReference, Timestamp, doc } from 'firebase/firestore'
 import React, { useState, useEffect, useRef } from 'react'
-// import { randomUUID } from 'crypto';
 import { v4 as generateUId } from 'uuid'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { db } from '@/firebase'
 import { useAuthContext } from '@/context/auth.context'
 import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
 import useCommon from '@/hooks/useCommon'
-
+import { HostRequestData, userSchema } from '@/firebase/service/request/request.types'
 interface DiscussionDTO {
 	uuid: string | undefined
-	// request_id: string,
 	_request_ref: DocumentReference | undefined
-	_user_ref: DocumentReference | undefined
-	reply_to?: string | undefined
+	_sender_ref: DocumentReference | undefined
+	_receiver_ref?: DocumentReference | undefined //the userRef of the person you're replying to
+	reply_to?: string | undefined //the message ID you're replying to
+	nest_level: number //the message level limit is 3 levels
 	message: string
 	timestamp: Timestamp
 	type: string
 }
-
-enum CommentType {
-	reply = 'reply',
-	parentComment = 'parentComment'
-
+interface DiscussionData {
+	id: string
+	uuid: string
+	_request_ref: HostRequestData
+	_sender_ref: userSchema
+	_receiver_ref?: userSchema
+	reply_to?: string
+	nest_level: number
+	message: string
+	timestamp: Timestamp
+	type: string
 }
 
 function convertTimestampToTime(timestamp: {
@@ -70,18 +73,27 @@ function convertTimestampToTime(timestamp: {
 }
 
 const NoDiscussion = () => {
-	
 	const circleBgColor = useColorModeValue('#e4faa85c', '#e4faa814')
-	
+
 	return (
-		<Flex flexDir={"column"} justifyContent={"center"} width="100%" minH="100dvh">
-			<Flex alignItems={"center"} flexDir={"column"} gap="10px">
-				<Circle borderRadius={"full"} bgColor={circleBgColor} minW={'100px'} minH={'100px'}>
+		<Flex
+			flexDir={'column'}
+			justifyContent={'center'}
+			width="100%"
+			minH="100dvh"
+		>
+			<Flex alignItems={'center'} flexDir={'column'} gap="10px">
+				<Circle
+					borderRadius={'full'}
+					bgColor={circleBgColor}
+					minW={'100px'}
+					minH={'100px'}
+				>
 					<Icon as={BiCommentX} w={16} h={16} color="green.400" />
 				</Circle>
-				<Flex gap="5px" alignItems={"center"} flexDir={"column"}>
-					<Text fontWeight={"600"}>No Discusstions Yet</Text>
-					<Text textAlign={"center"}>Be the first to start the discussion</Text>
+				<Flex gap="5px" alignItems={'center'} flexDir={'column'}>
+					<Text fontWeight={'600'}>No Discusstions Yet</Text>
+					<Text textAlign={'center'}>Be the first to start the discussion</Text>
 				</Flex>
 			</Flex>
 		</Flex>
@@ -93,36 +105,36 @@ const DiscussionComponent = ({
 	discussions,
 }: {
 	requestId: string | undefined
-	discussions: Record<string, any>
+	discussions: DiscussionData[]
 }) => {
 	const [requestRef, setRequestRef] = useState<DocumentReference | undefined>(
 		undefined,
 	)
-	console.log('discussions here', discussions)
+
 	const {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
-	// console.log(user_info)
-	// flat_share_profile.
 	const [message, setMessage] = useState<string>('')
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const { showToast } = useCommon()
 	const [isReplying, setIsReplying] = useState<boolean>(false)
 	const [commentId, setCommentId] = useState<string | undefined>(undefined)
 	const [userHandle, setUserHandle] = useState<string | undefined>(undefined)
+	const [nestLevel, setNestLevel] = useState<number>(1)
+	const [receiverRef, setReceiverRef] = useState<DocumentReference | undefined>(undefined)
 
 	const [formData, setFormData] = useState<DiscussionDTO>({
 		uuid: generateUId(),
-		// request_id: requestId as string,
 		_request_ref: requestRef,
-		_user_ref: undefined,
-		// reply_to: undefined,
+		_sender_ref: undefined,
 		message: '',
 		timestamp: Timestamp.now(),
+		nest_level: 1,
 		type: 'comment',
 	})
 
+	//set senderRef and requestRef
 	useEffect(() => {
 		if (requestId && typeof flat_share_profile?._user_ref !== 'undefined') {
 			const docRef = doc(db, DBCollectionName.flatShareRequests, requestId)
@@ -130,15 +142,14 @@ const DiscussionComponent = ({
 			setFormData((prev) => ({
 				...prev,
 				_request_ref: docRef,
-				_user_ref: flat_share_profile?._user_ref,
+				_sender_ref: flat_share_profile?._user_ref,
 			}))
 		}
 	}, [requestId, flat_share_profile])
 
 	const handleNewComment = async () => {
 		try {
-
-			setIsLoading(true);
+			setIsLoading(true)
 
 			if (message?.trim() === '') {
 				return
@@ -146,27 +157,14 @@ const DiscussionComponent = ({
 
 			const finalFormData = {
 				...formData,
-				message
+				message,
+				nest_level: nestLevel
 			}
 
 			if (isReplying && commentId) {
 				finalFormData.reply_to = commentId
+				finalFormData._receiver_ref = receiverRef
 			}
-
-			// console.log(finalFormData, isReplying, commentId, "about to send")
-			// setIsLoading(false)
-			// return
-
-			// await SherutaDB.create({
-			// 	collection_name: DBCollectionName.messages,
-			// 	data: {
-			// 		...formData,
-			// 		message: reply,
-			// 		reply_to: comment.id,
-			// 	},
-			// 	document_id: formData.uuid as string,
-			// })
-
 
 			await SherutaDB.create({
 				collection_name: DBCollectionName.messages,
@@ -176,56 +174,55 @@ const DiscussionComponent = ({
 
 			setTimeout(() => {
 				showToast({
-					message: "Your comment has been posted successfully",
-					status: "success"
+					message: `Your ${(isReplying) ? 'reply' : 'comment'} has been posted successfully`,
+					status: 'success',
 				})
 				window.location.reload()
 			}, 1000)
-
-			// SherutaDB.update({
-			//     collection_name: DBCollectionName.conversations,
-			//     data: { updatedAt: serverTimestamp() },
-			//     document_id: conversation_id,
-			// })
 		} catch (err: any) {
 			console.log(err)
-			setIsLoading(false);
+			showToast({
+				message: `Your ${(isReplying) ? 'reply' : 'comment'} was not submitted`,
+				status: 'error',
+			})
+			setIsLoading(false)
 		}
 	}
 
-	const getCommentReplies = (commentId: string) =>
-		discussions.filter((comment: any) => comment.reply_to === commentId) || []
+	const getCommentReplies = (commentId: string): DiscussionData[] =>
+		discussions.filter((comment) => comment.reply_to === commentId) || []
 
-	// Create a ref for the component you want to scroll to
+	// Create a ref for the reply box
 	const replyBoxRef = useRef<HTMLDivElement>(null)
 
 	// Function to scroll into view
 	const scrollToCommentInputBox = () => {
 		if (replyBoxRef.current) {
 			replyBoxRef.current.scrollIntoView({
-				behavior: 'smooth', // Smooth scrolling animation
-				block: 'start', // Align to the top of the container
+				behavior: 'smooth',
+				block: 'start',
 			})
 		}
 	}
 
 	return (
-		<Box maxWidth="100%" p={4} overflowY={'scroll'}>
-			<Box overflowY={'scroll'} minH={"100dvh"}>
-				<VStack align="start" spacing={6} w="100%">
-					{
-						(!discussions?.length) ? <NoDiscussion /> : (discussions.map((singleComment: any) => {
+		<Box width="100%" p={4} overflowY={'scroll'}>
+			<Box overflowY={'scroll'} minH={'50dvh'}>
+				<VStack align="start" spacing={2} w="100%">
+					{!discussions?.length ? (
+						<NoDiscussion />
+					) : (
+						discussions.map((singleComment) => {
 							if (typeof singleComment?.reply_to !== 'string') {
 								return (
 									<React.Fragment key={singleComment.id}>
 										<CommentComponent
-											formData={formData}
 											setUserHandle={setUserHandle}
-											setIsLoading={setIsLoading}
+											setReceiverRef={setReceiverRef}
+											setNestLevel={setNestLevel}
 											comment={singleComment}
 											getCommentReplies={getCommentReplies}
-											commentId={singleComment.id}
-											// replies={getCommentReplies(singleComment?.id)}
+											commentId={singleComment.id as string}
 											scrollToCommentInputBox={scrollToCommentInputBox}
 											setIsReplying={setIsReplying}
 											setCommentId={setCommentId}
@@ -235,67 +232,73 @@ const DiscussionComponent = ({
 							} else {
 								return null // Optionally render nothing if condition fails
 							}
-						}))
-					}
+						})
+					)}
 				</VStack>
 			</Box>
 
-			{/* Input Section */}
-			<Box
-				ref={replyBoxRef}
-				p={4}
-				bg="white"
-				borderRadius="md"
-				boxShadow="md"
-				w="100%"
-				// maxW="md"
-				mx="auto"
-			>
-				<InputGroup>
-					{/* Input field */}
-					<Input
-						placeholder="Type message here"
-						bg="#f9f9f9"
-						border="none"
-						borderRadius="md"
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-							const inputValue = e.target.value;
-
-							if (isReplying) {
-								// If input is cleared, don't prepend the userHandle
-								if (inputValue.trim() === '') {
-									setMessage('');
-								} else if (!inputValue.startsWith(userHandle)) {
-									// If the message doesn't already start with userHandle, prepend it
-									setMessage(`${userHandle} ${inputValue}`);
-								} else {
-									// If the userHandle is already there, just update the message
-									setMessage(inputValue);
-								}
-							} else {
-								setMessage(inputValue);
-							}
-						}}
-						value={isReplying ? (message.startsWith(userHandle) ? message : `${userHandle} ${message}`) : message}
-						disabled={isLoading}
-						_placeholder={{ color: "gray.400" }}
-					/>
-
-					{/* Send button */}
-					<InputRightElement py={5}>
-						<IconButton
-							onClick={handleNewComment}
-							disabled={message.trim() === '' || isLoading}
-							isLoading={isLoading}
-							aria-label="Send message"
-							icon={<BiSend />}
-							bg="black"
-							color="white"
+			{/* Reply Box */}
+			<Box>
+				<Box
+					ref={replyBoxRef}
+					p={4}
+					bg="white"
+					borderRadius="md"
+					boxShadow="md"
+					w="100%"
+					mx="auto"
+				>
+					<InputGroup>
+						<Input
+							placeholder="Type message here"
+							bg="#f9f9f9"
+							border="none"
 							borderRadius="md"
-							_hover={{ bg: "gray.700" }}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								const inputValue = e.target.value
+
+								if (isReplying) {
+									// If input is cleared, don't prepend the userHandle
+									if (inputValue.trim() === '') {
+										setMessage('')
+									} else if (userHandle && !inputValue.startsWith(userHandle)) {
+										// If the message doesn't already start with userHandle, prepend it
+										setMessage(`${userHandle} ${inputValue}`)
+									} else {
+										// If the userHandle is already there, just update the message
+										setMessage(inputValue)
+									}
+								} else {
+									setMessage(inputValue)
+									//user is not replying to any comment
+									setNestLevel(1)
+								}
+							}}
+							value={
+								isReplying
+									? (userHandle && message.startsWith(userHandle))
+										? message
+										: `${userHandle} ${message}`
+									: message
+							}
+							disabled={isLoading}
+							_placeholder={{ color: 'gray.400' }}
 						/>
-					</InputRightElement>
-				</InputGroup>
+						<InputRightElement py={5}>
+							<IconButton
+								onClick={handleNewComment}
+								disabled={message.trim() === '' || isLoading}
+								isLoading={isLoading}
+								aria-label="Send message"
+								icon={<BiSend />}
+								bg="black"
+								color="white"
+								borderRadius="md"
+								_hover={{ bg: 'gray.700' }}
+							/>
+						</InputRightElement>
+					</InputGroup>
+				</Box>
 			</Box>
 		</Box>
 	)
@@ -303,71 +306,34 @@ const DiscussionComponent = ({
 
 const CommentComponent = ({
 	comment,
-	formData,
 	setUserHandle,
-	setIsLoading,
+	setReceiverRef,
+	setNestLevel,
 	getCommentReplies,
-	// replies,
 	scrollToCommentInputBox,
 	setIsReplying,
 	setCommentId,
-	commentId
+	commentId,
 }: {
 	comment: Record<string, any>
-	formData: DiscussionDTO
-	setUserHandle: (prev: string) => void
-	setIsLoading: (arg: boolean) => void
+	setUserHandle: (arg: string) => void
+	setReceiverRef: (arg: any) => void
+	setNestLevel: (arg: number) => void
 	scrollToCommentInputBox: () => void
 	setIsReplying: (arg: boolean) => void
 	setCommentId: (arg: string | undefined) => void
-	getCommentReplies: (arg: string) => []
+	getCommentReplies: (arg: string) => DiscussionData[]
 	commentId: string
-	// replies: any[]
 }) => {
-	// console.log(replies, 'replies hre')
 
 	const replies = getCommentReplies(commentId)
 
 	const userName =
-		comment?._user_ref?.first_name + ' ' + comment?._user_ref?.last_name
-
-	const [reply, setReply] = useState<string>('')
-	const { showToast } = useCommon();
-
-	const postNewReply = async () => {
-		try {
-			setIsLoading(true);
-
-			if (reply?.trim() === '') {
-				return
-			}
-
-			await SherutaDB.create({
-				collection_name: DBCollectionName.messages,
-				data: {
-					...formData,
-					message: reply,
-					reply_to: comment.id,
-				},
-				document_id: formData.uuid as string,
-			})
-
-			setTimeout(() => {
-				showToast({
-					message: "Your reply has been posted successfully",
-					status: "success"
-				})
-				window.location.reload()
-			}, 1000)
-		} catch (err: any) {
-			console.log(err)
-			setIsLoading(false);
-		}
-	}
+		comment?._sender_ref?.first_name + ' ' + comment?._sender_ref?.last_name
 
 	return (
 		<>
-			{/* First Comment */}
+			{/* First Comment -> NEST LEVEL 1 */}
 			<Box width="100%" borderRadius="md">
 				<Flex flexDirection={'column'}>
 					<Flex gap={'10px'}>
@@ -376,8 +342,8 @@ const CommentComponent = ({
 							alignSelf={'center'}
 							name={userName}
 							size="md"
+							src={comment._sender_ref?.avatar_url}
 						/>
-
 						<Box
 							width={'100%'}
 							px={5}
@@ -400,25 +366,22 @@ const CommentComponent = ({
 								<Text fontSize="sm">{comment?.message}</Text>
 							</VStack>
 						</Box>
-
-						{/* <Button onClick={() => setIsReplying(!isReplying)} size="sm" variant="link" colorScheme="gray" mt={2}>
-                            reply
-                        </Button> */}
 					</Flex>
 
 					<Box>
 						<Flex
-							px={5}
-							py={3}
+							py={2}
 							gap={2}
 							width={'100px'}
-							ml={'50px'}
+							ml={'60px'}
 							cursor={'pointer'}
 							onClick={() => {
-								setUserHandle(`@${userName}`);
+								setUserHandle(`@${userName}`)
 								setIsReplying(true)
 								setCommentId(comment.id)
 								scrollToCommentInputBox()
+								setNestLevel(2)
+								setReceiverRef(comment._sender_ref)
 							}}
 						>
 							<Icon alignSelf={'center'} as={BiRepost} /> <Text>Reply</Text>
@@ -427,122 +390,116 @@ const CommentComponent = ({
 				</Flex>
 			</Box>
 
-
 			{/* Reply Comment */}
-			{/* <ReplyComponent reply={{a: 1}} /> */}
-
-			{replies.map((singleReply: any) => {
+			{replies.map((singleReply) => {
 				// Check if the reply is a sub-reply
-				if (typeof singleReply?.reply_to === 'string') {
-					const subReplies: any[] = getCommentReplies(singleReply.id);
+				if (singleReply.nest_level >= 2 && typeof singleReply?.reply_to === 'string') {
 
+					const subReplies = getCommentReplies(singleReply.id)
 					// Return the main reply along with its sub-replies
 					return (
 						<React.Fragment key={singleReply.id}>
-							{subReplies.map((subReply: any) => (
-								<ReplyComponent
-									setIsReplying={setIsReplying}
-									setCommentId={setCommentId}
-									setUserHandle={setUserHandle}
-									scrollToCommentInputBox={scrollToCommentInputBox}
-									key={subReply.id}
-									reply={subReply}
-								/>
-							))}
+							<ReplyComponent
+								setIsReplying={setIsReplying}
+								setNestLevel={setNestLevel}
+								setReceiverRef={setReceiverRef}
+								setCommentId={setCommentId}
+								setUserHandle={setUserHandle}
+								scrollToCommentInputBox={scrollToCommentInputBox}
+								key={singleReply.id}
+								reply={singleReply}
+							/>
+							{subReplies
+								// Step 1: Sort subReplies by timestamp (ascending)
+								.sort((a: any, b: any) => {
+									const timestampA = new Date(a.timestamp.seconds * 1000 + a.timestamp.nanoseconds / 1000000);
+									const timestampB = new Date(b.timestamp.seconds * 1000 + b.timestamp.nanoseconds / 1000000);
+									return timestampA.getTime() - timestampB.getTime(); // Ascending order
+								})
+								// Step 2: Loop through sorted subReplies
+								.map((subReply: any) => (
+									<ReplyComponent
+										setIsReplying={setIsReplying}
+										setNestLevel={setNestLevel}
+										setReceiverRef={setReceiverRef}
+										setCommentId={setCommentId}
+										setUserHandle={setUserHandle}
+										scrollToCommentInputBox={scrollToCommentInputBox}
+										key={subReply.id}
+										reply={subReply}
+									/>
+								))}
 						</React.Fragment>
-					);
+					)
 				} else {
 					// Return the main reply if it's not a sub-reply
 					return (
 						<ReplyComponent
 							setIsReplying={setIsReplying}
+							setNestLevel={setNestLevel}
+							setReceiverRef={setReceiverRef}
 							setCommentId={setCommentId}
 							setUserHandle={setUserHandle}
 							scrollToCommentInputBox={scrollToCommentInputBox}
 							key={singleReply.id}
 							reply={singleReply}
 						/>
-					);
+					)
 				}
 			})}
-
-
-			{replies.map((singleReply: any) => {
-				return <ReplyComponent setIsReplying={setIsReplying} setCommentId={setCommentId} setUserHandle={setUserHandle} scrollToCommentInputBox={scrollToCommentInputBox} key={singleReply.id} reply={singleReply} />
-			})}
-			{/* <Box
-                    w="90%"
-                    ml="10%"
-                    border="1px"
-                    borderColor="gray.200"
-                    p={4}
-                    borderRadius="md"
-                >
-                    <HStack align="start">
-                        <Avatar
-                            name="Stanley Obassii"
-                            size="sm"
-                            src="https://bit.ly/tioluwani-kolawole"
-                        />
-                        <VStack align="start" spacing={0}>
-                            <Flex
-                                justifyContent={'space-between'}
-                                alignItems={'baseline'}
-                                gap="15px"
-                            >
-                                <Text fontWeight="bold">Stanley Obassii</Text>
-                                <Text fontSize="xs" color="gray.500">
-                                    12:08PM
-                                </Text>
-                            </Flex>
-                            <Text fontSize="sm">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
-                                consequat fringilla la dolor, non feugiat nunc fringilla non.
-                                Sed a orci.
-                            </Text>
-                        </VStack>
-                    </HStack>
-                    <Button size="sm" variant="link" colorScheme="gray" mt={2}>
-                        reply
-                    </Button>
-                </Box> */}
 		</>
 	)
 }
 
-const ReplyComponent = ({ reply, scrollToCommentInputBox, setUserHandle, setIsReplying, setCommentId }: {
-	reply: Record<string, any>,
-	scrollToCommentInputBox: () => void,
+const ReplyComponent = ({
+	reply,
+	scrollToCommentInputBox,
+	setUserHandle,
+	setNestLevel,
+	setReceiverRef,
+	setIsReplying,
+	setCommentId,
+}: {
+	reply: DiscussionData
+	scrollToCommentInputBox: () => void
 	setUserHandle: (prev: string) => void
+	setNestLevel: (arg: number) => void
+	setReceiverRef: (arg: any) => void
 	setIsReplying: (arg: boolean) => void
 	setCommentId: (arg: string) => void
 }) => {
-	console.log(reply, "is here")
 
 	const userName =
-		reply?._user_ref?.first_name + ' ' + reply?._user_ref?.last_name
+		reply?._sender_ref?.first_name + ' ' + reply?._sender_ref?.last_name
+
+	const [marginLeft, setMarginLeft] = useState<string>('50px')
+
+	useEffect(() => {
+		if (reply.nest_level === 3) {
+			setMarginLeft('100px')
+		} else {
+			setMarginLeft('50px')
+		}
+	}, [reply])
 
 	return (
 		<>
-			<Box w="100%" ml="50px">
+			<Box ml={marginLeft}>
 				<Flex flexDirection={'column'}>
 					<Flex
 						gap={'10px'}
-					// justifyContent="flex-end"
 					>
 						<Avatar
 							alignSelf={'center'}
 							name={userName}
 							size="md"
-							src="https://bit.ly/tioluwani-kolawole"
+							src={reply._sender_ref?.avatar_url}
 						/>
 						<Box
 							px={5}
 							py={2}
 							width={'100%'}
 							borderRadius={'lg'}
-							// border="1px"
-							// borderColor="#1117171A"
 							bgColor={'#11171708'}
 						>
 							<VStack align="start" spacing={0}>
@@ -560,23 +517,21 @@ const ReplyComponent = ({ reply, scrollToCommentInputBox, setUserHandle, setIsRe
 							</VStack>
 						</Box>
 					</Flex>
-					<Box
-					// onClick={() => setIsReplying(!isReplying)}
-					>
+					<Box>
 						<Flex
-							px={5}
-							py={3}
+							py={2}
 							gap={2}
 							width={'100px'}
-							ml={'50px'}
+							ml={'60px'}
 							cursor={'pointer'}
+							visibility={(reply?.nest_level > 2) ? 'hidden' : 'visible'}
 							onClick={() => {
-								console.log("I am replying to", reply);
-								// return
-								setUserHandle(`@${userName}`);
+								setUserHandle(`@${userName}`)
 								setIsReplying(true)
 								setCommentId(reply.id)
 								scrollToCommentInputBox()
+								setNestLevel(3)
+								setReceiverRef(reply._sender_ref)
 							}}
 						>
 							<Icon alignSelf={'center'} as={BiRepost} /> <Text>Reply</Text>

@@ -1,15 +1,27 @@
 import SherutaDB from '@/firebase/service/index.firebase'
-import { DocumentData } from 'firebase/firestore'
+import { DocumentData, Timestamp } from 'firebase/firestore'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { Box, Flex } from '@chakra-ui/react'
 import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import MainHeader from '@/components/layout/MainHeader'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import SeekerPost from '@/components/seekerDetails/SeekerPost'
 import SuperJSON from 'superjson'
+import MainBackHeader from '@/components/atoms/MainBackHeader'
+interface PostData {
+	id: string;
+	updatedAt: Timestamp;
+	description: string;
+	google_location_text: string;
+	flat_share_profile?: any;
+	_service_ref?: any;
+	_location_keyword_ref?: any;
+	budget: number;
+	payment_type: string;
+	userInfoDoc?: any;
+}
 
 export default async function Page({
 	params,
@@ -18,21 +30,21 @@ export default async function Page({
 }) {
 	const requestId = params.request_id
 
-	let requestData: string | undefined = await getRequestData(requestId)
+	let requestData: string | undefined | PostData = await getRequestData(requestId)
 
 	if (requestData) {
-		requestData = SuperJSON.parse(requestData)
+		requestData = SuperJSON.parse(requestData) as PostData
 	}
 
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
-				<ThreeColumnLayout header={<MainHeader />}>
+				<ThreeColumnLayout header={<MainBackHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
 					<Box p={DEFAULT_PADDING}>
-						<SeekerPost postData={requestData} requestId={requestId} />
+						<SeekerPost postData={requestData as PostData} requestId={requestId} />
 					</Box>
 				</ThreeColumnLayout>
 			</MainContainer>

@@ -2,7 +2,9 @@ import ApartmentDetails from '@/components/HostDetails/ApartmentDetails'
 import MediaCarousel from '@/components/HostDetails/MediaCarousel'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { Box, Flex, Text } from '@chakra-ui/react'
+import { DocumentData } from 'firebase/firestore'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { FaAngleLeft } from 'react-icons/fa'
@@ -21,6 +23,11 @@ export default async function page({
 		document_id: request_id,
 		collection_name: DBCollectionName.flatShareRequests,
 	})
+
+	if (request?.flat_share_profile?._id) {
+		const userInfoDoc = await UserInfoService.get(request.flat_share_profile._id);
+		request.userInfoDoc = userInfoDoc
+	}
 
 	const discussions: any[] = await SherutaDB.getAll({
 		collection_name: DBCollectionName.messages,
@@ -84,7 +91,7 @@ export default async function page({
 						minW={{ base: '100%', lg: '50%' }}
 						maxW={{ base: '100%', lg: '50%' }}
 						flexFlow={'column'}
-						// paddingRight={{ base: 0, lg: DEFAULT_PADDING }}
+					// paddingRight={{ base: 0, lg: DEFAULT_PADDING }}
 					>
 						<MediaCarousel
 							video={request.video_url}
