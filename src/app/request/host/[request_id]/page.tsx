@@ -22,6 +22,17 @@ export default async function page({
 		collection_name: DBCollectionName.flatShareRequests,
 	})
 
+	const discussions: any[] = await SherutaDB.getAll({
+		collection_name: DBCollectionName.messages,
+		_limit: 1000,
+	})
+
+	const finalDiscussions = discussions.filter(
+		(disc: any) =>
+			disc.type === 'comment' && disc?._request_ref?.uuid === request_id,
+	)
+
+	// console.log(finalDiscussions)
 	// TODO: set an error page to redirect them home
 
 	if (!request) redirect('/')
@@ -88,7 +99,10 @@ export default async function page({
 						maxW={{ base: '100%', lg: '50%' }}
 						flexDir={'column'}
 					>
-						<ApartmentDetails request={JSON.stringify(request)} />
+						<ApartmentDetails
+							request={JSON.stringify(request)}
+							discussions={JSON.stringify(finalDiscussions)}
+						/>
 					</Flex>
 				</Flex>
 			</Flex>

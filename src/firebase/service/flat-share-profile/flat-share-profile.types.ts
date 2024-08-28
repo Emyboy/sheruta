@@ -25,13 +25,15 @@ const FlatShareProfileDataSchema = z.object({
 	religion: z.string().nullable(),
 	verified: z.boolean(),
 	bio: z.string().nullable(),
-	socials: z.object({
-		twitter: z.string().optional(),
-		facebook: z.string().optional(),
-		instagram: z.string().optional(),
-		tiktok: z.string().optional(),
-		linkedin: z.string().optional(),
-	  }).nullable()
+	socials: z
+		.object({
+			twitter: z.string().optional(),
+			facebook: z.string().optional(),
+			instagram: z.string().optional(),
+			tiktok: z.string().optional(),
+			linkedin: z.string().optional(),
+		})
+		.nullable(),
 })
 
 export type FlatShareProfileData = z.infer<typeof FlatShareProfileDataSchema>
