@@ -18,8 +18,8 @@ export type inspectionCategoryType =
 
 const inspectionCategories: inspectionCategoryType[] = [
 	'upcoming',
-	'missed',
 	'past',
+	'missed',
 	'cancelled',
 ]
 
@@ -49,21 +49,30 @@ export default function MyInspections() {
 			case 'upcoming':
 				return inspections.filter(
 					(inspection) =>
-						inspection.inspection_date.toDate() > currentTime &&
+						new Date(
+							inspection.inspection_date.toDate().getTime() +
+								6 * 60 * 60 * 1000,
+						) > currentTime &&
 						!inspection.hasOccured &&
 						!inspection.isCancelled,
 				)
 			case 'missed':
 				return inspections.filter(
 					(inspection) =>
-						inspection.inspection_date.toDate() <= currentTime &&
+						new Date(
+							inspection.inspection_date.toDate().getTime() +
+								6 * 60 * 60 * 1000,
+						) <= currentTime &&
 						!inspection.hasOccured &&
 						!inspection.isCancelled,
 				)
 			case 'past':
 				return inspections.filter(
 					(inspection) =>
-						inspection.inspection_date.toDate() <= currentTime &&
+						new Date(
+							inspection.inspection_date.toDate().getTime() +
+								6 * 60 * 60 * 1000,
+						) <= currentTime &&
 						inspection.hasOccured &&
 						!inspection.isCancelled,
 				)

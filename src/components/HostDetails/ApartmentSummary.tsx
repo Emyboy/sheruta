@@ -68,6 +68,7 @@ import MainTooltip from '../atoms/MainTooltip'
 import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
+import { generateRoomUrl } from '@/utils/actions'
 
 export default function ApartmentSummary({
 	request,
@@ -997,34 +998,56 @@ const BookInspectionModal = ({
 			})
 
 		setLoading(true)
-
-		const uuid = crypto.randomUUID()
-
-		const data: InspectionData = {
-			host_details: {
-				id: host_details._id,
-				first_name: host_details.first_name,
-				last_name: host_details.last_name,
-			},
-			seeker_details: {
-				id: authState.user._id,
-				first_name: authState.user.first_name,
-				last_name: authState.user.last_name,
-			},
-			inspection_type: inspectionData.inspection_type as 'virtual' | 'physical',
-			inspection_date: Timestamp.fromDate(
+		try {
+			const inspection_date = Timestamp.fromDate(
 				new Date(
 					`${inspectionData.inspection_date}T${inspectionData.inspection_time}:00`,
 				),
-			),
-			isCancelled: false,
-			hasOccured: false,
-			inspection_location,
-		}
+			)
 
-		InspectionDataSchema.parse(data)
+			if (inspection_date.toDate() < new Date()) {
+				setLoading(false)
+				return showToast({
+					message:
+						'The inspection date cannot be earlier than the current date.',
+					status: 'error',
+				})
+			}
 
-		try {
+			const urls = await generateRoomUrl(
+				new Date(
+					inspection_date.toDate().getTime() + 6 * 60 * 60 * 1000,
+				).toISOString(),
+			)
+
+			const { roomUrl, hostRoomUrl } = urls
+
+			const uuid = crypto.randomUUID()
+
+			const data: InspectionData = {
+				host_details: {
+					id: host_details._id,
+					first_name: host_details.first_name,
+					last_name: host_details.last_name,
+				},
+				seeker_details: {
+					id: authState.user._id,
+					first_name: authState.user.first_name,
+					last_name: authState.user.last_name,
+				},
+				inspection_type: inspectionData.inspection_type as
+					| 'virtual'
+					| 'physical',
+				inspection_date,
+				isCancelled: false,
+				hasOccured: false,
+				inspection_location,
+				roomUrl,
+				hostRoomUrl,
+			}
+
+			InspectionDataSchema.parse(data)
+
 			await Promise.all([
 				InspectionServices.create({
 					collection_name: DBCollectionName.inspections,

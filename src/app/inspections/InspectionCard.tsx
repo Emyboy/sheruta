@@ -1,5 +1,8 @@
+'use client'
+
 import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import CloseIcon from '@/assets/svg/close-icon-dark'
+import MainTooltip from '@/components/atoms/MainTooltip'
 import Spinner from '@/components/atoms/Spinner'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { creditTable } from '@/constants'
@@ -13,6 +16,7 @@ import {
 	returnedInspectionData,
 } from '@/firebase/service/inspections/inspections.types'
 import useCommon from '@/hooks/useCommon'
+import { generateRoomUrl } from '@/utils/actions'
 import {
 	Box,
 	Button,
@@ -24,6 +28,7 @@ import {
 	ModalOverlay,
 	Text,
 } from '@chakra-ui/react'
+import '@whereby.com/browser-sdk/embed'
 import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -49,6 +54,12 @@ type cancelBookingModalProps = InspectionData & {
 	id: string
 }
 
+type videoCallModalProps = {
+	closeVideoCallModal: () => void
+	showVideoCallModal: boolean
+	roomUrl: string
+}
+
 export default function InspectionCard({
 	hasOccured,
 	host_details,
@@ -60,12 +71,17 @@ export default function InspectionCard({
 	seeker_details,
 	currentUserId,
 	inspectionCategory,
+	roomUrl,
+	hostRoomUrl,
 }: InspectionProps) {
 	const router = useRouter()
+	const { showToast } = useCommon()
 
 	const [showRescheduleInspectionModal, setShowRescheduleInspectionModal] =
 		useState(false)
 	const [showCancelBookingModal, setShowCancelBookingModal] = useState(false)
+	const [showVideoCallModal, setShowVideoCallModal] = useState(false)
+	const [loadVideoCall, setLoadVideoCall] = useState(false)
 
 	const openRescheduleInspectionModal = () =>
 		setShowRescheduleInspectionModal(true)
@@ -75,8 +91,27 @@ export default function InspectionCard({
 	const openCancelBookingModal = () => setShowCancelBookingModal(true)
 	const closeCancelBookingModal = () => setShowCancelBookingModal(false)
 
+	const handleStartCall = async () => {
+		const inspectionDate = inspection_date.toDate()
+		const currentDate = new Date()
+
+		// if (inspectionDate > currentDate) {
+		// 	return showToast({
+		// 		message: 'The inspection is not yet due; please check back later.',
+		// 		status: 'error',
+		// 	})
+		// }
+
+		setShowVideoCallModal(true)
+	}
+
 	return (
 		<>
+			<VideoCallModal
+				closeVideoCallModal={() => setShowVideoCallModal(false)}
+				roomUrl={currentUserId === host_details.id ? hostRoomUrl : roomUrl}
+				showVideoCallModal={showVideoCallModal}
+			/>
 			<CancelBookingModal
 				showCancelBookingModal={showCancelBookingModal}
 				closeCancelBookingModal={closeCancelBookingModal}
@@ -88,6 +123,8 @@ export default function InspectionCard({
 				inspection_type={inspection_type}
 				isCancelled={isCancelled}
 				seeker_details={seeker_details}
+				hostRoomUrl={hostRoomUrl}
+				roomUrl={roomUrl}
 			/>
 			<ResheduleInspectionModal
 				showRescheduleInspectionModal={showRescheduleInspectionModal}
@@ -100,6 +137,8 @@ export default function InspectionCard({
 				inspection_type={inspection_type}
 				isCancelled={isCancelled}
 				seeker_details={seeker_details}
+				hostRoomUrl={hostRoomUrl}
+				roomUrl={roomUrl}
 			/>
 			<Flex
 				flexDir={'column'}
@@ -116,13 +155,13 @@ export default function InspectionCard({
 				>
 					<Text fontSize={{ base: 'sm', sm: 'base', md: 'lg' }} flex={1}>
 						New Apartment Inspection with{' '}
-						<Text as={'span'} color={'brand'}>
+						<Text as={'span'} color={'brand'} textTransform={'capitalize'}>
 							{currentUserId === host_details.id
 								? `${seeker_details.last_name} ${seeker_details.first_name}`
 								: `${host_details.last_name} ${host_details.first_name}`}
 						</Text>
 					</Text>
-					<Text
+					<Flex
 						display={'flex'}
 						_dark={{ color: 'text_muted' }}
 						fontWeight={300}
@@ -135,7 +174,7 @@ export default function InspectionCard({
 							<CiFlag1 />
 						</Box>
 						<Hide below="sm">Flag Booking</Hide>
-					</Text>
+					</Flex>
 				</Flex>
 				<Flex
 					alignItems={'center'}
@@ -162,7 +201,7 @@ export default function InspectionCard({
 							year: 'numeric',
 						})}
 					</Text>
-					<Text
+					<Flex
 						display={'flex'}
 						fontSize={{ base: 'xs', md: 'sm' }}
 						fontWeight={300}
@@ -178,8 +217,8 @@ export default function InspectionCard({
 						{inspection_date
 							.toDate()
 							.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-					</Text>
-					<Text
+					</Flex>
+					<Flex
 						display={'flex'}
 						fontSize={{ base: 'xs', md: 'sm' }}
 						fontWeight={300}
@@ -196,7 +235,7 @@ export default function InspectionCard({
 						{inspection_location.length > 20
 							? inspection_location.substring(0, 20) + '... '
 							: inspection_location}
-					</Text>
+					</Flex>
 					{inspectionCategory === 'upcoming' && (
 						<Flex
 							cursor={'pointer'}
@@ -234,8 +273,7 @@ export default function InspectionCard({
 							{inspection_type} Inspection
 						</Text>
 						{inspectionCategory === 'upcoming' && (
-							<Text
-								display={'flex'}
+							<Flex
 								alignSelf={'end'}
 								_dark={{ color: 'text_muted' }}
 								fontWeight={300}
@@ -251,12 +289,12 @@ export default function InspectionCard({
 									<MdOutlineCancel color="red" />
 								</Box>
 								Cancel Booking
-							</Text>
+							</Flex>
 						)}
 					</Flex>
 					<Flex alignItems={'center'} gap={2}>
 						<Button
-							isDisabled={inspectionCategory !== 'upcoming'}
+							isDisabled={inspectionCategory !== 'upcoming' || loadVideoCall}
 							rounded={'8px'}
 							display={'flex'}
 							alignItems={'center'}
@@ -280,7 +318,7 @@ export default function InspectionCard({
 							Send Message
 						</Button>
 						<Button
-							isDisabled={inspectionCategory !== 'upcoming'}
+							isDisabled={inspectionCategory !== 'upcoming' || loadVideoCall}
 							rounded={'8px'}
 							display={'flex'}
 							alignItems={'center'}
@@ -290,6 +328,7 @@ export default function InspectionCard({
 							bgColor={'#111717CC'}
 							color={'white'}
 							fontSize={{ base: 'sm', md: 'base' }}
+							onClick={handleStartCall}
 						>
 							Call
 						</Button>
@@ -297,6 +336,87 @@ export default function InspectionCard({
 				</Flex>
 			</Flex>
 		</>
+	)
+}
+
+const VideoCallModal = ({
+	showVideoCallModal,
+	closeVideoCallModal,
+	roomUrl,
+}: videoCallModalProps) => {
+	return (
+		<Modal
+			isOpen={showVideoCallModal}
+			onClose={closeVideoCallModal}
+			size={'full'}
+		>
+			<ModalOverlay />
+			<ModalContent
+				w={'100vw'}
+				h={'100vh'}
+				margin={'auto'}
+				display={'flex'}
+				flexDir={'column'}
+				alignItems={'center'}
+				justifyContent={'center'}
+				position={'relative'}
+				rounded={'16px'}
+				_dark={{ bgColor: 'black' }}
+				_light={{
+					bgColor: '#FDFDFD',
+					border: '1px',
+					borderColor: 'text_muted',
+				}}
+			>
+				<Box
+					pos={'absolute'}
+					top={4}
+					right={4}
+					cursor={'pointer'}
+					onClick={closeVideoCallModal}
+				>
+					<MainTooltip label="Leave Call" placement="top">
+						<Button
+							px={0}
+							bg="none"
+							color="text_muted"
+							display={'flex'}
+							gap={1}
+							fontWeight={'light'}
+							_hover={{
+								color: 'brand',
+								bg: 'none',
+								_dark: {
+									color: 'brand',
+								},
+							}}
+							_dark={{
+								color: 'dark_lighter',
+							}}
+							fontSize={{
+								md: 'xl',
+								sm: 'lg',
+								base: 'base',
+							}}
+						>
+							<CloseIcon />
+						</Button>
+					</MainTooltip>
+				</Box>
+				{
+					// @ts-ignore
+					<whereby-embed
+						room={roomUrl}
+						style={{
+							minWidth: '100vw',
+							minHeight: '100vh',
+							maxWidth: '100vw',
+							maxHeight: '100vh',
+						}}
+					/>
+				}
+			</ModalContent>
+		</Modal>
 	)
 }
 
@@ -310,6 +430,8 @@ const CancelBookingModal = ({
 	inspection_type,
 	seeker_details,
 	id,
+	hostRoomUrl,
+	roomUrl,
 }: cancelBookingModalProps) => {
 	const { authState } = useAuthContext()
 	const { showToast } = useCommon()
@@ -337,6 +459,8 @@ const CancelBookingModal = ({
 			isCancelled: true,
 			hasOccured,
 			inspection_location,
+			roomUrl,
+			hostRoomUrl,
 		}
 
 		try {
@@ -529,6 +653,8 @@ const ResheduleInspectionModal = ({
 	isCancelled,
 	seeker_details,
 	id,
+	roomUrl,
+	hostRoomUrl,
 }: rescheduleInspectionModalProps) => {
 	const { authState } = useAuthContext()
 	const { showToast } = useCommon()
@@ -576,6 +702,8 @@ const ResheduleInspectionModal = ({
 			isCancelled,
 			hasOccured,
 			inspection_location,
+			roomUrl,
+			hostRoomUrl,
 		}
 
 		InspectionDataSchema.parse(data)
