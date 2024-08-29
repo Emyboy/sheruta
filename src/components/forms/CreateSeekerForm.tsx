@@ -1,15 +1,4 @@
 import { libraries } from '@/constants'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
-import SherutaDB from '@/firebase/service/index.firebase'
-import {
-	createSeekerRequestDTO,
-	LocationObject,
-	PaymentPlan,
-	SeekerRequestData,
-	userSchema,
-} from '@/firebase/service/request/request.types'
-import useCommon from '@/hooks/useCommon'
 import {
 	Button,
 	Flex,
@@ -22,7 +11,6 @@ import {
 	useColorMode,
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
-import { v4 as generateUId } from 'uuid'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
@@ -31,8 +19,8 @@ import {
 	PaymentPlan,
 	SeekerRequestData,
 	userSchema,
+	LocationObject
 } from '@/firebase/service/request/request.types'
-import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'

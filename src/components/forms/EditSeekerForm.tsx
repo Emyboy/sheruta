@@ -1,17 +1,7 @@
 'use client'
 
 import { libraries } from '@/constants'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
 import { db } from '@/firebase'
-import SherutaDB from '@/firebase/service/index.firebase'
-import {
-	createSeekerRequestDTO,
-	LocationObject,
-	PaymentPlan,
-	RequestData,
-} from '@/firebase/service/request/request.types'
-import useCommon from '@/hooks/useCommon'
 import {
 	Button,
 	Flex,
@@ -24,7 +14,6 @@ import {
 	Textarea,
 	useColorMode,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import {
 	doc,
 	DocumentData,
@@ -40,6 +29,7 @@ import {
 	PaymentPlan,
 	RequestData,
 	SeekerRequestData,
+	LocationObject
 } from '@/firebase/service/request/request.types'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
@@ -64,11 +54,6 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	quarterly: 80000,
 	'bi-annually': 100000,
 	annually: 150000,
-}
-
-interface Props {
-	editFormData: Partial<RequestData> | undefined
-	requestId: string
 }
 
 const initialFormState: SeekerRequestData = {
