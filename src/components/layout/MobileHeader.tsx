@@ -8,7 +8,7 @@ import {
 	Text,
 	useColorMode,
 } from '@chakra-ui/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import MainBodyContent from './MainBodyContent'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import NextLink from 'next/link'
@@ -20,6 +20,8 @@ import { useAuthContext } from '@/context/auth.context'
 import MainLeftNav from './MainLeftNav'
 import { useAppContext } from '@/context/app.context'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import SearchPageFilter from '@/app/search/(components)/SearchPageFilter'
 
 type Props = {}
 
@@ -28,6 +30,12 @@ export default function MobileHeader({}: Props) {
 	const { authState, loginWithGoogle } = useAuthContext()
 	const { user, flat_share_profile } = authState
 	const { setAppState } = useAppContext()
+
+	const pathname = usePathname()
+
+	useEffect(() => {
+		if (pathname.startsWith('/search')) setAppState({ show_left_nav: true })
+	}, [])
 
 	return (
 		<Show below="lg">
@@ -115,6 +123,7 @@ export default function MobileHeader({}: Props) {
 const Drawer = () => {
 	const { appState, setAppState } = useAppContext()
 	const { show_left_nav } = appState
+	const pathname = usePathname()
 
 	return (
 		<>
@@ -134,11 +143,16 @@ const Drawer = () => {
 				_dark={{
 					borderColor: 'dark_light',
 				}}
+				overflowY={'auto'}
 			>
 				<Flex flexDirection={'column'} w="full">
 					<NavProfile />
 					<Box px={DEFAULT_PADDING}>
-						<MainLeftNav />
+						{pathname.startsWith('/search') ? (
+							<SearchPageFilter />
+						) : (
+							<MainLeftNav />
+						)}
 					</Box>
 				</Flex>
 			</Box>
@@ -176,6 +190,7 @@ const NavProfile = () => {
 				borderColor={'border_color'}
 				_dark={{
 					borderColor: 'dark_light',
+					bgColor: 'dark',
 				}}
 				alignItems={'center'}
 				gap={DEFAULT_PADDING}

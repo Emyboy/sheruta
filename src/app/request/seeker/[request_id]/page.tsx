@@ -10,17 +10,18 @@ import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import SeekerPost from '@/components/seekerDetails/SeekerPost'
 import SuperJSON from 'superjson'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 interface PostData {
-	id: string;
-	updatedAt: Timestamp;
-	description: string;
-	google_location_text: string;
-	flat_share_profile?: any;
-	_service_ref?: any;
-	_location_keyword_ref?: any;
-	budget: number;
-	payment_type: string;
-	userInfoDoc?: any;
+	id: string
+	updatedAt: Timestamp
+	description: string
+	google_location_text: string
+	flat_share_profile?: any
+	_service_ref?: any
+	_location_keyword_ref?: any
+	budget: number
+	payment_type: string
+	userInfoDoc?: any
 }
 
 export default async function Page({
@@ -30,7 +31,8 @@ export default async function Page({
 }) {
 	const requestId = params.request_id
 
-	let requestData: string | undefined | PostData = await getRequestData(requestId)
+	let requestData: string | undefined | PostData =
+		await getRequestData(requestId)
 
 	if (requestData) {
 		requestData = SuperJSON.parse(requestData) as PostData
@@ -44,9 +46,13 @@ export default async function Page({
 						<MainLeftNav />
 					</Flex>
 					<Box p={DEFAULT_PADDING}>
-						<SeekerPost postData={requestData as PostData} requestId={requestId} />
+						<SeekerPost
+							postData={requestData as PostData}
+							requestId={requestId}
+						/>
 					</Box>
 				</ThreeColumnLayout>
+				<MobileNavFooter />
 			</MainContainer>
 		</Flex>
 	)

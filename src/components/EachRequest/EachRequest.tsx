@@ -33,7 +33,6 @@ import {
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
-import useCommon from '@/hooks/useCommon'
 import { useAuthContext } from '@/context/auth.context'
 import { useRouter } from 'next/navigation'
 
@@ -163,64 +162,64 @@ export default function EachRequest({ request }: Props) {
 											</Button>
 											{authState.user?._id ===
 												request.flat_share_profile._id && (
-													<>
-														<Button
-															variant="ghost"
-															leftIcon={<BiPencil />}
-															isLoading={isLoading}
-															_active={{
-																bgColor: 'none',
-															}}
-															_hover={{
-																bgColor: 'none',
-																color: 'brand_dark',
-															}}
-															onClick={() => {
-																router.push(
-																	`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
-																)
-															}}
-															width="100%"
-															display="flex"
-															alignItems="center"
-															padding={0}
-															borderRadius="sm"
-														>
-															<Text width={'100%'} textAlign={'left'}>
-																Edit
-															</Text>
-														</Button>
-														<Button
-															variant="ghost"
-															leftIcon={<BiTrash />}
-															isLoading={isLoading}
-															bgColor="none"
-															_active={{
-																bgColor: 'none',
-															}}
-															onClick={() =>
-																handleDeletePost({
-																	requestId: request.id,
-																	userId: request.flat_share_profile._id,
-																})
-															}
-															width="100%"
-															display="flex"
-															alignItems="center"
-															padding={0}
-															borderRadius="sm"
-															_hover={{
-																bgColor: 'none',
-																color: 'red.500',
-															}}
-															color="red.400"
-														>
-															<Text width={'100%'} textAlign={'left'}>
-																Delete
-															</Text>
-														</Button>
-													</>
-												)}
+												<>
+													<Button
+														variant="ghost"
+														leftIcon={<BiPencil />}
+														isLoading={isLoading}
+														_active={{
+															bgColor: 'none',
+														}}
+														_hover={{
+															bgColor: 'none',
+															color: 'brand_dark',
+														}}
+														onClick={() => {
+															router.push(
+																`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
+															)
+														}}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Edit
+														</Text>
+													</Button>
+													<Button
+														variant="ghost"
+														leftIcon={<BiTrash />}
+														isLoading={isLoading}
+														bgColor="none"
+														_active={{
+															bgColor: 'none',
+														}}
+														onClick={() =>
+															handleDeletePost({
+																requestId: request.id,
+																userId: request.flat_share_profile._id,
+															})
+														}
+														width="100%"
+														display="flex"
+														alignItems="center"
+														padding={0}
+														borderRadius="sm"
+														_hover={{
+															bgColor: 'none',
+															color: 'red.500',
+														}}
+														color="red.400"
+													>
+														<Text width={'100%'} textAlign={'left'}>
+															Delete
+														</Text>
+													</Button>
+												</>
+											)}
 										</VStack>
 									</PopoverBody>
 								</PopoverContent>
@@ -230,7 +229,7 @@ export default function EachRequest({ request }: Props) {
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +
-									request.updatedAt.nanoseconds / 1000000,
+										request.updatedAt.nanoseconds / 1000000,
 								),
 								{ addSuffix: true },
 							)}
@@ -316,12 +315,11 @@ export default function EachRequest({ request }: Props) {
 					<Flex gap={DEFAULT_PADDING}>
 						<MainTooltip label="Call me" placement="top">
 							<Button
-								// onClick={() => {
-								// 	// @ts-ignore
-								// 	if (request.userInfoDoc?.primary_phone_number) {
-								// 		window.location.href = `tel:${request.userInfoDoc.primary_phone_number}`;
-								// 	}
-								// }}
+								onClick={() => {
+									if (request._user_info?.primary_phone_number) {
+										window.location.href = `tel:${request._user_info.primary_phone_number}`;
+									}
+								}}
 								px={0}
 								bg="none"
 								color="text_muted"

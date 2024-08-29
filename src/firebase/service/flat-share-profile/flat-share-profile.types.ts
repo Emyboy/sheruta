@@ -24,16 +24,14 @@ const FlatShareProfileDataSchema = z.object({
 	interests: z.array(z.any()),
 	religion: z.string().nullable(),
 	verified: z.boolean(),
-	bio: z.string().nullable(),
-	socials: z
-		.object({
-			twitter: z.string().optional(),
-			facebook: z.string().optional(),
-			instagram: z.string().optional(),
-			tiktok: z.string().optional(),
-			linkedin: z.string().optional(),
-		})
-		.nullable(),
+	// bio: z.string().optional(),
+	// socials: z.object({
+	// 	twitter: z.string().optional(),
+	// 	facebook: z.string().optional(),
+	// 	instagram: z.string().optional(),
+	// 	tiktok: z.string().optional(),
+	// 	linkedin: z.string().optional(),
+	//   }).nullable()
 })
 
 export type FlatShareProfileData = z.infer<typeof FlatShareProfileDataSchema>
@@ -56,7 +54,7 @@ export type UpdateFlatShareProfileDataDTO = {
 	habits?: any[]
 	interests?: any[]
 	done_kyc: boolean
-	socials: object
+	// socials: object
 }
 
 export const flatShareProfileDefaults = {
@@ -78,5 +76,5 @@ export const flatShareProfileDefaults = {
 	habits: [],
 	interests: [],
 	done_kyc: false,
-	bio: null,
+	// bio: null,
 }

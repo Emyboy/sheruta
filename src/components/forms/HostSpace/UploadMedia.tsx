@@ -353,7 +353,7 @@ export default function UploadMedia({
 											accept="image/*"
 											display={'none'}
 											onChange={(e) => handleUploadImages(e, i)}
-											disabled={loading}
+											isDisabled={loading}
 										/>
 									</FormLabel>
 								</GridItem>
@@ -446,13 +446,13 @@ export default function UploadMedia({
 							accept="video/*"
 							display={'none'}
 							onChange={handleVideoUpload}
-							disabled={loading}
+							isDisabled={loading}
 						/>
 					</FormLabel>
 				</VStack>
 				<br />
 				<Button
-					disabled={loading}
+					isDisabled={loading}
 					isLoading={loading}
 					bgColor={'brand'}
 					w={'100%'}

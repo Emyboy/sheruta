@@ -2,6 +2,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
+import usePayment from '@/hooks/usePayment'
 import { formatPrice } from '@/utils/index.utils'
 import {
 	Flex,
@@ -12,10 +13,9 @@ import {
 	ModalOverlay,
 	Text,
 } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
 import { usePaystackPayment } from 'next-paystack'
+import { useEffect, useState } from 'react'
 import { HookConfig } from 'react-paystack/dist/types'
-import usePayment from '@/hooks/usePayment'
 
 type Props = {}
 

@@ -39,6 +39,17 @@ export interface RequestData {
 	updatedAt: Timestamp
 }
 
+export interface LocationObject {
+	formatted_address?: string
+	geometry?: {
+		location?: {
+			lat: number
+			lng: number
+		}
+	}
+	[key: string]: any
+}
+
 export type PaymentPlan =
 	| 'monthly'
 	| 'annually'
@@ -89,7 +100,7 @@ export const createHostRequestDTO = z.object({
 
 	seeking: z.boolean(),
 
-	google_location_object: z.record(z.string(), z.any()),
+	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
 
 	_location_keyword_ref: z.custom<DocumentReference | undefined>(
@@ -137,7 +148,7 @@ export const createSeekerRequestDTO = z.object({
 
 	budget: z.number(),
 
-	google_location_object: z.record(z.string(), z.any()),
+	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
 	_location_keyword_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
@@ -191,6 +202,7 @@ export type HostRequestDataDetails = Omit<
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
 	_state_ref: { title: string; slug: string }
+	_user_info?: { primary_phone_number: string } // Add the _user_info field
 }
 
 export type SeekerRequestDataDetails = Omit<

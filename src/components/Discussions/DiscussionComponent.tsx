@@ -22,7 +22,10 @@ import { db } from '@/firebase'
 import { useAuthContext } from '@/context/auth.context'
 import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
 import useCommon from '@/hooks/useCommon'
-import { HostRequestData, userSchema } from '@/firebase/service/request/request.types'
+import {
+	HostRequestData,
+	userSchema,
+} from '@/firebase/service/request/request.types'
 interface DiscussionDTO {
 	uuid: string | undefined
 	_request_ref: DocumentReference | undefined
@@ -122,7 +125,9 @@ const DiscussionComponent = ({
 	const [commentId, setCommentId] = useState<string | undefined>(undefined)
 	const [userHandle, setUserHandle] = useState<string | undefined>(undefined)
 	const [nestLevel, setNestLevel] = useState<number>(1)
-	const [receiverRef, setReceiverRef] = useState<DocumentReference | undefined>(undefined)
+	const [receiverRef, setReceiverRef] = useState<DocumentReference | undefined>(
+		undefined,
+	)
 
 	const [formData, setFormData] = useState<DiscussionDTO>({
 		uuid: generateUId(),
@@ -158,7 +163,7 @@ const DiscussionComponent = ({
 			const finalFormData = {
 				...formData,
 				message,
-				nest_level: nestLevel
+				nest_level: nestLevel,
 			}
 
 			if (isReplying && commentId) {
@@ -174,7 +179,7 @@ const DiscussionComponent = ({
 
 			setTimeout(() => {
 				showToast({
-					message: `Your ${(isReplying) ? 'reply' : 'comment'} has been posted successfully`,
+					message: `Your ${isReplying ? 'reply' : 'comment'} has been posted successfully`,
 					status: 'success',
 				})
 				window.location.reload()
@@ -182,7 +187,7 @@ const DiscussionComponent = ({
 		} catch (err: any) {
 			console.log(err)
 			showToast({
-				message: `Your ${(isReplying) ? 'reply' : 'comment'} was not submitted`,
+				message: `Your ${isReplying ? 'reply' : 'comment'} was not submitted`,
 				status: 'error',
 			})
 			setIsLoading(false)
@@ -276,7 +281,7 @@ const DiscussionComponent = ({
 							}}
 							value={
 								isReplying
-									? (userHandle && message.startsWith(userHandle))
+									? userHandle && message.startsWith(userHandle)
 										? message
 										: `${userHandle} ${message}`
 									: message
@@ -325,7 +330,6 @@ const CommentComponent = ({
 	getCommentReplies: (arg: string) => DiscussionData[]
 	commentId: string
 }) => {
-
 	const replies = getCommentReplies(commentId)
 
 	const userName =
@@ -393,8 +397,10 @@ const CommentComponent = ({
 			{/* Reply Comment */}
 			{replies.map((singleReply) => {
 				// Check if the reply is a sub-reply
-				if (singleReply.nest_level >= 2 && typeof singleReply?.reply_to === 'string') {
-
+				if (
+					singleReply.nest_level >= 2 &&
+					typeof singleReply?.reply_to === 'string'
+				) {
 					const subReplies = getCommentReplies(singleReply.id)
 					// Return the main reply along with its sub-replies
 					return (
@@ -412,9 +418,15 @@ const CommentComponent = ({
 							{subReplies
 								// Step 1: Sort subReplies by timestamp (ascending)
 								.sort((a: any, b: any) => {
-									const timestampA = new Date(a.timestamp.seconds * 1000 + a.timestamp.nanoseconds / 1000000);
-									const timestampB = new Date(b.timestamp.seconds * 1000 + b.timestamp.nanoseconds / 1000000);
-									return timestampA.getTime() - timestampB.getTime(); // Ascending order
+									const timestampA = new Date(
+										a.timestamp.seconds * 1000 +
+											a.timestamp.nanoseconds / 1000000,
+									)
+									const timestampB = new Date(
+										b.timestamp.seconds * 1000 +
+											b.timestamp.nanoseconds / 1000000,
+									)
+									return timestampA.getTime() - timestampB.getTime() // Ascending order
 								})
 								// Step 2: Loop through sorted subReplies
 								.map((subReply: any) => (
@@ -468,7 +480,6 @@ const ReplyComponent = ({
 	setIsReplying: (arg: boolean) => void
 	setCommentId: (arg: string) => void
 }) => {
-
 	const userName =
 		reply?._sender_ref?.first_name + ' ' + reply?._sender_ref?.last_name
 
@@ -486,9 +497,7 @@ const ReplyComponent = ({
 		<>
 			<Box ml={marginLeft}>
 				<Flex flexDirection={'column'}>
-					<Flex
-						gap={'10px'}
-					>
+					<Flex gap={'10px'}>
 						<Avatar
 							alignSelf={'center'}
 							name={userName}
@@ -524,7 +533,7 @@ const ReplyComponent = ({
 							width={'100px'}
 							ml={'60px'}
 							cursor={'pointer'}
-							visibility={(reply?.nest_level > 2) ? 'hidden' : 'visible'}
+							visibility={reply?.nest_level > 2 ? 'hidden' : 'visible'}
 							onClick={() => {
 								setUserHandle(`@${userName}`)
 								setIsReplying(true)

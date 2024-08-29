@@ -1,13 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import { libraries } from '@/constants'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
+import SherutaDB from '@/firebase/service/index.firebase'
+import {
+	createSeekerRequestDTO,
+	LocationObject,
+	PaymentPlan,
+	SeekerRequestData,
+	userSchema,
+} from '@/firebase/service/request/request.types'
+import useCommon from '@/hooks/useCommon'
 import {
 	Button,
+	Flex,
 	FormControl,
+	FormErrorMessage,
 	FormLabel,
 	Input,
 	Select,
 	Textarea,
-	FormErrorMessage,
-	Flex,
 	useColorMode,
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
@@ -25,6 +36,9 @@ import { z, ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
+import React, { useCallback, useEffect, useState } from 'react'
+import { v4 as generateUId } from 'uuid'
+import { ZodError } from 'zod'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
@@ -57,8 +71,6 @@ const extractErrors = (errorArray: ErrorObject[]): Errors => {
 	}, {} as Errors)
 }
 
-const libraries: 'places'[] = ['places']
-
 interface Options {
 	_service_ref: DocumentReference | undefined
 	_location_keyword_ref: DocumentReference | undefined
@@ -71,17 +83,6 @@ interface budgetLimits {
 	quarterly: number
 	'bi-annually': number
 	weekly: number
-}
-
-interface LocationObject {
-	formatted_address?: string
-	geometry?: {
-		location?: {
-			lat: number
-			lng: number
-		}
-	}
-	[key: string]: any
 }
 
 const budgetLimits: Record<PaymentPlan, number> = {
@@ -106,13 +107,7 @@ const initialFormState: SeekerRequestData = {
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
-	flat_share_profile: {
-		done_kyc: false,
-		_id: '',
-		first_name: '',
-		last_name: '',
-		avatar_url: '',
-	},
+	flat_share_profile: {} as userSchema,
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -186,14 +181,13 @@ const CreateSeekerForm: React.FC = () => {
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (
-		autocompleteInstance: google.maps.places.Autocomplete,
-	) => {
-		setAutocomplete(autocompleteInstance)
-		console.log('Autocomplete Loaded:', autocompleteInstance)
-	}
+	const handleLoad = useCallback(
+		(autocompleteInstance: google.maps.places.Autocomplete) =>
+			setAutocomplete(autocompleteInstance),
+		[],
+	)
 
-	const handlePlaceChanged = () => {
+	const handlePlaceChanged = useCallback(() => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
 			const locationObject: LocationObject = {
@@ -215,7 +209,7 @@ const CreateSeekerForm: React.FC = () => {
 				google_location_text: locationText,
 			}))
 		}
-	}
+	}, [googleLocationText, autocomplete])
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -305,9 +299,22 @@ const CreateSeekerForm: React.FC = () => {
 			}
 
 			setIsLoading(true)
+			if (!flat_share_profile?._user_id || !user?._id)
+				return showToast({
+					message: 'Please log in to make a request',
+					status: 'error',
+				})
+			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
 				...optionsRef,
+				flat_share_profile: {
+					done_kyc: flat_share_profile?.done_kyc,
+					_id: user._id,
+					avatar_url: user.avatar_url,
+					first_name: user.first_name,
+					last_name: user.last_name,
+				},
 			}
 
 			finalFormData.budget = Number(finalFormData.budget)
