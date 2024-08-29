@@ -81,7 +81,6 @@ export default function InspectionCard({
 		useState(false)
 	const [showCancelBookingModal, setShowCancelBookingModal] = useState(false)
 	const [showVideoCallModal, setShowVideoCallModal] = useState(false)
-	const [loadVideoCall, setLoadVideoCall] = useState(false)
 
 	const openRescheduleInspectionModal = () =>
 		setShowRescheduleInspectionModal(true)
@@ -95,12 +94,12 @@ export default function InspectionCard({
 		const inspectionDate = inspection_date.toDate()
 		const currentDate = new Date()
 
-		// if (inspectionDate > currentDate) {
-		// 	return showToast({
-		// 		message: 'The inspection is not yet due; please check back later.',
-		// 		status: 'error',
-		// 	})
-		// }
+		if (inspectionDate > currentDate) {
+			return showToast({
+				message: 'The inspection is not yet due; please check back later.',
+				status: 'error',
+			})
+		}
 
 		setShowVideoCallModal(true)
 	}
@@ -294,7 +293,7 @@ export default function InspectionCard({
 					</Flex>
 					<Flex alignItems={'center'} gap={2}>
 						<Button
-							isDisabled={inspectionCategory !== 'upcoming' || loadVideoCall}
+							isDisabled={inspectionCategory !== 'upcoming'}
 							rounded={'8px'}
 							display={'flex'}
 							alignItems={'center'}
@@ -318,7 +317,7 @@ export default function InspectionCard({
 							Send Message
 						</Button>
 						<Button
-							isDisabled={inspectionCategory !== 'upcoming' || loadVideoCall}
+							isDisabled={inspectionCategory !== 'upcoming'}
 							rounded={'8px'}
 							display={'flex'}
 							alignItems={'center'}
