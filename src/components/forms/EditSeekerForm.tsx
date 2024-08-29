@@ -4,14 +4,13 @@ import { libraries } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { db } from '@/firebase'
-import SherutaDB from '@/firebase/service/index.firebase'
+
 import {
-	createSeekerRequestDTO,
+
 	LocationObject,
-	PaymentPlan,
-	RequestData,
+	
 } from '@/firebase/service/request/request.types'
-import useCommon from '@/hooks/useCommon'
+
 import {
 	Button,
 	Flex,
@@ -24,7 +23,7 @@ import {
 	Textarea,
 	useColorMode,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript } from '@react-google-maps/api'
+
 import {
 	doc,
 	DocumentData,
@@ -41,8 +40,7 @@ import {
 	RequestData,
 	SeekerRequestData,
 } from '@/firebase/service/request/request.types'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
+
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as generateUId } from 'uuid'

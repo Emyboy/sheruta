@@ -171,7 +171,7 @@ export default async function page(props: any) {
 							phone_number: formattedUserInfoDoc.primary_phone_number,
 							gender: formattedUserInfoDoc.gender,
 							bio: formattedUserInfoDoc.bio,
-							verified: formattedUserInfoDoc.is_verified,
+							is_verified: formattedUserInfoDoc.is_verified,
 						}
 					: null,
 			}
