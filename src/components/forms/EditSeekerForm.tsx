@@ -29,7 +29,7 @@ import {
 	PaymentPlan,
 	RequestData,
 	SeekerRequestData,
-	LocationObject
+	LocationObject,
 } from '@/firebase/service/request/request.types'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'

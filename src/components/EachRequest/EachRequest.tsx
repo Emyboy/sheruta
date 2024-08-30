@@ -317,7 +317,7 @@ export default function EachRequest({ request }: Props) {
 							<Button
 								onClick={() => {
 									if (request._user_info?.primary_phone_number) {
-										window.location.href = `tel:${request._user_info.primary_phone_number}`;
+										window.location.href = `tel:${request._user_info.primary_phone_number}`
 									}
 								}}
 								px={0}
