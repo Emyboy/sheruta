@@ -8,7 +8,7 @@ import {
 	Text,
 	useColorMode,
 } from '@chakra-ui/react'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import MainBodyContent from './MainBodyContent'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import NextLink from 'next/link'
@@ -22,6 +22,8 @@ import { useAppContext } from '@/context/app.context'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import SearchPageFilter from '@/app/search/(components)/SearchPageFilter'
+import MainTooltip from '../atoms/MainTooltip'
+import { AiOutlineSwap } from 'react-icons/ai'
 
 type Props = {}
 
@@ -125,6 +127,10 @@ const Drawer = () => {
 	const { show_left_nav } = appState
 	const pathname = usePathname()
 
+	const [toogleSideNav, setToogleSideNav] = useState<boolean>(
+		pathname.startsWith('/search') ? true : false,
+	)
+
 	return (
 		<>
 			<Box
@@ -147,12 +153,20 @@ const Drawer = () => {
 			>
 				<Flex flexDirection={'column'} w="full">
 					<NavProfile />
-					<Box px={DEFAULT_PADDING}>
-						{pathname.startsWith('/search') ? (
-							<SearchPageFilter />
-						) : (
-							<MainLeftNav />
+					<Box p={DEFAULT_PADDING}>
+						{pathname.startsWith('/search') && (
+							<MainIconBtn
+								label={
+									toogleSideNav
+										? 'Switch to side nav'
+										: 'Switch to search filter'
+								}
+								Icon={AiOutlineSwap}
+								active={false}
+								onClick={() => setToogleSideNav((prev) => !prev)}
+							/>
 						)}
+						{toogleSideNav ? <SearchPageFilter /> : <MainLeftNav />}
 					</Box>
 				</Flex>
 			</Box>
