@@ -16,7 +16,6 @@ import {
 	returnedInspectionData,
 } from '@/firebase/service/inspections/inspections.types'
 import useCommon from '@/hooks/useCommon'
-import { generateRoomUrl } from '@/utils/actions'
 import {
 	Box,
 	Button,

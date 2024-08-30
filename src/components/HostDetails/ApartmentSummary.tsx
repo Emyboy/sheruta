@@ -1439,8 +1439,8 @@ const BookInspectionModal = ({
 					<Button
 						rounded={DEFAULT_PADDING}
 						type="submit"
-						paddingX={'50px'}
-						paddingY={'16px'}
+						paddingX={{ base: '36px', md: '50px' }}
+						paddingY={{ base: '12px', md: '16px' }}
 						h={{ base: '48px', md: '54px' }}
 						bgColor={'#00BC7399'}
 						textColor={'white'}
