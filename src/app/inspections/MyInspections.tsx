@@ -2,9 +2,8 @@
 
 import MyInspectionsIcon from '@/assets/svg/my-inspections-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
-import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
+import { useInspectionsContext } from '@/context/inspections.context'
 import { returnedInspectionData } from '@/firebase/service/inspections/inspections.types'
 import { Flex, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
@@ -25,22 +24,12 @@ const inspectionCategories: inspectionCategoryType[] = [
 
 export default function MyInspections() {
 	const { authState } = useAuthContext()
-	const { appState } = useAppContext()
+	const { inspections, loadingInspections } = useInspectionsContext()
 
-	const [inspections, setInspections] = useState<returnedInspectionData[]>([])
 	const [filteredInspections, setFilteredInspections] =
 		useState<returnedInspectionData[]>(inspections)
 	const [inspectionCategory, setInspectionCategory] =
 		useState<inspectionCategoryType>('upcoming')
-
-	const fetchYourInspections = async (id: string) => {
-		try {
-			const res = await InspectionServices.getYourInspections(id)
-			setInspections(res as returnedInspectionData[])
-		} catch (error) {
-			console.error('Error', error)
-		}
-	}
 
 	const filterInspections = () => {
 		const currentTime = new Date()
@@ -69,10 +58,8 @@ export default function MyInspections() {
 			case 'past':
 				return inspections.filter(
 					(inspection) =>
-						new Date(
-							inspection.inspection_date.toDate().getTime() +
-								6 * 60 * 60 * 1000,
-						) <= currentTime &&
+						new Date(inspection.inspection_date.toDate().getTime()) <=
+							currentTime &&
 						inspection.hasOccured &&
 						!inspection.isCancelled,
 				)
@@ -84,25 +71,11 @@ export default function MyInspections() {
 	}
 
 	useEffect(() => {
-		if (appState.app_loading) return
-		if (!authState.user?._id) return
-
-		fetchYourInspections(authState.user?._id || '')
-	}, [appState.app_loading, authState.user?._id])
-
-	useEffect(() => {
-		if (appState.app_loading) return
-		if (!authState.user?._id) return
 		if (!inspections.length) return
 
 		const sortedInspections = filterInspections()
 		setFilteredInspections(sortedInspections)
-	}, [
-		inspectionCategory,
-		appState.app_loading,
-		authState.user?._id,
-		inspections.length,
-	])
+	}, [inspectionCategory, inspections.length, loadingInspections])
 
 	return (
 		<Flex
