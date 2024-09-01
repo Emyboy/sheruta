@@ -70,7 +70,7 @@ export default function ProfileHero({ data, userProfile }: Props) {
 					<Text isTruncated fontSize={'x-large'} textTransform={'capitalize'}>
 						{_user?.first_name} {_user?.last_name}
 					</Text>
-					{_userInfo?.isVerified ? (
+					{_userInfo?.is_verified ? (
 						<Flex alignItems={'center'} color={'green.400'} h="full">
 							<BiSolidBadgeCheck size={25} />
 						</Flex>

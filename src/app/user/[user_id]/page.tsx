@@ -21,6 +21,7 @@ import {
 import { db } from '@/firebase'
 import { promise } from 'zod'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -171,7 +172,7 @@ export default async function page(props: any) {
 							phone_number: formattedUserInfoDoc.primary_phone_number,
 							gender: formattedUserInfoDoc.gender,
 							bio: formattedUserInfoDoc.bio,
-							verified: formattedUserInfoDoc.is_verified,
+							is_verified: formattedUserInfoDoc.is_verified,
 						}
 					: null,
 			}
@@ -199,7 +200,9 @@ export default async function page(props: any) {
 						<PageNotFound />
 					)}
 				</ThreeColumnLayout>
+				
 			</MainContainer>
+			
 		</Flex>
 	)
 }

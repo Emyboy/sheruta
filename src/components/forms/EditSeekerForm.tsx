@@ -32,17 +32,17 @@ import {
 	Timestamp,
 } from 'firebase/firestore'
 import Link from 'next/link'
-import { LoadScript, Autocomplete } from '@react-google-maps/api'
-import SherutaDB from '@/firebase/service/index.firebase'
-import useCommon from '@/hooks/useCommon'
+// import { LoadScript, Autocomplete } from '@react-google-maps/api'
+// import SherutaDB from '@/firebase/service/index.firebase'
+// import useCommon from '@/hooks/useCommon'
 import {
-	createSeekerRequestDTO,
-	PaymentPlan,
-	RequestData,
+	// createSeekerRequestDTO,
+	// PaymentPlan,
+	// RequestData,
 	SeekerRequestData,
 } from '@/firebase/service/request/request.types'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
+// import { useAuthContext } from '@/context/auth.context'
+// import { useOptionsContext } from '@/context/options.context'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as generateUId } from 'uuid'

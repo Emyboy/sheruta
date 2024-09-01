@@ -5,6 +5,7 @@ import MainSection from '@/components/atoms/MainSection'
 import ProfileAboutMe from './ProfileAboutMe'
 import PersonalInfo from './personal-info/PersonalInfo'
 import EachRequest from '@/components/EachRequest/EachRequest'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 
 interface Props {
 	data: any
@@ -28,6 +29,7 @@ export default async function UserProfilePage({ data, userId }: Props) {
 				<EachRequest />
 				<EachRequest /> */}
 			</MainSection>
+			<MobileNavFooter />
 		</Flex>
 	)
 }
