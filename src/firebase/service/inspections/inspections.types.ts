@@ -17,6 +17,8 @@ export const InspectionDataSchema = z.object({
 	isCancelled: z.boolean(),
 	hasOccured: z.boolean(),
 	inspection_location: z.string(),
+	hostRoomUrl: z.string(),
+	roomUrl: z.string(),
 })
 
 export type InspectionData = z.infer<typeof InspectionDataSchema>

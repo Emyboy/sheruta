@@ -54,6 +54,7 @@ export default function ListOfFilters({ length }: { length: number }) {
 						fontWeight={300}
 						_light={{ color: '#111717' }}
 						color={'text_muted'}
+						overflow={'hidden'}
 					>
 						{filter}
 						{/* <TbCircleLetterX size={'16px'} /> */}

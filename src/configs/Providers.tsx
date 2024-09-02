@@ -11,6 +11,7 @@ import MasterPopup from '@/components/popups/MasterPopup'
 import dynamic from 'next/dynamic'
 import GetStarted from '@/components/info/GetStarted/GetStarted'
 import { OptionsProvider } from '@/context/options.context'
+import { InspectionsProvider } from '@/context/inspections.context'
 
 const CreditOptionsPopups = dynamic(
 	() => import('@/components/popups/CreditOptionsPopups'),
@@ -26,26 +27,28 @@ export function Providers({ children }: { children: React.ReactNode }) {
 			<AppContextProvider>
 				<AuthContextProvider>
 					<OptionsProvider>
-						<Box
-							bg="white"
-							_dark={{
-								bg: 'dark',
-							}}
-							minH={'100vh'}
-							userSelect={'none'}
-						>
-							<GetStarted />
-							<CreditOptionsPopups />
-							<MasterPopup />
-							<AppLoading />
-							<Next13ProgressBar
-								height="4px"
-								color="#00bc73"
-								options={{ showSpinner: false }}
-								showOnShallow
-							/>
-							{children}
-						</Box>
+						<InspectionsProvider>
+							<Box
+								bg="white"
+								_dark={{
+									bg: 'dark',
+								}}
+								minH={'100vh'}
+								userSelect={'none'}
+							>
+								<GetStarted />
+								<CreditOptionsPopups />
+								<MasterPopup />
+								<AppLoading />
+								<Next13ProgressBar
+									height="4px"
+									color="#00bc73"
+									options={{ showSpinner: false }}
+									showOnShallow
+								/>
+								{children}
+							</Box>
+						</InspectionsProvider>
 					</OptionsProvider>
 				</AuthContextProvider>
 			</AppContextProvider>

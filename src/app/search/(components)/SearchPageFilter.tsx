@@ -138,7 +138,7 @@ export default function SearchPageFilter({}: Props) {
 			flexDir={'column'}
 			pr={DEFAULT_PADDING}
 			py={DEFAULT_PADDING}
-			gap={'48px'}
+			gap={{ base: '24px', md: '48px' }}
 		>
 			<Box
 				p={DEFAULT_PADDING}
@@ -241,18 +241,18 @@ export default function SearchPageFilter({}: Props) {
 				</Flex>
 			</Box>
 
-			<Flex gap={'20px'} flexDir={'column'}>
+			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
 					as={'h3'}
 					fontWeight={'normal'}
-					fontSize={'base'}
+					fontSize={{ base: 'sm', md: 'base' }}
 					color={'#111717CC'}
 					_dark={{ color: 'white' }}
 				>
 					Search By Budget
 				</Text>
 
-				<SimpleGrid columns={1} spacingY="16px">
+				<SimpleGrid columns={1} spacingY={{ base: '12px', md: '16px' }}>
 					{budgetList.map((budget, i) => (
 						<Checkbox
 							key={i}
@@ -262,7 +262,7 @@ export default function SearchPageFilter({}: Props) {
 							colorScheme="green"
 							color={'#11171799'}
 							fontWeight={'300'}
-							fontSize={'sm'}
+							fontSize={{ base: 'xs', md: 'sm' }}
 							value={budget.value}
 							onChange={handleCheckBoxOptions}
 							defaultChecked={searchParams.toString().includes(budget.value)}
@@ -273,18 +273,18 @@ export default function SearchPageFilter({}: Props) {
 				</SimpleGrid>
 			</Flex>
 
-			<Flex gap={'20px'} flexDir={'column'}>
+			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
 					as={'h3'}
 					fontWeight={'normal'}
-					fontSize={'base'}
+					fontSize={{ base: 'sm', md: 'base' }}
 					color={'#111717CC'}
 					_dark={{ color: 'white' }}
 				>
 					Search By Service Type
 				</Text>
 
-				<SimpleGrid columns={1} spacingY="16px">
+				<SimpleGrid columns={1} spacingY={{ base: '12px', md: '16px' }}>
 					{options.services.map((service) => (
 						<Checkbox
 							key={service.id}
@@ -293,7 +293,7 @@ export default function SearchPageFilter({}: Props) {
 							colorScheme="green"
 							color={'#11171799'}
 							fontWeight={'300'}
-							fontSize={'sm'}
+							fontSize={{ base: 'xs', md: 'sm' }}
 							value={service.id}
 							name="service"
 							onChange={handleCheckBoxOptions}
@@ -305,18 +305,18 @@ export default function SearchPageFilter({}: Props) {
 				</SimpleGrid>
 			</Flex>
 
-			<Flex gap={'20px'} flexDir={'column'}>
+			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
 					as={'h3'}
 					fontWeight={'normal'}
-					fontSize={'base'}
+					fontSize={{ base: 'sm', md: 'base' }}
 					color={'#111717CC'}
 					_dark={{ color: 'white' }}
 				>
 					Find Apartment
 				</Text>
 
-				<SimpleGrid columns={1} spacingY="16px">
+				<SimpleGrid columns={1} spacingY={{ base: '12px', md: '16px' }}>
 					{findApartmentList.map((apartmentType, i) => (
 						<Checkbox
 							key={i}
@@ -325,7 +325,7 @@ export default function SearchPageFilter({}: Props) {
 							colorScheme="green"
 							color={'#11171799'}
 							fontWeight={'300'}
-							fontSize={'sm'}
+							fontSize={{ base: 'xs', md: 'sm' }}
 							value={apartmentType.value}
 							name="apartment"
 							onChange={handleCheckBoxOptions}
@@ -339,18 +339,18 @@ export default function SearchPageFilter({}: Props) {
 				</SimpleGrid>
 			</Flex>
 
-			<Flex gap={'20px'} flexDir={'column'}>
+			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
 					as={'h3'}
 					fontWeight={'normal'}
-					fontSize={'base'}
+					fontSize={{ base: 'sm', md: 'base' }}
 					color={'#111717CC'}
 					_dark={{ color: 'white' }}
 				>
 					Payment Mode
 				</Text>
 
-				<SimpleGrid columns={1} spacingY="16px">
+				<SimpleGrid columns={1} spacingY={{ base: '12px', md: '16px' }}>
 					{paymentTypeList.map((paymentType, i) => (
 						<Checkbox
 							key={i}
@@ -359,7 +359,7 @@ export default function SearchPageFilter({}: Props) {
 							colorScheme="green"
 							color={'#11171799'}
 							fontWeight={'300'}
-							fontSize={'sm'}
+							fontSize={{ base: 'xs', md: 'sm' }}
 							value={paymentType.value}
 							name="payment_type"
 							onChange={handleCheckBoxOptions}
