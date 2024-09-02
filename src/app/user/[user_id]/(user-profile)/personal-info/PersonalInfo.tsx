@@ -37,13 +37,12 @@ export default function PersonalInfo({ userProfile }: Props) {
 		title: string
 	}
 
-	type Socials ={
-		instagram: string,
-		twitter: string,
-		tiktok: string,
-		facebook: string,
+	type Socials = {
+		instagram: string
+		twitter: string
+		tiktok: string
+		facebook: string
 		linkedin: string
-
 	}
 
 	const socials: Socials = userProfile.flatShareProfile.socials
@@ -54,8 +53,6 @@ export default function PersonalInfo({ userProfile }: Props) {
 	const twitterUrl = `https://x.com/${_userFlatshareProfile?.twitter}`
 	const linkedinUrl = `https://linkedin.com/in/${_userFlatshareProfile?.linkedin}`
 	const tiktokUrl = `https://tiktok.com/@${_userFlatshareProfile?.tiktok}`
-
-
 
 	// const handleInstagramClick = () => {
 	// 	window.open(

@@ -1,10 +1,12 @@
 import React from 'react'
 import UserProfilePage from './(user-profile)/UserProfilePage'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import MainContainer from '@/components/layout/MainContainer'
-import { Flex } from '@chakra-ui/react'
+import MainSection from '@/components/atoms/MainSection'
+import { Box, Flex } from '@chakra-ui/react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
+import MainHeader from '@/components/layout/MainHeader'
+import MainContainer from '@/components/layout/MainContainer'
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
 import {
@@ -189,15 +191,21 @@ export default async function page(props: any) {
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
-				<ThreeColumnLayout header={<MainBackHeader />}>
+				<ThreeColumnLayout header={<MainHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{user ? (
-						<UserProfilePage data={user} userId={otherInfos} />
-					) : (
-						<PageNotFound />
-					)}
+					<Flex flexDirection={'column'} w="full">
+						<Box my={3}>
+							<MainBackHeader />
+						</Box>
+
+						{user ? (
+							<UserProfilePage  data={user} userId={otherInfos} />
+						) : (
+							<PageNotFound />
+						)}
+					</Flex>
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

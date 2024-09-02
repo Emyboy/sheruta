@@ -33,8 +33,7 @@ export default function ProfileHero({ data, userProfile }: Props) {
 	const handleCall = () => {
 		window.location.href = `tel:${_userInfo.primary_phone_number}`
 	}
-    
-	
+
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>
 			<Box
@@ -55,22 +54,18 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				overflow={'hidden'}
 				mr={{
 					md: '16px',
-					base: '20px', 
+					base: '20px',
 				}}
 				mt={{
 					md: '1px',
-					base: '20px', 
+					base: '20px',
 				}}
-				
-			
-				
 			>
 				<Image
 					style={{ position: 'absolute' }}
 					src={_user.avatar_url || '/assets/avatar.webp'}
 					fill
 					alt={'user'}
-					
 				/>
 			</Box>
 			<Flex
@@ -85,8 +80,8 @@ export default function ProfileHero({ data, userProfile }: Props) {
 					</Text>
 					{_userInfo?.is_verified ? (
 						<Flex alignItems={'center'} color={'green.400'} h="full">
-						<BiSolidBadgeCheck size={25} />
-					</Flex>
+							<BiSolidBadgeCheck size={25} />
+						</Flex>
 					) : null}
 				</Flex>
 				<Flex alignItems={'center'} gap={1} color="text_muted">

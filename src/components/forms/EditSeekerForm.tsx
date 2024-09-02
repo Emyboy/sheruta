@@ -5,11 +5,7 @@ import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { db } from '@/firebase'
 
-import {
-
-	LocationObject,
-	
-} from '@/firebase/service/request/request.types'
+import { LocationObject } from '@/firebase/service/request/request.types'
 
 import {
 	Button,
