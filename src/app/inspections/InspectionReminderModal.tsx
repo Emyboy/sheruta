@@ -36,35 +36,44 @@ const InspectionReminderModal = () => {
 	useEffect(() => {
 		const checkInspections = () => {
 			const now = new Date().getTime()
+			let nextCheckTime = Infinity
 
-			inspections.forEach((inspection) => {
+			for (const inspection of inspections) {
 				const inspectionDate = inspection.inspection_date.toDate().getTime()
-
 				const timeLeft = inspectionDate - now
 
-				if (timeLeft < 0) return
+				if (timeLeft < 0) continue
+
+				const lastReminder = getLastReminderTime(inspection.id)
 
 				for (const reminder of reminders) {
 					const reminderTime = timeLeft - reminder
 
-					if (
-						reminderTime <= 0 &&
-						getLastReminderTime(inspection.id) !== reminder.toString()
-					) {
+					if (reminderTime <= 0 && lastReminder !== reminder.toString()) {
 						setUpcomingInspection(inspection)
 						onOpen()
 						setLastReminderTime(inspection.id, reminder)
 						break
+					} else if (reminderTime > 0) {
+						nextCheckTime = Math.min(nextCheckTime, now + reminderTime)
+						break
 					}
 				}
-			})
+			}
+
+			return nextCheckTime !== Infinity ? nextCheckTime - now : null
 		}
 
-		checkInspections()
+		const scheduleNextCheck = () => {
+			const nextCheck = checkInspections()
+			if (nextCheck !== null) {
+				return setTimeout(scheduleNextCheck, Math.max(nextCheck, 60000))
+			}
+		}
 
-		const intervalId = setInterval(checkInspections, 60000)
+		const timeoutId = scheduleNextCheck()
 
-		return () => clearInterval(intervalId)
+		return () => clearTimeout(timeoutId)
 	}, [inspections, onOpen])
 
 	if (!upcomingInspection) return null
