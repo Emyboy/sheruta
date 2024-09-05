@@ -69,6 +69,10 @@ import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
 import { generateRoomUrl } from '@/utils/actions'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
+import { auth } from '@/firebase'
 
 export default function ApartmentSummary({
 	request,
@@ -1062,6 +1066,16 @@ const BookInspectionModal = ({
 							? creditTable.VIRTUAL_INSPECTION
 							: 0,
 				}),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						type: 'inspection',
+						message: NotificationsBodyMessage.inspection,
+						recipient_id: host_details._id,
+						sender_details: data.seeker_details,
+					},
+				}),
 			])
 
 			showToast({
@@ -1070,7 +1084,7 @@ const BookInspectionModal = ({
 			})
 			router.push('/inspections')
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			showToast({
 				message: 'Error booking inspection',
 				status: 'error',
@@ -1084,7 +1098,7 @@ const BookInspectionModal = ({
 
 	if (loading)
 		return (
-			<Modal isOpen={loading} onClose={() => setLoading(false)}>
+			<Modal isOpen={loading} onClose={() => setLoading(false)} size={'full'}>
 				<ModalOverlay
 					bg="blackAlpha.300"
 					backdropFilter="blur(10px) hue-rotate(90deg)"

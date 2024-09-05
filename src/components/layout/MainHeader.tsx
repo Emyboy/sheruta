@@ -1,6 +1,9 @@
 'use client'
+import { DEFAULT_PADDING } from '@/configs/theme'
+import { useNotificationContext } from '@/context/notifications.context'
 import { Flex, Hide, useColorMode } from '@chakra-ui/react'
-import React from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
 	BiBell,
 	BiHome,
@@ -9,11 +12,8 @@ import {
 	BiSearchAlt,
 	BiSun,
 } from 'react-icons/bi'
-import MainBodyContent from './MainBodyContent'
 import MainIconBtn from '../atoms/MainIconBtn'
-import { DEFAULT_PADDING } from '@/configs/theme'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import MainBodyContent from './MainBodyContent'
 import MobileHeader from './MobileHeader'
 
 type Props = {}
@@ -21,6 +21,7 @@ type Props = {}
 export default function MainHeader({}: Props) {
 	const pathname = usePathname()
 	const { toggleColorMode } = useColorMode()
+	const { unreadNotifications } = useNotificationContext()
 
 	return (
 		<>
@@ -61,6 +62,7 @@ export default function MainHeader({}: Props) {
 								label="Notifications"
 								Icon={BiBell}
 								active={pathname === '/notifications'}
+								hasNotification={unreadNotifications}
 							/>
 						</Link>
 						<Link href={`/messages`}>

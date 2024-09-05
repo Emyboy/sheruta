@@ -1,9 +1,8 @@
+import { useAuthContext } from '@/context/auth.context'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useCommon from './useCommon'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { useAuthContext } from '@/context/auth.context'
-import { useRouter } from 'next/navigation'
-import { deletePost } from '@/utils/actions'
 
 export default function useShareSpace() {
 	const { showToast } = useCommon()
