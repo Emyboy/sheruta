@@ -1,9 +1,9 @@
 'use client'
 
+import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
+import { useNotificationContext } from '@/context/notifications.context'
 import { Flex, Hide } from '@chakra-ui/react'
 import Link from 'next/link'
-import React from 'react'
-import MainIconBtn from '../atoms/MainIconBtn'
 import { usePathname } from 'next/navigation'
 import {
 	BiBell,
@@ -12,12 +12,14 @@ import {
 	BiPlus,
 	BiSearchAlt,
 } from 'react-icons/bi'
-import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
+import MainIconBtn from '../atoms/MainIconBtn'
 
 type Props = {}
 
 export default function MobileNavFooter({}: Props) {
 	const pathname = usePathname()
+	const { unreadNotifications } = useNotificationContext()
+
 	return (
 		<Hide above="lg">
 			<Flex
@@ -45,7 +47,7 @@ export default function MobileNavFooter({}: Props) {
 						label="Notifications"
 						Icon={BiBell}
 						active={pathname === '/notifications'}
-						hasNotification
+						hasNotification={unreadNotifications}
 					/>
 				</Link>
 				<Link href={`/request`}>

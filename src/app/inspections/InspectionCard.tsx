@@ -35,6 +35,9 @@ import { CiCalendarDate, CiFlag1, CiLocationOn } from 'react-icons/ci'
 import { IoTimeOutline } from 'react-icons/io5'
 import { MdOutlineCancel } from 'react-icons/md'
 import { inspectionCategoryType } from './MyInspections'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
 
 type InspectionProps = returnedInspectionData & {
 	currentUserId: string
@@ -615,7 +618,6 @@ const CancelBookingModal = ({
 	currentUserId,
 }: ModalProps) => {
 	const { showToast } = useCommon()
-	const router = useRouter()
 	const { fetchYourInspections } = useInspectionsContext()
 
 	const [loading, setLoading] = useState<boolean>(false)
@@ -668,12 +670,44 @@ const CancelBookingModal = ({
 								newCredit: creditTable.VIRTUAL_INSPECTION,
 								document_id: currentUserId,
 							}),
+							NotificationsService.create({
+								collection_name: DBCollectionName.notifications,
+								data: {
+									is_read: false,
+									type: 'cancelled',
+									message: NotificationsBodyMessage.cancelled,
+									recipient_id:
+										currentUserId === seeker_details.id
+											? host_details.id
+											: seeker_details.id,
+									sender_details:
+										currentUserId === host_details.id
+											? host_details
+											: seeker_details,
+								},
+							}),
 						]
 					: [
 							InspectionServices.update({
 								collection_name: DBCollectionName.inspections,
 								data,
 								document_id: id,
+							}),
+							NotificationsService.create({
+								collection_name: DBCollectionName.notifications,
+								data: {
+									is_read: false,
+									type: 'cancelled',
+									message: NotificationsBodyMessage.cancelled,
+									recipient_id:
+										currentUserId === seeker_details.id
+											? host_details.id
+											: seeker_details.id,
+									sender_details:
+										currentUserId === host_details.id
+											? host_details
+											: seeker_details,
+								},
 							}),
 						]
 
@@ -838,7 +872,6 @@ const ResheduleInspectionModal = ({
 	currentUserId,
 }: ModalProps) => {
 	const { showToast } = useCommon()
-	const router = useRouter()
 	const { fetchYourInspections } = useInspectionsContext()
 
 	const [inspectionData, setInspectionData] = useState({
@@ -890,11 +923,27 @@ const ResheduleInspectionModal = ({
 		InspectionDataSchema.parse(data)
 
 		try {
-			await InspectionServices.update({
-				collection_name: DBCollectionName.inspections,
-				data,
-				document_id: id,
-			})
+			await Promise.all([
+				InspectionServices.update({
+					collection_name: DBCollectionName.inspections,
+					data,
+					document_id: id,
+				}),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						type: 'rescheduled',
+						message: NotificationsBodyMessage.rescheduled,
+						recipient_id:
+							currentUserId === seeker_details.id
+								? host_details.id
+								: seeker_details.id,
+						sender_details:
+							currentUserId === host_details.id ? host_details : seeker_details,
+					},
+				}),
+			])
 
 			await fetchYourInspections(currentUserId)
 

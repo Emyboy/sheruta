@@ -6,7 +6,7 @@ import { useAuthContext } from '@/context/auth.context'
 import { useInspectionsContext } from '@/context/inspections.context'
 import { returnedInspectionData } from '@/firebase/service/inspections/inspections.types'
 import { Flex, Text } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import InspectionCard from './InspectionCard'
 
 export type inspectionCategoryType =
@@ -24,14 +24,14 @@ const inspectionCategories: inspectionCategoryType[] = [
 
 export default function MyInspections() {
 	const { authState } = useAuthContext()
-	const { inspections, loadingInspections } = useInspectionsContext()
+	const { inspections } = useInspectionsContext()
 
 	const [filteredInspections, setFilteredInspections] =
 		useState<returnedInspectionData[]>(inspections)
 	const [inspectionCategory, setInspectionCategory] =
 		useState<inspectionCategoryType>('upcoming')
 
-	const filterInspections = () => {
+	const filterInspections = useCallback(() => {
 		const currentTime = new Date()
 
 		switch (inspectionCategory) {
@@ -68,14 +68,14 @@ export default function MyInspections() {
 			default:
 				return inspections
 		}
-	}
+	}, [inspectionCategory, inspections])
 
 	useEffect(() => {
 		if (!inspections.length) return
 
 		const sortedInspections = filterInspections()
 		setFilteredInspections(sortedInspections)
-	}, [inspectionCategory, inspections.length, loadingInspections])
+	}, [inspectionCategory, inspections.length, filterInspections])
 
 	return (
 		<Flex
