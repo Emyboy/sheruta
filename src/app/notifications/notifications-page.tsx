@@ -131,7 +131,7 @@ export default function NotificationsPage({}: Props) {
 								}}
 								_dark={{
 									color: 'white',
-									borderColor: 'white',
+									borderColor: 'dark_light',
 									bgColor: 'brand_darker',
 								}}
 								py={{ base: '8px', md: '10px' }}
