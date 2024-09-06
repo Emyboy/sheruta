@@ -85,6 +85,7 @@ export default function NotificationsPage({}: Props) {
 						}}
 						_dark={{
 							backgroundColor: notification.is_read ? '' : 'brand_darker',
+							borderColor: 'dark_light',
 						}}
 					>
 						<Text
@@ -131,7 +132,7 @@ export default function NotificationsPage({}: Props) {
 								}}
 								_dark={{
 									color: 'white',
-									borderColor: 'dark_light',
+									borderColor: 'white',
 									bgColor: 'brand_darker',
 								}}
 								py={{ base: '8px', md: '10px' }}
