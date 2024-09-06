@@ -23,6 +23,7 @@ import {
 import { db } from '@/firebase'
 import { promise } from 'zod'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { ShareButton } from '@/components/atoms/ShareButton'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -36,7 +37,7 @@ export default async function page(props: any) {
 
 			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
 
-			// console.log('Basic user profile:...............',formattedUserDoc)
+			// console.log(formattedUserDoc)
 
 			return {
 				user: formattedUserDoc
@@ -45,6 +46,7 @@ export default async function page(props: any) {
 							last_name: formattedUserDoc.last_name,
 							email: formattedUserDoc.email,
 							avatar_url: formattedUserDoc.avatar_url,
+							id: formattedUserDoc._id,
 						}
 					: null,
 			}
@@ -53,8 +55,6 @@ export default async function page(props: any) {
 			throw new Error('Failed to get user profile')
 		}
 	}
-
-	const user = await getUserData()
 
 	async function getUserProfile() {
 		try {
@@ -80,9 +80,6 @@ export default async function page(props: any) {
 			const formattedUserInfoDoc = userInfoDocs.docs[0].data()
 				? userInfoDocs.docs[0].data()
 				: null
-
-			// console.log('FS profile:...............',formattedFlatShareProfile)
-			// console.log('User info:...............',formattedUserInfoDoc)
 
 			let interestsData: any = []
 
@@ -139,7 +136,24 @@ export default async function page(props: any) {
 					console.log('Location keyword document does not exist.')
 				}
 			} catch (error) {
-				console.error('Error fetching document:', error)
+				console.error('Error fetching Location keyword document:', error)
+			}
+
+			let stateValue: any = null
+
+			try {
+				const stateDocRef =
+					formattedFlatShareProfile?.state as DocumentReference
+
+				const docSnapshot = await getDoc(stateDocRef)
+
+				if (docSnapshot.exists()) {
+					stateValue = docSnapshot.data()
+				} else {
+					console.log('state document does not exist.')
+				}
+			} catch (error) {
+				console.error('Error fetching state document ref:', error)
 			}
 
 			const user = {
@@ -160,6 +174,7 @@ export default async function page(props: any) {
 								linkedin: formattedFlatShareProfile.linkedin,
 								instagram: formattedFlatShareProfile.instagram,
 							},
+							state: stateValue,
 							seeking: formattedFlatShareProfile.seeking,
 							employment_status: formattedFlatShareProfile.employment_status,
 							religion: formattedFlatShareProfile.religion,
@@ -187,6 +202,9 @@ export default async function page(props: any) {
 	}
 
 	const otherInfos = await getUserProfile()
+	const user = await getUserData()
+
+	const userId = user.user?.id
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -197,11 +215,14 @@ export default async function page(props: any) {
 					</Flex>
 					<Flex flexDirection={'column'} w="full">
 						<Box my={3}>
-							<MainBackHeader />
+							<Flex>
+								<MainBackHeader />
+								<ShareButton userId={userId} />
+							</Flex>
 						</Box>
 
 						{user ? (
-							<UserProfilePage  data={user} userId={otherInfos} />
+							<UserProfilePage data={user} userId={otherInfos} />
 						) : (
 							<PageNotFound />
 						)}

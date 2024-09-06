@@ -17,6 +17,8 @@ interface Props {
 export default async function UserProfilePage({ data, userId }: Props) {
 	const userProfile = JSON.parse(userId)
 
+	// console.log(userProfile.flatShareProfile?.state.name)
+
 	return (
 		<Flex flexDir={'column'}>
 			<MainSection>

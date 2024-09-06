@@ -110,7 +110,7 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				>
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>
-						{`${userProfile.flatShareProfile?.area} Nigeria`}
+						{`${userProfile.flatShareProfile?.state.name}, Nigeria`}
 					</Text>
 				</Flex>
 

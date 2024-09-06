@@ -90,7 +90,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 					<EachPersonalInfo
 						Icon={BiMapPin}
 						heading="Preferred Location"
-						subHeading={userProfile.flatShareProfile.area}
+						subHeading={`${userProfile.flatShareProfile?.area}, ${userProfile.flatShareProfile?.state.name}`}
 					/>
 					<EachPersonalInfo
 						Icon={BiMoney}
