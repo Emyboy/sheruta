@@ -17,6 +17,7 @@ import {
 } from 'react-icons/bi'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { UserInfo } from '@/firebase/service/user-info/user-info.types'
+import { handleCall } from '@/utils/index.utils'
 
 type Props = {
 	data: any
@@ -30,9 +31,9 @@ export default function ProfileHero({ data, userProfile }: Props) {
 
 	const _userInfo: UserInfo = userProfile.userInfo
 
-	const handleCall = () => {
-		window.location.href = `tel:${_userInfo.primary_phone_number}`
-	}
+	// const handleCall = () => {
+	// 	window.location.href = `tel:${_userInfo.primary_phone_number}`
+	// }
 
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>
@@ -107,7 +108,9 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				</Flex>
 
 				<Flex gap={DEFAULT_PADDING}>
-					<Button onClick={handleCall}>Call Me</Button>
+					<Button onClick={() => handleCall(_userInfo.primary_phone_number)}>
+						Call Me
+					</Button>
 					<Link href={`/messages/${_user._id}`}>
 						<Button>
 							<BiMessageRoundedDetail size={25} />

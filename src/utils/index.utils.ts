@@ -1,3 +1,5 @@
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import NotificationsService from '@/firebase/service/notifications/notifications.firebase'
 import { formatDuration, intervalToDuration } from 'date-fns'
 
 export const hasEmptyValue = (obj: any): boolean => {
@@ -83,4 +85,8 @@ export function convertSeconds(seconds: number) {
 	}
 
 	return formattedDuration
+}
+
+export const handleCall = (number: string | null) => {
+	window.location.href = `tel:${number}`
 }

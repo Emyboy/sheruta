@@ -83,5 +83,5 @@ export const flatShareProfileDefaults = {
 	done_kyc: false,
 	gender_preference: null,
 	age_preference: null,
-	bio: null,
+	bio: '',
 }

@@ -35,6 +35,7 @@ import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
 import { useAuthContext } from '@/context/auth.context'
 import { useRouter } from 'next/navigation'
+import { handleCall } from '@/utils/index.utils'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -90,7 +91,7 @@ export default function EachRequest({ request }: Props) {
 										{request.flat_share_profile.last_name}{' '}
 										{request.flat_share_profile.first_name}
 									</Text>
-									{request.flat_share_profile.done_kyc && (
+									{request.flat_share_profile.is_verified && (
 										<LuBadgeCheck fill="#00bc73" />
 									)}
 								</Flex>
@@ -341,36 +342,41 @@ export default function EachRequest({ request }: Props) {
 									sm: 'lg',
 									base: 'base',
 								}}
+								onClick={() =>
+									handleCall(request.flat_share_profile.primary_phone_number)
+								}
 							>
 								<BiPhone /> 35
 							</Button>
 						</MainTooltip>
 						<MainTooltip label="Ask questions" placement="top">
-							<Button
-								px={0}
-								bg="none"
-								color="text_muted"
-								display={'flex'}
-								gap={1}
-								fontWeight={'light'}
-								_hover={{
-									color: 'brand',
-									bg: 'none',
-									_dark: {
+							<Link href={`/messsages/${request.flat_share_profile._id}`}>
+								<Button
+									px={0}
+									bg="none"
+									color="text_muted"
+									display={'flex'}
+									gap={1}
+									fontWeight={'light'}
+									_hover={{
 										color: 'brand',
-									},
-								}}
-								_dark={{
-									color: 'dark_lighter',
-								}}
-								fontSize={{
-									md: 'xl',
-									sm: 'lg',
-									base: 'base',
-								}}
-							>
-								<BiMessageRoundedDetail /> 35
-							</Button>
+										bg: 'none',
+										_dark: {
+											color: 'brand',
+										},
+									}}
+									_dark={{
+										color: 'dark_lighter',
+									}}
+									fontSize={{
+										md: 'xl',
+										sm: 'lg',
+										base: 'base',
+									}}
+								>
+									<BiMessageRoundedDetail /> 35
+								</Button>
+							</Link>
 						</MainTooltip>
 						<MainTooltip label="Engagements" placement="top">
 							<Button

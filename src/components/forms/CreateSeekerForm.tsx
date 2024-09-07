@@ -109,7 +109,7 @@ const CreateSeekerForm: React.FC = () => {
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const {
-		authState: { flat_share_profile, user },
+		authState: { flat_share_profile, user, user_info },
 	} = useAuthContext()
 
 	const [userInfo, setUserInfo] = useState<userInfo>({
@@ -122,9 +122,10 @@ const CreateSeekerForm: React.FC = () => {
 	} = useOptionsContext()
 
 	useEffect(() => {
-		if (flat_share_profile && user) {
+		if (flat_share_profile && user && user_info) {
 			const { done_kyc } = flat_share_profile
 			const { _id, first_name, last_name, avatar_url } = user
+			const {is_verified, primary_phone_number} = user_info
 
 			setUserInfo({
 				state: flat_share_profile?.state,
@@ -134,6 +135,8 @@ const CreateSeekerForm: React.FC = () => {
 			setFormData((prev: SeekerRequestData) => ({
 				...prev,
 				flat_share_profile: {
+					is_verified,
+					primary_phone_number,
 					done_kyc,
 					_id,
 					first_name,

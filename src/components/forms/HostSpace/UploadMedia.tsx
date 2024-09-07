@@ -33,7 +33,7 @@ export default function UploadMedia({
 }: HostSpaceFormProps) {
 	const toast = useToast()
 	const {
-		authState: { flat_share_profile, user },
+		authState: { user, user_info },
 	} = useAuthContext()
 	const router = useRouter()
 
@@ -115,7 +115,7 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (!flat_share_profile || !user)
+		if (!user || !user_info)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -163,8 +163,8 @@ export default function UploadMedia({
 			const { category, service, state, area, property, ...cleanedFormData } =
 				formData
 
-			const { done_kyc } = flat_share_profile
 			const { _id, first_name, last_name, avatar_url } = user
+			const { primary_phone_number, is_verified } = user_info
 
 			let data: HostRequestData = {
 				...cleanedFormData,
@@ -177,7 +177,8 @@ export default function UploadMedia({
 				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
 				flat_share_profile: {
-					done_kyc,
+					is_verified,
+					primary_phone_number,
 					_id,
 					first_name,
 					last_name,
