@@ -211,7 +211,7 @@ const DiscussionComponent = ({
 	}
 
 	return (
-		<Box width="100%" p={4} overflowY={'scroll'}>
+		<Box width="100%" overflowY={'scroll'}>
 			<Box overflowY={'scroll'} minH={'50dvh'}>
 				<VStack align="start" spacing={2} w="100%">
 					{!discussions?.length ? (
@@ -246,8 +246,8 @@ const DiscussionComponent = ({
 			<Box>
 				<Box
 					ref={replyBoxRef}
-					p={4}
-					bg="white"
+					// p={4}
+					// bg="white"
 					borderRadius="md"
 					boxShadow="md"
 					w="100%"
@@ -256,8 +256,8 @@ const DiscussionComponent = ({
 					<InputGroup>
 						<Input
 							placeholder="Type message here"
-							bg="#f9f9f9"
-							border="none"
+							// bg="#f9f9f9"
+							border="1px solid #ddd"
 							borderRadius="md"
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 								const inputValue = e.target.value
@@ -335,6 +335,8 @@ const CommentComponent = ({
 	const userName =
 		comment?._sender_ref?.first_name + ' ' + comment?._sender_ref?.last_name
 
+	const borderColor = useColorModeValue('#1117171A', '#006c42')
+
 	return (
 		<>
 			{/* First Comment -> NEST LEVEL 1 */}
@@ -354,7 +356,7 @@ const CommentComponent = ({
 							py={2}
 							borderRadius={'lg'}
 							border="1px"
-							borderColor="#1117171A"
+							borderColor={borderColor}
 						>
 							<VStack align="start" spacing={0}>
 								<Flex
@@ -420,11 +422,11 @@ const CommentComponent = ({
 								.sort((a: any, b: any) => {
 									const timestampA = new Date(
 										a.timestamp.seconds * 1000 +
-											a.timestamp.nanoseconds / 1000000,
+										a.timestamp.nanoseconds / 1000000,
 									)
 									const timestampB = new Date(
 										b.timestamp.seconds * 1000 +
-											b.timestamp.nanoseconds / 1000000,
+										b.timestamp.nanoseconds / 1000000,
 									)
 									return timestampA.getTime() - timestampB.getTime() // Ascending order
 								})
@@ -480,6 +482,8 @@ const ReplyComponent = ({
 	setIsReplying: (arg: boolean) => void
 	setCommentId: (arg: string) => void
 }) => {
+	const bgColor = useColorModeValue('#11171708', '#004b2e2b')
+
 	const userName =
 		reply?._sender_ref?.first_name + ' ' + reply?._sender_ref?.last_name
 
@@ -509,7 +513,7 @@ const ReplyComponent = ({
 							py={2}
 							width={'100%'}
 							borderRadius={'lg'}
-							bgColor={'#11171708'}
+							bgColor={bgColor}
 						>
 							<VStack align="start" spacing={0}>
 								<Flex
@@ -526,26 +530,29 @@ const ReplyComponent = ({
 							</VStack>
 						</Box>
 					</Flex>
-					<Box>
-						<Flex
-							py={2}
-							gap={2}
-							width={'100px'}
-							ml={'60px'}
-							cursor={'pointer'}
-							visibility={reply?.nest_level > 2 ? 'hidden' : 'visible'}
-							onClick={() => {
-								setUserHandle(`@${userName}`)
-								setIsReplying(true)
-								setCommentId(reply.id)
-								scrollToCommentInputBox()
-								setNestLevel(3)
-								setReceiverRef(reply._sender_ref)
-							}}
-						>
-							<Icon alignSelf={'center'} as={BiRepost} /> <Text>Reply</Text>
-						</Flex>
-					</Box>
+					{
+						(reply?.nest_level <= 2) ? <Box>
+							<Flex
+								py={2}
+								gap={2}
+								width={'100px'}
+								ml={'60px'}
+								cursor={'pointer'}
+								// visibility={reply?.nest_level > 2 ? 'hidden' : 'visible'}
+								onClick={() => {
+									setUserHandle(`@${userName}`)
+									setIsReplying(true)
+									setCommentId(reply.id)
+									scrollToCommentInputBox()
+									setNestLevel(3)
+									setReceiverRef(reply._sender_ref)
+								}}
+							>
+								<Icon alignSelf={'center'} as={BiRepost} /> <Text>Reply</Text>
+							</Flex>
+						</Box> : <Box my={2}> </Box>
+					}
+
 				</Flex>
 			</Box>
 		</>

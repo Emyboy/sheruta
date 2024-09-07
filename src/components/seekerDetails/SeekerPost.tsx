@@ -342,7 +342,7 @@ const SeekerPost = ({
 							borderBottom={`.5px solid ${colorMode === 'light' ? '#1117171A' : '#515151'}`}
 						></HStack>
 					</Box>
-					<Box marginTop={10}>
+					<Box marginTop={10} paddingBottom="70px">
 						<UserCard
 							name={
 								capitalizeString(userDoc?.first_name) + ' ' + userDoc?.last_name
