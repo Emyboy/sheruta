@@ -38,6 +38,7 @@ import { inspectionCategoryType } from './MyInspections'
 import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
+import Link from 'next/link'
 
 type InspectionProps = returnedInspectionData & {
 	currentUserId: string
@@ -157,11 +158,15 @@ export default function InspectionCard({
 				>
 					<Text fontSize={{ base: 'sm', sm: 'base', md: 'lg' }} flex={1}>
 						New Apartment Inspection with{' '}
-						<Text as={'span'} color={'brand'} textTransform={'capitalize'}>
-							{currentUserId === host_details.id
-								? `${seeker_details.last_name} ${seeker_details.first_name}`
-								: `${host_details.last_name} ${host_details.first_name}`}
-						</Text>
+						<Link
+							href={`/user/${currentUserId === host_details.id ? seeker_details.id : host_details.id}`}
+						>
+							<Text as={'span'} color={'brand'} textTransform={'capitalize'}>
+								{currentUserId === host_details.id
+									? `${seeker_details.last_name} ${seeker_details.first_name}`
+									: `${host_details.last_name} ${host_details.first_name}`}
+							</Text>
+						</Link>
 					</Text>
 					<Flex
 						display={'flex'}
@@ -320,7 +325,10 @@ export default function InspectionCard({
 							Send Message
 						</Button>
 						<Button
-							isDisabled={inspectionCategory !== 'upcoming'}
+							isDisabled={
+								inspectionCategory !== 'upcoming' ||
+								inspection_type === 'physical'
+							}
 							rounded={'8px'}
 							display={'flex'}
 							alignItems={'center'}

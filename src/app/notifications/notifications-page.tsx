@@ -85,6 +85,7 @@ export default function NotificationsPage({}: Props) {
 						}}
 						_dark={{
 							backgroundColor: notification.is_read ? '' : 'brand_darker',
+							borderColor: 'dark_light',
 						}}
 					>
 						<Text

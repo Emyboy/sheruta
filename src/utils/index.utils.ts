@@ -84,3 +84,7 @@ export function convertSeconds(seconds: number) {
 
 	return formattedDuration
 }
+
+export const handleCall = (number: string | null) => {
+	window.location.href = `tel:${number}`
+}

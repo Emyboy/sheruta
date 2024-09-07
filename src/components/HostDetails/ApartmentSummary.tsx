@@ -17,12 +17,16 @@ import {
 	InspectionData,
 	InspectionDataSchema,
 } from '@/firebase/service/inspections/inspections.types'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
 import {
 	HostRequestDataDetails,
 	userSchema,
 } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
+import { generateRoomUrl } from '@/utils/actions'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -68,11 +72,7 @@ import MainTooltip from '../atoms/MainTooltip'
 import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
-import { generateRoomUrl } from '@/utils/actions'
-import NotificationsService, {
-	NotificationsBodyMessage,
-} from '@/firebase/service/notifications/notifications.firebase'
-import { auth } from '@/firebase'
+import { handleCall } from '@/utils/index.utils'
 
 export default function ApartmentSummary({
 	request,
@@ -194,7 +194,7 @@ export default function ApartmentSummary({
 									{request.flat_share_profile.last_name}{' '}
 									{request.flat_share_profile.first_name}
 								</Text>
-								{request.flat_share_profile.done_kyc && (
+								{request.flat_share_profile.is_verified && (
 									<LuBadgeCheck fill="#00bc73" />
 								)}
 							</Flex>
@@ -221,35 +221,40 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
+									onClick={() =>
+										handleCall(request.flat_share_profile.primary_phone_number)
+									}
 								>
 									<BiPhone />
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
-								<Button
-									px={0}
-									bg="none"
-									color="text_muted"
-									display={'flex'}
-									fontWeight={'light'}
-									_hover={{
-										color: 'brand',
-										bg: 'none',
-										_dark: {
+								<Link href={`/messages/${request.flat_share_profile._id}`}>
+									<Button
+										px={0}
+										bg="none"
+										color="text_muted"
+										display={'flex'}
+										fontWeight={'light'}
+										_hover={{
 											color: 'brand',
-										},
-									}}
-									_dark={{
-										color: 'dark_lighter',
-									}}
-									fontSize={{
-										md: 'xl',
-										base: 'lg',
-									}}
-									ml={'-8px'}
-								>
-									<MdOutlineMailOutline />
-								</Button>
+											bg: 'none',
+											_dark: {
+												color: 'brand',
+											},
+										}}
+										_dark={{
+											color: 'dark_lighter',
+										}}
+										fontSize={{
+											md: 'xl',
+											base: 'lg',
+										}}
+										ml={'-8px'}
+									>
+										<MdOutlineMailOutline />
+									</Button>
+								</Link>
 							</MainTooltip>
 						</Flex>
 					</Flex>
@@ -583,7 +588,7 @@ export default function ApartmentSummary({
 							>
 								₦
 								{(
-									request.service_charge || 0 + request.budget
+									(request.service_charge || 0) + request.budget
 								).toLocaleString()}
 							</Text>
 						</Flex>
@@ -604,7 +609,7 @@ export default function ApartmentSummary({
 						Book Inspection
 					</Button>
 				</Flex>
-				{request.amenities && request.amenities.length && (
+				{request.amenities && !!request.amenities.length && (
 					<Flex
 						my={{ base: '24px', sm: '32px' }}
 						flexDir={'column'}
@@ -683,7 +688,7 @@ export default function ApartmentSummary({
 						))}
 					</SimpleGrid>
 				</Flex>
-				{request.house_rules && request.house_rules.length && (
+				{request.house_rules && !!request.house_rules.length && (
 					<Flex
 						my={{ base: '24px', sm: '32px' }}
 						flexDir={'column'}
@@ -1018,13 +1023,19 @@ const BookInspectionModal = ({
 				})
 			}
 
-			const urls = await generateRoomUrl(
-				new Date(
-					inspection_date.toDate().getTime() + 6 * 60 * 60 * 1000,
-				).toISOString(),
-			)
+			let roomUrl = undefined
+			let hostRoomUrl = undefined
 
-			const { roomUrl, hostRoomUrl } = urls
+			if (inspectionData.inspection_type === 'virtual') {
+				const urls = await generateRoomUrl(
+					new Date(
+						inspection_date.toDate().getTime() + 6 * 60 * 60 * 1000,
+					).toISOString(),
+				)
+
+				roomUrl = urls.roomUrl
+				hostRoomUrl = urls.hostRoomUrl
+			}
 
 			const uuid = crypto.randomUUID()
 
