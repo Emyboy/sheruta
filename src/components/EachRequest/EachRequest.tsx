@@ -346,31 +346,33 @@ export default function EachRequest({ request }: Props) {
 							</Button>
 						</MainTooltip>
 						<MainTooltip label="Ask questions" placement="top">
-							<Button
-								px={0}
-								bg="none"
-								color="text_muted"
-								display={'flex'}
-								gap={1}
-								fontWeight={'light'}
-								_hover={{
-									color: 'brand',
-									bg: 'none',
-									_dark: {
+							<Link href={`/messsages/${request.flat_share_profile._id}`}>
+								<Button
+									px={0}
+									bg="none"
+									color="text_muted"
+									display={'flex'}
+									gap={1}
+									fontWeight={'light'}
+									_hover={{
 										color: 'brand',
-									},
-								}}
-								_dark={{
-									color: 'dark_lighter',
-								}}
-								fontSize={{
-									md: 'xl',
-									sm: 'lg',
-									base: 'base',
-								}}
-							>
-								<BiMessageRoundedDetail /> 35
-							</Button>
+										bg: 'none',
+										_dark: {
+											color: 'brand',
+										},
+									}}
+									_dark={{
+										color: 'dark_lighter',
+									}}
+									fontSize={{
+										md: 'xl',
+										sm: 'lg',
+										base: 'base',
+									}}
+								>
+									<BiMessageRoundedDetail /> 35
+								</Button>
+							</Link>
 						</MainTooltip>
 						<MainTooltip label="Engagements" placement="top">
 							<Button

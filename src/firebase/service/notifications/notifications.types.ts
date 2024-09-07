@@ -6,6 +6,7 @@ export const NotificationsDTO = z.object({
 		'message',
 		'inspection',
 		'missed_call',
+		'call',
 		'comment',
 		'rescheduled',
 		'profile_view',
