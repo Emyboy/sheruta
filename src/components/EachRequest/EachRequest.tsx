@@ -1,6 +1,8 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
+import { handleCall } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -19,6 +21,7 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
 	BiBarChart,
@@ -33,10 +36,10 @@ import {
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
-import useCommon from '@/hooks/useCommon'
-import { useAuthContext } from '@/context/auth.context'
-import { useRouter } from 'next/navigation'
-import { handleCall } from '@/utils/index.utils'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -45,6 +48,26 @@ export default function EachRequest({ request }: Props) {
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+
+	const createNotification = async (id: string) => {
+		await NotificationsService.create({
+			collection_name: DBCollectionName.notifications,
+			data: {
+				is_read: false,
+				message: NotificationsBodyMessage.profile_view,
+				recipient_id: id,
+				type: 'profile_view',
+				sender_details: authState.user
+					? {
+							avatar_url: authState.user.avatar_url,
+							first_name: authState.user.first_name,
+							last_name: authState.user.last_name,
+							id: authState.user._id,
+						}
+					: null,
+			},
+		})
+	}
 
 	return (
 		<Box
@@ -68,6 +91,7 @@ export default function EachRequest({ request }: Props) {
 					<Link
 						href={`/user/${request.flat_share_profile._id}`}
 						style={{ textDecoration: 'none' }}
+						onClick={() => createNotification(request.flat_share_profile._id)}
 					>
 						<Avatar
 							src={request.flat_share_profile.avatar_url}
@@ -84,6 +108,9 @@ export default function EachRequest({ request }: Props) {
 							<Link
 								href={`/user/${request.flat_share_profile._id}`}
 								style={{ textDecoration: 'none' }}
+								onClick={() =>
+									createNotification(request.flat_share_profile._id)
+								}
 							>
 								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 									<Text

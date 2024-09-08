@@ -114,17 +114,28 @@ export default function NotificationsPage({}: Props) {
 						>
 							<Text fontWeight={400} fontSize={{ base: 'base', md: 'lg' }}>
 								{notification.message}{' '}
-								<Link href={`/user/${notification.sender_details.id}`}>
+								{notification.sender_details ? (
+									<Link href={`/user/${notification.sender_details.id}`}>
+										<Text
+											textTransform={'capitalize'}
+											fontWeight={'500'}
+											color={'brand'}
+											as={'span'}
+										>
+											{notification.sender_details.last_name}{' '}
+											{notification.sender_details.first_name}
+										</Text>
+									</Link>
+								) : (
 									<Text
 										textTransform={'capitalize'}
 										fontWeight={'500'}
 										color={'brand'}
 										as={'span'}
 									>
-										{notification.sender_details.last_name}{' '}
-										{notification.sender_details.first_name}
+										Unknown
 									</Text>
-								</Link>
+								)}
 							</Text>
 							<Button
 								fontSize={{ base: 'sm', md: 'base' }}
@@ -149,7 +160,7 @@ export default function NotificationsPage({}: Props) {
 									push(
 										routes({
 											type: notification.type,
-											userid: notification.sender_details.id,
+											userid: notification?.sender_details?.id,
 										}),
 									)
 								}}
