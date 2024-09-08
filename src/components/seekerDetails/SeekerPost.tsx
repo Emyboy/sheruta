@@ -37,12 +37,27 @@ import {
 	BiTrash,
 } from 'react-icons/bi'
 import UserCard from './UserCard'
-
-interface Props {
-	[key: string]: any
+import { Timestamp } from 'firebase/firestore'
+interface PostData {
+	id: string
+	updatedAt: Timestamp
+	description: string
+	google_location_text: string
+	flat_share_profile?: any
+	_service_ref?: any
+	_location_keyword_ref?: any
+	budget: number
+	payment_type: string
+	userInfoDoc?: any
 }
 
-const SeekerPost = ({ postData, requestId }: Props) => {
+const SeekerPost = ({
+	postData,
+	requestId,
+}: {
+	postData: PostData
+	requestId: string | undefined
+}) => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
@@ -240,7 +255,7 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 								<Text fontSize={'25px'}>
 									<BiMap />
 								</Text>{' '}
-								<Text fontSize={'15px'}> {locationKeywordDoc?.name} </Text>
+								<Text fontSize={'15px'}> {google_location_text} </Text>
 							</Flex>
 
 							<Text>
@@ -327,7 +342,7 @@ const SeekerPost = ({ postData, requestId }: Props) => {
 							borderBottom={`.5px solid ${colorMode === 'light' ? '#1117171A' : '#515151'}`}
 						></HStack>
 					</Box>
-					<Box marginTop={10}>
+					<Box marginTop={10} paddingBottom="70px">
 						<UserCard
 							name={
 								capitalizeString(userDoc?.first_name) + ' ' + userDoc?.last_name

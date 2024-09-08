@@ -1,15 +1,4 @@
 import { libraries } from '@/constants'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
-import SherutaDB from '@/firebase/service/index.firebase'
-import {
-	createSeekerRequestDTO,
-	LocationObject,
-	PaymentPlan,
-	SeekerRequestData,
-	userSchema,
-} from '@/firebase/service/request/request.types'
-import useCommon from '@/hooks/useCommon'
 import {
 	Button,
 	Flex,
@@ -22,11 +11,21 @@ import {
 	useColorMode,
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
-import { v4 as generateUId } from 'uuid'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
 
-import { z, ZodError } from 'zod'
+import SherutaDB from '@/firebase/service/index.firebase'
+import useCommon from '@/hooks/useCommon'
+import {
+	createSeekerRequestDTO,
+	PaymentPlan,
+	SeekerRequestData,
+	userSchema,
+	LocationObject,
+} from '@/firebase/service/request/request.types'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
 
+import { z, ZodError } from 'zod'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -111,22 +110,23 @@ const CreateSeekerForm: React.FC = () => {
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const {
-		authState: { flat_share_profile, user },
+		authState: { flat_share_profile, user, user_info },
 	} = useAuthContext()
 
 	const [userInfo, setUserInfo] = useState<userInfo>({
 		state: undefined,
 		location: undefined,
 	})
-
+ 
 	const {
 		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
 
 	useEffect(() => {
-		if (flat_share_profile && user) {
+		if (flat_share_profile && user && user_info) {
 			const { done_kyc } = flat_share_profile
 			const { _id, first_name, last_name, avatar_url } = user
+			const {is_verified, primary_phone_number} = user_info
 
 			setUserInfo({
 				state: flat_share_profile?.state,
@@ -136,6 +136,8 @@ const CreateSeekerForm: React.FC = () => {
 			setFormData((prev: SeekerRequestData) => ({
 				...prev,
 				flat_share_profile: {
+					is_verified,
+					primary_phone_number,
 					done_kyc,
 					_id,
 					first_name,

@@ -60,7 +60,8 @@ export type PaymentPlan =
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
 export type userSchema = {
-	done_kyc: boolean
+	is_verified: boolean
+	primary_phone_number: string | null
 	_id: string
 	first_name: string
 	last_name: string
@@ -74,7 +75,6 @@ const timestampSchema = z.object({
 
 export const createHostRequestDTO = z.object({
 	uuid: z.string(),
-
 	description: z.string(),
 	budget: z.number(),
 	service_charge: z.number().nullable(),
@@ -202,6 +202,7 @@ export type HostRequestDataDetails = Omit<
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
 	_state_ref: { title: string; slug: string }
+	_user_info?: { primary_phone_number: string } // Add the _user_info field
 }
 
 export type SeekerRequestDataDetails = Omit<

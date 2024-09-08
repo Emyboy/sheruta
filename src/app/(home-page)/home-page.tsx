@@ -27,6 +27,8 @@ import {
 
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 
 type Props = {
 	locations: string
@@ -44,6 +46,20 @@ export default function HomePage({ locations, states, requests }: Props) {
 
 	const lastRequestRef = useRef<HTMLDivElement | null>(null)
 	const observer = useRef<IntersectionObserver | null>(null)
+
+	useEffect(() => {
+		if (flatShareRequests.length > 0) {
+			flatShareRequests.forEach(async (request: HostRequestDataDetails) => {
+				const userInfo = await UserInfoService.get(
+					request.flat_share_profile._id,
+				)
+				if (userInfo) {
+					// @ts-ignore
+					request._user_info = userInfo
+				}
+			})
+		}
+	}, [flatShareRequests])
 
 	const loadMore = async () => {
 		setIsLoading(true)
@@ -108,13 +124,6 @@ export default function HomePage({ locations, states, requests }: Props) {
 		lastRequestRef.current = node
 		if (node) observer.current?.observe(node)
 	}
-
-	useEffect(() => {
-		const parsedRequests: [] = requests ? JSON.parse(requests) : []
-		if (parsedRequests.length > 0) {
-			setFlatShareRequests([...parsedRequests])
-		}
-	}, [requests])
 
 	return (
 		<>

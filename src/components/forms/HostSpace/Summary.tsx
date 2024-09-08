@@ -17,7 +17,7 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
 
@@ -39,46 +39,48 @@ export default function Summary({
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = useCallback(
-		(autocompleteInstance: google.maps.places.Autocomplete) =>
-			setAutocomplete(autocompleteInstance),
-		[],
-	)
+	const handleLoad = (
+		autocompleteInstance: google.maps.places.Autocomplete,
+	) => {
+		if (autocompleteInstance) {
+			setAutocomplete(autocompleteInstance)
+		}
+	}
 
-	const handlePlaceChanged = useCallback(() => {
+	const handlePlaceChanged = () => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
 
-			const locationObject: LocationObject = {
-				formatted_address: place.formatted_address,
-				geometry: place.geometry
-					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
-					: undefined,
-			}
+			if (place && place.geometry && place.geometry.location) {
+				const locationObject: LocationObject = {
+					formatted_address: place.formatted_address || '',
+					geometry: {
+						location: {
+							lat: place.geometry.location.lat(),
+							lng: place.geometry.location.lng(),
+						},
+					},
+				}
 
-			const locationText =
-				locationObject.formatted_address || formData.google_location_text
+				const locationText =
+					locationObject.formatted_address || formData.google_location_text
 
-			setFormData((prev) => ({
-				...prev,
-				google_location_object: locationObject,
-				google_location_text: locationText,
-			}))
-			localStorage.setItem(
-				'host_space_form',
-				JSON.stringify({
-					...formData,
+				setFormData((prev) => ({
+					...prev,
 					google_location_object: locationObject,
 					google_location_text: locationText,
-				}),
-			)
+				}))
+				localStorage.setItem(
+					'host_space_form',
+					JSON.stringify({
+						...formData,
+						google_location_object: locationObject,
+						google_location_text: locationText,
+					}),
+				)
+			}
 		}
-	}, [autocomplete, formData.google_location_text])
+	}
 
 	const addHouseRule = () => setHouseRules((prev) => [...prev, ''])
 
@@ -341,38 +343,6 @@ export default function Summary({
 								</option>
 							</Select>
 						</Flex>
-						{/* <Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={3}
-						>
-							<Text color={'text_muted'} fontSize={'base'}>
-								Select availability status
-							</Text>
-							<Select
-								onChange={handleChange}
-								required
-								value={formData.availability_status || ''}
-								name="availability_status"
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								_placeholder={{ color: 'text_muted' }}
-								_light={{ color: 'dark' }}
-								placeholder="Availability Status"
-								size="md"
-							>
-								<option style={{ color: 'black' }} value="available">
-									Available
-								</option>
-								<option style={{ color: 'black' }} value="unavailable">
-									Unavailable
-								</option>
-								<option style={{ color: 'black' }} value="reserved">
-									Reserved
-								</option>
-							</Select>
-						</Flex> */}
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -562,14 +532,14 @@ export default function Summary({
 							<SimpleGrid columns={[1, 2, 3]} spacingY="8px">
 								{options.amenities.map((amenity) => (
 									<Checkbox
+										key={amenity.id}
 										textTransform={'capitalize'}
 										color={'border_color'}
 										colorScheme="green"
 										_light={{ color: 'dark' }}
 										value={amenity.title}
-										key={amenity.id}
 										textColor={'white'}
-										defaultChecked={formData.amenities.includes(amenity.title)}
+										isChecked={formData.amenities.includes(amenity.title)}
 										onChange={(e) => {
 											const { checked, value } = e.target
 											if (checked) {
@@ -758,37 +728,11 @@ export default function Summary({
 							</FormControl>
 						</LoadScript>
 					)}
-					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={3}
-						>
-							<Text color={'text_muted'} fontSize={'base'}>
-								Apartment Description
-							</Text>
-							<Textarea
-								onChange={handleChange}
-								required
-								minLength={20}
-								value={formData.description}
-								name="description"
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Summary Here"
-								resize={'vertical'}
-								height={160}
-							/>
-						</Flex>
-					</Flex>
 				</VStack>
 				<br />
-				<Button
-					bgColor={'brand'}
-					color={'white'}
-					type={'submit'}
-				>{`Next`}</Button>
+				<Button bgColor={'brand'} color={'white'} type={'submit'}>
+					Next
+				</Button>
 			</Flex>
 		</>
 	)

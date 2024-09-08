@@ -246,6 +246,7 @@ export const DBCollectionName = {
 	messages: 'messages',
 	conversations: 'conversations',
 	inspections: 'inspections',
+	notifications: 'notifications',
 
 	// options
 	propertyTypes: 'property_types',

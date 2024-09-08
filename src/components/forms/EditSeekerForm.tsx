@@ -1,8 +1,6 @@
 'use client'
 
 import { libraries } from '@/constants'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
 import { db } from '@/firebase'
 
 import { LocationObject } from '@/firebase/service/request/request.types'
@@ -20,6 +18,7 @@ import {
 	useColorMode,
 } from '@chakra-ui/react'
 
+  
 import {
 	doc,
 	DocumentData,
@@ -35,6 +34,7 @@ import {
 	PaymentPlan,
 	RequestData,
 	SeekerRequestData,
+	LocationObject,
 } from '@/firebase/service/request/request.types'
 
 import { useRouter } from 'next/navigation'
@@ -58,11 +58,6 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	quarterly: 80000,
 	'bi-annually': 100000,
 	annually: 150000,
-}
-
-interface Props {
-	editFormData: Partial<RequestData> | undefined
-	requestId: string
 }
 
 const initialFormState: SeekerRequestData = {

@@ -3,6 +3,7 @@
 import ApartmentSummary from '@/components/HostDetails/ApartmentSummary'
 import { Flex, Text } from '@chakra-ui/react'
 import { useState } from 'react'
+import DiscussionComponent from '../Discussions/DiscussionComponent'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -11,8 +12,18 @@ const mini_nav_items = [
 	'Pay Details',
 ]
 
-export default function ApartmentDetails({ request }: { request: string }) {
+export default function ApartmentDetails({
+	request,
+	discussions,
+}: {
+	request: string
+	discussions: string | undefined
+}) {
 	const [activeTab, setActiveTab] = useState('Apartment Summary')
+
+	const parsedRequest = JSON.parse(request)
+
+	const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
 
 	return (
 		<>
@@ -73,9 +84,14 @@ export default function ApartmentDetails({ request }: { request: string }) {
 			</Flex>
 
 			{activeTab === 'Apartment Summary' && (
-				<ApartmentSummary request={JSON.parse(request)} />
+				<ApartmentSummary request={parsedRequest} />
 			)}
-			{activeTab === 'Discussion' && <Text>Discussion coming soon</Text>}
+			{activeTab === 'Discussion' && (
+				<DiscussionComponent
+					requestId={parsedRequest.id}
+					discussions={parsedDiscussions}
+				/>
+			)}
 			{activeTab === 'Verification' && <Text>Verification coming soon</Text>}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>
