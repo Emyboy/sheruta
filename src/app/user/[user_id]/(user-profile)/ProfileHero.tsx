@@ -52,6 +52,14 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				}}
 				rounded={'md'}
 				overflow={'hidden'}
+				mr={{
+					md: '16px',
+					base: '20px',
+				}}
+				mt={{
+					md: '1px',
+					base: '20px',
+				}}
 			>
 				<Image
 					style={{ position: 'absolute' }}
@@ -70,7 +78,7 @@ export default function ProfileHero({ data, userProfile }: Props) {
 					<Text isTruncated fontSize={'x-large'} textTransform={'capitalize'}>
 						{_user?.first_name} {_user?.last_name}
 					</Text>
-					{_userInfo?.isVerified ? (
+					{_userInfo?.is_verified ? (
 						<Flex alignItems={'center'} color={'green.400'} h="full">
 							<BiSolidBadgeCheck size={25} />
 						</Flex>
@@ -85,7 +93,7 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				<Flex alignItems={'center'} gap={1} color="text_muted">
 					<BiStore />
 					<Text as="span" color="text_muted">
-						{userFlatshareProfile?.seeking ? 'Seeker' : 'I have an apartment'}
+						{userFlatshareProfile?.seeking ? 'Seeker' : 'I have a space'}
 					</Text>
 				</Flex>
 				<Flex alignItems={'center'} gap={1} color="text_muted">

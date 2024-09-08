@@ -19,7 +19,7 @@ export interface UserInfoDTO {
 	primary_phone_number: null | string
 	whatsapp_phone_number: null
 	done_kyc: boolean
-	is_verified: boolean
+	// is_verified: boolean
 	phone_number_verified: boolean
 	date_of_birth: string | null
 	nin: string | null
