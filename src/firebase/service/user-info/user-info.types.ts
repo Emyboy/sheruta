@@ -10,6 +10,7 @@ export interface UserInfo {
 	phone_number_verified: boolean
 	date_of_birth: string | null
 	nin: string | null
+	bio: string | null
 }
 
 export interface UserInfoDTO {
@@ -24,4 +25,5 @@ export interface UserInfoDTO {
 	date_of_birth: string | null
 	nin: string | null
 	is_verified: boolean | null
+	bio: string | null
 }

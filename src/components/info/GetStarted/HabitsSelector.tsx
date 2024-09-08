@@ -96,7 +96,7 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 				color={'dark_lighter'}
 				className={'animate__animated animate__fadeInUp'}
 			>
-				{`Help our matching algorithm find the best match`}
+				{`Select habits unique to you alone`}
 			</Text>
 			{fetching && (
 				<>

@@ -8,6 +8,9 @@ import {
 	flatShareProfileDefaults,
 } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
+
+
+
 type Props = {
 	userProfile: any
 }
@@ -19,7 +22,7 @@ export default function ProfileAboutMe({ userProfile }: Props) {
 
 	let userInterests: Interest[] = userProfile.flatShareProfile?.interests
 
-	const userBio: string | null = userProfile.flatshareProfile?.bio || null
+	const userBio: string | null = userProfile.userInfo?.bio || null
 
 	return (
 		<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>

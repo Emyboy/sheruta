@@ -2,7 +2,7 @@
 
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
+import { Box, Button, Flex, Text,} from '@chakra-ui/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -75,7 +75,14 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				justifyContent={'flex-end'}
 			>
 				<Flex maxW={'90%'} alignItems={'center'} gap={1}>
-					<Text isTruncated fontSize={'x-large'} textTransform={'capitalize'}>
+					<Text 
+					
+					isTruncated 
+					fontSize={{
+						md:'large',
+						base:'small'
+					}} 
+					textTransform={'capitalize'}>
 						{_user?.first_name} {_user?.last_name}
 					</Text>
 					{_userInfo?.is_verified ? (

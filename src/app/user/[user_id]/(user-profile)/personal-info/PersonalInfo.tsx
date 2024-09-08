@@ -23,6 +23,7 @@ import {
 	FlatShareProfileData,
 	FlatShareProfileDataDTO,
 } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import CurrencyInput from 'react-currency-input-field'
 import Link from 'next/link'
 
 type Props = {
@@ -44,6 +45,8 @@ export default function PersonalInfo({ userProfile }: Props) {
 		facebook: string
 		linkedin: string
 	}
+
+	
 
 	const socials: Socials = userProfile.flatShareProfile.socials
 	const habits: Habits[] = userProfile.flatShareProfile.habits
@@ -110,16 +113,21 @@ export default function PersonalInfo({ userProfile }: Props) {
 					<EachPersonalInfo
 						Icon={BiSolidGroup}
 						heading="Gender Preference"
-						subHeading="To be fixed"
+						subHeading={_userFlatshareProfile?.gender_preference}
 					/>
 					<EachPersonalInfo
 						Icon={BiSolidIdCard}
 						heading="Employment Status"
 						subHeading={_userFlatshareProfile?.employment_status}
 					/>
+					<EachPersonalInfo
+						Icon={BiSolidGroup}
+						heading="Age Preference"
+						subHeading={_userFlatshareProfile?.age_preference}
+					/>
 				</Flex>
 			</MainSection>
-			<MainSection heading="Unique Habits">
+			<MainSection heading="My unique Habits">
 				<Flex flexWrap={'wrap'}>
 					{habits.map((item, index) => {
 						return (

@@ -18,6 +18,9 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 		user_info?.primary_phone_number || '',
 	)
 	const [budget, setBudget] = useState(flat_share_profile?.budget || 0)
+
+	const  [bio, setBio] = useState(user_info?.bio || "")
+
 	const [isLoading, setIsLoading] = useState(false)
 
 	const update = async (e: any) => {
@@ -31,7 +34,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 			})
 
 			await UserInfoService.update({
-				data: { primary_phone_number },
+				data: { primary_phone_number, bio },
 				document_id: user._id,
 			})
 
@@ -139,6 +142,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								{flat_share_profile?.seeking ? 'Budget' : 'Rent'}
 							</Text>
 							<CurrencyInput
+							  required
 								style={{
 									padding: 8,
 									paddingLeft: 19,
@@ -156,7 +160,25 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								onValueChange={(value) => setBudget(parseInt(value as string))}
 							/>
 						</Flex>
+					
 					</Flex>
+					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
+							<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={2}
+							>
+						    <Text color={'text_muted'} fontSize={'sm'}>
+								Lets know why you're here
+							</Text>
+                           <Textarea 
+						   placeholder='Ex: Searching for a vacant space in Lekki, go through my profile' 
+						   onChange={(e)=> {setBio(e.target.value)}}
+						   value={bio}
+						   />
+							</Flex>
+						</Flex>
 				</VStack>
 				<br />
 				<Button type={'submit'} isLoading={isLoading}>{`Next`}</Button>

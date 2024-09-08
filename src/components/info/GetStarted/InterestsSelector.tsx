@@ -90,14 +90,14 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 				fontSize={'3xl'}
 				className={'animate__animated animate__fadeInUp animate__faster'}
 			>
-				{`Pick what interests you?`}
+				{`What are your Interests ?`}
 			</Text>
 			<Text
 				textAlign={'center'}
 				color={'dark_lighter'}
 				className={'animate__animated animate__fadeInUp'}
 			>
-				{`Help our matching algorithm find the best match`}
+				{`Select traits you want prospects to have`}
 			</Text>
 			{fetching && (
 				<>

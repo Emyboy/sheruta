@@ -167,6 +167,8 @@ export default async function page(props: any) {
 							habits: habitsData,
 							work_industry: formattedFlatShareProfile.work_industry,
 							credits: formattedFlatShareProfile.credits,
+							gender_preference: formattedFlatShareProfile.gender_preference,
+							age_preference: formattedFlatShareProfile.age_preference,
 							socials: {
 								twitter: formattedFlatShareProfile.twitter,
 								tiktok: formattedFlatShareProfile.tiktok,
