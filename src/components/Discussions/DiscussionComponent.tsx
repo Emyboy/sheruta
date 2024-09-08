@@ -422,11 +422,11 @@ const CommentComponent = ({
 								.sort((a: any, b: any) => {
 									const timestampA = new Date(
 										a.timestamp.seconds * 1000 +
-										a.timestamp.nanoseconds / 1000000,
+											a.timestamp.nanoseconds / 1000000,
 									)
 									const timestampB = new Date(
 										b.timestamp.seconds * 1000 +
-										b.timestamp.nanoseconds / 1000000,
+											b.timestamp.nanoseconds / 1000000,
 									)
 									return timestampA.getTime() - timestampB.getTime() // Ascending order
 								})
@@ -530,8 +530,8 @@ const ReplyComponent = ({
 							</VStack>
 						</Box>
 					</Flex>
-					{
-						(reply?.nest_level <= 2) ? <Box>
+					{reply?.nest_level <= 2 ? (
+						<Box>
 							<Flex
 								py={2}
 								gap={2}
@@ -550,9 +550,10 @@ const ReplyComponent = ({
 							>
 								<Icon alignSelf={'center'} as={BiRepost} /> <Text>Reply</Text>
 							</Flex>
-						</Box> : <Box my={2}> </Box>
-					}
-
+						</Box>
+					) : (
+						<Box my={2}> </Box>
+					)}
 				</Flex>
 			</Box>
 		</>

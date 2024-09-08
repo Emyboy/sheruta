@@ -28,6 +28,7 @@ import { useOptionsContext } from '@/context/options.context'
 import { z, ZodError } from 'zod'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
+import { v4 as generateUId } from 'uuid'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
@@ -117,7 +118,7 @@ const CreateSeekerForm: React.FC = () => {
 		state: undefined,
 		location: undefined,
 	})
- 
+
 	const {
 		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
@@ -126,7 +127,7 @@ const CreateSeekerForm: React.FC = () => {
 		if (flat_share_profile && user && user_info) {
 			const { done_kyc } = flat_share_profile
 			const { _id, first_name, last_name, avatar_url } = user
-			const {is_verified, primary_phone_number} = user_info
+			const { is_verified, primary_phone_number } = user_info
 
 			setUserInfo({
 				state: flat_share_profile?.state,

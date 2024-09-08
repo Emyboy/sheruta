@@ -5,7 +5,7 @@ import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
-import PrivacyForm from '@/components/forms/Settings/PrivacyForm'
+import SearchPreferenceForm from '@/components/forms/Settings/SearchPreference'
 
 export default function Page() {
 	return (
@@ -18,7 +18,7 @@ export default function Page() {
 					<Box p={DEFAULT_PADDING}>
 						<Box marginBottom={10}>
 							<Box marginBottom={10}>
-								<PrivacyForm />
+								<SearchPreferenceForm />
 							</Box>
 						</Box>
 					</Box>
