@@ -2,6 +2,9 @@
 
 import { libraries } from '@/constants'
 import { db } from '@/firebase'
+
+import { LocationObject } from '@/firebase/service/request/request.types'
+
 import {
 	Button,
 	Flex,
@@ -14,6 +17,8 @@ import {
 	Textarea,
 	useColorMode,
 } from '@chakra-ui/react'
+
+  
 import {
 	doc,
 	DocumentData,
@@ -31,8 +36,7 @@ import {
 	SeekerRequestData,
 	LocationObject,
 } from '@/firebase/service/request/request.types'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
+
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as generateUId } from 'uuid'
