@@ -40,6 +40,7 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { createNotification } from '@/utils/actions'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -48,26 +49,6 @@ export default function EachRequest({ request }: Props) {
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
-
-	const createNotification = async (id: string) => {
-		await NotificationsService.create({
-			collection_name: DBCollectionName.notifications,
-			data: {
-				is_read: false,
-				message: NotificationsBodyMessage.profile_view,
-				recipient_id: id,
-				type: 'profile_view',
-				sender_details: authState.user
-					? {
-							avatar_url: authState.user.avatar_url,
-							first_name: authState.user.first_name,
-							last_name: authState.user.last_name,
-							id: authState.user._id,
-						}
-					: null,
-			},
-		})
-	}
 
 	return (
 		<Box
@@ -91,7 +72,22 @@ export default function EachRequest({ request }: Props) {
 					<Link
 						href={`/user/${request.flat_share_profile._id}`}
 						style={{ textDecoration: 'none' }}
-						onClick={() => createNotification(request.flat_share_profile._id)}
+						onClick={async () =>
+							await createNotification({
+								is_read: false,
+								message: NotificationsBodyMessage.profile_view,
+								recipient_id: request.flat_share_profile._id,
+								type: 'profile_view',
+								sender_details: authState.user
+									? {
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
+									: null,
+							})
+						}
 					>
 						<Avatar
 							src={request.flat_share_profile.avatar_url}
@@ -108,8 +104,21 @@ export default function EachRequest({ request }: Props) {
 							<Link
 								href={`/user/${request.flat_share_profile._id}`}
 								style={{ textDecoration: 'none' }}
-								onClick={() =>
-									createNotification(request.flat_share_profile._id)
+								onClick={async () =>
+									await createNotification({
+										is_read: false,
+										message: NotificationsBodyMessage.profile_view,
+										recipient_id: request.flat_share_profile._id,
+										type: 'profile_view',
+										sender_details: authState.user
+											? {
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
+											: null,
+									})
 								}
 							>
 								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
@@ -227,8 +236,8 @@ export default function EachRequest({ request }: Props) {
 														_active={{
 															bgColor: 'none',
 														}}
-														onClick={() =>
-															handleDeletePost({
+														onClick={async () =>
+															await handleDeletePost({
 																requestId: request.id,
 																userId: request.flat_share_profile._id,
 															})
