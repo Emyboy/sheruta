@@ -8,9 +8,6 @@ import {
 	flatShareProfileDefaults,
 } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
-
-
-
 type Props = {
 	userProfile: any
 }

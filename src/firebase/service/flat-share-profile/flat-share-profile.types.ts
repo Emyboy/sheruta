@@ -60,7 +60,6 @@ export type UpdateFlatShareProfileDataDTO = {
 	gender_preference: string
 	age_preference: string
 	// socials: object
-	
 }
 
 export const flatShareProfileDefaults = {
@@ -83,6 +82,6 @@ export const flatShareProfileDefaults = {
 	interests: [],
 	done_kyc: false,
 	gender_preference: null,
-	age_preference: null
+	age_preference: null,
 	// bio: null,
 }

@@ -19,7 +19,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 	)
 	const [budget, setBudget] = useState(flat_share_profile?.budget || 0)
 
-	const  [bio, setBio] = useState(user_info?.bio || "")
+	const [bio, setBio] = useState(user_info?.bio || '')
 
 	const [isLoading, setIsLoading] = useState(false)
 
@@ -142,7 +142,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								{flat_share_profile?.seeking ? 'Budget' : 'Rent'}
 							</Text>
 							<CurrencyInput
-							  required
+								required
 								style={{
 									padding: 8,
 									paddingLeft: 19,
@@ -160,25 +160,26 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								onValueChange={(value) => setBudget(parseInt(value as string))}
 							/>
 						</Flex>
-					
 					</Flex>
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-							<Flex
+						<Flex
 							justifyContent={'flex-start'}
 							flexDir={'column'}
 							w="full"
 							gap={2}
-							>
-						    <Text color={'text_muted'} fontSize={'sm'}>
-								Lets know why you're here
+						>
+							<Text color={'text_muted'} fontSize={'sm'}>
+								{`Let us know why you're here`}
 							</Text>
-                           <Textarea 
-						   placeholder='Ex: Searching for a vacant space in Lekki, go through my profile' 
-						   onChange={(e)=> {setBio(e.target.value)}}
-						   value={bio}
-						   />
-							</Flex>
+							<Textarea
+								placeholder="Ex: Searching for a vacant space in Lekki, go through my profile"
+								onChange={(e) => {
+									setBio(e.target.value)
+								}}
+								value={bio}
+							/>
 						</Flex>
+					</Flex>
 				</VStack>
 				<br />
 				<Button type={'submit'} isLoading={isLoading}>{`Next`}</Button>

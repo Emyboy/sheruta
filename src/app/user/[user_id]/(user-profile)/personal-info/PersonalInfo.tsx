@@ -46,8 +46,6 @@ export default function PersonalInfo({ userProfile }: Props) {
 		linkedin: string
 	}
 
-	
-
 	const socials: Socials = userProfile.flatShareProfile.socials
 	const habits: Habits[] = userProfile.flatShareProfile.habits
 

@@ -38,9 +38,13 @@ export default function PersonalInfoForm({ done }: Props) {
 		flat_share_profile?.work_industry || '',
 	)
 	const [religion, setReligion] = useState(flat_share_profile?.religion || '')
-    const [gender_preference, setGenderPreference] = useState(flat_share_profile?.gender_preference || "")
+	const [gender_preference, setGenderPreference] = useState(
+		flat_share_profile?.gender_preference || '',
+	)
 
-	const [age_preference, setAgePreference] = useState(flat_share_profile?.age_preference || "")
+	const [age_preference, setAgePreference] = useState(
+		flat_share_profile?.age_preference || '',
+	)
 
 	const [tiktok, setTiktok] = useState(flat_share_profile?.tiktok || '')
 	const [facebook, setFacebook] = useState(flat_share_profile?.facebook || '')
@@ -67,7 +71,7 @@ export default function PersonalInfoForm({ done }: Props) {
 					twitter,
 					linkedin,
 					gender_preference,
-					age_preference
+					age_preference,
 				},
 			})
 			if (user) {
@@ -216,7 +220,7 @@ export default function PersonalInfoForm({ done }: Props) {
 							</Flex>
 						</Flex>
 						<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
-						<Flex
+							<Flex
 								justifyContent={'flex-start'}
 								flexDir={'column'}
 								w="full"
