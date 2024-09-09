@@ -19,6 +19,7 @@ export const NotificationsBodyMessage: Record<
 > = {
 	rescheduled: 'Your inspection has been rescheduled by',
 	missed_call: 'You have a missed call from',
+	call: 'You have a call from',
 	inspection: 'You have an inspection with',
 	message: 'You have a new message from',
 	comment: 'You have a comment from',

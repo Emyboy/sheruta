@@ -555,9 +555,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 											value={amenity.title}
 											key={amenity.id}
 											textColor={'white'}
-											defaultChecked={formData.amenities.includes(
-												amenity.title,
-											)}
+											isChecked={formData.amenities.includes(amenity.title)}
 											onChange={(e) => {
 												const { checked, value } = e.target
 												if (checked) {

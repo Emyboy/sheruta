@@ -26,7 +26,7 @@ import {
 } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
-import { generateRoomUrl } from '@/utils/actions'
+import { createNotification, generateRoomUrl } from '@/utils/actions'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -185,6 +185,22 @@ export default function ApartmentSummary({
 						<Link
 							href={`/user/${request.flat_share_profile._id}`}
 							style={{ textDecoration: 'none' }}
+							onClick={async () =>
+								await createNotification({
+									is_read: false,
+									message: NotificationsBodyMessage.profile_view,
+									recipient_id: request.flat_share_profile._id,
+									type: 'profile_view',
+									sender_details: authState.user
+										? {
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
+										: null,
+								})
+							}
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 								<Text
@@ -1084,7 +1100,12 @@ const BookInspectionModal = ({
 						type: 'inspection',
 						message: NotificationsBodyMessage.inspection,
 						recipient_id: host_details._id,
-						sender_details: data.seeker_details,
+						sender_details: {
+							id: authState.user._id,
+							first_name: authState.user.first_name,
+							last_name: authState.user.last_name,
+							avatar_url: authState.user.avatar_url,
+						},
 					},
 				}),
 			])

@@ -1,6 +1,8 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
+import { handleCall } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -19,6 +21,7 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
 	BiBarChart,
@@ -33,10 +36,11 @@ import {
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
-import useCommon from '@/hooks/useCommon'
-import { useAuthContext } from '@/context/auth.context'
-import { useRouter } from 'next/navigation'
-import { handleCall } from '@/utils/index.utils'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { createNotification } from '@/utils/actions'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -68,6 +72,22 @@ export default function EachRequest({ request }: Props) {
 					<Link
 						href={`/user/${request.flat_share_profile._id}`}
 						style={{ textDecoration: 'none' }}
+						onClick={async () =>
+							await createNotification({
+								is_read: false,
+								message: NotificationsBodyMessage.profile_view,
+								recipient_id: request.flat_share_profile._id,
+								type: 'profile_view',
+								sender_details: authState.user
+									? {
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
+									: null,
+							})
+						}
 					>
 						<Avatar
 							src={request.flat_share_profile.avatar_url}
@@ -84,6 +104,22 @@ export default function EachRequest({ request }: Props) {
 							<Link
 								href={`/user/${request.flat_share_profile._id}`}
 								style={{ textDecoration: 'none' }}
+								onClick={async () =>
+									await createNotification({
+										is_read: false,
+										message: NotificationsBodyMessage.profile_view,
+										recipient_id: request.flat_share_profile._id,
+										type: 'profile_view',
+										sender_details: authState.user
+											? {
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
+											: null,
+									})
+								}
 							>
 								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 									<Text
@@ -200,8 +236,8 @@ export default function EachRequest({ request }: Props) {
 														_active={{
 															bgColor: 'none',
 														}}
-														onClick={() =>
-															handleDeletePost({
+														onClick={async () =>
+															await handleDeletePost({
 																requestId: request.id,
 																userId: request.flat_share_profile._id,
 															})
@@ -346,31 +382,33 @@ export default function EachRequest({ request }: Props) {
 							</Button>
 						</MainTooltip>
 						<MainTooltip label="Ask questions" placement="top">
-							<Button
-								px={0}
-								bg="none"
-								color="text_muted"
-								display={'flex'}
-								gap={1}
-								fontWeight={'light'}
-								_hover={{
-									color: 'brand',
-									bg: 'none',
-									_dark: {
+							<Link href={`/messsages/${request.flat_share_profile._id}`}>
+								<Button
+									px={0}
+									bg="none"
+									color="text_muted"
+									display={'flex'}
+									gap={1}
+									fontWeight={'light'}
+									_hover={{
 										color: 'brand',
-									},
-								}}
-								_dark={{
-									color: 'dark_lighter',
-								}}
-								fontSize={{
-									md: 'xl',
-									sm: 'lg',
-									base: 'base',
-								}}
-							>
-								<BiMessageRoundedDetail /> 35
-							</Button>
+										bg: 'none',
+										_dark: {
+											color: 'brand',
+										},
+									}}
+									_dark={{
+										color: 'dark_lighter',
+									}}
+									fontSize={{
+										md: 'xl',
+										sm: 'lg',
+										base: 'base',
+									}}
+								>
+									<BiMessageRoundedDetail /> 35
+								</Button>
+							</Link>
 						</MainTooltip>
 						<MainTooltip label="Engagements" placement="top">
 							<Button

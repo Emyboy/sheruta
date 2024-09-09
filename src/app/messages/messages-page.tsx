@@ -1,24 +1,24 @@
 'use client'
+
+import LoginCard from '@/components/atoms/LoginCard'
 import MainContainer from '@/components/layout/MainContainer'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex, Text } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
+import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
-import EachConversationLoading from './components/EachConversationLoading'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
+import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
+import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
-import Link from 'next/link'
-import EachConversation from './components/EachConversation'
-import { ConversationData } from '@/firebase/service/conversations/conversations.types'
 import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
+import { ConversationData } from '@/firebase/service/conversations/conversations.types'
+import { Box, Flex, Text } from '@chakra-ui/react'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import {
 	BiSolidMessageSquareDetail,
 	BiSolidMessageSquareEdit,
 } from 'react-icons/bi'
-import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
-import MainHeader from '@/components/layout/MainHeader'
-import LoginCard from '@/components/atoms/LoginCard'
-import MobileNavFooter from '@/components/layout/MobileNavFooter'
+import EachConversation from './components/EachConversation'
+import EachConversationLoading from './components/EachConversationLoading'
 
 type Props = {}
 

@@ -10,18 +10,23 @@ import { useRouter } from 'next/navigation'
 
 type Props = {}
 
-const routes = (type: NotificationsType['type'], userid?: string) => {
+const routes = (data: {
+	type: NotificationsType['type']
+	userid?: string
+	url?: string
+}) => {
 	const options = {
 		rescheduled: 'inspections',
 		cancelled: 'inspections',
 		inspection: 'inspections',
 		comment: '',
-		message: 'messages' + userid,
+		message: 'messages' + data.userid,
+		call: '',
 		missed_call: '',
 		profile_view: '',
 	}
 
-	return options[type]
+	return options[data.type]
 }
 
 export default function NotificationsPage({}: Props) {
@@ -109,17 +114,28 @@ export default function NotificationsPage({}: Props) {
 						>
 							<Text fontWeight={400} fontSize={{ base: 'base', md: 'lg' }}>
 								{notification.message}{' '}
-								<Link href={`/user/${notification.sender_details.id}`}>
+								{notification.sender_details ? (
+									<Link href={`/user/${notification.sender_details.id}`}>
+										<Text
+											textTransform={'capitalize'}
+											fontWeight={'500'}
+											color={'brand'}
+											as={'span'}
+										>
+											{notification.sender_details.last_name}{' '}
+											{notification.sender_details.first_name}
+										</Text>
+									</Link>
+								) : (
 									<Text
 										textTransform={'capitalize'}
 										fontWeight={'500'}
 										color={'brand'}
 										as={'span'}
 									>
-										{notification.sender_details.last_name}{' '}
-										{notification.sender_details.first_name}
+										Unknown
 									</Text>
-								</Link>
+								)}
 							</Text>
 							<Button
 								fontSize={{ base: 'sm', md: 'base' }}
@@ -142,7 +158,10 @@ export default function NotificationsPage({}: Props) {
 									if (!notification.is_read)
 										await updateNotification(notification.id)
 									push(
-										routes(notification.type, notification.sender_details.id),
+										routes({
+											type: notification.type,
+											userid: notification?.sender_details?.id,
+										}),
 									)
 								}}
 							>
