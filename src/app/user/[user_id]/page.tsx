@@ -201,7 +201,7 @@ export default async function page(props: any) {
 						</Box>
 
 						{user ? (
-							<UserProfilePage  data={user} userId={otherInfos} />
+							<UserProfilePage data={user} userId={otherInfos} />
 						) : (
 							<PageNotFound />
 						)}

@@ -17,7 +17,7 @@ import {
 
 type Props = {}
 
-export default function MainLeftNav({ }: Props) {
+export default function MainLeftNav({}: Props) {
 	const {
 		logout,
 		authState: { user_info },
@@ -43,7 +43,7 @@ export default function MainLeftNav({ }: Props) {
 				<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			</Link>
 			<EachNav Icon={BiWallet} label="Wallet" />
-			{(user_info && user_info._user_id) ? (
+			{user_info && user_info._user_id ? (
 				<Link href={'/settings'}>
 					<EachNav Icon={BiWrench} label="Settings" />
 				</Link>

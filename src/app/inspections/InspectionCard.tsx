@@ -39,6 +39,7 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import Link from 'next/link'
+import { useAuthContext } from '@/context/auth.context'
 
 type InspectionProps = returnedInspectionData & {
 	currentUserId: string
@@ -49,7 +50,6 @@ type ModalProps = InspectionData & {
 	showModal: boolean
 	closeModal: () => void
 	id: string
-	currentUserId: string
 }
 
 export default function InspectionCard({
@@ -99,7 +99,6 @@ export default function InspectionCard({
 	return (
 		<>
 			<VideoCallModal
-				currentUserId={currentUserId}
 				showModal={showVideoCallModal}
 				closeModal={() => setShowVideoCallModal(false)}
 				roomUrl={roomUrl}
@@ -114,7 +113,6 @@ export default function InspectionCard({
 				seeker_details={seeker_details}
 			/>
 			<CancelBookingModal
-				currentUserId={currentUserId}
 				showModal={showCancelBookingModal}
 				closeModal={closeCancelBookingModal}
 				hasOccured={hasOccured}
@@ -129,7 +127,6 @@ export default function InspectionCard({
 				roomUrl={roomUrl}
 			/>
 			<ResheduleInspectionModal
-				currentUserId={currentUserId}
 				showModal={showRescheduleInspectionModal}
 				closeModal={closeRescheduleInspectionModal}
 				hasOccured={hasOccured}
@@ -361,17 +358,19 @@ const VideoCallModal = ({
 	id,
 	roomUrl,
 	hostRoomUrl,
-	currentUserId,
 }: ModalProps) => {
 	const [loading, setLoading] = useState(false)
 	const [confirmEndMeeting, setConfirmEndMeeting] = useState(false)
 	const { showToast } = useCommon()
 	const { fetchYourInspections } = useInspectionsContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		if (!currentUserId)
+		if (!user?._id)
 			return showToast({
 				message: 'please login to update your inspection',
 				status: 'error',
@@ -400,7 +399,7 @@ const VideoCallModal = ({
 				document_id: id,
 			})
 
-			await fetchYourInspections(currentUserId)
+			await fetchYourInspections(user._id)
 
 			showToast({
 				message: 'You have succesfully concluded your inspection',
@@ -455,7 +454,10 @@ const VideoCallModal = ({
 		return (
 			<Modal
 				isOpen={confirmEndMeeting}
-				onClose={() => setConfirmEndMeeting(false)}
+				onClose={() => {
+					setConfirmEndMeeting(false)
+					closeModal()
+				}}
 				size={'xl'}
 			>
 				<ModalOverlay />
@@ -477,6 +479,42 @@ const VideoCallModal = ({
 					gap={{ base: '24px', md: '32px' }}
 					as={'form'}
 				>
+					<Box
+						pos={'absolute'}
+						top={4}
+						right={4}
+						cursor={'pointer'}
+						onClick={() => {
+							setConfirmEndMeeting(true)
+							closeModal()
+						}}
+					>
+						<Button
+							px={0}
+							bg="none"
+							color="text_muted"
+							display={'flex'}
+							gap={1}
+							fontWeight={'light'}
+							_hover={{
+								color: 'brand',
+								bg: 'none',
+								_dark: {
+									color: 'brand',
+								},
+							}}
+							_dark={{
+								color: 'dark_lighter',
+							}}
+							fontSize={{
+								md: 'xl',
+								sm: 'lg',
+								base: 'base',
+							}}
+						>
+							<CloseIcon />
+						</Button>
+					</Box>
 					<Flex
 						alignItems={'center'}
 						justifyContent={'center'}
@@ -597,7 +635,7 @@ const VideoCallModal = ({
 				{
 					// @ts-ignore
 					<whereby-embed
-						room={currentUserId === host_details.id ? hostRoomUrl : roomUrl}
+						room={user?._id === host_details.id ? hostRoomUrl : roomUrl}
 						style={{
 							minWidth: '100vw',
 							minHeight: '100vh',
@@ -623,17 +661,19 @@ const CancelBookingModal = ({
 	id,
 	hostRoomUrl,
 	roomUrl,
-	currentUserId,
 }: ModalProps) => {
 	const { showToast } = useCommon()
 	const { fetchYourInspections } = useInspectionsContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const [loading, setLoading] = useState<boolean>(false)
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		if (!currentUserId) {
+		if (!user?._id) {
 			return showToast({
 				message: 'Please login to reschedule an inspection',
 				status: 'error',
@@ -666,7 +706,7 @@ const CancelBookingModal = ({
 
 		try {
 			const promises =
-				currentUserId === host_details.id && inspection_type === 'virtual'
+				user._id === host_details.id && inspection_type === 'virtual'
 					? [
 							InspectionServices.update({
 								collection_name: DBCollectionName.inspections,
@@ -676,7 +716,7 @@ const CancelBookingModal = ({
 							FlatShareProfileService.incrementCredit({
 								collection_name: DBCollectionName.flatShareProfile,
 								newCredit: creditTable.VIRTUAL_INSPECTION,
-								document_id: currentUserId,
+								document_id: user._id,
 							}),
 							NotificationsService.create({
 								collection_name: DBCollectionName.notifications,
@@ -685,13 +725,15 @@ const CancelBookingModal = ({
 									type: 'cancelled',
 									message: NotificationsBodyMessage.cancelled,
 									recipient_id:
-										currentUserId === seeker_details.id
+										user._id === seeker_details.id
 											? host_details.id
 											: seeker_details.id,
-									sender_details:
-										currentUserId === host_details.id
-											? host_details
-											: seeker_details,
+									sender_details: {
+										id: user._id,
+										avatar_url: user.avatar_url,
+										first_name: user.first_name,
+										last_name: user.last_name,
+									},
 								},
 							}),
 						]
@@ -708,20 +750,22 @@ const CancelBookingModal = ({
 									type: 'cancelled',
 									message: NotificationsBodyMessage.cancelled,
 									recipient_id:
-										currentUserId === seeker_details.id
+										user._id === seeker_details.id
 											? host_details.id
 											: seeker_details.id,
-									sender_details:
-										currentUserId === host_details.id
-											? host_details
-											: seeker_details,
+									sender_details: {
+										id: user._id,
+										avatar_url: user.avatar_url,
+										first_name: user.first_name,
+										last_name: user.last_name,
+									},
 								},
 							}),
 						]
 
 			await Promise.all(promises)
 
-			await fetchYourInspections(currentUserId)
+			await fetchYourInspections(user._id)
 
 			localStorage.removeItem(`lastReminder_${id}`)
 
@@ -877,10 +921,12 @@ const ResheduleInspectionModal = ({
 	id,
 	roomUrl,
 	hostRoomUrl,
-	currentUserId,
 }: ModalProps) => {
 	const { showToast } = useCommon()
 	const { fetchYourInspections } = useInspectionsContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const [inspectionData, setInspectionData] = useState({
 		inspection_date: inspection_date.toDate().toISOString().split('T')[0],
@@ -904,7 +950,7 @@ const ResheduleInspectionModal = ({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		if (!currentUserId)
+		if (!user?._id)
 			return showToast({
 				message: 'please login to reschedule an inspection',
 				status: 'error',
@@ -944,16 +990,20 @@ const ResheduleInspectionModal = ({
 						type: 'rescheduled',
 						message: NotificationsBodyMessage.rescheduled,
 						recipient_id:
-							currentUserId === seeker_details.id
+							user._id === seeker_details.id
 								? host_details.id
 								: seeker_details.id,
-						sender_details:
-							currentUserId === host_details.id ? host_details : seeker_details,
+						sender_details: {
+							id: user._id,
+							avatar_url: user.avatar_url,
+							first_name: user.first_name,
+							last_name: user.last_name,
+						},
 					},
 				}),
 			])
 
-			await fetchYourInspections(currentUserId)
+			await fetchYourInspections(user?._id)
 
 			showToast({
 				message: 'You have succesfully rescheduled your inspection',

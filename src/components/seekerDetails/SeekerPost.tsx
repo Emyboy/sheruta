@@ -350,9 +350,7 @@ const SeekerPost = ({
 							handle={userDoc?.first_name}
 							userInfoDoc={userInfoDoc}
 							profilePicture={userDoc?.avatar_url}
-							bio={
-								'A well renowed Software Engineer with 99 years of experience.'
-							}
+							bio={userDoc?.bio || "No Bio Available"}
 						/>
 					</Box>
 				</>

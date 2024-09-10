@@ -13,11 +13,14 @@ export const NotificationsDTO = z.object({
 		'cancelled',
 	]),
 	message: z.string(),
-	sender_details: z.object({
-		id: z.string(),
-		first_name: z.string(),
-		last_name: z.string(),
-	}),
+	sender_details: z
+		.object({
+			id: z.string(),
+			first_name: z.string(),
+			last_name: z.string(),
+			avatar_url: z.string(),
+		})
+		.nullable(),
 	recipient_id: z.string(),
 	is_read: z.boolean().default(false),
 })

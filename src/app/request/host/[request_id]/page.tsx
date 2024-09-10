@@ -97,7 +97,10 @@ export default async function page({
 					maxW={{ base: '100%', lg: '50%' }}
 					flexDir={'column'}
 				>
-					<ApartmentDetails request={JSON.stringify(request)} discussions={JSON.stringify(finalDiscussions)} />
+					<ApartmentDetails
+						request={JSON.stringify(request)}
+						discussions={JSON.stringify(finalDiscussions)}
+					/>
 				</Flex>
 			</Flex>
 		</Flex>

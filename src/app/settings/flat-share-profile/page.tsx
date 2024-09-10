@@ -8,22 +8,22 @@ import MainBackHeader from '@/components/atoms/MainBackHeader'
 import FlatShareProfileForm from '@/components/forms/Settings/FlatShareProfile'
 
 export default function Page() {
-    return (
-        <Flex justifyContent={'center'}>
-            <MainContainer>
-                <ThreeColumnLayout header={<MainBackHeader />}>
-                    <Flex flexDirection={'column'} w="full">
-                        <MainLeftNav />
-                    </Flex>
-                    <Box p={DEFAULT_PADDING}>
-                        <Box marginBottom={10}>
-                            <Box marginBottom={10}>
-                                <FlatShareProfileForm />
-                            </Box>
-                        </Box>
-                    </Box>
-                </ThreeColumnLayout>
-            </MainContainer>
-        </Flex>
-    )
+	return (
+		<Flex justifyContent={'center'}>
+			<MainContainer>
+				<ThreeColumnLayout header={<MainBackHeader />}>
+					<Flex flexDirection={'column'} w="full">
+						<MainLeftNav />
+					</Flex>
+					<Box p={DEFAULT_PADDING}>
+						<Box marginBottom={10}>
+							<Box marginBottom={10}>
+								<FlatShareProfileForm />
+							</Box>
+						</Box>
+					</Box>
+				</ThreeColumnLayout>
+			</MainContainer>
+		</Flex>
+	)
 }
