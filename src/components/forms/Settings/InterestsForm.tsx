@@ -44,7 +44,7 @@ const InterestsForm = () => {
 	useEffect(() => {
 		if (interests && flat_share_profile && flat_share_profile._user_id) {
 			getAllInterests()
-            setInterestsList(interests)
+			setInterestsList(interests)
 			return
 		}
 	}, [flat_share_profile, interests])

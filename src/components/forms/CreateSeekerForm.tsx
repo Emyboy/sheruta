@@ -125,7 +125,7 @@ const CreateSeekerForm: React.FC = () => {
 
 	useEffect(() => {
 		if (flat_share_profile && user && user_info) {
-			const { done_kyc } = flat_share_profile
+			const { done_kyc, bio } = flat_share_profile
 			const { _id, first_name, last_name, avatar_url } = user
 			const { is_verified, primary_phone_number } = user_info
 
@@ -137,6 +137,7 @@ const CreateSeekerForm: React.FC = () => {
 			setFormData((prev: SeekerRequestData) => ({
 				...prev,
 				flat_share_profile: {
+					bio,
 					is_verified,
 					primary_phone_number,
 					done_kyc,
@@ -302,6 +303,8 @@ const CreateSeekerForm: React.FC = () => {
 				...formData,
 				...optionsRef,
 				flat_share_profile: {
+					...formData?.flat_share_profile,
+					bio: flat_share_profile?.bio || null,
 					done_kyc: flat_share_profile?.done_kyc,
 					_id: user._id,
 					avatar_url: user.avatar_url,

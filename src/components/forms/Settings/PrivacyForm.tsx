@@ -8,6 +8,8 @@ import {
 	Switch,
 	VStack,
 	Text,
+	Alert,
+	AlertIcon,
 } from '@chakra-ui/react'
 import { useAuthContext } from '@/context/auth.context'
 import useCommon from '@/hooks/useCommon'
@@ -76,10 +78,12 @@ const PrivacyForm = () => {
 			<Text fontSize={'3xl'} fontWeight={500} mb="5" textAlign={'center'}>
 				Update your privacy settings
 			</Text>
-			{/* <Alert mb={5} status="info" variant="subtle">
-                <AlertIcon />
-                {'Manage your privacy settings here. You can choose to hide your profile and phone number from other users for added privacy.'}
-            </Alert> */}
+			<Alert mb={5} status="info" variant="subtle">
+				<AlertIcon />
+				{
+					'When you hide your profile, your posts will no longer be visible to other users.'
+				}
+			</Alert>
 
 			<form>
 				<VStack spacing={4} align="stretch">
@@ -90,7 +94,14 @@ const PrivacyForm = () => {
 							name="hide_profile"
 							isChecked={formData.hide_profile}
 							onChange={handleChange}
-							colorScheme="teal"
+							sx={{
+								'span.chakra-switch__track': {
+									backgroundColor: formData.hide_profile ? '#38A169' : '#CBD5E0',
+								},
+								'span.chakra-switch__thumb': {
+									backgroundColor: formData.hide_profile ? 'white' : 'white',
+								}
+							}}
 						/>
 					</FormControl>
 
@@ -101,7 +112,14 @@ const PrivacyForm = () => {
 							name="hide_phone"
 							isChecked={formData.hide_phone}
 							onChange={handleChange}
-							colorScheme="teal"
+							sx={{
+								'span.chakra-switch__track': {
+									backgroundColor: formData.hide_phone ? '#38A169' : '#CBD5E0',
+								},
+								'span.chakra-switch__thumb': {
+									backgroundColor: formData.hide_phone ? 'white' : 'white',
+								}
+							}}
 						/>
 					</FormControl>
 				</VStack>

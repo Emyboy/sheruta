@@ -45,11 +45,10 @@ const SettingOption = ({
 
 const Settings = () => {
 	return (
-		<Box maxW="600px" mx="auto">
+		<Box maxW="600px" mx="auto" color="dark_light">
 			<Heading mb={10}>Settings</Heading>
 
 			<Stack spacing={4}>
-                
 				<Text fontSize="lg" fontWeight="bold">
 					Personal Information
 				</Text>
