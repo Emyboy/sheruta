@@ -237,9 +237,22 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
-									onClick={() =>
-										handleCall(request.flat_share_profile.primary_phone_number)
-									}
+									onClick={async () => {
+										if (authState.user?._id === request.flat_share_profile._id)
+											return
+										await handleCall({
+											number: request.flat_share_profile.primary_phone_number,
+											recipient_id: request.flat_share_profile._id,
+											sender_details: authState.user
+												? {
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
+												: null,
+										})
+									}}
 								>
 									<BiPhone />
 								</Button>

@@ -1,26 +1,23 @@
-import React from 'react'
-import UserProfilePage from './(user-profile)/UserProfilePage'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import MainContainer from '@/components/layout/MainContainer'
-import { Flex } from '@chakra-ui/react'
-import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
+import MainContainer from '@/components/layout/MainContainer'
+import MainLeftNav from '@/components/layout/MainLeftNav'
+import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { Flex } from '@chakra-ui/react'
 import {
 	collection,
 	doc,
+	DocumentReference,
+	DocumentSnapshot,
 	getDoc,
 	getDocs,
 	query,
 	where,
-	DocumentReference,
-	DocumentSnapshot,
-	DocumentData,
 } from 'firebase/firestore'
-import { db } from '@/firebase'
-import { promise } from 'zod'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
+import UserProfilePage from './(user-profile)/UserProfilePage'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -194,7 +191,11 @@ export default async function page(props: any) {
 						<MainLeftNav />
 					</Flex>
 					{user ? (
-						<UserProfilePage data={user} userId={otherInfos} />
+						<UserProfilePage
+							data={user}
+							userId={otherInfos}
+							user_id={user_id}
+						/>
 					) : (
 						<PageNotFound />
 					)}

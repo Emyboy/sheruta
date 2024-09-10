@@ -1,7 +1,9 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
+import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
+import { createNotification } from '@/utils/actions'
 import { handleCall } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
@@ -36,11 +38,6 @@ import {
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
-import NotificationsService, {
-	NotificationsBodyMessage,
-} from '@/firebase/service/notifications/notifications.firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { createNotification } from '@/utils/actions'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -374,9 +371,22 @@ export default function EachRequest({ request }: Props) {
 									sm: 'lg',
 									base: 'base',
 								}}
-								onClick={() =>
-									handleCall(request.flat_share_profile.primary_phone_number)
-								}
+								onClick={async () => {
+									if (authState.user?._id === request.flat_share_profile._id)
+										return
+									await handleCall({
+										number: request.flat_share_profile.primary_phone_number,
+										recipient_id: request.flat_share_profile._id,
+										sender_details: authState.user
+											? {
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
+											: null,
+									})
+								}}
 							>
 								<BiPhone /> 35
 							</Button>
