@@ -1,6 +1,8 @@
 'use server'
 
-import SherutaDB from '@/firebase/service/index.firebase'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import NotificationsService from '@/firebase/service/notifications/notifications.firebase'
+import { NotificationsType } from '@/firebase/service/notifications/notifications.types'
 import axios from 'axios'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -41,4 +43,11 @@ export const generateRoomUrl = async (endDate: string) => {
 	} catch (error) {
 		console.log('error', error)
 	}
+}
+
+export const createNotification = async (data: NotificationsType) => {
+	await NotificationsService.create({
+		collection_name: DBCollectionName.notifications,
+		data,
+	})
 }
