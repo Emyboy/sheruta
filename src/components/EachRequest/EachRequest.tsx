@@ -392,7 +392,10 @@ export default function EachRequest({ request }: Props) {
 							</Button>
 						</MainTooltip>
 						<MainTooltip label="Ask questions" placement="top">
-							<Link href={`/messsages/${request.flat_share_profile._id}`}>
+							<Link
+								href={`/messsages/${request.flat_share_profile._id}`}
+								style={{ textDecoration: 'none' }}
+							>
 								<Button
 									px={0}
 									bg="none"
@@ -403,6 +406,7 @@ export default function EachRequest({ request }: Props) {
 									_hover={{
 										color: 'brand',
 										bg: 'none',
+										textDecoration: 'none',
 										_dark: {
 											color: 'brand',
 										},
