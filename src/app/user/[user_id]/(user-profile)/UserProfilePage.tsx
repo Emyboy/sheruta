@@ -1,15 +1,9 @@
 import MainSection from '@/components/atoms/MainSection'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import { Flex } from '@chakra-ui/react'
 import ProfileAboutMe from './ProfileAboutMe'
 import ProfileHero from './ProfileHero'
 import PersonalInfo from './personal-info/PersonalInfo'
-<<<<<<< HEAD
-=======
-import EachRequest from '@/components/EachRequest/EachRequest'
-import MobileNavFooter from '@/components/layout/MobileNavFooter'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import MainHeader from '@/components/layout/MainHeader'
->>>>>>> 10cb1046be51f220080225b03a9da115feee5df8
 
 interface Props {
 	data: any
