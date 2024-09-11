@@ -96,11 +96,13 @@ const PrivacyForm = () => {
 							onChange={handleChange}
 							sx={{
 								'span.chakra-switch__track': {
-									backgroundColor: formData.hide_profile ? '#38A169' : '#CBD5E0',
+									backgroundColor: formData.hide_profile
+										? '#38A169'
+										: '#CBD5E0',
 								},
 								'span.chakra-switch__thumb': {
 									backgroundColor: formData.hide_profile ? 'white' : 'white',
-								}
+								},
 							}}
 						/>
 					</FormControl>
@@ -118,7 +120,7 @@ const PrivacyForm = () => {
 								},
 								'span.chakra-switch__thumb': {
 									backgroundColor: formData.hide_phone ? 'white' : 'white',
-								}
+								},
 							}}
 						/>
 					</FormControl>

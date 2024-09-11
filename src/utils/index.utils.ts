@@ -90,3 +90,7 @@ export function convertSeconds(seconds: number) {
 export const handleCall = (number: string | null) => {
 	window.location.href = `tel:${number}`
 }
+
+export const handleDM = (userId: string | null) => {
+	window.location.href = `/messages/${userId}`
+}

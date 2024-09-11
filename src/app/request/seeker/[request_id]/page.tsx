@@ -11,12 +11,14 @@ import SeekerPost from '@/components/seekerDetails/SeekerPost'
 import SuperJSON from 'superjson'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+
 interface PostData {
 	id: string
 	updatedAt: Timestamp
 	description: string
 	google_location_text: string
-	flat_share_profile?: any
+	// flat_share_profile?: any
 	_service_ref?: any
 	_location_keyword_ref?: any
 	budget: number
@@ -31,12 +33,8 @@ export default async function Page({
 }) {
 	const requestId = params.request_id
 
-	let requestData: string | undefined | PostData =
-		await getRequestData(requestId)
-
-	if (requestData) {
-		requestData = SuperJSON.parse(requestData) as PostData
-	}
+	const requestData: string | undefined =
+		await getSeekerRequestData(requestId)
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -47,7 +45,7 @@ export default async function Page({
 					</Flex>
 					<Box p={DEFAULT_PADDING}>
 						<SeekerPost
-							postData={requestData as PostData}
+							requestData={requestData}
 							requestId={requestId}
 						/>
 					</Box>
@@ -58,30 +56,41 @@ export default async function Page({
 	)
 }
 
-async function getRequestData(requestId: string): Promise<string | undefined> {
+export async function getSeekerRequestData(requestId: string): Promise<string | undefined> {
 	try {
 		const result: DocumentData | null = await SherutaDB.get({
 			collection_name: 'requests',
 			document_id: requestId,
 		})
 
+		console.log(result)
+
 		if (
 			result &&
 			Object.keys(result).length > 0 &&
-			result.flat_share_profile &&
+			result._user_ref &&
 			result._service_ref &&
 			result._location_keyword_ref
 		) {
-			let userInfoDoc: DocumentData | undefined = undefined
 
-			if (result?.flat_share_profile?._id) {
-				userInfoDoc = await UserInfoService.get(result.flat_share_profile._id)
+			if (result?._user_ref?._id) {
+				const userId = result._user_ref._id;
+
+				const [user_info, flat_share_profile] = await Promise.all([
+					await UserInfoService.get(userId),
+					await FlatShareProfileService.get(userId)
+				])
+
+				return SuperJSON.stringify({
+					...result,
+					user_info,
+					flat_share_profile
+				})
+			}else{
+				console.log("User reference not found in request document")
+                return undefined;
 			}
 
-			return SuperJSON.stringify({
-				...result,
-				userInfoDoc,
-			})
 		}
 
 		return undefined
