@@ -1,24 +1,14 @@
-<<<<<<< HEAD
-import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
-import MainLeftNav from '@/components/layout/MainLeftNav'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-=======
-import React from 'react'
-import UserProfilePage from './(user-profile)/UserProfilePage'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import MainSection from '@/components/atoms/MainSection'
-import { Box, Flex } from '@chakra-ui/react'
-import MainLeftNav from '@/components/layout/MainLeftNav'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainHeader from '@/components/layout/MainHeader'
-import MainContainer from '@/components/layout/MainContainer'
->>>>>>> 10cb1046be51f220080225b03a9da115feee5df8
+import MainLeftNav from '@/components/layout/MainLeftNav'
+import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
+import { Flex } from '@chakra-ui/react'
+import UserProfilePage from './(user-profile)/UserProfilePage'
+
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { Flex } from '@chakra-ui/react'
 import {
 	collection,
 	doc,
@@ -29,7 +19,6 @@ import {
 	query,
 	where,
 } from 'firebase/firestore'
-import UserProfilePage from './(user-profile)/UserProfilePage'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -202,7 +191,6 @@ export default async function page(props: any) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-<<<<<<< HEAD
 					{user ? (
 						<UserProfilePage
 							data={user}
@@ -212,19 +200,6 @@ export default async function page(props: any) {
 					) : (
 						<PageNotFound />
 					)}
-=======
-					<Flex flexDirection={'column'} w="full">
-						<Box my={3}>
-							<MainBackHeader />
-						</Box>
-
-						{user ? (
-							<UserProfilePage data={user} userId={otherInfos} />
-						) : (
-							<PageNotFound />
-						)}
-					</Flex>
->>>>>>> 10cb1046be51f220080225b03a9da115feee5df8
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
