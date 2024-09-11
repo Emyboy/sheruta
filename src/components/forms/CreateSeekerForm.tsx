@@ -86,7 +86,7 @@ interface userInfo {
 	state: string | undefined
 	location: string | undefined
 }
- 
+
 const initialFormState: SeekerRequestData = {
 	description: '',
 	uuid: generateUId(), //automatically generate a uuid
@@ -288,7 +288,7 @@ const CreateSeekerForm: React.FC = () => {
 			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
-				...optionsRef
+				...optionsRef,
 			}
 
 			finalFormData.budget = Number(finalFormData.budget)

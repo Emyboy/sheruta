@@ -15,12 +15,7 @@ type Props = {
 export default async function Page({ params }: Props) {
 	const requestId = params.request_id
 
-	const requestData: string | undefined =
-		await getSeekerRequestData(requestId)
-
-	if (!requestData) {
-		return window.location.assign('/')
-	}
+	const requestData: string | undefined = await getSeekerRequestData(requestId)
 
 	return (
 		<Flex justifyContent={'center'}>

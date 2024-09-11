@@ -33,8 +33,7 @@ export default async function Page({
 }) {
 	const requestId = params.request_id
 
-	const requestData: string | undefined =
-		await getSeekerRequestData(requestId)
+	const requestData: string | undefined = await getSeekerRequestData(requestId)
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -44,10 +43,7 @@ export default async function Page({
 						<MainLeftNav />
 					</Flex>
 					<Box p={DEFAULT_PADDING}>
-						<SeekerPost
-							requestData={requestData}
-							requestId={requestId}
-						/>
+						<SeekerPost requestData={requestData} requestId={requestId} />
 					</Box>
 				</ThreeColumnLayout>
 				<MobileNavFooter />
@@ -56,7 +52,9 @@ export default async function Page({
 	)
 }
 
-export async function getSeekerRequestData(requestId: string): Promise<string | undefined> {
+export async function getSeekerRequestData(
+	requestId: string,
+): Promise<string | undefined> {
 	try {
 		const result: DocumentData | null = await SherutaDB.get({
 			collection_name: 'requests',
@@ -72,25 +70,23 @@ export async function getSeekerRequestData(requestId: string): Promise<string | 
 			result._service_ref &&
 			result._location_keyword_ref
 		) {
-
 			if (result?._user_ref?._id) {
-				const userId = result._user_ref._id;
+				const userId = result._user_ref._id
 
 				const [user_info, flat_share_profile] = await Promise.all([
 					await UserInfoService.get(userId),
-					await FlatShareProfileService.get(userId)
+					await FlatShareProfileService.get(userId),
 				])
 
 				return SuperJSON.stringify({
 					...result,
 					user_info,
-					flat_share_profile
+					flat_share_profile,
 				})
-			}else{
-				console.log("User reference not found in request document")
-                return undefined;
+			} else {
+				console.log('User reference not found in request document')
+				return undefined
 			}
-
 		}
 
 		return undefined

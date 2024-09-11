@@ -4,7 +4,12 @@ import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
-import { capitalizeString, timeAgo, handleCall, handleDM } from '@/utils/index.utils'
+import {
+	capitalizeString,
+	timeAgo,
+	handleCall,
+	handleDM,
+} from '@/utils/index.utils'
 import {
 	Avatar,
 	Badge,
@@ -36,7 +41,7 @@ import {
 	BiPhone,
 	BiShare,
 	BiTrash,
-	BiSolidBadgeCheck
+	BiSolidBadgeCheck,
 } from 'react-icons/bi'
 import SuperJSON from 'superjson'
 import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
@@ -54,18 +59,24 @@ const SeekerPost = ({
 	const { copyShareUrl } = useShareSpace()
 	const router = useRouter()
 
-	const postData: SeekerRequestDataDetails | undefined = (requestData) ? SuperJSON.parse(requestData) : undefined
+	const postData: SeekerRequestDataDetails | undefined = requestData
+		? SuperJSON.parse(requestData)
+		: undefined
+
+	const [lastUpdated, setLastUpdated] = useState<string>('99 years ago')
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)
 
 	useEffect(() => {
-		if (postData &&
+		if (
+			postData &&
 			typeof authState.user !== 'undefined' &&
 			typeof postData?._user_ref?._id !== 'undefined'
 		) {
 			setIsPostAdmin(authState.user?._id === postData?._user_ref?._id)
+			setLastUpdated(timeAgo(postData.updatedAt))
 		}
 	}, [postData, authState])
 
@@ -112,14 +123,18 @@ const SeekerPost = ({
 
 	return (
 		<>
-			{typeof postData !== 'undefined' && Object.values(postData || {}).length ? (
+			{typeof postData !== 'undefined' &&
+				Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
 							<Flex alignItems="center">
 								<Avatar
 									size="lg"
-									src={postData._user_ref.avatar_url || 'https://via.placeholder.com/150'}
+									src={
+										postData._user_ref.avatar_url ||
+										'https://via.placeholder.com/150'
+									}
 								/>
 								<Box ml={2}>
 									<Heading as="h3" size="md">
@@ -130,7 +145,7 @@ const SeekerPost = ({
 										fontSize="sm"
 										color={colorMode === 'light' ? '#11171766' : '#ddd'}
 									>
-										Posted {timeAgo(postData.updatedAt)}
+										Posted {lastUpdated}
 									</Text>
 								</Box>
 							</Flex>
@@ -321,7 +336,9 @@ const SeekerPost = ({
 					<Box marginTop={10} paddingBottom="70px">
 						<UserCard
 							name={
-								capitalizeString(postData._user_ref.first_name) + ' ' + postData._user_ref.last_name
+								capitalizeString(postData._user_ref.first_name) +
+								' ' +
+								postData._user_ref.last_name
 							}
 							handle={postData._user_ref.first_name}
 							userInfo={postData.user_info}
@@ -330,9 +347,11 @@ const SeekerPost = ({
 						/>
 					</Box>
 				</>
-			) : <Box w="full" textAlign="center">
-				{'This Post does not exist'}
-			</Box>}
+			) : (
+				<Box w="100%" textAlign="center">
+					{'This Post does not exist'}
+				</Box>
+			)}
 		</>
 	)
 }
@@ -344,20 +363,19 @@ const UserCard = ({
 	profilePicture,
 	userInfo,
 }: {
-	name: string,
-	handle: string,
-	bio: string | undefined,
-	profilePicture: string | undefined,
+	name: string
+	handle: string
+	bio: string | undefined
+	profilePicture: string | undefined
 	userInfo: any
 }) => {
-	const router = useRouter()
 
 	return (
 		<Box bgColor="#202020" borderRadius="15px">
 			<Flex bg="brand_darker" p={4} alignItems="center" borderRadius="15px">
 				<Avatar size="lg" src={profilePicture} />
-				<Box ml={2}>
-					<Flex gap={1} alignItems={'center'}>
+				<VStack justifyContent={"flex-start"} spacing={1} ml={2}>
+					<Flex gap={2} alignItems={'center'}>
 						<Text fontWeight="bold" color="white">
 							{name}
 						</Text>
@@ -365,13 +383,13 @@ const UserCard = ({
 							<Icon as={BiSolidBadgeCheck} color="blue.500" ml={1} />
 						) : null}
 					</Flex>
-					<Text color="#fff" fontSize="sm">
+					<Text w="100%" color="#fff" fontSize="sm">
 						@{handle}
 					</Text>
-					<Text color="#fff" fontSize="sm">
+					<Text w="100%" color="#fff" fontSize="sm">
 						{bio}
 					</Text>
-				</Box>
+				</VStack>
 			</Flex>
 
 			<HStack
@@ -401,9 +419,7 @@ const UserCard = ({
 							colorScheme="white"
 							ml={2}
 							size={'md'}
-							onClick={() =>
-								handleCall(userInfo.primary_phone_number)
-							}
+							onClick={() => handleCall(userInfo.primary_phone_number)}
 						/>
 					) : null}
 				</Flex>

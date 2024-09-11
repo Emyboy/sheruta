@@ -42,16 +42,10 @@ import { useOptionsContext } from '@/context/options.context'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { SuperJSON } from 'superjson'
 import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
+import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
-
-interface DocRefs {
-	_service_ref: DocumentReference | undefined
-	_location_keyword_ref: DocumentReference | undefined
-	_state_ref: DocumentReference | undefined
-	// _user_ref: DocumentReference | undefined
-}
 
 const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
@@ -95,7 +89,9 @@ const EditSeekerForm: React.FC<{
 	requestId: string
 }> = ({ requestData, requestId }) => {
 
-	const parsedRequestData: SeekerRequestDataDetails | undefined = (requestData) ? SuperJSON.parse(requestData) : undefined
+	const parsedRequestData: SeekerRequestDataDetails | undefined = requestData
+		? SuperJSON.parse(requestData)
+		: undefined
 
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
@@ -105,17 +101,55 @@ const EditSeekerForm: React.FC<{
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
+	// Redirect to '/' if parsedRequestData is undefined
+	useEffect(() => {
+		console.log('why?????', parsedRequestData)
+		if (parsedRequestData) {
+			// Check for missing parsedRequestData or mismatched user ID
+			if (flat_share_profile && parsedRequestData._user_ref._id !== flat_share_profile?._user_id) {
+				window.location.assign('/');
+				return;
+			}
+		}else{
+			window.location.assign('/');
+			return;
+		}
+
+	}, [parsedRequestData, flat_share_profile]);
+
+
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [formData, setFormData] = useState(initialFormState)
+	const [formData, setFormData] = useState({
+		_location_keyword_ref: undefined,
+		_state_ref: undefined,
+		_service_ref: undefined,
+		_user_ref: undefined,
+		updatedAt: parsedRequestData?.updatedAt || Timestamp.now(),
+		createdAt: parsedRequestData?.createdAt || Timestamp.now(),
+		description: parsedRequestData?.description || '',
+		uuid: parsedRequestData?.id,
+		budget: parsedRequestData?.budget,
+		google_location_object: parsedRequestData?.google_location_object,
+		google_location_text: parsedRequestData?.google_location_text,
+		payment_type: parsedRequestData?.payment_type as PaymentPlan,
+		seeking: true,
+	})
+
+	console.log(formData)
 
 	const {
 		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
 
-	const [optionRefs, setOptionRefs] = useState<DocRefs>({
+	const [docRefs, setDocRefs] = useState<{
+		_service_ref: DocumentReference | undefined
+		_location_keyword_ref: DocumentReference | undefined
+		_state_ref: DocumentReference | undefined
+	}
+	>({
 		_service_ref: undefined,
 		_state_ref: undefined,
-		_location_keyword_ref: undefined,
+		_location_keyword_ref: undefined
 	})
 
 	const [locations, setLocations] = useState<any[]>([])
@@ -123,38 +157,42 @@ const EditSeekerForm: React.FC<{
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
 	const getLocations = (stateId: string): string[] => {
-		return location_keywords.filter((item: StateData) => item.id === stateId)
+		return location_keywords.filter((item: LocationKeywordData) => item._state_id === stateId)
 	}
 
-	useEffect(() => {
-		if (parsedRequestData && flat_share_profile?._user_id) {
-			const convertedFormData =
-				convertPlainObjectsToTimestamps(parsedRequestData)
-			console.log('infinite')
-			console.log(convertedFormData)
+	// useEffect(() => {
+	// 	if (parsedRequestData && flat_share_profile?._user_id) {
+	// 		const convertedFormData =
+	// 			convertPlainObjectsToTimestamps(parsedRequestData)
+	// 		console.log('infinite')
+	// 		console.log(convertedFormData)
 
-			// If user IDs don't match, redirect
-			if (parsedRequestData._user_ref._id !== flat_share_profile?._user_id) {
-				window.location.assign('/')
-				return
-			}
+	// 		// If user IDs don't match, redirect
+	// 		if (parsedRequestData._user_ref._id !== flat_share_profile?._user_id) {
+	// 			window.location.assign('/')
+	// 			return
+	// 		}
 
-			setFormData((prev) => ({
-				...prev,
-				// ...convertedFormData,
-				updatedAt: parsedRequestData.updatedAt,
-				createdAt: parsedRequestData.createdAt,
-				description: parsedRequestData.description,
-				uuid: parsedRequestData.id,
-				budget: parsedRequestData.budget,
-				google_location_object: parsedRequestData.google_location_object,
-				google_location_text: parsedRequestData.google_location_text,
-				payment_type: parsedRequestData.payment_type,
-				seeking: true,
-			}))
+	// 		const newFormData = {
+	// 			...convertedFormData,
+	// 			updatedAt: parsedRequestData.updatedAt,
+	// 			createdAt: parsedRequestData.createdAt,
+	// 			description: parsedRequestData.description,
+	// 			uuid: parsedRequestData.id,
+	// 			budget: parsedRequestData.budget,
+	// 			google_location_object: parsedRequestData.google_location_object,
+	// 			google_location_text: parsedRequestData.google_location_text,
+	// 			payment_type: parsedRequestData.payment_type,
+	// 			seeking: true,
+	// 		}
 
-		}
-	}, [parsedRequestData, flat_share_profile])
+	// 		setFormData((prev) => ({
+	// 			...prev,
+	// 			...newFormData
+	// 		}))
+	// 	}
+	// }, [flat_share_profile])
+
 
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
@@ -198,7 +236,11 @@ const EditSeekerForm: React.FC<{
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
+		console.log('I AM WORKING')
+		console.log(location_keywords)
 		const { id, name, value } = e.target
+
+		console.log(id, name, value)
 
 		const updateBudgetInvalidState = (
 			paymentType: string,
@@ -209,12 +251,11 @@ const EditSeekerForm: React.FC<{
 		}
 
 		const updateOptionsRef = (key: string, refValue: any) => {
-			setOptionRefs((prev) => ({
+			setDocRefs((prev) => ({
 				...prev,
 				[key]: refValue,
 			}))
 		}
-
 		switch (id) {
 			case 'budget':
 				const paymentType = formData?.payment_type
@@ -229,6 +270,7 @@ const EditSeekerForm: React.FC<{
 			case 'stateId':
 				if (value) {
 					const newLocations = getLocations(value)
+					console.log(newLocations)
 					setLocations(newLocations)
 					const stateRef = states.find((data) => data.id === value)?._ref
 					updateOptionsRef('_state_ref', stateRef)
@@ -272,7 +314,8 @@ const EditSeekerForm: React.FC<{
 
 			const finalFormData = {
 				...formData,
-				...optionRefs,
+				...docRefs,
+				_user_ref: flat_share_profile?._user_ref,
 				updatedAt: Timestamp.now(),
 			}
 
@@ -321,7 +364,7 @@ const EditSeekerForm: React.FC<{
 						type="number"
 						id="budget"
 						name="budget"
-						onChange={handleChange}
+						onChange={(e) => handleChange(e)}
 						placeholder={`Minimum ₦${budgetLimits[formData?.payment_type || 'weekly'].toLocaleString()}`}
 						defaultValue={!formData?.budget ? '' : formData.budget}
 					/>

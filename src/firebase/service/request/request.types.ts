@@ -214,8 +214,20 @@ export type HostRequestDataDetails = Omit<
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
 	_state_ref: { title: string; slug: string }
-	_user_ref: {first_name: string, last_name: string, avatar_url :string, _id : string, email : string}
-	user_info: {primary_phone_number: string, hide_profile: boolean, is_verified: boolean, hide_phone: boolean, gender: string}
+	_user_ref: {
+		first_name: string
+		last_name: string
+		avatar_url: string
+		_id: string
+		email: string
+	}
+	user_info: {
+		primary_phone_number: string
+		hide_profile: boolean
+		is_verified: boolean
+		hide_phone: boolean
+		gender: string
+	}
 }
 
 export type SeekerRequestDataDetails = Omit<
@@ -228,7 +240,18 @@ export type SeekerRequestDataDetails = Omit<
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string }
 	_state_ref: { title: string; slug: string }
-	_user_ref: {first_name: string, last_name: string, avatar_url :string, _id : string, email : string}
-	flat_share_profile: {bio: string | null}
-	user_info: {primary_phone_number: string, hide_profile: boolean, is_verified: boolean, gender: string}
+	_user_ref: {
+		first_name: string
+		last_name: string
+		avatar_url: string
+		_id: string
+		email: string
+	}
+	flat_share_profile: { bio: string | null }
+	user_info: {
+		primary_phone_number: string
+		hide_profile: boolean
+		is_verified: boolean
+		gender: string
+	}
 }
