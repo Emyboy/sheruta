@@ -66,6 +66,7 @@ export type userSchema = {
 	first_name: string
 	last_name: string
 	avatar_url: string
+	bio?: string
 }
 
 const timestampSchema = z.object({
@@ -202,6 +203,11 @@ export type HostRequestDataDetails = Omit<
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
 	_state_ref: { title: string; slug: string }
+	_user_info?: {
+		primary_phone_number: string
+		hide_phone: boolean
+		hide_profile: boolean
+	} // Add the _user_info field
 }
 
 export type SeekerRequestDataDetails = Omit<

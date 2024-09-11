@@ -27,6 +27,9 @@ import {
 
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
 type Props = {
 	locations: string
@@ -44,6 +47,41 @@ export default function HomePage({ locations, states, requests }: Props) {
 
 	const lastRequestRef = useRef<HTMLDivElement | null>(null)
 	const observer = useRef<IntersectionObserver | null>(null)
+
+	const [processedRequests, setProcessedRequests] = useState<
+		HostRequestDataDetails[]
+	>([])
+
+	useEffect(() => {
+		const processRequests = async () => {
+			if (flatShareRequests.length > 0) {
+				const updatedRequests = await Promise.all(
+					flatShareRequests.map(async (request: HostRequestDataDetails) => {
+						const userInfo = await UserInfoService.get(
+							request.flat_share_profile._id,
+						)
+
+						// Skip hidden profiles
+						if (userInfo?.hide_profile) {
+							return null
+						} else {
+							return {
+								...request,
+								_user_info: userInfo,
+							}
+						}
+					}),
+				)
+
+				const validRequests = updatedRequests.filter(
+					(request) => request !== null,
+				)
+				setProcessedRequests(validRequests as HostRequestDataDetails[])
+			}
+		}
+
+		processRequests()
+	}, [flatShareRequests])
 
 	const loadMore = async () => {
 		setIsLoading(true)
@@ -109,13 +147,6 @@ export default function HomePage({ locations, states, requests }: Props) {
 		if (node) observer.current?.observe(node)
 	}
 
-	useEffect(() => {
-		const parsedRequests: [] = requests ? JSON.parse(requests) : []
-		if (parsedRequests.length > 0) {
-			setFlatShareRequests([...parsedRequests])
-		}
-	}, [requests])
-
 	return (
 		<>
 			<MainPageBody>
@@ -127,10 +158,10 @@ export default function HomePage({ locations, states, requests }: Props) {
 						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
 						<Flex flexDirection={'column'} gap={0}>
-							{flatShareRequests.map((request: any, index: number) => (
+							{processedRequests.map((request: any, index: number) => (
 								<Box
 									key={request.id}
-									ref={index === flatShareRequests.length - 1 ? setRef : null}
+									ref={index === processedRequests.length - 1 ? setRef : null}
 									style={{ transition: 'opacity 0.3s ease-in-out' }}
 								>
 									{index === 3 && <JoinTheCommunity key={index} />}
@@ -140,13 +171,13 @@ export default function HomePage({ locations, states, requests }: Props) {
 								</Box>
 							))}
 
-							{isLoading && flatShareRequests.length > 0 && (
+							{isLoading && processedRequests.length > 0 && (
 								<Flex justify="center" mt="3">
 									<Spinner />
 								</Flex>
 							)}
 
-							{!flatShareRequests.length &&
+							{!processedRequests.length &&
 								isLoading &&
 								Array.from({ length: 4 }).map((_, index) => (
 									<SpaceSkeleton key={index} />

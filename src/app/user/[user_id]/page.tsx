@@ -1,7 +1,19 @@
+<<<<<<< HEAD
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
+=======
+import React from 'react'
+import UserProfilePage from './(user-profile)/UserProfilePage'
+import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
+import MainSection from '@/components/atoms/MainSection'
+import { Box, Flex } from '@chakra-ui/react'
+import MainLeftNav from '@/components/layout/MainLeftNav'
+import MainBackHeader from '@/components/atoms/MainBackHeader'
+import MainHeader from '@/components/layout/MainHeader'
+import MainContainer from '@/components/layout/MainContainer'
+>>>>>>> 10cb1046be51f220080225b03a9da115feee5df8
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
 import { db } from '@/firebase'
@@ -168,7 +180,7 @@ export default async function page(props: any) {
 							phone_number: formattedUserInfoDoc.primary_phone_number,
 							gender: formattedUserInfoDoc.gender,
 							bio: formattedUserInfoDoc.bio,
-							verified: formattedUserInfoDoc.is_verified,
+							is_verified: formattedUserInfoDoc.is_verified,
 						}
 					: null,
 			}
@@ -186,10 +198,11 @@ export default async function page(props: any) {
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
-				<ThreeColumnLayout header={<MainBackHeader />}>
+				<ThreeColumnLayout header={<MainHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
+<<<<<<< HEAD
 					{user ? (
 						<UserProfilePage
 							data={user}
@@ -199,6 +212,19 @@ export default async function page(props: any) {
 					) : (
 						<PageNotFound />
 					)}
+=======
+					<Flex flexDirection={'column'} w="full">
+						<Box my={3}>
+							<MainBackHeader />
+						</Box>
+
+						{user ? (
+							<UserProfilePage data={user} userId={otherInfos} />
+						) : (
+							<PageNotFound />
+						)}
+					</Flex>
+>>>>>>> 10cb1046be51f220080225b03a9da115feee5df8
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

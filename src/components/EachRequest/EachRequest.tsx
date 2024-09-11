@@ -46,7 +46,6 @@ export default function EachRequest({ request }: Props) {
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
-
 	return (
 		<Box
 			position={'relative'}
@@ -289,7 +288,8 @@ export default function EachRequest({ request }: Props) {
 								<BiLocationPlus size={'16px'} />
 							</Box>
 							<Truncate
-								text={request.google_location_text}
+								//@ts-ignore
+								text={request._location_keyword_ref.name}
 								max={70}
 								showReadMore={false}
 							/>
@@ -348,49 +348,48 @@ export default function EachRequest({ request }: Props) {
 					justifyContent={'space-between'}
 				>
 					<Flex gap={DEFAULT_PADDING}>
-						<MainTooltip label="Call me" placement="top">
-							<Button
-								px={0}
-								bg="none"
-								color="text_muted"
-								display={'flex'}
-								gap={1}
-								fontWeight={'light'}
-								_hover={{
-									color: 'brand',
-									bg: 'none',
-									_dark: {
+						{!request._user_info?.hide_phone ? (
+							<MainTooltip label="Call me" placement="top">
+								<Button
+									px={0}
+									bg="none"
+									color="text_muted"
+									display={'flex'}
+									gap={1}
+									fontWeight={'light'}
+									_hover={{
 										color: 'brand',
-									},
-								}}
-								_dark={{
-									color: 'dark_lighter',
-								}}
-								fontSize={{
-									md: 'xl',
-									sm: 'lg',
-									base: 'base',
-								}}
-								onClick={async () => {
-									if (authState.user?._id === request.flat_share_profile._id)
-										return
-									await handleCall({
-										number: request.flat_share_profile.primary_phone_number,
-										recipient_id: request.flat_share_profile._id,
-										sender_details: authState.user
-											? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
-											: null,
-									})
-								}}
-							>
-								<BiPhone /> 35
-							</Button>
-						</MainTooltip>
+									}}
+									_dark={{
+										color: 'dark_lighter',
+									}}
+									fontSize={{
+										md: 'xl',
+										sm: 'lg',
+										base: 'base',
+									}}
+									onClick={async () => {
+										if (authState.user?._id === request.flat_share_profile._id)
+											return
+										await handleCall({
+											number: request.flat_share_profile.primary_phone_number,
+											recipient_id: request.flat_share_profile._id,
+											sender_details: authState.user
+												? {
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
+												: null,
+										})
+									}}
+								>
+									<BiPhone /> 35
+								</Button>
+							</MainTooltip>
+						) : null}
+
 						<MainTooltip label="Ask questions" placement="top">
 							<Link
 								href={`/messsages/${request.flat_share_profile._id}`}

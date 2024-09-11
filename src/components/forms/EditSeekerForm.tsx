@@ -1,17 +1,7 @@
 'use client'
 
 import { libraries } from '@/constants'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
 import { db } from '@/firebase'
-import SherutaDB from '@/firebase/service/index.firebase'
-import {
-	createSeekerRequestDTO,
-	LocationObject,
-	PaymentPlan,
-	RequestData,
-} from '@/firebase/service/request/request.types'
-import useCommon from '@/hooks/useCommon'
 import {
 	Button,
 	Flex,
@@ -24,7 +14,7 @@ import {
 	Textarea,
 	useColorMode,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript } from '@react-google-maps/api'
+
 import {
 	doc,
 	DocumentData,
@@ -40,13 +30,17 @@ import {
 	PaymentPlan,
 	RequestData,
 	SeekerRequestData,
+	LocationObject,
+	userSchema,
 } from '@/firebase/service/request/request.types'
-import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
+
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as generateUId } from 'uuid'
 import { ZodError } from 'zod'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
+import { StateData } from '@/firebase/service/options/states/states.types'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
@@ -66,27 +60,16 @@ const budgetLimits: Record<PaymentPlan, number> = {
 	annually: 150000,
 }
 
-interface Props {
-	editFormData: Partial<RequestData> | undefined
-	requestId: string
-}
-
 const initialFormState: SeekerRequestData = {
 	description: '',
-	uuid: '',
+	uuid: generateUId(),
 	budget: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
 	_location_keyword_ref: undefined as DocumentReference | undefined,
 	_state_ref: undefined as DocumentReference | undefined,
 	_service_ref: undefined as DocumentReference | undefined,
-	flat_share_profile: {
-		done_kyc: false,
-		_id: '',
-		first_name: '',
-		last_name: '',
-		avatar_url: '',
-	},
+	flat_share_profile: {} as userSchema,
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -138,7 +121,7 @@ const EditSeekerForm: React.FC<{
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
 	const getLocations = (stateId: string): string[] => {
-		return location_keywords.filter((item) => item._state_id === stateId)
+		return location_keywords.filter((item: StateData) => item.id === stateId)
 	}
 
 	useEffect(() => {
@@ -157,13 +140,14 @@ const EditSeekerForm: React.FC<{
 							return
 						}
 
-						const { done_kyc } = flat_share_profile
+						const { done_kyc, bio } = flat_share_profile
 						const { _id, first_name, last_name, avatar_url } = authorDoc
 
 						setFormData((prev) => ({
 							...prev,
 							...convertedFormData,
 							flat_share_profile: {
+								bio,
 								done_kyc,
 								_id,
 								first_name,

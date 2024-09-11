@@ -50,6 +50,14 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 				}}
 				rounded={'md'}
 				overflow={'hidden'}
+				mr={{
+					md: '16px',
+					base: '20px',
+				}}
+				mt={{
+					md: '1px',
+					base: '20px',
+				}}
 			>
 				<Image
 					style={{ position: 'absolute' }}
@@ -83,7 +91,7 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 				<Flex alignItems={'center'} gap={1} color="text_muted">
 					<BiStore />
 					<Text as="span" color="text_muted">
-						{userFlatshareProfile?.seeking ? 'Seeker' : 'I have an apartment'}
+						{userFlatshareProfile?.seeking ? 'Seeker' : 'I have a space'}
 					</Text>
 				</Flex>
 				<Flex alignItems={'center'} gap={1} color="text_muted">

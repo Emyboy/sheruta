@@ -25,6 +25,8 @@ export default class UserInfoService {
 				phone_number_verified: false,
 				date_of_birth: null,
 				nin: null,
+				hide_phone: false,
+				hide_profile: false,
 			}
 			let result = await SherutaDB.create({
 				collection_name: DBCollectionName.userInfos,
