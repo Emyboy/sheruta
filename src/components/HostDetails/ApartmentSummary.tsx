@@ -20,9 +20,7 @@ import {
 import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
-import {
-	HostRequestDataDetails
-} from '@/firebase/service/request/request.types'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification, generateRoomUrl } from '@/utils/actions'
@@ -192,11 +190,11 @@ export default function ApartmentSummary({
 									type: 'profile_view',
 									sender_details: authState.user
 										? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
 										: null,
 								})
 							}
@@ -206,8 +204,7 @@ export default function ApartmentSummary({
 									textTransform={'capitalize'}
 									fontSize={{ base: 'base', md: 'lg' }}
 								>
-									{request._user_ref.last_name}{' '}
-									{request._user_ref.first_name}
+									{request._user_ref.last_name} {request._user_ref.first_name}
 								</Text>
 								{request.user_info.is_verified && (
 									<LuBadgeCheck fill="#00bc73" />
@@ -237,18 +234,17 @@ export default function ApartmentSummary({
 										base: 'lg',
 									}}
 									onClick={async () => {
-										if (authState.user?._id === request._user_ref._id)
-											return
+										if (authState.user?._id === request._user_ref._id) return
 										await handleCall({
 											number: request.user_info.primary_phone_number,
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
 												: null,
 										})
 									}}
@@ -440,7 +436,7 @@ export default function ApartmentSummary({
 					{formatDistanceToNow(
 						new Date(
 							request.updatedAt.seconds * 1000 +
-							request.updatedAt.nanoseconds / 1000000,
+								request.updatedAt.nanoseconds / 1000000,
 						),
 						{ addSuffix: true },
 					)}
@@ -868,8 +864,7 @@ export default function ApartmentSummary({
 									_light={{ color: '#111717CC' }}
 									textTransform={'capitalize'}
 								>
-									{request._user_ref.last_name}{' '}
-									{request._user_ref.first_name}
+									{request._user_ref.last_name} {request._user_ref.first_name}
 								</Text>
 								<Text
 									fontWeight={'300'}
@@ -1503,7 +1498,7 @@ const BookInspectionModal = ({
 						bgColor={'#00BC7399'}
 						textColor={'white'}
 						fontSize={{ base: 'sm', md: 'base' }}
-					// onClick={handleSubmit}
+						// onClick={handleSubmit}
 					>
 						Proceed to Payment
 					</Button>
