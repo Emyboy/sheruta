@@ -1,39 +1,36 @@
 'use client'
 
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
-import Image from 'next/image'
-import Link from 'next/link'
-import React from 'react'
-import {
-	BiBriefcase,
-	BiMessageRoundedDetail,
-	BiSolidBadgeCheck,
-	BiSolidLocationPlus,
-	BiMaleFemale,
-	BiGroup,
-	BiStore,
-} from 'react-icons/bi'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { UserInfo } from '@/firebase/service/user-info/user-info.types'
 import { handleCall } from '@/utils/index.utils'
+import { Box, Button, Flex, Text } from '@chakra-ui/react'
+import Image from 'next/image'
+import Link from 'next/link'
+import {
+	BiBriefcase,
+	BiGroup,
+	BiMessageRoundedDetail,
+	BiSolidBadgeCheck,
+	BiSolidLocationPlus,
+	BiStore,
+} from 'react-icons/bi'
 
 type Props = {
 	data: any
 	userProfile: any
+	user_id: string
 }
 
-export default function ProfileHero({ data, userProfile }: Props) {
+export default function ProfileHero({ data, userProfile, user_id }: Props) {
 	const _user: AuthUser = data.user
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
+	const { authState } = useAuthContext()
 
 	const _userInfo: UserInfo = userProfile.userInfo
-
-	// const handleCall = () => {
-	// 	window.location.href = `tel:${_userInfo.primary_phone_number}`
-	// }
 
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>
@@ -116,7 +113,23 @@ export default function ProfileHero({ data, userProfile }: Props) {
 				</Flex>
 
 				<Flex gap={DEFAULT_PADDING}>
-					<Button onClick={() => handleCall(_userInfo.primary_phone_number)}>
+					<Button
+						onClick={async () => {
+							if (authState.user?._id === user_id) return
+							await handleCall({
+								number: _userInfo.primary_phone_number,
+								recipient_id: user_id,
+								sender_details: authState.user
+									? {
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
+									: null,
+							})
+						}}
+					>
 						Call Me
 					</Button>
 					<Link href={`/messages/${_user._id}`}>

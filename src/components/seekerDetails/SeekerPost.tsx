@@ -350,7 +350,7 @@ const SeekerPost = ({
 							handle={userDoc?.first_name}
 							userInfoDoc={userInfoDoc}
 							profilePicture={userDoc?.avatar_url}
-							bio={userDoc?.bio || "No Bio Available"}
+							bio={userDoc?.bio || 'No Bio Available'}
 						/>
 					</Box>
 				</>
