@@ -28,8 +28,6 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
 type Props = {
 	locations: string
@@ -56,27 +54,13 @@ export default function HomePage({ locations, states, requests }: Props) {
 		const processRequests = async () => {
 			if (flatShareRequests.length > 0) {
 				const updatedRequests = await Promise.all(
-					flatShareRequests.map(async (request: HostRequestDataDetails) => {
-						const userInfo = await UserInfoService.get(
-							request.flat_share_profile._id,
-						)
-
-						// Skip hidden profiles
-						if (userInfo?.hide_profile) {
-							return null
-						} else {
-							return {
-								...request,
-								_user_info: userInfo,
-							}
-						}
-					}),
+					flatShareRequests.map(async (request: HostRequestDataDetails) =>
+						request.user_info?.hide_profile ? null : { ...request },
+					),
 				)
 
-				const validRequests = updatedRequests.filter(
-					(request) => request !== null,
-				)
-				setProcessedRequests(validRequests as HostRequestDataDetails[])
+				const filteredRequests = updatedRequests.filter(Boolean)
+				setProcessedRequests(filteredRequests as HostRequestDataDetails[])
 			}
 		}
 

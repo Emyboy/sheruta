@@ -31,7 +31,6 @@ import {
 	RequestData,
 	SeekerRequestData,
 	LocationObject,
-	userSchema,
 } from '@/firebase/service/request/request.types'
 
 import { useRouter } from 'next/navigation'
@@ -41,16 +40,12 @@ import { ZodError } from 'zod'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { StateData } from '@/firebase/service/options/states/states.types'
+import { SuperJSON } from 'superjson'
+import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
+import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
-
-interface DocRefs {
-	_service_ref: DocumentReference | undefined
-	_location_keyword_ref: DocumentReference | undefined
-	_state_ref: DocumentReference | undefined
-	_user_ref: DocumentReference | undefined
-}
 
 const budgetLimits: Record<PaymentPlan, number> = {
 	weekly: 10000,
@@ -69,7 +64,6 @@ const initialFormState: SeekerRequestData = {
 	_location_keyword_ref: undefined as DocumentReference | undefined,
 	_state_ref: undefined as DocumentReference | undefined,
 	_service_ref: undefined as DocumentReference | undefined,
-	flat_share_profile: {} as userSchema,
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -91,9 +85,13 @@ function convertPlainObjectsToTimestamps(data: any): any {
 }
 
 const EditSeekerForm: React.FC<{
-	editFormData: SeekerRequestData
+	requestData: string | undefined
 	requestId: string
-}> = ({ editFormData, requestId }) => {
+}> = ({ requestData, requestId }) => {
+	const parsedRequestData: SeekerRequestDataDetails | undefined = requestData
+		? SuperJSON.parse(requestData)
+		: undefined
+
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 	const router = useRouter()
@@ -102,18 +100,52 @@ const EditSeekerForm: React.FC<{
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
+	// Redirect to '/' if parsedRequestData is undefined
+	useEffect(() => {
+		if (parsedRequestData) {
+			// Check for missing parsedRequestData or mismatched user ID
+			if (
+				flat_share_profile &&
+				parsedRequestData._user_ref._id !== flat_share_profile?._user_id
+			) {
+				window.location.assign('/')
+				return
+			}
+		} else {
+			window.location.assign('/')
+			return
+		}
+	}, [parsedRequestData, flat_share_profile])
+
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [formData, setFormData] = useState(initialFormState)
+	const [formData, setFormData] = useState({
+		_location_keyword_ref: undefined,
+		_state_ref: undefined,
+		_service_ref: undefined,
+		_user_ref: undefined,
+		updatedAt: parsedRequestData?.updatedAt || Timestamp.now(),
+		createdAt: parsedRequestData?.createdAt || Timestamp.now(),
+		description: parsedRequestData?.description || '',
+		uuid: parsedRequestData?.id,
+		budget: parsedRequestData?.budget,
+		google_location_object: parsedRequestData?.google_location_object,
+		google_location_text: parsedRequestData?.google_location_text,
+		payment_type: parsedRequestData?.payment_type as PaymentPlan,
+		seeking: true,
+	})
 
 	const {
 		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
 
-	const [docRefs, setDocRefs] = useState<DocRefs>({
+	const [docRefs, setDocRefs] = useState<{
+		_service_ref: DocumentReference | undefined
+		_location_keyword_ref: DocumentReference | undefined
+		_state_ref: DocumentReference | undefined
+	}>({
 		_service_ref: undefined,
 		_state_ref: undefined,
 		_location_keyword_ref: undefined,
-		_user_ref: undefined,
 	})
 
 	const [locations, setLocations] = useState<any[]>([])
@@ -121,58 +153,10 @@ const EditSeekerForm: React.FC<{
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
 	const getLocations = (stateId: string): string[] => {
-		return location_keywords.filter((item: StateData) => item.id === stateId)
+		return location_keywords.filter(
+			(item: LocationKeywordData) => item._state_id === stateId,
+		)
 	}
-
-	useEffect(() => {
-		const fetchData = async () => {
-			if (editFormData && flat_share_profile?._user_id) {
-				try {
-					const convertedFormData =
-						convertPlainObjectsToTimestamps(editFormData)
-
-					if (editFormData.flat_share_profile) {
-						const authorDoc = editFormData.flat_share_profile
-
-						// If user IDs don't match, redirect
-						if (authorDoc?._id !== flat_share_profile?._user_id) {
-							router.push('/')
-							return
-						}
-
-						const { done_kyc, bio } = flat_share_profile
-						const { _id, first_name, last_name, avatar_url } = authorDoc
-
-						setFormData((prev) => ({
-							...prev,
-							...convertedFormData,
-							flat_share_profile: {
-								bio,
-								done_kyc,
-								_id,
-								first_name,
-								last_name,
-								avatar_url,
-							},
-						}))
-
-						// Convert authorDoc back to DocumentReference
-						const _user_ref = doc(db, 'users', authorDoc._id)
-
-						// Set document reference state
-						setDocRefs((prev) => ({
-							...prev,
-							_user_ref,
-						}))
-					}
-				} catch (error) {
-					console.error('Error fetching data: ', error)
-				}
-			}
-		}
-
-		fetchData()
-	}, [editFormData, flat_share_profile, router])
 
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
@@ -232,7 +216,6 @@ const EditSeekerForm: React.FC<{
 				[key]: refValue,
 			}))
 		}
-
 		switch (id) {
 			case 'budget':
 				const paymentType = formData?.payment_type
@@ -291,6 +274,7 @@ const EditSeekerForm: React.FC<{
 			const finalFormData = {
 				...formData,
 				...docRefs,
+				_user_ref: flat_share_profile?._user_ref,
 				updatedAt: Timestamp.now(),
 			}
 
@@ -311,7 +295,7 @@ const EditSeekerForm: React.FC<{
 				})
 
 				setTimeout(() => {
-					router.push('/')
+					window.location.assign('/')
 				}, 1000)
 			}
 		} catch (error: any) {
@@ -339,7 +323,7 @@ const EditSeekerForm: React.FC<{
 						type="number"
 						id="budget"
 						name="budget"
-						onChange={handleChange}
+						onChange={(e) => handleChange(e)}
 						placeholder={`Minimum ₦${budgetLimits[formData?.payment_type || 'weekly'].toLocaleString()}`}
 						defaultValue={!formData?.budget ? '' : formData.budget}
 					/>

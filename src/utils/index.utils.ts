@@ -112,3 +112,7 @@ export const handleCall = async (data: {
 		},
 	})
 }
+
+export const handleDM = (userId: string | null) => {
+	window.location.href = `/messages/${userId}`
+}

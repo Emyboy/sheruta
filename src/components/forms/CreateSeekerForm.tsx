@@ -19,7 +19,6 @@ import {
 	createSeekerRequestDTO,
 	PaymentPlan,
 	SeekerRequestData,
-	userSchema,
 	LocationObject,
 } from '@/firebase/service/request/request.types'
 import { useAuthContext } from '@/context/auth.context'
@@ -97,7 +96,7 @@ const initialFormState: SeekerRequestData = {
 	_location_keyword_ref: undefined,
 	_state_ref: undefined,
 	_service_ref: undefined,
-	flat_share_profile: {} as userSchema,
+	_user_ref: undefined,
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -107,12 +106,13 @@ const initialFormState: SeekerRequestData = {
 const CreateSeekerForm: React.FC = () => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
-	const router = useRouter()
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const {
 		authState: { flat_share_profile, user, user_info },
 	} = useAuthContext()
+
+	console.log(flat_share_profile, user, user_info)
 
 	const [userInfo, setUserInfo] = useState<userInfo>({
 		state: undefined,
@@ -124,11 +124,7 @@ const CreateSeekerForm: React.FC = () => {
 	} = useOptionsContext()
 
 	useEffect(() => {
-		if (flat_share_profile && user && user_info) {
-			const { done_kyc, bio } = flat_share_profile
-			const { _id, first_name, last_name, avatar_url } = user
-			const { is_verified, primary_phone_number } = user_info
-
+		if (flat_share_profile && user_info) {
 			setUserInfo({
 				state: flat_share_profile?.state,
 				location: flat_share_profile?.location_keyword,
@@ -136,19 +132,10 @@ const CreateSeekerForm: React.FC = () => {
 
 			setFormData((prev: SeekerRequestData) => ({
 				...prev,
-				flat_share_profile: {
-					bio,
-					is_verified,
-					primary_phone_number,
-					done_kyc,
-					_id,
-					first_name,
-					last_name,
-					avatar_url,
-				},
+				_user_ref: flat_share_profile?._user_ref,
 			}))
 		}
-	}, [flat_share_profile, user])
+	}, [flat_share_profile, user_info])
 
 	const [optionsRef, setOptionsRef] = useState<Options>({
 		_service_ref: undefined,
@@ -302,15 +289,6 @@ const CreateSeekerForm: React.FC = () => {
 			const finalFormData = {
 				...formData,
 				...optionsRef,
-				flat_share_profile: {
-					...formData?.flat_share_profile,
-					bio: flat_share_profile?.bio || null,
-					done_kyc: flat_share_profile?.done_kyc,
-					_id: user._id,
-					avatar_url: user.avatar_url,
-					first_name: user.first_name,
-					last_name: user.last_name,
-				},
 			}
 
 			finalFormData.budget = Number(finalFormData.budget)
@@ -329,7 +307,7 @@ const CreateSeekerForm: React.FC = () => {
 				})
 
 				setTimeout(() => {
-					router.push('/')
+					window.location.assign('/')
 				}, 1000)
 			}
 		} catch (error) {

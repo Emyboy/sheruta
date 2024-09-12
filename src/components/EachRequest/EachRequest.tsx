@@ -66,13 +66,13 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request.flat_share_profile._id}`}
+						href={`/user/${request._user_ref._id}`}
 						style={{ textDecoration: 'none' }}
 						onClick={async () =>
 							await createNotification({
 								is_read: false,
 								message: NotificationsBodyMessage.profile_view,
-								recipient_id: request.flat_share_profile._id,
+								recipient_id: request._user_ref._id,
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
@@ -86,7 +86,7 @@ export default function EachRequest({ request }: Props) {
 						}
 					>
 						<Avatar
-							src={request.flat_share_profile.avatar_url}
+							src={request._user_ref.avatar_url}
 							size={{
 								md: 'md',
 								base: 'md',
@@ -98,13 +98,13 @@ export default function EachRequest({ request }: Props) {
 					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
 							<Link
-								href={`/user/${request.flat_share_profile._id}`}
+								href={`/user/${request._user_ref._id}`}
 								style={{ textDecoration: 'none' }}
 								onClick={async () =>
 									await createNotification({
 										is_read: false,
 										message: NotificationsBodyMessage.profile_view,
-										recipient_id: request.flat_share_profile._id,
+										recipient_id: request._user_ref._id,
 										type: 'profile_view',
 										sender_details: authState.user
 											? {
@@ -122,10 +122,9 @@ export default function EachRequest({ request }: Props) {
 										textTransform={'capitalize'}
 										fontSize={{ base: 'base', md: 'lg' }}
 									>
-										{request.flat_share_profile.last_name}{' '}
-										{request.flat_share_profile.first_name}
+										{request._user_ref.last_name} {request._user_ref.first_name}
 									</Text>
-									{request.flat_share_profile.is_verified && (
+									{request.user_info.is_verified && (
 										<LuBadgeCheck fill="#00bc73" />
 									)}
 								</Flex>
@@ -195,8 +194,7 @@ export default function EachRequest({ request }: Props) {
 													Share
 												</Text>
 											</Button>
-											{authState.user?._id ===
-												request.flat_share_profile._id && (
+											{authState.user?._id === request._user_ref._id && (
 												<>
 													<Button
 														variant="ghost"
@@ -235,7 +233,7 @@ export default function EachRequest({ request }: Props) {
 														onClick={async () =>
 															await handleDeletePost({
 																requestId: request.id,
-																userId: request.flat_share_profile._id,
+																userId: request._user_ref._id,
 															})
 														}
 														width="100%"
@@ -348,7 +346,7 @@ export default function EachRequest({ request }: Props) {
 					justifyContent={'space-between'}
 				>
 					<Flex gap={DEFAULT_PADDING}>
-						{!request._user_info?.hide_phone ? (
+						{!request.user_info?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									px={0}
@@ -369,11 +367,10 @@ export default function EachRequest({ request }: Props) {
 										base: 'base',
 									}}
 									onClick={async () => {
-										if (authState.user?._id === request.flat_share_profile._id)
-											return
+										if (authState.user?._id === request._user_ref._id) return
 										await handleCall({
-											number: request.flat_share_profile.primary_phone_number,
-											recipient_id: request.flat_share_profile._id,
+											number: request.user_info.primary_phone_number,
+											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
 														avatar_url: authState.user.avatar_url,
@@ -392,7 +389,7 @@ export default function EachRequest({ request }: Props) {
 
 						<MainTooltip label="Ask questions" placement="top">
 							<Link
-								href={`/messsages/${request.flat_share_profile._id}`}
+								href={`/messsages/${request._user_ref._id}`}
 								style={{ textDecoration: 'none' }}
 							>
 								<Button

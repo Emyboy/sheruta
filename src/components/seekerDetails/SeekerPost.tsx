@@ -4,7 +4,12 @@ import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
-import { capitalizeString, timeAgo } from '@/utils/index.utils'
+import {
+	capitalizeString,
+	timeAgo,
+	handleCall,
+	handleDM,
+} from '@/utils/index.utils'
 import {
 	Avatar,
 	Badge,
@@ -22,6 +27,7 @@ import {
 	Tooltip,
 	useColorMode,
 	VStack,
+	Icon,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -35,27 +41,16 @@ import {
 	BiPhone,
 	BiShare,
 	BiTrash,
+	BiSolidBadgeCheck,
 } from 'react-icons/bi'
-import UserCard from './UserCard'
-import { Timestamp } from 'firebase/firestore'
-interface PostData {
-	id: string
-	updatedAt: Timestamp
-	description: string
-	google_location_text: string
-	flat_share_profile?: any
-	_service_ref?: any
-	_location_keyword_ref?: any
-	budget: number
-	payment_type: string
-	userInfoDoc?: any
-}
+import SuperJSON from 'superjson'
+import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
 
 const SeekerPost = ({
-	postData,
+	requestData,
 	requestId,
 }: {
-	postData: PostData
+	requestData: string | undefined
 	requestId: string | undefined
 }) => {
 	const { colorMode } = useColorMode()
@@ -64,17 +59,11 @@ const SeekerPost = ({
 	const { copyShareUrl } = useShareSpace()
 	const router = useRouter()
 
-	const {
-		updatedAt,
-		description,
-		google_location_text,
-		flat_share_profile: userDoc,
-		_service_ref: serviceTypeDoc,
-		_location_keyword_ref: locationKeywordDoc,
-		budget,
-		payment_type,
-		userInfoDoc,
-	} = postData || {}
+	const postData: SeekerRequestDataDetails | undefined = requestData
+		? SuperJSON.parse(requestData)
+		: undefined
+
+	const [lastUpdated, setLastUpdated] = useState<string>('99 years ago')
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -82,12 +71,14 @@ const SeekerPost = ({
 
 	useEffect(() => {
 		if (
+			postData &&
 			typeof authState.user !== 'undefined' &&
-			typeof userDoc !== 'undefined'
+			typeof postData?._user_ref?._id !== 'undefined'
 		) {
-			setIsPostAdmin(authState.user?._id === userDoc?._id)
+			setIsPostAdmin(authState.user?._id === postData?._user_ref?._id)
+			setLastUpdated(timeAgo(postData.updatedAt))
 		}
-	}, [userDoc, authState])
+	}, [postData, authState])
 
 	const deletePost = async (): Promise<void> => {
 		try {
@@ -132,14 +123,18 @@ const SeekerPost = ({
 
 	return (
 		<>
-			{typeof userDoc !== 'undefined' && Object.values(userDoc || {}).length ? (
+			{typeof postData !== 'undefined' &&
+			Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
 							<Flex alignItems="center">
 								<Avatar
 									size="lg"
-									src={userDoc?.avatar_url || 'https://via.placeholder.com/150'}
+									src={
+										postData._user_ref.avatar_url ||
+										'https://via.placeholder.com/150'
+									}
 								/>
 								<Box ml={2}>
 									<Heading as="h3" size="md">
@@ -150,7 +145,7 @@ const SeekerPost = ({
 										fontSize="sm"
 										color={colorMode === 'light' ? '#11171766' : '#ddd'}
 									>
-										Posted {timeAgo(updatedAt)}
+										Posted {lastUpdated}
 									</Text>
 								</Box>
 							</Flex>
@@ -255,7 +250,7 @@ const SeekerPost = ({
 								<Text fontSize={'25px'}>
 									<BiMap />
 								</Text>{' '}
-								<Text fontSize={'15px'}> {google_location_text} </Text>
+								<Text fontSize={'15px'}> {postData.google_location_text} </Text>
 							</Flex>
 
 							<Text>
@@ -268,13 +263,13 @@ const SeekerPost = ({
 									variant="subtle"
 									fontWeight={300}
 								>
-									{serviceTypeDoc?.title}
+									{postData._service_ref?.title}
 								</Badge>
 							</Text>
 						</Flex>
 
 						<Text mt={5} mb={5} whiteSpace={'pre-wrap'}>
-							{description}
+							{postData.description}
 						</Text>
 
 						<HStack>
@@ -285,24 +280,22 @@ const SeekerPost = ({
 								justifyContent={'space-between'}
 							>
 								<Box>
-									{userInfoDoc?.primary_phone_number ? (
+									{postData.user_info.primary_phone_number ? (
 										<Tooltip
 											bgColor={colorMode === 'dark' ? '#fff' : 'gray.300'}
 											hasArrow
-											label={`Call ${userDoc?.first_name}`}
+											label={`Call ${postData._user_ref?.first_name}`}
 											color={colorMode === 'dark' ? 'black' : 'black'}
 										>
 											<IconButton
 												variant="outline"
-												aria-label={`Call ${userDoc?.first_name}`}
+												aria-label={`Call ${postData._user_ref?.first_name}`}
 												border="none"
 												fontSize={'24px'}
 												icon={<BiPhone />}
-												onClick={() =>
-													router.replace(
-														`tel:${userInfoDoc.primary_phone_number}`,
-													)
-												}
+												// onClick={() =>
+												// 	handleCall(postData.user_info.primary_phone_number)
+												// }
 											/>
 										</Tooltip>
 									) : null}
@@ -310,28 +303,26 @@ const SeekerPost = ({
 									<Tooltip
 										bgColor={colorMode === 'dark' ? '#fff' : 'gray.300'}
 										hasArrow
-										label={`Dm ${userDoc?.first_name}`}
+										label={`Dm ${postData._user_ref.first_name}`}
 										color={colorMode === 'dark' ? 'black' : 'black'}
 									>
 										<IconButton
 											variant="outline"
-											aria-label={`Message ${userDoc?.first_name}`}
+											aria-label={`Message ${postData._user_ref.first_name}`}
 											border="none"
 											fontSize="24px"
 											icon={<BiEnvelope />}
-											onClick={() => {
-												router.replace(`/messages/${userInfoDoc?._user_id}`)
-											}}
+											onClick={() => handleDM(postData._user_ref._id)}
 										/>
 									</Tooltip>
 								</Box>
 								<Flex flexWrap={'wrap'}>
 									<Text fontSize={'1.4rem'} fontWeight={'700'}>
-										&#8358;{budget?.toLocaleString()}
+										&#8358;{postData.budget?.toLocaleString()}
 									</Text>
 									<Text fontSize={20} fontWeight={200}>
 										{'/'}
-										{payment_type}
+										{postData.payment_type}
 									</Text>
 								</Flex>
 							</Flex>
@@ -345,19 +336,94 @@ const SeekerPost = ({
 					<Box marginTop={10} paddingBottom="70px">
 						<UserCard
 							name={
-								capitalizeString(userDoc?.first_name) + ' ' + userDoc?.last_name
+								capitalizeString(postData._user_ref.first_name) +
+								' ' +
+								postData._user_ref.last_name
 							}
-							handle={userDoc?.first_name}
-							userInfoDoc={userInfoDoc}
-							profilePicture={userDoc?.avatar_url}
-							bio={userDoc?.bio || 'No Bio Available'}
+							handle={postData._user_ref.first_name}
+							userInfo={postData.user_info}
+							profilePicture={postData._user_ref.avatar_url}
+							bio={postData.flat_share_profile.bio || 'No Bio Available'}
 						/>
 					</Box>
 				</>
 			) : (
-				'please wait ...'
+				<Box w="100%" textAlign="center">
+					{'This Post does not exist'}
+				</Box>
 			)}
 		</>
+	)
+}
+
+const UserCard = ({
+	name,
+	handle,
+	bio,
+	profilePicture,
+	userInfo,
+}: {
+	name: string
+	handle: string
+	bio: string | undefined
+	profilePicture: string | undefined
+	userInfo: any
+}) => {
+	return (
+		<Box bgColor="#202020" borderRadius="15px">
+			<Flex bg="brand_darker" p={4} alignItems="center" borderRadius="15px">
+				<Avatar size="lg" src={profilePicture} />
+				<VStack justifyContent={'flex-start'} spacing={1} ml={2}>
+					<Flex gap={2} alignItems={'center'}>
+						<Text fontWeight="bold" color="white">
+							{name}
+						</Text>
+						{userInfo?.is_verified ? (
+							<Icon as={BiSolidBadgeCheck} color="blue.500" ml={1} />
+						) : null}
+					</Flex>
+					<Text w="100%" color="#fff" fontSize="sm">
+						@{handle}
+					</Text>
+					<Text w="100%" color="#fff" fontSize="sm">
+						{bio}
+					</Text>
+				</VStack>
+			</Flex>
+
+			<HStack
+				p={4}
+				justifyContent={'space-between'}
+				alignItems={'center'}
+				bgColor={'gray.600'}
+				color={'#fff'}
+			>
+				<Text fontWeight={'semibold'} cursor={'pointer'}>
+					Book Inspection
+				</Text>
+				<Flex justifyContent="flex-end">
+					<IconButton
+						aria-label="sese"
+						icon={<BiEnvelope />}
+						variant="ghost"
+						colorScheme="white"
+						size={'md'}
+						onClick={() => handleDM(userInfo?._user_id)}
+					/>
+					{userInfo?.primary_phone_number ? (
+						<IconButton
+							aria-label="sese"
+							icon={<BiPhone />}
+							variant="ghost"
+							colorScheme="white"
+							ml={2}
+							size={'md'}
+							onClick={() => handleCall(userInfo.primary_phone_number)}
+						/>
+					) : null}
+				</Flex>
+			</HStack>
+		</Box>
 	)
 }
 
