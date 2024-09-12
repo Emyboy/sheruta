@@ -88,7 +88,6 @@ const EditSeekerForm: React.FC<{
 	requestData: string | undefined
 	requestId: string
 }> = ({ requestData, requestId }) => {
-
 	const parsedRequestData: SeekerRequestDataDetails | undefined = requestData
 		? SuperJSON.parse(requestData)
 		: undefined
@@ -103,20 +102,20 @@ const EditSeekerForm: React.FC<{
 
 	// Redirect to '/' if parsedRequestData is undefined
 	useEffect(() => {
-		console.log('why?????', parsedRequestData)
 		if (parsedRequestData) {
 			// Check for missing parsedRequestData or mismatched user ID
-			if (flat_share_profile && parsedRequestData._user_ref._id !== flat_share_profile?._user_id) {
-				window.location.assign('/');
-				return;
+			if (
+				flat_share_profile &&
+				parsedRequestData._user_ref._id !== flat_share_profile?._user_id
+			) {
+				window.location.assign('/')
+				return
 			}
-		}else{
-			window.location.assign('/');
-			return;
+		} else {
+			window.location.assign('/')
+			return
 		}
-
-	}, [parsedRequestData, flat_share_profile]);
-
+	}, [parsedRequestData, flat_share_profile])
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [formData, setFormData] = useState({
@@ -135,8 +134,6 @@ const EditSeekerForm: React.FC<{
 		seeking: true,
 	})
 
-	console.log(formData)
-
 	const {
 		optionsState: { services, states, location_keywords },
 	} = useOptionsContext()
@@ -145,11 +142,10 @@ const EditSeekerForm: React.FC<{
 		_service_ref: DocumentReference | undefined
 		_location_keyword_ref: DocumentReference | undefined
 		_state_ref: DocumentReference | undefined
-	}
-	>({
+	}>({
 		_service_ref: undefined,
 		_state_ref: undefined,
-		_location_keyword_ref: undefined
+		_location_keyword_ref: undefined,
 	})
 
 	const [locations, setLocations] = useState<any[]>([])
@@ -157,42 +153,10 @@ const EditSeekerForm: React.FC<{
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
 	const getLocations = (stateId: string): string[] => {
-		return location_keywords.filter((item: LocationKeywordData) => item._state_id === stateId)
+		return location_keywords.filter(
+			(item: LocationKeywordData) => item._state_id === stateId,
+		)
 	}
-
-	// useEffect(() => {
-	// 	if (parsedRequestData && flat_share_profile?._user_id) {
-	// 		const convertedFormData =
-	// 			convertPlainObjectsToTimestamps(parsedRequestData)
-	// 		console.log('infinite')
-	// 		console.log(convertedFormData)
-
-	// 		// If user IDs don't match, redirect
-	// 		if (parsedRequestData._user_ref._id !== flat_share_profile?._user_id) {
-	// 			window.location.assign('/')
-	// 			return
-	// 		}
-
-	// 		const newFormData = {
-	// 			...convertedFormData,
-	// 			updatedAt: parsedRequestData.updatedAt,
-	// 			createdAt: parsedRequestData.createdAt,
-	// 			description: parsedRequestData.description,
-	// 			uuid: parsedRequestData.id,
-	// 			budget: parsedRequestData.budget,
-	// 			google_location_object: parsedRequestData.google_location_object,
-	// 			google_location_text: parsedRequestData.google_location_text,
-	// 			payment_type: parsedRequestData.payment_type,
-	// 			seeking: true,
-	// 		}
-
-	// 		setFormData((prev) => ({
-	// 			...prev,
-	// 			...newFormData
-	// 		}))
-	// 	}
-	// }, [flat_share_profile])
-
 
 	const [isBudgetInvalid, setIsBudgetInvalid] = useState<boolean>(false)
 	const [googleLocationText, setGoogleLocationText] = useState<string>('')
@@ -213,11 +177,11 @@ const EditSeekerForm: React.FC<{
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -236,11 +200,7 @@ const EditSeekerForm: React.FC<{
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
-		console.log('I AM WORKING')
-		console.log(location_keywords)
 		const { id, name, value } = e.target
-
-		console.log(id, name, value)
 
 		const updateBudgetInvalidState = (
 			paymentType: string,
@@ -270,7 +230,6 @@ const EditSeekerForm: React.FC<{
 			case 'stateId':
 				if (value) {
 					const newLocations = getLocations(value)
-					console.log(newLocations)
 					setLocations(newLocations)
 					const stateRef = states.find((data) => data.id === value)?._ref
 					updateOptionsRef('_state_ref', stateRef)
@@ -336,7 +295,7 @@ const EditSeekerForm: React.FC<{
 				})
 
 				setTimeout(() => {
-					router.push('/')
+					window.location.assign('/')
 				}, 1000)
 			}
 		} catch (error: any) {

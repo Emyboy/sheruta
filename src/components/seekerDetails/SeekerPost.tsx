@@ -124,7 +124,7 @@ const SeekerPost = ({
 	return (
 		<>
 			{typeof postData !== 'undefined' &&
-				Object.values(postData || {}).length ? (
+			Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -293,9 +293,9 @@ const SeekerPost = ({
 												border="none"
 												fontSize={'24px'}
 												icon={<BiPhone />}
-												onClick={() =>
-													handleCall(postData.user_info.primary_phone_number)
-												}
+												// onClick={() =>
+												// 	handleCall(postData.user_info.primary_phone_number)
+												// }
 											/>
 										</Tooltip>
 									) : null}
@@ -369,12 +369,11 @@ const UserCard = ({
 	profilePicture: string | undefined
 	userInfo: any
 }) => {
-
 	return (
 		<Box bgColor="#202020" borderRadius="15px">
 			<Flex bg="brand_darker" p={4} alignItems="center" borderRadius="15px">
 				<Avatar size="lg" src={profilePicture} />
-				<VStack justifyContent={"flex-start"} spacing={1} ml={2}>
+				<VStack justifyContent={'flex-start'} spacing={1} ml={2}>
 					<Flex gap={2} alignItems={'center'}>
 						<Text fontWeight="bold" color="white">
 							{name}

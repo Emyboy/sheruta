@@ -1,28 +1,24 @@
-import React from 'react'
-import UserProfilePage from './(user-profile)/UserProfilePage'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import MainSection from '@/components/atoms/MainSection'
-import { Box, Flex } from '@chakra-ui/react'
-import MainLeftNav from '@/components/layout/MainLeftNav'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
-import MainHeader from '@/components/layout/MainHeader'
 import MainContainer from '@/components/layout/MainContainer'
+import MainHeader from '@/components/layout/MainHeader'
+import MainLeftNav from '@/components/layout/MainLeftNav'
+import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
+import { Flex } from '@chakra-ui/react'
+import UserProfilePage from './(user-profile)/UserProfilePage'
+
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
 	collection,
 	doc,
+	DocumentReference,
+	DocumentSnapshot,
 	getDoc,
 	getDocs,
 	query,
 	where,
-	DocumentReference,
-	DocumentSnapshot,
-	DocumentData,
 } from 'firebase/firestore'
-import { db } from '@/firebase'
-import { promise } from 'zod'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -195,17 +191,15 @@ export default async function page(props: any) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					<Flex flexDirection={'column'} w="full">
-						<Box my={3}>
-							<MainBackHeader />
-						</Box>
-
-						{user ? (
-							<UserProfilePage data={user} userId={otherInfos} />
-						) : (
-							<PageNotFound />
-						)}
-					</Flex>
+					{user ? (
+						<UserProfilePage
+							data={user}
+							userId={otherInfos}
+							user_id={user_id}
+						/>
+					) : (
+						<PageNotFound />
+					)}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

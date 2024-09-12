@@ -33,7 +33,7 @@ export default function UploadMedia({
 }: HostSpaceFormProps) {
 	const toast = useToast()
 	const {
-		authState: { user, user_info },
+		authState: { user, user_info, flat_share_profile },
 	} = useAuthContext()
 	const router = useRouter()
 
@@ -176,14 +176,15 @@ export default function UploadMedia({
 				uuid,
 				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
-				flat_share_profile: {
-					is_verified,
-					primary_phone_number,
-					_id,
-					first_name,
-					last_name,
-					avatar_url,
-				},
+				_user_ref: flat_share_profile?._user_ref,
+				// flat_share_profile: {
+				// 	is_verified,
+				// 	primary_phone_number,
+				// 	_id,
+				// 	first_name,
+				// 	last_name,
+				// 	avatar_url,
+				// },
 			}
 
 			createHostRequestDTO.parse(data)

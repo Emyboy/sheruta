@@ -58,16 +58,6 @@ export type PaymentPlan =
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
-// export type userSchema = {
-// 	is_verified: boolean
-// 	primary_phone_number: string | null
-// 	_id: string
-// 	first_name: string
-// 	last_name: string
-// 	avatar_url: string
-// 	bio?: string
-// }
-
 const timestampSchema = z.object({
 	seconds: z.number().int().positive(),
 	nanoseconds: z.number().int().nonnegative().max(999_999_999),
@@ -133,7 +123,6 @@ export const createHostRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	// flat_share_profile: z.custom<userSchema>(),
 	_user_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
@@ -162,7 +151,6 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	// flat_share_profile: z.custom<userSchema>(),
 
 	_state_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,

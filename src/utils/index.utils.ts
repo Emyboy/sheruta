@@ -1,5 +1,7 @@
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import NotificationsService from '@/firebase/service/notifications/notifications.firebase'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
 import { formatDuration, intervalToDuration } from 'date-fns'
 
 export const hasEmptyValue = (obj: any): boolean => {
@@ -87,8 +89,28 @@ export function convertSeconds(seconds: number) {
 	return formattedDuration
 }
 
-export const handleCall = (number: string | null) => {
-	window.location.href = `tel:${number}`
+export const handleCall = async (data: {
+	number: string | null
+	recipient_id: string
+	sender_details: null | {
+		id: string
+		first_name: string
+		last_name: string
+		avatar_url: string
+	}
+}) => {
+	window.location.href = `tel:${data.number}`
+
+	await NotificationsService.create({
+		collection_name: DBCollectionName.notifications,
+		data: {
+			type: 'call',
+			is_read: false,
+			message: NotificationsBodyMessage.call,
+			recipient_id: data.recipient_id,
+			sender_details: data.sender_details,
+		},
+	})
 }
 
 export const handleDM = (userId: string | null) => {

@@ -337,7 +337,7 @@ export default function InspectionCard({
 							fontSize={{ base: 'sm', md: 'base' }}
 							onClick={handleStartCall}
 						>
-							Call
+							Join Call
 						</Button>
 					</Flex>
 				</Flex>

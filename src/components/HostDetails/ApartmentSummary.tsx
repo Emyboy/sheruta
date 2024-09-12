@@ -21,8 +21,7 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import {
-	HostRequestDataDetails,
-	userSchema,
+	HostRequestDataDetails
 } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
@@ -96,7 +95,7 @@ export default function ApartmentSummary({
 			<BookInspectionModal
 				closeModal={closeModal}
 				showBookInspectionModal={showBookInspectionModal}
-				host_details={request.flat_share_profile}
+				host_details={request._user_ref}
 				inspection_location={request.google_location_text}
 			/>
 			<Flex
@@ -164,7 +163,7 @@ export default function ApartmentSummary({
 
 				<Flex gap={{ base: '8px', md: '16px' }}>
 					<Avatar
-						src={request.flat_share_profile.avatar_url}
+						src={request._user_ref.avatar_url}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -183,21 +182,21 @@ export default function ApartmentSummary({
 						flexDir={'column'}
 					>
 						<Link
-							href={`/user/${request.flat_share_profile._id}`}
+							href={`/user/${request._user_ref._id}`}
 							style={{ textDecoration: 'none' }}
 							onClick={async () =>
 								await createNotification({
 									is_read: false,
 									message: NotificationsBodyMessage.profile_view,
-									recipient_id: request.flat_share_profile._id,
+									recipient_id: request._user_ref._id,
 									type: 'profile_view',
 									sender_details: authState.user
 										? {
-												avatar_url: authState.user.avatar_url,
-												first_name: authState.user.first_name,
-												last_name: authState.user.last_name,
-												id: authState.user._id,
-											}
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
 										: null,
 								})
 							}
@@ -207,10 +206,10 @@ export default function ApartmentSummary({
 									textTransform={'capitalize'}
 									fontSize={{ base: 'base', md: 'lg' }}
 								>
-									{request.flat_share_profile.last_name}{' '}
-									{request.flat_share_profile.first_name}
+									{request._user_ref.last_name}{' '}
+									{request._user_ref.first_name}
 								</Text>
-								{request.flat_share_profile.is_verified && (
+								{request.user_info.is_verified && (
 									<LuBadgeCheck fill="#00bc73" />
 								)}
 							</Flex>
@@ -237,15 +236,28 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
-									onClick={() =>
-										handleCall(request.flat_share_profile.primary_phone_number)
-									}
+									onClick={async () => {
+										if (authState.user?._id === request._user_ref._id)
+											return
+										await handleCall({
+											number: request.user_info.primary_phone_number,
+											recipient_id: request._user_ref._id,
+											sender_details: authState.user
+												? {
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
+												: null,
+										})
+									}}
 								>
 									<BiPhone />
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
-								<Link href={`/messages/${request.flat_share_profile._id}`}>
+								<Link href={`/messages/${request._user_ref._id}`}>
 									<Button
 										px={0}
 										bg="none"
@@ -335,7 +347,7 @@ export default function ApartmentSummary({
 											Share
 										</Text>
 									</Button>
-									{authState.user?._id === request.flat_share_profile._id && (
+									{authState.user?._id === request._user_ref._id && (
 										<>
 											<Button
 												variant="ghost"
@@ -364,7 +376,7 @@ export default function ApartmentSummary({
 												onClick={() =>
 													handleDeletePost({
 														requestId: request.id,
-														userId: request.flat_share_profile._id,
+														userId: request._user_ref._id,
 													})
 												}
 												width="100%"
@@ -428,7 +440,7 @@ export default function ApartmentSummary({
 					{formatDistanceToNow(
 						new Date(
 							request.updatedAt.seconds * 1000 +
-								request.updatedAt.nanoseconds / 1000000,
+							request.updatedAt.nanoseconds / 1000000,
 						),
 						{ addSuffix: true },
 					)}
@@ -827,7 +839,7 @@ export default function ApartmentSummary({
 					>
 						<Flex alignItems={'center'} gap={'16px'} justifyContent={'start'}>
 							<Avatar
-								src={request.flat_share_profile.avatar_url}
+								src={request._user_ref.avatar_url}
 								w={{
 									md: '100px',
 									base: '60px',
@@ -856,8 +868,8 @@ export default function ApartmentSummary({
 									_light={{ color: '#111717CC' }}
 									textTransform={'capitalize'}
 								>
-									{request.flat_share_profile.last_name}{' '}
-									{request.flat_share_profile.first_name}
+									{request._user_ref.last_name}{' '}
+									{request._user_ref.first_name}
 								</Text>
 								<Text
 									fontWeight={'300'}
@@ -983,7 +995,7 @@ const BookInspectionModal = ({
 }: {
 	closeModal: () => void
 	showBookInspectionModal: boolean
-	host_details: userSchema
+	host_details: any
 	inspection_location: string
 }) => {
 	const { authState } = useAuthContext()
@@ -1491,7 +1503,7 @@ const BookInspectionModal = ({
 						bgColor={'#00BC7399'}
 						textColor={'white'}
 						fontSize={{ base: 'sm', md: 'base' }}
-						// onClick={handleSubmit}
+					// onClick={handleSubmit}
 					>
 						Proceed to Payment
 					</Button>

@@ -203,7 +203,7 @@ const MessageSection = ({
 				message,
 				conversation_id: conversation._id,
 				recipient_id: guest._id,
-				user_id: user?._id as string,
+				user_id: user._id,
 			})
 
 			await NotificationsService.create({

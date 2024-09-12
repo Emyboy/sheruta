@@ -34,8 +34,8 @@ export type FormDataType = {
 	_location_keyword_ref: undefined | DocumentReference
 	_state_ref: undefined | DocumentReference
 	_service_ref: undefined | DocumentReference
-	_category_ref: undefined | DocumentReference	
-	_user_ref: undefined | DocumentReference	
+	_category_ref: undefined | DocumentReference
+	_user_ref: undefined | DocumentReference
 	images_urls: string[]
 	video_url: string | null
 	google_location_object: Record<string, any>
