@@ -24,7 +24,6 @@ import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
 import useCommon from '@/hooks/useCommon'
 import {
 	HostRequestData,
-	userSchema,
 } from '@/firebase/service/request/request.types'
 interface DiscussionDTO {
 	uuid: string | undefined
@@ -41,8 +40,8 @@ interface DiscussionData {
 	id: string
 	uuid: string
 	_request_ref: HostRequestData
-	_sender_ref: userSchema
-	_receiver_ref?: userSchema
+	_sender_ref: any
+	_receiver_ref?: any
 	reply_to?: string
 	nest_level: number
 	message: string

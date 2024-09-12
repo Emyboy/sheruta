@@ -28,8 +28,8 @@ export default async function page({
 		SherutaDB.getAll({
 			collection_name: DBCollectionName.messages,
 			_limit: 1000,
-		})
-	]);
+		}),
+	])
 
 	let finalRequest: DocumentData | null = requestData
 	const discussions: any[] = discussionsData
@@ -39,7 +39,6 @@ export default async function page({
 		Object.keys(finalRequest).length > 0 &&
 		finalRequest._user_ref
 	) {
-
 		if (finalRequest?._user_ref?._id) {
 			const userId = finalRequest._user_ref._id
 

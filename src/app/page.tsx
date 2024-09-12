@@ -30,7 +30,7 @@ export default async function page() {
 
 				return {
 					...request,
-					user_info
+					user_info,
 				}
 			}) || [],
 	)
