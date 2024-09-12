@@ -45,6 +45,7 @@ export default function EachRequest({ request }: Props) {
 	const { authState } = useAuthContext()
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
+	console.log('Join comunity:....................2', request)
 	return (
 		<Box
 			position={'relative'}
@@ -89,8 +90,8 @@ export default function EachRequest({ request }: Props) {
 										textTransform={'capitalize'}
 										fontSize={{ base: 'base', md: 'lg' }}
 									>
-										{request.flat_share_profile.last_name}{' '}
-										{request.flat_share_profile.first_name}
+										{request.flat_share_profile.first_name}{' '}
+										{request.flat_share_profile.last_name}
 									</Text>
 									{request.flat_share_profile.done_kyc && (
 										<LuBadgeCheck fill="#00bc73" />

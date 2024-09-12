@@ -27,6 +27,7 @@ import {
 
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
+import ProfileSnippet from '@/components/ads/ProfileSnippet'
 
 type Props = {
 	locations: string
@@ -126,6 +127,8 @@ export default function HomePage({ locations, states, requests }: Props) {
 					<Flex flexDir={'column'}>
 						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
+						<ProfileSnippet />
+
 						<Flex flexDirection={'column'} gap={0}>
 							{flatShareRequests.map((request: any, index: number) => (
 								<Box

@@ -11,6 +11,8 @@ type Props = {}
 export default function JoinTheCommunity({}: Props) {
 	const { setAppState } = useAppContext()
 	const { authState } = useAuthContext()
+
+	console.log('Join comunity:....................', authState.user)
 	return (
 		<>
 			{!authState?.user && (
