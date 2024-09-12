@@ -22,9 +22,7 @@ import { db } from '@/firebase'
 import { useAuthContext } from '@/context/auth.context'
 import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
 import useCommon from '@/hooks/useCommon'
-import {
-	HostRequestData,
-} from '@/firebase/service/request/request.types'
+import { HostRequestData } from '@/firebase/service/request/request.types'
 interface DiscussionDTO {
 	uuid: string | undefined
 	_request_ref: DocumentReference | undefined
