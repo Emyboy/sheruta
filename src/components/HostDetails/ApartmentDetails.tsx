@@ -3,7 +3,8 @@
 import ApartmentSummary from '@/components/HostDetails/ApartmentSummary'
 import { Flex, Text } from '@chakra-ui/react'
 import { useState } from 'react'
-import DiscussionComponent from '../Discussions/DiscussionComponent'
+import DiscussionComponent from './DiscussionComponent'
+import { useSearchParams } from 'next/navigation'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -19,7 +20,10 @@ export default function ApartmentDetails({
 	request: string
 	discussions: string | undefined
 }) {
-	const [activeTab, setActiveTab] = useState('Apartment Summary')
+	const params = useSearchParams()
+	const [activeTab, setActiveTab] = useState(
+		params.get('tab')?.toString() || 'Apartment Summary',
+	)
 
 	const parsedRequest = JSON.parse(request)
 

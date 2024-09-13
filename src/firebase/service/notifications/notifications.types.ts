@@ -5,7 +5,7 @@ export const NotificationsDTO = z.object({
 	type: z.enum([
 		'message',
 		'inspection',
-		'missed_call',
+		'comment_reply',
 		'call',
 		'comment',
 		'rescheduled',
@@ -23,6 +23,7 @@ export const NotificationsDTO = z.object({
 		.nullable(),
 	recipient_id: z.string(),
 	is_read: z.boolean().default(false),
+	action_url: z.string().optional(),
 })
 
 export type NotificationsType = z.infer<typeof NotificationsDTO>

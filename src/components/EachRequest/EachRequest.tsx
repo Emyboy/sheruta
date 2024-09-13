@@ -4,7 +4,7 @@ import { NotificationsBodyMessage } from '@/firebase/service/notifications/notif
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification } from '@/utils/actions'
-import { handleCall } from '@/utils/index.utils'
+import { handleCall, timeAgo } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -82,6 +82,7 @@ export default function EachRequest({ request }: Props) {
 											id: authState.user._id,
 										}
 									: null,
+								action_url: `/user/${request._user_ref._id}`,
 							})
 						}
 					>
@@ -114,6 +115,7 @@ export default function EachRequest({ request }: Props) {
 													id: authState.user._id,
 												}
 											: null,
+										action_url: `/user/${request._user_ref._id}`,
 									})
 								}
 							>
@@ -259,13 +261,7 @@ export default function EachRequest({ request }: Props) {
 							</Popover>
 						</Flex>
 						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
-							{formatDistanceToNow(
-								new Date(
-									request.updatedAt.seconds * 1000 +
-										request.updatedAt.nanoseconds / 1000000,
-								),
-								{ addSuffix: true },
-							)}
+							{timeAgo(request.updatedAt)}
 						</Text>
 					</Flex>
 				</Flex>
