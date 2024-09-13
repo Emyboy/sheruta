@@ -85,9 +85,11 @@ const NoDiscussion = () => {
 const DiscussionComponent = ({
 	requestId,
 	discussions,
+	hostId,
 }: {
 	requestId: string | undefined
 	discussions: DiscussionData[]
+	hostId: string
 }) => {
 	const [requestRef, setRequestRef] = useState<DocumentReference | undefined>(
 		undefined,
@@ -166,7 +168,7 @@ const DiscussionComponent = ({
 						message: isReplying
 							? NotificationsBodyMessage.comment_reply
 							: NotificationsBodyMessage.comment,
-						recipient_id: '',
+						recipient_id: hostId,
 						sender_details: user
 							? {
 									id: user._id,

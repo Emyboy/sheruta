@@ -5,6 +5,7 @@ import { Flex, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import DiscussionComponent from './DiscussionComponent'
 import { useSearchParams } from 'next/navigation'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -25,7 +26,7 @@ export default function ApartmentDetails({
 		params.get('tab')?.toString() || 'Apartment Summary',
 	)
 
-	const parsedRequest = JSON.parse(request)
+	const parsedRequest: HostRequestDataDetails = JSON.parse(request)
 
 	const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
 
@@ -94,6 +95,7 @@ export default function ApartmentDetails({
 				<DiscussionComponent
 					requestId={parsedRequest.id}
 					discussions={parsedDiscussions}
+					hostId={parsedRequest._user_ref._id}
 				/>
 			)}
 			{activeTab === 'Verification' && <Text>Verification coming soon</Text>}
