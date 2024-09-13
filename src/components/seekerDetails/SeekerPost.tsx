@@ -42,9 +42,14 @@ import {
 	BiShare,
 	BiTrash,
 	BiSolidBadgeCheck,
+	BiSolidBookmark,
 } from 'react-icons/bi'
 import SuperJSON from 'superjson'
 import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
+import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
+import { BookmarkDataDetails } from '@/firebase/service/bookmarks/bookmarks.types'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { v4 as generateUId } from 'uuid'
 
 const SeekerPost = ({
 	requestData,
@@ -68,6 +73,9 @@ const SeekerPost = ({
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)
+
+	const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
+	const [bookmarkId, setBookmarkId] = useState<string | null>(null)
 
 	useEffect(() => {
 		if (
@@ -120,6 +128,92 @@ const SeekerPost = ({
 			setIsLoading(false)
 		}
 	}
+
+	const updateBookmark = async () => {
+		try {
+			if (!(authState.user && authState.user?._id)) {
+				return showToast({
+					message: 'Please login to perform this action',
+					status: 'success',
+				})
+			}
+
+			setIsLoading(true)
+
+			//check if user has saved this bookmark already, then unsave it
+			if (isBookmarked && bookmarkId) {
+				await BookmarkService.delete({
+					collection_name: DBCollectionName.bookmarks,
+					document_id: bookmarkId,
+				})
+				setIsBookmarked(false)
+				setBookmarkId(null)
+				setIsLoading(false)
+				return showToast({
+					message: 'Bookmark removed successfully',
+					status: 'success',
+				})
+			}
+
+			const uuid = generateUId()
+
+			//save new bookmark
+			await BookmarkService.create({
+				collection_name: DBCollectionName.bookmarks,
+				document_id: uuid as string,
+				data: {
+					type: 'request',
+					object_id: requestId as string,
+					user_id: authState.user._id,
+				},
+			})
+			setBookmarkId(bookmarkId)
+			setIsLoading(false)
+			setIsBookmarked(true)
+			return showToast({
+				message: 'Bookmark added successfully',
+				status: 'success',
+			})
+		} catch (err) {
+			showToast({
+				message: 'Failed to update bookmark',
+				status: 'error',
+			})
+		}
+	}
+
+	useEffect(() => {
+		const isBookmarked = async (): Promise<void> => {
+			try {
+				if (!(authState.user && authState.user._id)) {
+					setIsBookmarked(false)
+					return
+				}
+
+				const myBookmarks = (await BookmarkService.getUserBookmarks(
+					authState.user._id,
+				)) as BookmarkDataDetails[]
+
+				// Find the bookmark by request_id
+				const theBookmark = myBookmarks.find(
+					(bookmark) => bookmark.object_id === requestId,
+				)
+
+				// Set bookmarkId if a bookmark is found
+				if (theBookmark) {
+					setBookmarkId(theBookmark.id)
+					setIsBookmarked(true)
+				} else {
+					setIsBookmarked(false)
+				}
+			} catch (err: any) {
+				console.error('Error checking if request is bookmarked:', err)
+				setIsBookmarked(false)
+			}
+		}
+
+		isBookmarked()
+	}, [authState, requestId])
 
 	return (
 		<>
@@ -237,10 +331,13 @@ const SeekerPost = ({
 									</PopoverContent>
 								</Popover>
 								<IconButton
+									onClick={() => updateBookmark()}
+									disabled={isLoading}
+									isLoading={isLoading}
 									colorScheme={colorMode === 'dark' ? '' : 'gray'}
 									fontSize="24px"
 									aria-label="Bookmark"
-									icon={<BiBookmark />}
+									icon={isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
 								/>
 							</HStack>
 						</Flex>

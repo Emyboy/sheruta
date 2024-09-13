@@ -632,7 +632,12 @@ const VideoCallModal = ({
 						</Button>
 					</MainTooltip>
 				</Box>
-				<WherebyEmbed roomUrl={roomUrl} hostRoomUrl={hostRoomUrl} user={user} host_details={host_details} />
+				<WherebyEmbed
+					roomUrl={roomUrl}
+					hostRoomUrl={hostRoomUrl}
+					user={user}
+					host_details={host_details}
+				/>
 			</ModalContent>
 		</Modal>
 	)
