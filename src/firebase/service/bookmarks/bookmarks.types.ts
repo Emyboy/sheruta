@@ -9,7 +9,6 @@ export enum BookmarkType {
 
 export const BookmarkDTO = z.object({
 	uuid: z.string(),
-	title: z.string(),
 	object_type: z.enum([
 		BookmarkType.requests,
 		BookmarkType.listings,

@@ -170,11 +170,9 @@ const SeekerPost = ({
 
 			await BookmarkService.createBookmark({
 				object_type: BookmarkType.requests,
-				// object_id: requestId as string,
 				_object_ref: requestRef,
 				_user_ref: authState.flat_share_profile?._user_ref,
-				uuid,
-				title: truncateText(postData?.description as string, 50),
+				uuid
 			})
 
 			setBookmarkId(uuid)
