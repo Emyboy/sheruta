@@ -9,6 +9,7 @@ import {
 	timeAgo,
 	handleCall,
 	handleDM,
+	truncateText,
 } from '@/utils/index.utils'
 import {
 	Avatar,
@@ -47,7 +48,10 @@ import {
 import SuperJSON from 'superjson'
 import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import { BookmarkDataDetails, BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
+import {
+	BookmarkDataDetails,
+	BookmarkType,
+} from '@/firebase/service/bookmarks/bookmarks.types'
 import { v4 as generateUId } from 'uuid'
 import { doc } from 'firebase/firestore'
 import { db } from '@/firebase'
@@ -143,8 +147,10 @@ const SeekerPost = ({
 
 			//check if user has saved this bookmark already, then unsave it
 			if (isBookmarked && bookmarkId) {
-				await BookmarkService.deleteBookmark({user_id: authState.user._id, 
-				document_id: bookmarkId})
+				await BookmarkService.deleteBookmark({
+					user_id: authState.user._id,
+					document_id: bookmarkId,
+				})
 
 				setIsBookmarked(false)
 				setBookmarkId(null)
@@ -156,14 +162,19 @@ const SeekerPost = ({
 			}
 
 			const uuid = generateUId()
-			const requestRef = doc(db, DBCollectionName.flatShareRequests, requestId as string);
+			const requestRef = doc(
+				db,
+				DBCollectionName.flatShareRequests,
+				requestId as string,
+			)
 
 			await BookmarkService.createBookmark({
 				object_type: BookmarkType.requests,
-				object_id: requestId as string,
+				// object_id: requestId as string,
 				_object_ref: requestRef,
 				_user_ref: authState.flat_share_profile?._user_ref,
-				uuid
+				uuid,
+				title: truncateText(postData?.description as string, 50)
 			})
 
 			setBookmarkId(uuid)
@@ -195,7 +206,7 @@ const SeekerPost = ({
 
 				// Find the bookmark by request_id
 				const theBookmark = myBookmarks.find(
-					(bookmark) => bookmark._object_ref?.uuid === requestId,
+					(bookmark) => bookmark._object_ref?.id === requestId,
 				)
 
 				// Set bookmarkId if a bookmark is found
@@ -217,7 +228,7 @@ const SeekerPost = ({
 	return (
 		<>
 			{typeof postData !== 'undefined' &&
-				Object.values(postData || {}).length ? (
+			Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -396,9 +407,9 @@ const SeekerPost = ({
 												border="none"
 												fontSize={'24px'}
 												icon={<BiPhone />}
-											// onClick={() =>
-											// 	handleCall(postData.user_info.primary_phone_number)
-											// }
+												// onClick={() =>
+												// 	handleCall(postData.user_info.primary_phone_number)
+												// }
 											/>
 										</Tooltip>
 									) : null}

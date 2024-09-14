@@ -60,7 +60,7 @@ const PrivacyForm = () => {
 			}))
 			setIsLoading(false)
 			return showToast({
-				message: `Your ${(name === 'hide_profile') ? 'Profile' : 'Phone number'} has been ${(checked) ? 'hidden' : 'revealed'}.`,
+				message: `Your ${name === 'hide_profile' ? 'Profile' : 'Phone number'} has been ${checked ? 'hidden' : 'revealed'}.`,
 				status: 'success',
 			})
 		} catch (err: any) {

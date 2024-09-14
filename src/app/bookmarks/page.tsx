@@ -8,18 +8,17 @@ import React from 'react'
 
 type Props = {}
 
-export default function page({ }: Props) {
-    return (
-        <Flex justifyContent={'center'}>
-            <MainContainer>
-                <ThreeColumnLayout header={<MainHeader />}>
-                    <Flex flexDirection={'column'} w="full">
-                        <MainLeftNav />
-                    </Flex>
-                   <BookmarkList />
-                </ThreeColumnLayout>
-            </MainContainer>
-        </Flex>
-    )
+export default function page({}: Props) {
+	return (
+		<Flex justifyContent={'center'}>
+			<MainContainer>
+				<ThreeColumnLayout header={<MainHeader />}>
+					<Flex flexDirection={'column'} w="full">
+						<MainLeftNav />
+					</Flex>
+					<BookmarkList />
+				</ThreeColumnLayout>
+			</MainContainer>
+		</Flex>
+	)
 }
-

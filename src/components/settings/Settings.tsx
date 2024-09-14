@@ -31,7 +31,7 @@ const SettingOption = ({
 	return (
 		<Link href={href}>
 			<Flex
-			color="dark_lighter"
+				color="dark_lighter"
 				align="center"
 				p={4}
 				borderRadius="md"
@@ -54,7 +54,9 @@ const SettingOption = ({
 const Settings = () => {
 	return (
 		<Box maxW="600px" mx="auto">
-			<Heading mb={10} color={'dark-light'}>Settings</Heading>
+			<Heading mb={10} color={'dark-light'}>
+				Settings
+			</Heading>
 
 			<Stack spacing={4}>
 				<Text color={'dark-light'} fontSize="lg" fontWeight="bold">

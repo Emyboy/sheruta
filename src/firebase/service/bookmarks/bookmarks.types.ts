@@ -1,11 +1,5 @@
 import { z } from 'zod'
 import { DocumentReference, Timestamp } from 'firebase/firestore'
-import { HostRequestDataDetails } from '../request/request.types'
-
-const timestampSchema = z.object({
-	seconds: z.number().int().positive(),
-	nanoseconds: z.number().int().nonnegative().max(999_999_999),
-})
 
 export enum BookmarkType {
 	requests = 'requests',
@@ -15,12 +9,12 @@ export enum BookmarkType {
 
 export const BookmarkDTO = z.object({
 	uuid: z.string(),
+	title: z.string(),
 	object_type: z.enum([
 		BookmarkType.requests,
 		BookmarkType.listings,
 		BookmarkType.profiles,
 	]),
-	object_id: z.string(),
 	_object_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
@@ -34,7 +28,6 @@ export const BookmarkDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	// createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })
 
 export type BookmarkData = z.infer<typeof BookmarkDTO>
@@ -48,7 +41,7 @@ export type BookmarkDataDetails = Omit<BookmarkData, '_user_ref'> & {
 		_id: string
 		email: string
 	}
-	_object_ref : {
-		uuid: string
+	_object_ref: {
+		id: string
 	}
 }

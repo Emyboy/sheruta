@@ -6,7 +6,7 @@ import { NotificationsBodyMessage } from '@/firebase/service/notifications/notif
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification } from '@/utils/actions'
-import { handleCall } from '@/utils/index.utils'
+import { handleCall, truncateText } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -44,7 +44,10 @@ import MainTooltip from '../atoms/MainTooltip'
 import useCommon from '@/hooks/useCommon'
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
 import { v4 as generateUId } from 'uuid'
-import { BookmarkDataDetails, BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
+import {
+	BookmarkDataDetails,
+	BookmarkType,
+} from '@/firebase/service/bookmarks/bookmarks.types'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { doc } from 'firebase/firestore'
 import { db } from '@/firebase'
@@ -53,12 +56,13 @@ type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
-	const { showToast } = useCommon();
+	const { showToast } = useCommon()
 	const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
 	const [bookmarkId, setBookmarkId] = useState<string | null>(null)
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
-	const { copyShareUrl, handleDeletePost, isLoading, setIsLoading } = useShareSpace()
+	const { copyShareUrl, handleDeletePost, isLoading, setIsLoading } =
+		useShareSpace()
 
 	const updateBookmark = async () => {
 		try {
@@ -73,8 +77,10 @@ export default function EachRequest({ request }: Props) {
 
 			//check if user has saved this bookmark already, then unsave it
 			if (isBookmarked && bookmarkId) {
-				await BookmarkService.deleteBookmark({user_id: authState.user._id, 
-				document_id: bookmarkId})
+				await BookmarkService.deleteBookmark({
+					user_id: authState.user._id,
+					document_id: bookmarkId,
+				})
 
 				setIsBookmarked(false)
 				setBookmarkId(null)
@@ -86,14 +92,19 @@ export default function EachRequest({ request }: Props) {
 			}
 
 			const uuid = generateUId()
-			const requestRef = doc(db, DBCollectionName.flatShareRequests, request.id as string);
+			const requestRef = doc(
+				db,
+				DBCollectionName.flatShareRequests,
+				request.id as string,
+			)
 
 			await BookmarkService.createBookmark({
 				object_type: BookmarkType.requests,
-				object_id: request.id as string,
+				// object_id: request.id as string,
+				title: truncateText(request?.description as string, 50),
 				_object_ref: requestRef,
 				_user_ref: authState.flat_share_profile?._user_ref,
-				uuid
+				uuid,
 			})
 
 			setBookmarkId(uuid)
@@ -125,7 +136,7 @@ export default function EachRequest({ request }: Props) {
 
 				// Find the bookmark by request_id
 				const theBookmark = myBookmarks.find(
-					(bookmark) => bookmark.object_id === request.id,
+					(bookmark) => bookmark._object_ref?.id === request.id,
 				)
 
 				// Set bookmarkId if a bookmark is found
@@ -174,11 +185,11 @@ export default function EachRequest({ request }: Props) {
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
-										avatar_url: authState.user.avatar_url,
-										first_name: authState.user.first_name,
-										last_name: authState.user.last_name,
-										id: authState.user._id,
-									}
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
 									: null,
 							})
 						}
@@ -206,11 +217,11 @@ export default function EachRequest({ request }: Props) {
 										type: 'profile_view',
 										sender_details: authState.user
 											? {
-												avatar_url: authState.user.avatar_url,
-												first_name: authState.user.first_name,
-												last_name: authState.user.last_name,
-												id: authState.user._id,
-											}
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
 											: null,
 									})
 								}
@@ -360,7 +371,7 @@ export default function EachRequest({ request }: Props) {
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +
-									request.updatedAt.nanoseconds / 1000000,
+										request.updatedAt.nanoseconds / 1000000,
 								),
 								{ addSuffix: true },
 							)}
@@ -471,11 +482,11 @@ export default function EachRequest({ request }: Props) {
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
 												: null,
 										})
 									}}
@@ -545,7 +556,7 @@ export default function EachRequest({ request }: Props) {
 									base: 'base',
 								}}
 							>
-								{(isBookmarked) ? <BiSolidBookmark /> : <BiBookmark />}
+								{isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
 							</Button>
 						</MainTooltip>
 					</Flex>
@@ -705,12 +716,9 @@ const Truncate = ({
 }) => {
 	const maxChars = max || 200
 
-	const truncatedText =
-		text.length > maxChars ? text.substring(0, maxChars) + '... ' : text
-
 	return (
 		<Text>
-			{truncatedText}
+			{truncateText(text, maxChars)}
 			{text.length > maxChars && showReadMore && (
 				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
 					Read more..
