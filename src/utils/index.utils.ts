@@ -89,6 +89,25 @@ export function convertSeconds(seconds: number) {
 	return formattedDuration
 }
 
+export function convertTimestampToTime(timestamp: {
+	seconds: number
+	nanoseconds: number
+}): string {
+	const date = new Date(timestamp.seconds * 1000)
+
+	let hours = date.getHours()
+	const minutes = date.getMinutes()
+
+	const ampm = hours >= 12 ? 'PM' : 'AM'
+
+	hours = hours % 12
+	hours = hours ? hours : 12
+
+	const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
+
+	return `${hours}:${formattedMinutes}${ampm}`
+}
+
 export const handleCall = async (data: {
 	number: string | null
 	recipient_id: string
@@ -109,6 +128,7 @@ export const handleCall = async (data: {
 			message: NotificationsBodyMessage.call,
 			recipient_id: data.recipient_id,
 			sender_details: data.sender_details,
+			action_url: '',
 		},
 	})
 }

@@ -7,6 +7,9 @@ import axios from 'axios'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+export const revalidatePathOnClient = (path?: string) =>
+	revalidatePath(path || '/')
+
 export const deletePost = async (id: string) => {
 	await SherutaDB.delete({
 		collection_name: 'requests',
@@ -16,8 +19,6 @@ export const deletePost = async (id: string) => {
 	revalidatePath('/')
 	redirect('/')
 }
-
-export const createPost = async () => {}
 
 export const generateRoomUrl = async (endDate: string) => {
 	const API_KEY = process.env.WHEREBY_API_KEY

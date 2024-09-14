@@ -199,28 +199,30 @@ const MessageSection = ({
 			})
 
 		try {
-			await MessagesService.sendDM({
-				message,
-				conversation_id: conversation._id,
-				recipient_id: guest._id,
-				user_id: user._id,
-			})
-
-			await NotificationsService.create({
-				collection_name: DBCollectionName.notifications,
-				data: {
-					is_read: false,
-					message: NotificationsBodyMessage.message,
+			await Promise.all([
+				MessagesService.sendDM({
+					message,
+					conversation_id: conversation._id,
 					recipient_id: guest._id,
-					sender_details: {
-						id: user._id,
-						avatar_url: user.avatar_url,
-						first_name: user.first_name,
-						last_name: user.last_name,
+					user_id: user._id,
+				}),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						message: NotificationsBodyMessage.message,
+						recipient_id: guest._id,
+						sender_details: {
+							id: user._id,
+							avatar_url: user.avatar_url,
+							first_name: user.first_name,
+							last_name: user.last_name,
+						},
+						type: 'message',
+						action_url: `/messages/${user._id}`,
 					},
-					type: 'message',
-				},
-			})
+				}),
+			])
 		} catch (error) {
 			toast({ title: 'error, please try again', status: 'error' })
 		}

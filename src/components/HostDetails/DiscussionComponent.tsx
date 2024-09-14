@@ -1,28 +1,35 @@
 'use client'
 
+import { useAuthContext } from '@/context/auth.context'
+import { db } from '@/firebase'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
+import { HostRequestData } from '@/firebase/service/request/request.types'
+import useCommon from '@/hooks/useCommon'
+import { revalidatePathOnClient } from '@/utils/actions'
+import { convertTimestampToTime } from '@/utils/index.utils'
 import {
-	Box,
-	VStack,
 	Avatar,
-	Text,
-	Input,
-	IconButton,
+	Box,
+	Circle,
 	Flex,
 	Icon,
+	IconButton,
+	Input,
 	InputGroup,
 	InputRightElement,
+	Text,
+	VStack,
 	useColorModeValue,
-	Circle,
 } from '@chakra-ui/react'
 import { DocumentReference, Timestamp, doc } from 'firebase/firestore'
-import React, { useState, useEffect, useRef } from 'react'
-import { v4 as generateUId } from 'uuid'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { db } from '@/firebase'
-import { useAuthContext } from '@/context/auth.context'
+import { usePathname, useRouter } from 'next/navigation'
+import React, { useEffect, useRef, useState } from 'react'
 import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
-import useCommon from '@/hooks/useCommon'
-import { HostRequestData } from '@/firebase/service/request/request.types'
+import { v4 as generateUId } from 'uuid'
+
 interface DiscussionDTO {
 	uuid: string | undefined
 	_request_ref: DocumentReference | undefined
@@ -45,31 +52,6 @@ interface DiscussionData {
 	message: string
 	timestamp: Timestamp
 	type: string
-}
-
-function convertTimestampToTime(timestamp: {
-	seconds: number
-	nanoseconds: number
-}): string {
-	// Create a Date object using the seconds from the timestamp
-	const date = new Date(timestamp.seconds * 1000) // Convert seconds to milliseconds
-
-	// Get hours and minutes from the Date object
-	let hours = date.getHours()
-	const minutes = date.getMinutes()
-
-	// Determine AM or PM
-	const ampm = hours >= 12 ? 'PM' : 'AM'
-
-	// Convert hours to 12-hour format
-	hours = hours % 12
-	hours = hours ? hours : 12 // the hour '0' should be '12'
-
-	// Format minutes to always be two digits
-	const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
-
-	// Return the time in the format HH:MM AM/PM
-	return `${hours}:${formattedMinutes}${ampm}`
 }
 
 const NoDiscussion = () => {
@@ -112,8 +94,10 @@ const DiscussionComponent = ({
 	)
 
 	const {
-		authState: { flat_share_profile },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
+	const pathname = usePathname()
+	const router = useRouter()
 
 	const [message, setMessage] = useState<string>('')
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -168,27 +152,50 @@ const DiscussionComponent = ({
 				finalFormData._receiver_ref = receiverRef
 			}
 
-			await SherutaDB.create({
-				collection_name: DBCollectionName.messages,
-				data: finalFormData,
-				document_id: finalFormData.uuid as string,
-			})
+			await Promise.all([
+				SherutaDB.create({
+					collection_name: DBCollectionName.messages,
+					data: finalFormData,
+					document_id: finalFormData.uuid as string,
+				}),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						type: isReplying ? 'comment_reply' : 'comment',
+						message: isReplying
+							? NotificationsBodyMessage.comment_reply
+							: NotificationsBodyMessage.comment,
+						recipient_id: '',
+						sender_details: user
+							? {
+									id: user._id,
+									first_name: user.first_name,
+									last_name: user.last_name,
+									avatar_url: user.avatar_url,
+								}
+							: null,
+						action_url: `${pathname}?tab=Discussion`,
+					},
+				}),
+			])
 
 			setTimeout(() => {
 				showToast({
 					message: `Your ${isReplying ? 'reply' : 'comment'} has been posted successfully`,
 					status: 'success',
 				})
-				window.location.reload()
 			}, 1000)
+			revalidatePathOnClient(pathname)
+			router.push(pathname + '?tab=Discussion')
 		} catch (err: any) {
 			console.log(err)
 			showToast({
 				message: `Your ${isReplying ? 'reply' : 'comment'} was not submitted`,
 				status: 'error',
 			})
-			setIsLoading(false)
 		}
+		setIsLoading(false)
 	}
 
 	const getCommentReplies = (commentId: string): DiscussionData[] =>
@@ -208,7 +215,7 @@ const DiscussionComponent = ({
 	}
 
 	return (
-		<Box width="100%" overflowY={'scroll'}>
+		<Box width="100%" overflowY={'scroll'} pos={'relative'}>
 			<Box overflowY={'scroll'} minH={'50dvh'}>
 				<VStack align="start" spacing={2} w="100%">
 					{!discussions?.length ? (
@@ -244,10 +251,13 @@ const DiscussionComponent = ({
 				<Box
 					ref={replyBoxRef}
 					// p={4}
-					// bg="white"
+					bg="dark"
+					pos={'fixed'}
+					right={0}
+					bottom={0}
+					left={{ base: 0, lg: '50%' }}
 					borderRadius="md"
 					boxShadow="md"
-					w="100%"
 					mx="auto"
 				>
 					<InputGroup>

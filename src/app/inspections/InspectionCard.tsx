@@ -728,6 +728,7 @@ const CancelBookingModal = ({
 										first_name: user.first_name,
 										last_name: user.last_name,
 									},
+									action_url: '/inspections',
 								},
 							}),
 						]
@@ -753,6 +754,7 @@ const CancelBookingModal = ({
 										first_name: user.first_name,
 										last_name: user.last_name,
 									},
+									action_url: '/inspections',
 								},
 							}),
 						]
@@ -993,6 +995,7 @@ const ResheduleInspectionModal = ({
 							first_name: user.first_name,
 							last_name: user.last_name,
 						},
+						action_url: '/inspections',
 					},
 				}),
 			])
