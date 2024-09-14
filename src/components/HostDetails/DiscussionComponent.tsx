@@ -28,8 +28,13 @@ import { DocumentReference, Timestamp, doc } from 'firebase/firestore'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
+<<<<<<< HEAD:src/components/HostDetails/DiscussionComponent.tsx
 import { v4 as generateUId } from 'uuid'
 
+=======
+import useCommon from '@/hooks/useCommon'
+import { HostRequestData } from '@/firebase/service/request/request.types'
+>>>>>>> 97ebb2a05ff4c94103c173d6bd3189610ee44f35:src/components/Discussions/DiscussionComponent.tsx
 interface DiscussionDTO {
 	uuid: string | undefined
 	_request_ref: DocumentReference | undefined

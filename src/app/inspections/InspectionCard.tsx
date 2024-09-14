@@ -27,7 +27,6 @@ import {
 	ModalOverlay,
 	Text,
 } from '@chakra-ui/react'
-import '@whereby.com/browser-sdk/embed'
 import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -40,6 +39,7 @@ import NotificationsService, {
 } from '@/firebase/service/notifications/notifications.firebase'
 import Link from 'next/link'
 import { useAuthContext } from '@/context/auth.context'
+import WherebyEmbed from './wherebyEmbed'
 
 type InspectionProps = returnedInspectionData & {
 	currentUserId: string
@@ -632,18 +632,12 @@ const VideoCallModal = ({
 						</Button>
 					</MainTooltip>
 				</Box>
-				{
-					// @ts-ignore
-					<whereby-embed
-						room={user?._id === host_details.id ? hostRoomUrl : roomUrl}
-						style={{
-							minWidth: '100vw',
-							minHeight: '100vh',
-							maxWidth: '100vw',
-							maxHeight: '100vh',
-						}}
-					/>
-				}
+				<WherebyEmbed
+					roomUrl={roomUrl}
+					hostRoomUrl={hostRoomUrl}
+					user={user}
+					host_details={host_details}
+				/>
 			</ModalContent>
 		</Modal>
 	)
