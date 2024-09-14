@@ -7,6 +7,7 @@ import { Divider, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+	BiBookmark,
 	BiCalendarAlt,
 	BiCheckShield,
 	BiLogInCircle,
@@ -17,7 +18,7 @@ import {
 
 type Props = {}
 
-export default function MainLeftNav({}: Props) {
+export default function MainLeftNav({ }: Props) {
 	const {
 		logout,
 		authState: { user_info },
@@ -53,6 +54,9 @@ export default function MainLeftNav({}: Props) {
 					<EachNav Icon={BiCheckShield} label="Verification" />
 				</Link>
 			) : null}
+			<Link href="/bookmarks">
+				<EachNav Icon={BiBookmark} label="Bookmarks" />
+			</Link>
 			<Divider
 				color="border_color"
 				_dark={{

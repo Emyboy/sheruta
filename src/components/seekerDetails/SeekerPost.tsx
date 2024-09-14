@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB from '@/firebase/service/index.firebase'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
 import {
@@ -47,9 +47,10 @@ import {
 import SuperJSON from 'superjson'
 import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import { BookmarkDataDetails } from '@/firebase/service/bookmarks/bookmarks.types'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { BookmarkDataDetails, BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
 import { v4 as generateUId } from 'uuid'
+import { doc } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 const SeekerPost = ({
 	requestData,
@@ -134,7 +135,7 @@ const SeekerPost = ({
 			if (!(authState.user && authState.user?._id)) {
 				return showToast({
 					message: 'Please login to perform this action',
-					status: 'success',
+					status: 'info',
 				})
 			}
 
@@ -142,10 +143,9 @@ const SeekerPost = ({
 
 			//check if user has saved this bookmark already, then unsave it
 			if (isBookmarked && bookmarkId) {
-				await BookmarkService.delete({
-					collection_name: DBCollectionName.bookmarks,
-					document_id: bookmarkId,
-				})
+				await BookmarkService.deleteBookmark({user_id: authState.user._id, 
+				document_id: bookmarkId})
+
 				setIsBookmarked(false)
 				setBookmarkId(null)
 				setIsLoading(false)
@@ -156,18 +156,17 @@ const SeekerPost = ({
 			}
 
 			const uuid = generateUId()
+			const requestRef = doc(db, DBCollectionName.flatShareRequests, requestId as string);
 
-			//save new bookmark
-			await BookmarkService.create({
-				collection_name: DBCollectionName.bookmarks,
-				document_id: uuid as string,
-				data: {
-					type: 'request',
-					object_id: requestId as string,
-					user_id: authState.user._id,
-				},
+			await BookmarkService.createBookmark({
+				object_type: BookmarkType.requests,
+				object_id: requestId as string,
+				_object_ref: requestRef,
+				_user_ref: authState.flat_share_profile?._user_ref,
+				uuid
 			})
-			setBookmarkId(bookmarkId)
+
+			setBookmarkId(uuid)
 			setIsLoading(false)
 			setIsBookmarked(true)
 			return showToast({
@@ -196,7 +195,7 @@ const SeekerPost = ({
 
 				// Find the bookmark by request_id
 				const theBookmark = myBookmarks.find(
-					(bookmark) => bookmark.object_id === requestId,
+					(bookmark) => bookmark._object_ref?.uuid === requestId,
 				)
 
 				// Set bookmarkId if a bookmark is found
@@ -218,7 +217,7 @@ const SeekerPost = ({
 	return (
 		<>
 			{typeof postData !== 'undefined' &&
-			Object.values(postData || {}).length ? (
+				Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -333,6 +332,13 @@ const SeekerPost = ({
 								<IconButton
 									onClick={() => updateBookmark()}
 									disabled={isLoading}
+									_hover={{
+										color: 'brand',
+										bg: 'none',
+										_dark: {
+											color: 'brand',
+										},
+									}}
 									isLoading={isLoading}
 									colorScheme={colorMode === 'dark' ? '' : 'gray'}
 									fontSize="24px"
@@ -390,9 +396,9 @@ const SeekerPost = ({
 												border="none"
 												fontSize={'24px'}
 												icon={<BiPhone />}
-												// onClick={() =>
-												// 	handleCall(postData.user_info.primary_phone_number)
-												// }
+											// onClick={() =>
+											// 	handleCall(postData.user_info.primary_phone_number)
+											// }
 											/>
 										</Tooltip>
 									) : null}

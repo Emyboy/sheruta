@@ -1,3 +1,5 @@
+'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
@@ -24,9 +26,8 @@ import {
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
-	BiBarChart,
 	BiBookmark,
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
@@ -35,18 +36,114 @@ import {
 	BiPhone,
 	BiPlayCircle,
 	BiShare,
+	BiSolidBookmark,
 	BiTrash,
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
+import useCommon from '@/hooks/useCommon'
+import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
+import { v4 as generateUId } from 'uuid'
+import { BookmarkDataDetails, BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { doc } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
+	const { showToast } = useCommon();
+	const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
+	const [bookmarkId, setBookmarkId] = useState<string | null>(null)
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
-	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+	const { copyShareUrl, handleDeletePost, isLoading, setIsLoading } = useShareSpace()
+
+	const updateBookmark = async () => {
+		try {
+			if (!(authState.user && authState.user?._id)) {
+				return showToast({
+					message: 'Please login to perform this action',
+					status: 'info',
+				})
+			}
+
+			setIsLoading(true)
+
+			//check if user has saved this bookmark already, then unsave it
+			if (isBookmarked && bookmarkId) {
+				await BookmarkService.deleteBookmark({user_id: authState.user._id, 
+				document_id: bookmarkId})
+
+				setIsBookmarked(false)
+				setBookmarkId(null)
+				setIsLoading(false)
+				return showToast({
+					message: 'Bookmark removed successfully',
+					status: 'success',
+				})
+			}
+
+			const uuid = generateUId()
+			const requestRef = doc(db, DBCollectionName.flatShareRequests, request.id as string);
+
+			await BookmarkService.createBookmark({
+				object_type: BookmarkType.requests,
+				object_id: request.id as string,
+				_object_ref: requestRef,
+				_user_ref: authState.flat_share_profile?._user_ref,
+				uuid
+			})
+
+			setBookmarkId(uuid)
+			setIsLoading(false)
+			setIsBookmarked(true)
+			return showToast({
+				message: 'Bookmark added successfully',
+				status: 'success',
+			})
+		} catch (err) {
+			showToast({
+				message: 'Failed to update bookmark',
+				status: 'error',
+			})
+		}
+	}
+
+	useEffect(() => {
+		const isBookmarked = async (): Promise<void> => {
+			try {
+				if (!(authState.user && authState.user._id)) {
+					setIsBookmarked(false)
+					return
+				}
+
+				const myBookmarks = (await BookmarkService.getUserBookmarks(
+					authState.user._id,
+				)) as BookmarkDataDetails[]
+
+				// Find the bookmark by request_id
+				const theBookmark = myBookmarks.find(
+					(bookmark) => bookmark.object_id === request.id,
+				)
+
+				// Set bookmarkId if a bookmark is found
+				if (theBookmark) {
+					setBookmarkId(theBookmark.id)
+					setIsBookmarked(true)
+				} else {
+					setIsBookmarked(false)
+				}
+			} catch (err: any) {
+				console.error('Error checking if request is bookmarked:', err)
+				setIsBookmarked(false)
+			}
+		}
+
+		isBookmarked()
+	}, [authState, request])
+
 	return (
 		<Box
 			position={'relative'}
@@ -77,11 +174,11 @@ export default function EachRequest({ request }: Props) {
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
+										avatar_url: authState.user.avatar_url,
+										first_name: authState.user.first_name,
+										last_name: authState.user.last_name,
+										id: authState.user._id,
+									}
 									: null,
 							})
 						}
@@ -109,11 +206,11 @@ export default function EachRequest({ request }: Props) {
 										type: 'profile_view',
 										sender_details: authState.user
 											? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
 											: null,
 									})
 								}
@@ -263,7 +360,7 @@ export default function EachRequest({ request }: Props) {
 							{formatDistanceToNow(
 								new Date(
 									request.updatedAt.seconds * 1000 +
-										request.updatedAt.nanoseconds / 1000000,
+									request.updatedAt.nanoseconds / 1000000,
 								),
 								{ addSuffix: true },
 							)}
@@ -374,16 +471,16 @@ export default function EachRequest({ request }: Props) {
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
 												: null,
 										})
 									}}
 								>
-									<BiPhone /> 35
+									<BiPhone />
 								</Button>
 							</MainTooltip>
 						) : null}
@@ -417,12 +514,15 @@ export default function EachRequest({ request }: Props) {
 										base: 'base',
 									}}
 								>
-									<BiMessageRoundedDetail /> 35
+									<BiMessageRoundedDetail />
 								</Button>
 							</Link>
 						</MainTooltip>
-						<MainTooltip label="Engagements" placement="top">
+						<MainTooltip label="Bookmark" placement="top">
 							<Button
+								onClick={() => updateBookmark()}
+								isLoading={isLoading}
+								disabled={isLoading}
 								px={0}
 								bg="none"
 								color="text_muted"
@@ -445,7 +545,7 @@ export default function EachRequest({ request }: Props) {
 									base: 'base',
 								}}
 							>
-								<BiBookmark /> 
+								{(isBookmarked) ? <BiSolidBookmark /> : <BiBookmark />}
 							</Button>
 						</MainTooltip>
 					</Flex>
