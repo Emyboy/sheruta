@@ -125,25 +125,24 @@ export default class SherutaDB {
 
 		const documents = await Promise.all(
 			querySnapshot.docs.map(async (doc) => {
-				const docData = { ...doc.data() };
-		
+				const docData = { ...doc.data() }
+
 				const refFields = Object.entries(docData).filter(
 					([_, value]) => value instanceof DocumentReference,
-				);
-		
+				)
+
 				const resolvedRefs = await Promise.all(
 					refFields.map(async ([key, ref]) => {
-						const resolvedDoc = await getDoc(ref as DocumentReference);
-						return { [key]: { ...resolvedDoc.data(), id: resolvedDoc.id } };
+						const resolvedDoc = await getDoc(ref as DocumentReference)
+						return { [key]: { ...resolvedDoc.data(), id: resolvedDoc.id } }
 					}),
-				);
-		
-				Object.assign(docData, ...resolvedRefs);
-				
-				return { id: doc.id, ...docData, ref: doc.ref };
+				)
+
+				Object.assign(docData, ...resolvedRefs)
+
+				return { id: doc.id, ...docData, ref: doc.ref }
 			}),
-		);
-		
+		)
 
 		return await Promise.all(documents)
 	}

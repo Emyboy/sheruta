@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { DocumentReference, Timestamp } from 'firebase/firestore'
+import { DocumentReference } from 'firebase/firestore'
 
 export enum BookmarkType {
 	requests = 'requests',
@@ -21,7 +21,6 @@ export const BookmarkDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-
 	_user_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{

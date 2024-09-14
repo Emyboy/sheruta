@@ -1,14 +1,5 @@
-import { db } from '@/firebase'
-import {
-	collection,
-	getDoc,
-	getDocs,
-	query,
-	DocumentData,
-} from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { BookmarkData, BookmarkDataDetails } from './bookmarks.types'
-import { AuthUser } from '../auth/auth.types'
 
 export default class BookmarkService extends SherutaDB {
 	static async createBookmark(data: BookmarkData): Promise<void> {
@@ -20,28 +11,9 @@ export default class BookmarkService extends SherutaDB {
 				_user_ref: data._user_ref,
 				_object_ref: data._object_ref,
 				object_type: data.object_type,
-				// object_id: data.object_id,
 			},
 		})
 	}
-
-	// static async getSingleBookmark(documentId: string): Promise<BookmarkDataDetails | null> {
-
-	// 	const docRef = doc(db, DBCollectionName.bookmarks, documentId);
-	// 	const docSnap = await getDoc(docRef);
-
-	// 	if (docSnap.exists()) {
-	// 		// Return the bookmark data with the document reference and id
-	// 		return {
-	// 			ref: docRef,
-	// 			id: docSnap.id,
-	// 			...docSnap.data(),
-	// 		} as unknown as BookmarkDataDetails;
-	// 	} else {
-	// 		return null; // Return null if the document doesn't exist
-	// 	}
-
-	// }
 
 	static async getSingleBookmark(
 		document_id: string,

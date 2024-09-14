@@ -174,7 +174,7 @@ const SeekerPost = ({
 				_object_ref: requestRef,
 				_user_ref: authState.flat_share_profile?._user_ref,
 				uuid,
-				title: truncateText(postData?.description as string, 50)
+				title: truncateText(postData?.description as string, 50),
 			})
 
 			setBookmarkId(uuid)

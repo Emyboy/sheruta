@@ -137,4 +137,7 @@ export const handleDM = (userId: string | null) => {
 	window.location.href = `/messages/${userId}`
 }
 
-export const truncateText = (text: string, maxChars?:number) => text.length > (maxChars || 50) ? text.substring(0, maxChars || 50) + '... ' : text
+export const truncateText = (text: string, maxChars?: number) =>
+	text.length > (maxChars || 50)
+		? text.substring(0, maxChars || 50) + '... '
+		: text
