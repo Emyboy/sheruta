@@ -43,7 +43,11 @@ export default function MainLeftNav({}: Props) {
 				<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			</Link>
 			<EachNav Icon={BiWallet} label="Wallet" />
-			<EachNav Icon={BiWrench} label="Settings" />
+			{user_info && user_info._user_id ? (
+				<Link href={'/settings'}>
+					<EachNav Icon={BiWrench} label="Settings" />
+				</Link>
+			) : null}
 			{!user_info?.is_verified ? (
 				<Link href="/verification">
 					<EachNav Icon={BiCheckShield} label="Verification" />

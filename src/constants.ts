@@ -59,3 +59,5 @@ export const industries = [
 ]
 
 export const libraries: 'places'[] = ['places']
+
+export const whereby_base_url = 'https://sheruta-test.whereby.com/'

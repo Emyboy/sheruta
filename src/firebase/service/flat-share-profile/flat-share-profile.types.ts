@@ -26,7 +26,7 @@ const FlatShareProfileDataSchema = z.object({
 	gender_preference: z.string().nullable(),
 	age_preference: z.string().nullable(),
 	verified: z.boolean(),
-
+	bio: z.string().nullable(),
 	// bio: z.string().optional(),
 	// socials: z.object({
 	// 	twitter: z.string().optional(),
@@ -49,16 +49,17 @@ export type UpdateFlatShareProfileDataDTO = {
 	instagram?: string
 	twitter?: string
 	linkedin?: string
-	location_keyword?: string
-	state?: string
+	location_keyword?: DocumentReference | null
+	state?: DocumentReference | null
 	budget?: number
 	seeking?: boolean
 	credits?: number
 	habits?: any[]
 	interests?: any[]
 	done_kyc: boolean
-	gender_preference: string
-	age_preference: string
+	bio?: string
+	gender_preference?: string
+	age_preference?: string
 	// socials: object
 }
 
@@ -83,5 +84,5 @@ export const flatShareProfileDefaults = {
 	done_kyc: false,
 	gender_preference: null,
 	age_preference: null,
-	// bio: null,
+	bio: null,
 }

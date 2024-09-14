@@ -1,15 +1,30 @@
 import SherutaDB from '@/firebase/service/index.firebase'
-import { DocumentData } from 'firebase/firestore'
+import { DocumentData, Timestamp } from 'firebase/firestore'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { Box, Flex } from '@chakra-ui/react'
 import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import MainHeader from '@/components/layout/MainHeader'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import SeekerPost from '@/components/seekerDetails/SeekerPost'
 import SuperJSON from 'superjson'
+import MainBackHeader from '@/components/atoms/MainBackHeader'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+
+interface PostData {
+	id: string
+	updatedAt: Timestamp
+	description: string
+	google_location_text: string
+	// flat_share_profile?: any
+	_service_ref?: any
+	_location_keyword_ref?: any
+	budget: number
+	payment_type: string
+	userInfoDoc?: any
+}
 
 export default async function Page({
 	params,
@@ -18,52 +33,60 @@ export default async function Page({
 }) {
 	const requestId = params.request_id
 
-	let requestData: string | undefined = await getRequestData(requestId)
-
-	if (requestData) {
-		requestData = SuperJSON.parse(requestData)
-	}
+	const requestData: string | undefined = await getSeekerRequestData(requestId)
 
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
-				<ThreeColumnLayout header={<MainHeader />}>
+				<ThreeColumnLayout header={<MainBackHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
 					<Box p={DEFAULT_PADDING}>
-						<SeekerPost postData={requestData} requestId={requestId} />
+						<SeekerPost requestData={requestData} requestId={requestId} />
 					</Box>
 				</ThreeColumnLayout>
+				<MobileNavFooter />
 			</MainContainer>
 		</Flex>
 	)
 }
 
-async function getRequestData(requestId: string): Promise<string | undefined> {
+export async function getSeekerRequestData(
+	requestId: string,
+): Promise<string | undefined> {
 	try {
 		const result: DocumentData | null = await SherutaDB.get({
 			collection_name: 'requests',
 			document_id: requestId,
 		})
 
+		console.log(result)
+
 		if (
 			result &&
 			Object.keys(result).length > 0 &&
-			result.flat_share_profile &&
+			result._user_ref &&
 			result._service_ref &&
 			result._location_keyword_ref
 		) {
-			let userInfoDoc: DocumentData | undefined = undefined
+			if (result?._user_ref?._id) {
+				const userId = result._user_ref._id
 
-			if (result?.flat_share_profile?._id) {
-				userInfoDoc = await UserInfoService.get(result.flat_share_profile._id)
+				const [user_info, flat_share_profile] = await Promise.all([
+					await UserInfoService.get(userId),
+					await FlatShareProfileService.get(userId),
+				])
+
+				return SuperJSON.stringify({
+					...result,
+					user_info,
+					flat_share_profile,
+				})
+			} else {
+				console.log('User reference not found in request document')
+				return undefined
 			}
-
-			return SuperJSON.stringify({
-				...result,
-				userInfoDoc,
-			})
 		}
 
 		return undefined

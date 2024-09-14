@@ -19,7 +19,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 	)
 	const [budget, setBudget] = useState(flat_share_profile?.budget || 0)
 
-	const [bio, setBio] = useState(user_info?.bio || '')
+	const [bio, setBio] = useState(flat_share_profile?.bio || '')
 
 	const [isLoading, setIsLoading] = useState(false)
 
@@ -34,12 +34,12 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 			})
 
 			await UserInfoService.update({
-				data: { primary_phone_number, bio },
+				data: { primary_phone_number },
 				document_id: user._id,
 			})
 
 			await FlatShareProfileService.update({
-				data: { budget },
+				data: { budget, bio },
 				document_id: user?._id,
 			})
 

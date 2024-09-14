@@ -15,6 +15,7 @@ import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
+import ProfileSnippet from '@/components/ads/ProfileSnippet'
 import {
 	collection,
 	DocumentData,
@@ -27,7 +28,7 @@ import {
 
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-import ProfileSnippet from '@/components/ads/ProfileSnippet'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 
 type Props = {
 	locations: string
@@ -45,6 +46,26 @@ export default function HomePage({ locations, states, requests }: Props) {
 
 	const lastRequestRef = useRef<HTMLDivElement | null>(null)
 	const observer = useRef<IntersectionObserver | null>(null)
+
+	const [processedRequests, setProcessedRequests] = useState<
+		HostRequestDataDetails[]
+	>([])
+
+	useEffect(() => {
+		const processRequests = async () => {
+			if (flatShareRequests.length > 0) {
+				const updatedRequests = await Promise.all(
+					flatShareRequests.map(async (request: HostRequestDataDetails) =>
+						request.user_info?.hide_profile ? null : { ...request },
+					),
+				)
+				const filteredRequests = updatedRequests.filter(Boolean)
+				setProcessedRequests(filteredRequests as HostRequestDataDetails[])
+			}
+		}
+
+		processRequests()
+	}, [flatShareRequests])
 
 	const loadMore = async () => {
 		setIsLoading(true)
@@ -110,13 +131,6 @@ export default function HomePage({ locations, states, requests }: Props) {
 		if (node) observer.current?.observe(node)
 	}
 
-	useEffect(() => {
-		const parsedRequests: [] = requests ? JSON.parse(requests) : []
-		if (parsedRequests.length > 0) {
-			setFlatShareRequests([...parsedRequests])
-		}
-	}, [requests])
-
 	return (
 		<>
 			<MainPageBody>
@@ -130,10 +144,10 @@ export default function HomePage({ locations, states, requests }: Props) {
 						<ProfileSnippet />
 
 						<Flex flexDirection={'column'} gap={0}>
-							{flatShareRequests.map((request: any, index: number) => (
+							{processedRequests.map((request: any, index: number) => (
 								<Box
 									key={request.id}
-									ref={index === flatShareRequests.length - 1 ? setRef : null}
+									ref={index === processedRequests.length - 1 ? setRef : null}
 									style={{ transition: 'opacity 0.3s ease-in-out' }}
 								>
 									{index === 3 && <JoinTheCommunity key={index} />}
@@ -143,13 +157,13 @@ export default function HomePage({ locations, states, requests }: Props) {
 								</Box>
 							))}
 
-							{isLoading && flatShareRequests.length > 0 && (
+							{isLoading && processedRequests.length > 0 && (
 								<Flex justify="center" mt="3">
 									<Spinner />
 								</Flex>
 							)}
 
-							{!flatShareRequests.length &&
+							{!processedRequests.length &&
 								isLoading &&
 								Array.from({ length: 4 }).map((_, index) => (
 									<SpaceSkeleton key={index} />

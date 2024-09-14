@@ -1,28 +1,28 @@
-import React from 'react'
-import UserProfilePage from './(user-profile)/UserProfilePage'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import MainSection from '@/components/atoms/MainSection'
-import { Box, Flex } from '@chakra-ui/react'
-import MainLeftNav from '@/components/layout/MainLeftNav'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
-import MainHeader from '@/components/layout/MainHeader'
 import MainContainer from '@/components/layout/MainContainer'
+import MainHeader from '@/components/layout/MainHeader'
+import MainBackHeader from '@/components/atoms/MainBackHeader'
+import MainLeftNav from '@/components/layout/MainLeftNav'
+import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
+import { Flex, Box } from '@chakra-ui/react'
+import UserProfilePage from './(user-profile)/UserProfilePage'
+
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
 	collection,
 	doc,
+	DocumentReference,
+	DocumentSnapshot,
 	getDoc,
 	getDocs,
 	query,
 	where,
-	DocumentReference,
-	DocumentSnapshot,
-	DocumentData,
 } from 'firebase/firestore'
-import { db } from '@/firebase'
+
 import { promise } from 'zod'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
+
 import { ShareButton } from '@/components/atoms/ShareButton'
 
 export const revalidate = CACHE_TTL.LONG
@@ -169,6 +169,7 @@ export default async function page(props: any) {
 							credits: formattedFlatShareProfile.credits,
 							gender_preference: formattedFlatShareProfile.gender_preference,
 							age_preference: formattedFlatShareProfile.age_preference,
+							bio: formattedFlatShareProfile.bio,
 							socials: {
 								twitter: formattedFlatShareProfile.twitter,
 								tiktok: formattedFlatShareProfile.tiktok,
@@ -189,7 +190,6 @@ export default async function page(props: any) {
 							whatsapp: formattedUserInfoDoc.whatsapp_phone_number,
 							phone_number: formattedUserInfoDoc.primary_phone_number,
 							gender: formattedUserInfoDoc.gender,
-							bio: formattedUserInfoDoc.bio,
 							is_verified: formattedUserInfoDoc.is_verified,
 						}
 					: null,
@@ -203,7 +203,7 @@ export default async function page(props: any) {
 		}
 	}
 
-	const otherInfos = await getUserProfile()
+	const flatshareInfos = await getUserProfile()
 	const user = await getUserData()
 
 	const userId = user.user?.id
@@ -215,6 +215,7 @@ export default async function page(props: any) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
+
 					<Flex flexDirection={'column'} w="full">
 						<Box my={3}>
 							<Flex>
@@ -224,7 +225,11 @@ export default async function page(props: any) {
 						</Box>
 
 						{user ? (
-							<UserProfilePage data={user} userId={otherInfos} />
+							<UserProfilePage
+								data={user}
+								flatshareInfos={flatshareInfos}
+								user_id={user_id}
+							/>
 						) : (
 							<PageNotFound />
 						)}

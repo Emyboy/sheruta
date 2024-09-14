@@ -13,3 +13,9 @@ export interface HabitData {
 	slug: string
 	_ref: DocumentReference
 }
+export interface InterestData {
+	id: string
+	title: string
+	slug: string
+	_ref: DocumentReference
+}

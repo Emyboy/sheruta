@@ -16,69 +16,92 @@ import {
 } from '@chakra-ui/react'
 import { BiBookmark } from 'react-icons/bi'
 import { useAuthContext } from '@/context/auth.context'
-// import { useEffect, useState } from 'react'
 import { DocumentReference, getDoc } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
 
 const ProfileSnippet = () => {
+	const [snippetData, setSnippetData] = useState<Record<string, any>>({})
 	const { authState } = useAuthContext()
 
-	// const [area, setArea] = useState('')
-	// const [state, setState] = useState('')
+	// console.log('PROFILE SNIPPET 1:....................', authState.user)
+	useEffect(() => {
+		// console.log('PROFILE SNIPPET 2:....................', authState.user)
+		const fetchData = async () => {
+			let locationValue: any = null
 
-	// let locationValue: any = null
+			try {
+				const locationKeywordDocRef = authState.flat_share_profile
+					?.location_keyword as DocumentReference
 
-	// 		try {
-	// 			const locationKeywordDocRef =
-	// 				authState.flat_share_profile?.location_keyword as DocumentReference
+				const docSnapshot = await getDoc(locationKeywordDocRef)
 
-	// 			const docSnapshot = await getDoc(locationKeywordDocRef)
+				if (docSnapshot.exists()) {
+					locationValue = docSnapshot.data()
+				} else {
+					console.log('Location keyword document does not exist.')
+				}
+			} catch (error) {
+				console.error('Error fetching Location keyword document:', error)
+			}
 
-	// 			if (docSnapshot.exists()) {
-	// 				locationValue = docSnapshot.data()
+			let stateValue: any = null
 
-	//                 setArea(locationValue)
-	// 			} else {
-	// 				console.log('Location keyword document does not exist.')
-	// 			}
-	// 		} catch (error) {
-	// 			console.error('Error fetching Location keyword document:', error)
-	// 		}
+			try {
+				const stateDocRef = authState.flat_share_profile
+					?.state as DocumentReference
 
-	// 		let stateValue: any = null
+				const docSnapshot = await getDoc(stateDocRef)
 
-	// 		try {
-	// 			const stateDocRef =
-	// 				authState.flat_share_profile?.state as DocumentReference
+				if (docSnapshot.exists()) {
+					stateValue = docSnapshot.data()
+				} else {
+					console.log('state document does not exist.')
+				}
+			} catch (error) {
+				console.error('Error fetching state document ref:', error)
+			}
 
-	// 			const docSnapshot = await getDoc(stateDocRef)
+			const profileSnippetData = {
+				firstName: authState.user?.first_name,
+				lastName: authState.user?.last_name,
+				bio: authState.flat_share_profile?.bio,
+				state: stateValue ? stateValue.name : null,
+				area: locationValue ? locationValue.name : null,
+				seeking: authState.flat_share_profile?.seeking,
+				budget: authState.flat_share_profile?.budget,
+			}
 
-	// 			if (docSnapshot.exists()) {
-	// 				stateValue = docSnapshot.data()
-	//                 setState(stateValue)
-	// 			} else {
-	// 				console.log('state document does not exist.')
-	// 			}
-	// 		} catch (error) {
-	// 			console.error('Error fetching state document ref:', error)
-	// 		}
+			setSnippetData(profileSnippetData)
+		}
+		fetchData()
+	}, [authState])
+
+	console.log('snippet data:.............', snippetData)
+
+	const ProfileSnippetBio = snippetData?.bio
+	const maxBioLength = 84
 
 	return (
 		<>
-			<Link>
-				<Box m={4}>
-					<Card
-						direction={{ base: 'column', sm: 'row' }}
-						overflow="hidden"
-						variant="outline"
-					>
-						<Image
-							objectFit="cover"
-							maxW={{ base: '100%', sm: '200px' }}
-							src={authState.user?.avatar_url}
-							alt="Caffe Latte"
-						/>
+			<Box m={4}>
+				<Card
+					direction={{ base: 'column', sm: 'row' }}
+					overflow="hidden"
+					variant="outline"
+				>
+					<Image
+						objectFit="cover"
+						maxW={{ base: '100%', sm: '200px' }}
+						w="600px"
+						src={`${authState.user?.avatar_url}`}
+						alt="Caffe Latte"
+					/>
 
-						<Stack>
+					<Stack>
+						<Link
+							href={`/user/${authState.user?._id}`}
+							style={{ textDecoration: 'none' }}
+						>
 							<CardBody mb={0} border="none">
 								{/* <Heading size='md'>The perfect latte</Heading> */}
 								<Flex justify="space-between" align="center" mb={3}>
@@ -89,9 +112,12 @@ const ProfileSnippet = () => {
 								</Flex>
 
 								<Flex>
-									<Text py="2">
-										Caffè latte is a coffee beverage of Italian origin made with
-										espresso and steamed milk.
+									<Text color="muted_text" py="2" fontSize="0.8em">
+										{ProfileSnippetBio
+											? ProfileSnippetBio.length > maxBioLength
+												? `${ProfileSnippetBio.substring(0, maxBioLength)}......`
+												: ProfileSnippetBio
+											: 'Hi! I am a user of Sheruta, you should go through my profile and see if we are a match'}
 									</Text>
 								</Flex>
 
@@ -100,15 +126,15 @@ const ProfileSnippet = () => {
 									justify="space-between"
 									align="center"
 								>
-									<Text color="text_muted">
-										{`Preffered area:${authState.flat_share_profile?.location_keyword} Lagos`}
+									<Text color="text_muted" fontWeight="700">
+										{`Preffered area: ${snippetData?.area} ,${snippetData?.state}`}
 									</Text>
 									<Badge
-										colorScheme="green"
+										colorScheme={snippetData?.is_seeking ? 'cyan' : 'green'}
 										rounded="md"
-										textTransform={'capitalize'}
+										textTransform="capitalize"
 									>
-										{`I have a space`}
+										{snippetData?.is_seeking ? 'Seeker' : 'I have a space'}
 									</Badge>
 									<Badge
 										colorScheme="orange"
@@ -119,20 +145,20 @@ const ProfileSnippet = () => {
 									</Badge>
 								</Flex>
 							</CardBody>
-							<Divider />
-							<Flex justify="space-between" align="center" mb={2}>
-								<Button colorScheme="lueb" color="text_muted">
-									<BiBookmark style={{ fontSize: '1.5em' }} />
-								</Button>
-								<Box mr={2} color="text_muted">
-									Budget: N600,000/month
-								</Box>
-							</Flex>
-						</Stack>
-					</Card>
-				</Box>
-				<Divider />
-			</Link>
+						</Link>
+						<Divider />
+						<Flex justify="space-between" align="center" mb={2}>
+							<Button colorScheme="lueb" color="text_muted">
+								<BiBookmark style={{ fontSize: '1.5em' }} />
+							</Button>
+							<Box mr={2} color="text_muted">
+								{`Budget: ${snippetData?.budget}/month`}
+							</Box>
+						</Flex>
+					</Stack>
+				</Card>
+			</Box>
+			<Divider />
 		</>
 	)
 }

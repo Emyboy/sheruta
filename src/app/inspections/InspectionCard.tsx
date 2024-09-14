@@ -1,9 +1,12 @@
+'use client'
+
 import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import CloseIcon from '@/assets/svg/close-icon-dark'
+import MainTooltip from '@/components/atoms/MainTooltip'
 import Spinner from '@/components/atoms/Spinner'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { creditTable } from '@/constants'
-import { useAuthContext } from '@/context/auth.context'
+import { useInspectionsContext } from '@/context/inspections.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
@@ -31,21 +34,21 @@ import { CiCalendarDate, CiFlag1, CiLocationOn } from 'react-icons/ci'
 import { IoTimeOutline } from 'react-icons/io5'
 import { MdOutlineCancel } from 'react-icons/md'
 import { inspectionCategoryType } from './MyInspections'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
+import Link from 'next/link'
+import { useAuthContext } from '@/context/auth.context'
+import WherebyEmbed from './wherebyEmbed'
 
 type InspectionProps = returnedInspectionData & {
 	currentUserId: string
 	inspectionCategory: inspectionCategoryType
 }
 
-type rescheduleInspectionModalProps = InspectionData & {
-	closeRescheduleInspectionModal: () => void
-	showRescheduleInspectionModal: boolean
-	id: string
-}
-
-type cancelBookingModalProps = InspectionData & {
-	closeCancelBookingModal: () => void
-	showCancelBookingModal: boolean
+type ModalProps = InspectionData & {
+	showModal: boolean
+	closeModal: () => void
 	id: string
 }
 
@@ -60,12 +63,16 @@ export default function InspectionCard({
 	seeker_details,
 	currentUserId,
 	inspectionCategory,
+	roomUrl,
+	hostRoomUrl,
 }: InspectionProps) {
 	const router = useRouter()
+	const { showToast } = useCommon()
 
 	const [showRescheduleInspectionModal, setShowRescheduleInspectionModal] =
 		useState(false)
 	const [showCancelBookingModal, setShowCancelBookingModal] = useState(false)
+	const [showVideoCallModal, setShowVideoCallModal] = useState(false)
 
 	const openRescheduleInspectionModal = () =>
 		setShowRescheduleInspectionModal(true)
@@ -75,23 +82,39 @@ export default function InspectionCard({
 	const openCancelBookingModal = () => setShowCancelBookingModal(true)
 	const closeCancelBookingModal = () => setShowCancelBookingModal(false)
 
+	const handleStartCall = async () => {
+		const inspectionDate = inspection_date.toDate()
+		const currentDate = new Date()
+
+		if (inspectionDate > currentDate) {
+			return showToast({
+				message: 'The inspection is not yet due; please check back later.',
+				status: 'error',
+			})
+		}
+
+		setShowVideoCallModal(true)
+	}
+
 	return (
 		<>
-			<CancelBookingModal
-				showCancelBookingModal={showCancelBookingModal}
-				closeCancelBookingModal={closeCancelBookingModal}
-				hasOccured={hasOccured}
+			<VideoCallModal
+				showModal={showVideoCallModal}
+				closeModal={() => setShowVideoCallModal(false)}
+				roomUrl={roomUrl}
+				hostRoomUrl={hostRoomUrl}
 				host_details={host_details}
 				id={id}
+				hasOccured={hasOccured}
 				inspection_date={inspection_date}
 				inspection_location={inspection_location}
 				inspection_type={inspection_type}
 				isCancelled={isCancelled}
 				seeker_details={seeker_details}
 			/>
-			<ResheduleInspectionModal
-				showRescheduleInspectionModal={showRescheduleInspectionModal}
-				closeRescheduleInspectionModal={closeRescheduleInspectionModal}
+			<CancelBookingModal
+				showModal={showCancelBookingModal}
+				closeModal={closeCancelBookingModal}
 				hasOccured={hasOccured}
 				host_details={host_details}
 				id={id}
@@ -100,6 +123,22 @@ export default function InspectionCard({
 				inspection_type={inspection_type}
 				isCancelled={isCancelled}
 				seeker_details={seeker_details}
+				hostRoomUrl={hostRoomUrl}
+				roomUrl={roomUrl}
+			/>
+			<ResheduleInspectionModal
+				showModal={showRescheduleInspectionModal}
+				closeModal={closeRescheduleInspectionModal}
+				hasOccured={hasOccured}
+				host_details={host_details}
+				id={id}
+				inspection_date={inspection_date}
+				inspection_location={inspection_location}
+				inspection_type={inspection_type}
+				isCancelled={isCancelled}
+				seeker_details={seeker_details}
+				hostRoomUrl={hostRoomUrl}
+				roomUrl={roomUrl}
 			/>
 			<Flex
 				flexDir={'column'}
@@ -116,13 +155,17 @@ export default function InspectionCard({
 				>
 					<Text fontSize={{ base: 'sm', sm: 'base', md: 'lg' }} flex={1}>
 						New Apartment Inspection with{' '}
-						<Text as={'span'} color={'brand'}>
-							{currentUserId === host_details.id
-								? `${seeker_details.last_name} ${seeker_details.first_name}`
-								: `${host_details.last_name} ${host_details.first_name}`}
-						</Text>
+						<Link
+							href={`/user/${currentUserId === host_details.id ? seeker_details.id : host_details.id}`}
+						>
+							<Text as={'span'} color={'brand'} textTransform={'capitalize'}>
+								{currentUserId === host_details.id
+									? `${seeker_details.last_name} ${seeker_details.first_name}`
+									: `${host_details.last_name} ${host_details.first_name}`}
+							</Text>
+						</Link>
 					</Text>
-					<Text
+					<Flex
 						display={'flex'}
 						_dark={{ color: 'text_muted' }}
 						fontWeight={300}
@@ -135,7 +178,7 @@ export default function InspectionCard({
 							<CiFlag1 />
 						</Box>
 						<Hide below="sm">Flag Booking</Hide>
-					</Text>
+					</Flex>
 				</Flex>
 				<Flex
 					alignItems={'center'}
@@ -162,7 +205,7 @@ export default function InspectionCard({
 							year: 'numeric',
 						})}
 					</Text>
-					<Text
+					<Flex
 						display={'flex'}
 						fontSize={{ base: 'xs', md: 'sm' }}
 						fontWeight={300}
@@ -178,8 +221,8 @@ export default function InspectionCard({
 						{inspection_date
 							.toDate()
 							.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-					</Text>
-					<Text
+					</Flex>
+					<Flex
 						display={'flex'}
 						fontSize={{ base: 'xs', md: 'sm' }}
 						fontWeight={300}
@@ -196,7 +239,7 @@ export default function InspectionCard({
 						{inspection_location.length > 20
 							? inspection_location.substring(0, 20) + '... '
 							: inspection_location}
-					</Text>
+					</Flex>
 					{inspectionCategory === 'upcoming' && (
 						<Flex
 							cursor={'pointer'}
@@ -234,8 +277,7 @@ export default function InspectionCard({
 							{inspection_type} Inspection
 						</Text>
 						{inspectionCategory === 'upcoming' && (
-							<Text
-								display={'flex'}
+							<Flex
 								alignSelf={'end'}
 								_dark={{ color: 'text_muted' }}
 								fontWeight={300}
@@ -251,7 +293,7 @@ export default function InspectionCard({
 									<MdOutlineCancel color="red" />
 								</Box>
 								Cancel Booking
-							</Text>
+							</Flex>
 						)}
 					</Flex>
 					<Flex alignItems={'center'} gap={2}>
@@ -280,7 +322,10 @@ export default function InspectionCard({
 							Send Message
 						</Button>
 						<Button
-							isDisabled={inspectionCategory !== 'upcoming'}
+							isDisabled={
+								inspectionCategory !== 'upcoming' ||
+								inspection_type === 'physical'
+							}
 							rounded={'8px'}
 							display={'flex'}
 							alignItems={'center'}
@@ -290,8 +335,9 @@ export default function InspectionCard({
 							bgColor={'#111717CC'}
 							color={'white'}
 							fontSize={{ base: 'sm', md: 'base' }}
+							onClick={handleStartCall}
 						>
-							Call
+							Join Call
 						</Button>
 					</Flex>
 				</Flex>
@@ -300,9 +346,306 @@ export default function InspectionCard({
 	)
 }
 
+const VideoCallModal = ({
+	showModal,
+	closeModal,
+	host_details,
+	seeker_details,
+	inspection_type,
+	inspection_date,
+	isCancelled,
+	inspection_location,
+	id,
+	roomUrl,
+	hostRoomUrl,
+}: ModalProps) => {
+	const [loading, setLoading] = useState(false)
+	const [confirmEndMeeting, setConfirmEndMeeting] = useState(false)
+	const { showToast } = useCommon()
+	const { fetchYourInspections } = useInspectionsContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+
+		if (!user?._id)
+			return showToast({
+				message: 'please login to update your inspection',
+				status: 'error',
+			})
+
+		setLoading(true)
+
+		const data: InspectionData = {
+			host_details,
+			seeker_details,
+			inspection_type,
+			inspection_date,
+			isCancelled,
+			hasOccured: true,
+			inspection_location,
+			roomUrl,
+			hostRoomUrl,
+		}
+
+		InspectionDataSchema.parse(data)
+
+		try {
+			await InspectionServices.update({
+				collection_name: DBCollectionName.inspections,
+				data,
+				document_id: id,
+			})
+
+			await fetchYourInspections(user._id)
+
+			showToast({
+				message: 'You have succesfully concluded your inspection',
+				status: 'success',
+			})
+
+			localStorage.removeItem(`lastReminder_${id}`)
+		} catch (error) {
+			console.log(error)
+			showToast({
+				message: 'Error rescheduling inspection',
+				status: 'error',
+			})
+		}
+
+		setLoading(false)
+		closeModal()
+		setConfirmEndMeeting(false)
+	}
+
+	if (loading)
+		return (
+			<Modal isOpen={loading} onClose={() => setLoading(false)} size={'full'}>
+				<ModalOverlay
+					bg="blackAlpha.300"
+					backdropFilter="blur(10px) hue-rotate(90deg)"
+				/>
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Spinner />
+				</ModalContent>
+			</Modal>
+		)
+
+	if (confirmEndMeeting && !loading)
+		return (
+			<Modal
+				isOpen={confirmEndMeeting}
+				onClose={() => {
+					setConfirmEndMeeting(false)
+					closeModal()
+				}}
+				size={'xl'}
+			>
+				<ModalOverlay />
+				<ModalContent
+					overflowY={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+					as={'form'}
+				>
+					<Box
+						pos={'absolute'}
+						top={4}
+						right={4}
+						cursor={'pointer'}
+						onClick={() => {
+							setConfirmEndMeeting(true)
+							closeModal()
+						}}
+					>
+						<Button
+							px={0}
+							bg="none"
+							color="text_muted"
+							display={'flex'}
+							gap={1}
+							fontWeight={'light'}
+							_hover={{
+								color: 'brand',
+								bg: 'none',
+								_dark: {
+									color: 'brand',
+								},
+							}}
+							_dark={{
+								color: 'dark_lighter',
+							}}
+							fontSize={{
+								md: 'xl',
+								sm: 'lg',
+								base: 'base',
+							}}
+						>
+							<CloseIcon />
+						</Button>
+					</Box>
+					<Flex
+						alignItems={'center'}
+						justifyContent={'center'}
+						w={'120px'}
+						h={'120px'}
+						rounded={'full'}
+						bgColor={'#E4FAA833'}
+					>
+						<BookInspectionBadge />
+					</Flex>
+					<Text
+						fontWeight={'300'}
+						fontSize={{ base: '20px', md: '24px' }}
+						_dark={{ color: 'white' }}
+						_light={{ color: '#111717' }}
+						textAlign={'center'}
+					>
+						Do you want to conclude your virtual inspection?
+					</Text>
+
+					<Flex
+						gap={{ base: '20px', md: '32px' }}
+						justifyContent={'center'}
+						flexWrap={'wrap'}
+						mb={{ base: '32px', md: 0 }}
+					>
+						<Button
+							rounded={DEFAULT_PADDING}
+							paddingX={'50px'}
+							paddingY={'16px'}
+							h={{ base: '48px', md: '54px' }}
+							bgColor={'transparent'}
+							textColor={'brand'}
+							border={'1px'}
+							borderColor={'brand'}
+							onClick={() => {
+								setLoading(false)
+								setConfirmEndMeeting(false)
+							}}
+							fontWeight={500}
+							fontSize={{ base: 'sm', md: 'base' }}
+						>
+							Rejoin Call
+						</Button>
+						<Button
+							rounded={DEFAULT_PADDING}
+							type="submit"
+							paddingX={'50px'}
+							paddingY={'16px'}
+							h={{ base: '48px', md: '54px' }}
+							bgColor={'#00BC7399'}
+							textColor={'white'}
+							fontSize={{ base: 'sm', md: 'base' }}
+							onClick={handleSubmit}
+						>
+							End Inspection
+						</Button>
+					</Flex>
+				</ModalContent>
+			</Modal>
+		)
+
+	return (
+		<Modal isOpen={showModal} onClose={closeModal} size={'full'}>
+			<ModalOverlay />
+			<ModalContent
+				w={'100vw'}
+				h={'100vh'}
+				margin={'auto'}
+				display={'flex'}
+				flexDir={'column'}
+				alignItems={'center'}
+				justifyContent={'center'}
+				position={'relative'}
+				rounded={'16px'}
+				_dark={{ bgColor: 'black' }}
+				_light={{
+					bgColor: '#FDFDFD',
+					border: '1px',
+					borderColor: 'text_muted',
+				}}
+			>
+				<Box
+					pos={'absolute'}
+					top={4}
+					right={4}
+					cursor={'pointer'}
+					onClick={() => setConfirmEndMeeting(true)}
+				>
+					<MainTooltip label="Leave Call" placement="top">
+						<Button
+							px={0}
+							bg="none"
+							color="text_muted"
+							display={'flex'}
+							gap={1}
+							fontWeight={'light'}
+							_hover={{
+								color: 'brand',
+								bg: 'none',
+								_dark: {
+									color: 'brand',
+								},
+							}}
+							_dark={{
+								color: 'dark_lighter',
+							}}
+							fontSize={{
+								md: 'xl',
+								sm: 'lg',
+								base: 'base',
+							}}
+						>
+							<CloseIcon />
+						</Button>
+					</MainTooltip>
+				</Box>
+				<WherebyEmbed
+					roomUrl={roomUrl}
+					hostRoomUrl={hostRoomUrl}
+					user={user}
+					host_details={host_details}
+				/>
+			</ModalContent>
+		</Modal>
+	)
+}
+
 const CancelBookingModal = ({
-	closeCancelBookingModal,
-	showCancelBookingModal,
+	closeModal,
+	showModal,
 	inspection_date,
 	hasOccured,
 	host_details,
@@ -310,17 +653,21 @@ const CancelBookingModal = ({
 	inspection_type,
 	seeker_details,
 	id,
-}: cancelBookingModalProps) => {
-	const { authState } = useAuthContext()
+	hostRoomUrl,
+	roomUrl,
+}: ModalProps) => {
 	const { showToast } = useCommon()
-	const router = useRouter()
+	const { fetchYourInspections } = useInspectionsContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const [loading, setLoading] = useState<boolean>(false)
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		if (!authState.user?._id) {
+		if (!user?._id) {
 			return showToast({
 				message: 'Please login to reschedule an inspection',
 				status: 'error',
@@ -337,6 +684,8 @@ const CancelBookingModal = ({
 			isCancelled: true,
 			hasOccured,
 			inspection_location,
+			roomUrl,
+			hostRoomUrl,
 		}
 
 		try {
@@ -351,7 +700,7 @@ const CancelBookingModal = ({
 
 		try {
 			const promises =
-				authState.user._id === host_details.id && inspection_type === 'virtual'
+				user._id === host_details.id && inspection_type === 'virtual'
 					? [
 							InspectionServices.update({
 								collection_name: DBCollectionName.inspections,
@@ -361,7 +710,25 @@ const CancelBookingModal = ({
 							FlatShareProfileService.incrementCredit({
 								collection_name: DBCollectionName.flatShareProfile,
 								newCredit: creditTable.VIRTUAL_INSPECTION,
-								document_id: authState.user._id,
+								document_id: user._id,
+							}),
+							NotificationsService.create({
+								collection_name: DBCollectionName.notifications,
+								data: {
+									is_read: false,
+									type: 'cancelled',
+									message: NotificationsBodyMessage.cancelled,
+									recipient_id:
+										user._id === seeker_details.id
+											? host_details.id
+											: seeker_details.id,
+									sender_details: {
+										id: user._id,
+										avatar_url: user.avatar_url,
+										first_name: user.first_name,
+										last_name: user.last_name,
+									},
+								},
 							}),
 						]
 					: [
@@ -370,15 +737,36 @@ const CancelBookingModal = ({
 								data,
 								document_id: id,
 							}),
+							NotificationsService.create({
+								collection_name: DBCollectionName.notifications,
+								data: {
+									is_read: false,
+									type: 'cancelled',
+									message: NotificationsBodyMessage.cancelled,
+									recipient_id:
+										user._id === seeker_details.id
+											? host_details.id
+											: seeker_details.id,
+									sender_details: {
+										id: user._id,
+										avatar_url: user.avatar_url,
+										first_name: user.first_name,
+										last_name: user.last_name,
+									},
+								},
+							}),
 						]
 
 			await Promise.all(promises)
+
+			await fetchYourInspections(user._id)
+
+			localStorage.removeItem(`lastReminder_${id}`)
 
 			showToast({
 				message: 'You have successfully cancelled your inspection',
 				status: 'success',
 			})
-			router.push('/inspections')
 		} catch (error) {
 			console.error(error)
 			showToast({
@@ -387,13 +775,13 @@ const CancelBookingModal = ({
 			})
 		} finally {
 			setLoading(false)
-			closeCancelBookingModal()
+			closeModal()
 		}
 	}
 
 	if (loading)
 		return (
-			<Modal isOpen={loading} onClose={() => setLoading(false)}>
+			<Modal isOpen={loading} onClose={() => setLoading(false)} size={'full'}>
 				<ModalOverlay
 					bg="blackAlpha.300"
 					backdropFilter="blur(10px) hue-rotate(90deg)"
@@ -420,11 +808,7 @@ const CancelBookingModal = ({
 		)
 
 	return (
-		<Modal
-			isOpen={showCancelBookingModal}
-			onClose={closeCancelBookingModal}
-			size={'90vh'}
-		>
+		<Modal isOpen={showModal} onClose={closeModal} size={'90vh'}>
 			<ModalOverlay />
 			<ModalContent
 				w={{
@@ -456,7 +840,7 @@ const CancelBookingModal = ({
 					top={{ base: '16px', md: '30px' }}
 					right={{ base: '16px', md: '30px' }}
 					cursor={'pointer'}
-					onClick={closeCancelBookingModal}
+					onClick={closeModal}
 				>
 					<CloseIcon />
 				</Box>
@@ -494,7 +878,7 @@ const CancelBookingModal = ({
 						textColor={'red'}
 						border={'1px'}
 						borderColor={'red'}
-						onClick={closeCancelBookingModal}
+						onClick={closeModal}
 						fontWeight={500}
 						fontSize={{ base: 'sm', md: 'base' }}
 					>
@@ -519,8 +903,8 @@ const CancelBookingModal = ({
 }
 
 const ResheduleInspectionModal = ({
-	closeRescheduleInspectionModal,
-	showRescheduleInspectionModal,
+	closeModal,
+	showModal,
 	inspection_date,
 	hasOccured,
 	host_details,
@@ -529,10 +913,14 @@ const ResheduleInspectionModal = ({
 	isCancelled,
 	seeker_details,
 	id,
-}: rescheduleInspectionModalProps) => {
-	const { authState } = useAuthContext()
+	roomUrl,
+	hostRoomUrl,
+}: ModalProps) => {
 	const { showToast } = useCommon()
-	const router = useRouter()
+	const { fetchYourInspections } = useInspectionsContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const [inspectionData, setInspectionData] = useState({
 		inspection_date: inspection_date.toDate().toISOString().split('T')[0],
@@ -556,7 +944,7 @@ const ResheduleInspectionModal = ({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		if (!authState.user?._id)
+		if (!user?._id)
 			return showToast({
 				message: 'please login to reschedule an inspection',
 				status: 'error',
@@ -576,22 +964,47 @@ const ResheduleInspectionModal = ({
 			isCancelled,
 			hasOccured,
 			inspection_location,
+			roomUrl,
+			hostRoomUrl,
 		}
 
 		InspectionDataSchema.parse(data)
 
 		try {
-			await InspectionServices.update({
-				collection_name: DBCollectionName.inspections,
-				data,
-				document_id: id,
-			})
+			await Promise.all([
+				InspectionServices.update({
+					collection_name: DBCollectionName.inspections,
+					data,
+					document_id: id,
+				}),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						type: 'rescheduled',
+						message: NotificationsBodyMessage.rescheduled,
+						recipient_id:
+							user._id === seeker_details.id
+								? host_details.id
+								: seeker_details.id,
+						sender_details: {
+							id: user._id,
+							avatar_url: user.avatar_url,
+							first_name: user.first_name,
+							last_name: user.last_name,
+						},
+					},
+				}),
+			])
+
+			await fetchYourInspections(user?._id)
 
 			showToast({
 				message: 'You have succesfully rescheduled your inspection',
 				status: 'success',
 			})
-			router.push('/inspections')
+
+			localStorage.removeItem(`lastReminder_${id}`)
 		} catch (error) {
 			console.log(error)
 			showToast({
@@ -601,12 +1014,12 @@ const ResheduleInspectionModal = ({
 		}
 
 		setLoading(false)
-		closeRescheduleInspectionModal()
+		closeModal()
 	}
 
 	if (loading)
 		return (
-			<Modal isOpen={loading} onClose={() => setLoading(false)}>
+			<Modal isOpen={loading} onClose={() => setLoading(false)} size={'full'}>
 				<ModalOverlay
 					bg="blackAlpha.300"
 					backdropFilter="blur(10px) hue-rotate(90deg)"
@@ -633,11 +1046,7 @@ const ResheduleInspectionModal = ({
 		)
 
 	return (
-		<Modal
-			isOpen={showRescheduleInspectionModal}
-			onClose={closeRescheduleInspectionModal}
-			size={'95vh'}
-		>
+		<Modal isOpen={showModal} onClose={closeModal} size={'95vh'}>
 			<ModalOverlay />
 			<ModalContent
 				w={{
@@ -669,7 +1078,7 @@ const ResheduleInspectionModal = ({
 					top={{ base: '16px', md: '30px' }}
 					right={{ base: '16px', md: '30px' }}
 					cursor={'pointer'}
-					onClick={closeRescheduleInspectionModal}
+					onClick={closeModal}
 				>
 					<CloseIcon />
 				</Box>
@@ -734,7 +1143,7 @@ const ResheduleInspectionModal = ({
 						textColor={'brand'}
 						border={'1px'}
 						borderColor={'brand'}
-						onClick={closeRescheduleInspectionModal}
+						onClick={closeModal}
 						fontSize={{ base: 'sm', md: 'base' }}
 					>
 						Cancel
