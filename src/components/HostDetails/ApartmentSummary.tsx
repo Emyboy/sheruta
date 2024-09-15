@@ -10,6 +10,13 @@ import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
+import { useBookmarksContext } from '@/context/bookmarks.context'
+import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
+import {
+	BookmarkData,
+	BookmarkDTO,
+	BookmarkType,
+} from '@/firebase/service/bookmarks/bookmarks.types'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
@@ -23,7 +30,12 @@ import NotificationsService, {
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
-import { createNotification, generateRoomUrl } from '@/utils/actions'
+import {
+	createNotification,
+	generateRoomUrl,
+	revalidatePathOnClient,
+} from '@/utils/actions'
+import { handleCall } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -46,10 +58,11 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
+import { randomUUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -64,12 +77,12 @@ import { FaHouseChimneyUser } from 'react-icons/fa6'
 import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
 import { LuBadgeCheck } from 'react-icons/lu'
 import { MdOutlineMailOutline } from 'react-icons/md'
+import { PiBookmarkSimpleFill } from 'react-icons/pi'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
 import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
-import { handleCall } from '@/utils/index.utils'
 
 export default function ApartmentSummary({
 	request,
@@ -78,18 +91,92 @@ export default function ApartmentSummary({
 }) {
 	const router = useRouter()
 
+	const { bookmarks, fetchBookmarks } = useBookmarksContext()
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
+	const { showToast } = useCommon()
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
+	const [showReserveApartmentModal, setShowReserveApartmentModal] =
+		useState<boolean>(false)
+	const [isApartmentBookmarked, setIsApartmentBookmarked] = useState(false)
 
 	const openModal = () => setShowBookInspectionModal(true)
 	const closeModal = () => setShowBookInspectionModal(false)
 
+	const openReserveApartmentModal = () => setShowReserveApartmentModal(true)
+	const closeReserveApartmentModal = () => setShowReserveApartmentModal(false)
+
+	const toggleSaveApartment = async () => {
+		const uuid = crypto.randomUUID()
+
+		if (!authState.flat_share_profile)
+			return showToast({
+				message: 'Login to save an apartment',
+				status: 'error',
+			})
+
+		const prev = isApartmentBookmarked
+
+		setIsApartmentBookmarked(!isApartmentBookmarked)
+
+		try {
+			if (!prev) {
+				await BookmarkService.createBookmark({
+					uuid,
+					object_type: BookmarkType.requests,
+					request_id: request.id,
+					_user_ref: authState.flat_share_profile._user_ref,
+				})
+
+				fetchBookmarks(authState.flat_share_profile._user_id)
+
+				showToast({
+					message: 'Successfully bookmarked apartment',
+					status: 'success',
+				})
+			} else {
+				await BookmarkService.deleteBookmark({
+					user_id: authState.flat_share_profile._user_id,
+					document_id: bookmarks.find(
+						(bookmark) => bookmark.request_id === request.id,
+					)?.id as string,
+				})
+				setIsApartmentBookmarked(true)
+
+				showToast({
+					message: 'Successfully removed apartment from bookmarks',
+					status: 'success',
+				})
+			}
+		} catch (error) {
+			console.error('Error toggling bookmark:', error)
+			setIsApartmentBookmarked(prev)
+			showToast({
+				message: 'error saving this apartment',
+				status: 'error',
+			})
+		}
+	}
+
+	useEffect(() => {
+		if (!authState.user) return
+
+		setIsApartmentBookmarked(
+			bookmarks.some((bookmark) => bookmark.request_id === request.id),
+		)
+	}, [authState.user])
+
 	return (
 		<>
+			{/* <BookmarkApartmentModal
+				closeModal={closeBookmarkModal}
+				showBookApartmentModal={showBookmarkApartmentModal}
+				request_id={request.id}
+				recipient_id={request._user_ref._id}
+			/> */}
 			<BookInspectionModal
 				closeModal={closeModal}
 				showBookInspectionModal={showBookInspectionModal}
@@ -154,6 +241,7 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
+						isDisabled={request.availability_status === 'reserved'}
 					>
 						Book Inspection
 					</Button>
@@ -398,7 +486,7 @@ export default function ApartmentSummary({
 						<Button
 							px={0}
 							bg="none"
-							color="text_muted"
+							color={'text_muted'}
 							display={'flex'}
 							fontWeight={'light'}
 							_hover={{
@@ -416,8 +504,13 @@ export default function ApartmentSummary({
 								base: 'lg',
 							}}
 							ml={'-8px'}
+							onClick={toggleSaveApartment}
 						>
-							<BiBookmark />
+							{isApartmentBookmarked ? (
+								<PiBookmarkSimpleFill fill={'#00bc73'} />
+							) : (
+								<BiBookmark />
+							)}
 						</Button>
 					</MainTooltip>
 				</Flex>
@@ -630,6 +723,7 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
+						isDisabled={request.availability_status === 'reserved'}
 					>
 						Book Inspection
 					</Button>
@@ -980,6 +1074,166 @@ export default function ApartmentSummary({
 					)}
 			</Flex>
 		</>
+	)
+}
+
+const BookmarkApartmentModal = ({
+	closeModal,
+	showBookApartmentModal,
+	recipient_id,
+	request_id,
+}: {
+	closeModal: () => void
+	showBookApartmentModal: boolean
+	request_id: string
+	recipient_id: string
+}) => {
+	const { authState } = useAuthContext()
+	const { showToast } = useCommon()
+
+	const [loading, setLoading] = useState<boolean>(false)
+
+	const bookmarkApartment = async () => {
+		if (!authState.flat_share_profile?._user_id || !authState.user?._id)
+			return showToast({
+				message: 'please login to book an inspection',
+				status: 'error',
+			})
+
+		setLoading(true)
+		try {
+			const uuid = crypto.randomUUID()
+
+			const data: BookmarkData = {
+				uuid,
+				object_type: BookmarkType.requests,
+				_user_ref: authState.flat_share_profile._user_ref,
+				request_id,
+			}
+
+			BookmarkDTO.parse(data)
+
+			await Promise.all([
+				BookmarkService.create({
+					collection_name: DBCollectionName.bookmarks,
+					data,
+					document_id: uuid,
+				}),
+				// RequestService.reserveListing(request_id),
+				// FlatShareProfileService.decrementCredit({
+				// 	collection_name: DBCollectionName.flatShareProfile,
+				// 	document_id: authState.flat_share_profile._user_id,
+				// 	newCredit: 0,
+				// }),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						type: 'bookmark',
+						message: NotificationsBodyMessage.inspection,
+						recipient_id,
+						sender_details: {
+							id: authState.user._id,
+							first_name: authState.user.first_name,
+							last_name: authState.user.last_name,
+							avatar_url: authState.user.avatar_url,
+						},
+						action_url: `/messages/${authState.user._id}`,
+					},
+				}),
+			])
+
+			showToast({
+				message: 'You have succesfully saved this apartment listing',
+				status: 'success',
+			})
+			revalidatePathOnClient('/bookmarks')
+		} catch (error) {
+			console.error(error)
+			showToast({
+				message: 'Error saving apartment',
+				status: 'error',
+			})
+		}
+
+		setLoading(false)
+
+		closeModal()
+	}
+
+	if (loading)
+		return (
+			<Modal isOpen={loading} onClose={() => setLoading(false)} size={'full'}>
+				<ModalOverlay
+					bg="blackAlpha.300"
+					backdropFilter="blur(10px) hue-rotate(90deg)"
+				/>
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Spinner />
+				</ModalContent>
+			</Modal>
+		)
+
+	return (
+		<Modal
+			isOpen={showBookApartmentModal}
+			onClose={() => {
+				setLoading(false)
+				closeModal()
+			}}
+			size={'xl'}
+		>
+			<ModalOverlay />
+			<ModalContent
+				w={'100%'}
+				margin={'auto'}
+				flexDir={'column'}
+				alignItems={'center'}
+				justifyContent={'center'}
+				position={'relative'}
+				rounded={'16px'}
+				_dark={{ bgColor: 'black' }}
+				_light={{
+					bgColor: '#FDFDFD',
+					border: '1px',
+					borderColor: 'text_muted',
+				}}
+				py={{ base: '16px', md: '24px' }}
+				px={{ base: '16px', sm: '24px', md: '32px' }}
+				gap={{ base: '24px', md: '32px' }}
+			>
+				<Box
+					pos={'absolute'}
+					top={{ base: '16px', md: '30px' }}
+					right={{ base: '16px', md: '30px' }}
+					cursor={'pointer'}
+					onClick={() => {
+						setLoading(false)
+						closeModal()
+					}}
+				>
+					<CloseIcon />
+				</Box>
+				<CreditInfo credit={0} onUse={bookmarkApartment} />
+			</ModalContent>
+		</Modal>
 	)
 }
 

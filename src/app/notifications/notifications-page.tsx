@@ -18,6 +18,7 @@ const ButtonText: Record<NotificationsType['type'], string> = {
 	call: 'Call Back',
 	comment_reply: 'Reply',
 	profile_view: 'View',
+	bookmark: 'Message',
 }
 
 export default function NotificationsPage({}: Props) {
@@ -110,7 +111,6 @@ export default function NotificationsPage({}: Props) {
 								}}
 							/>
 							<Text fontWeight={400} fontSize={{ base: 'base', md: 'lg' }}>
-								{notification.message}{' '}
 								{notification.sender_details ? (
 									<Link href={`/user/${notification.sender_details.id}`}>
 										<Text
@@ -132,7 +132,8 @@ export default function NotificationsPage({}: Props) {
 									>
 										Unknown
 									</Text>
-								)}
+								)}{' '}
+								{notification.message}
 							</Text>
 							<Link href={notification.action_url || ''}>
 								<Button
