@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useAuthContext } from '@/context/auth.context'
 import useCommon from '@/hooks/useCommon'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
@@ -15,8 +15,9 @@ import {
 	useColorMode,
 } from '@chakra-ui/react'
 import { useOptionsContext } from '@/context/options.context'
-import { DocumentReference } from 'firebase/firestore'
+import { DocumentReference, getDoc } from 'firebase/firestore'
 import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
+import { StateData } from '@/firebase/service/options/states/states.types'
 
 const SearchPreferenceForm = () => {
 	const [formData, setFormData] = useState<{
@@ -32,6 +33,8 @@ const SearchPreferenceForm = () => {
 	})
 
 	const { colorMode } = useColorMode()
+	const stateDOMRef = useRef<HTMLSelectElement>(null)
+	const locationDOMRef = useRef<HTMLSelectElement>(null)
 	const {
 		authState: { flat_share_profile },
 	} = useAuthContext()
@@ -57,14 +60,48 @@ const SearchPreferenceForm = () => {
 	}, [states, selectedState])
 
 	useEffect(() => {
-		if (flat_share_profile) {
-			setFormData({
-				gender_preference: flat_share_profile?.gender_preference || '',
-				age_preference: flat_share_profile?.age_preference || '',
-				location_keyword: flat_share_profile?.location_keyword || null,
-				state: flat_share_profile?.state || null,
-			})
+		const fetchLocationAndState = async () => {
+			if (flat_share_profile) {
+				console.log(flat_share_profile)
+				const stateRef = flat_share_profile.state
+				const locationRef = flat_share_profile.location_keyword
+
+				try {
+					const stateData = await getDoc(stateRef)
+					const locationData = await getDoc(locationRef)
+
+					if (stateData.exists() && locationData.exists()) {
+						const state = { ...stateData.data(), id: stateData.id } as StateData
+						const location_keyword = { ...locationData.data(), id: locationData.id } as LocationKeywordData
+
+						console.log(state, location_keyword)
+						if (stateDOMRef.current) {
+							console.log('setting state value', state.id)
+							stateDOMRef.current.value = state.id
+							// setSelectedState(state.id)
+							setLocations(getLocations(state.id))
+							console.log('locations updated')
+						}
+						if (locationDOMRef.current) {
+							console.log('setting location value', location_keyword.id)
+							locationDOMRef.current.value = location_keyword.id
+							setSelectedLocation(location_keyword.id)
+						}
+					}
+
+					setFormData({
+						gender_preference: flat_share_profile?.gender_preference || '',
+						age_preference: flat_share_profile?.age_preference || '',
+						location_keyword: flat_share_profile?.location_keyword || null,
+						state: flat_share_profile?.state || null,
+					})
+				} catch (error) {
+					console.error('Error fetching state/location:', error)
+				}
+			}
 		}
+
+		fetchLocationAndState()
 	}, [flat_share_profile])
 
 	useEffect(() => {
@@ -174,6 +211,7 @@ const SearchPreferenceForm = () => {
 					<FormControl isRequired>
 						<FormLabel requiredIndicator={null}>Select state</FormLabel>
 						<Select
+							ref={stateDOMRef}
 							onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
 								setSelectedState(e.target.value)
 							}
@@ -189,25 +227,26 @@ const SearchPreferenceForm = () => {
 						</Select>
 					</FormControl>
 
-					<FormControl isRequired flex="1">
-						<FormLabel requiredIndicator={null} htmlFor="location">
-							Select location
-						</FormLabel>
-						<Select
-							onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-								setSelectedLocation(e.target.value)
-							}
-							placeholder="Select a location"
-							bgColor={colorMode}
-						>
-							{locations &&
-								locations.map((data, index: number) => (
+					{(locations && locations.length > 0) && <>
+						<FormControl isRequired flex="1">
+							<FormLabel requiredIndicator={null} htmlFor="location">
+								Select location
+							</FormLabel>
+							<Select
+								ref={locationDOMRef}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+									setSelectedLocation(e.target.value)
+								}
+								placeholder="Select a location"
+								bgColor={colorMode}
+							>
+								{(locations.map((data, index: number) => (
 									<option key={index} value={data.id}>
 										{data.name}
-									</option>
-								))}
-						</Select>
-					</FormControl>
+									</option>)))}
+							</Select>
+						</FormControl>
+					</>}
 
 					<Button
 						isLoading={isLoading}

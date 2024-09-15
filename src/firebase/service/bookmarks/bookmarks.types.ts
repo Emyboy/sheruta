@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { DocumentReference } from 'firebase/firestore'
-import { HostRequestData, HostRequestDataDetails, SeekerRequestData, SeekerRequestDataDetails } from '../request/request.types'
+import {
+	HostRequestData,
+	HostRequestDataDetails,
+	SeekerRequestData,
+	SeekerRequestDataDetails,
+} from '../request/request.types'
 import { AuthUser } from '../auth/auth.types'
 import { FlatShareProfileData } from '../flat-share-profile/flat-share-profile.types'
 
