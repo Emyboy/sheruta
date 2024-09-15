@@ -239,6 +239,7 @@ export const DBCollectionName = {
 	userInfos: 'user_infos',
 	userSecrets: 'user_secrets',
 	userSettings: 'user_settings',
+	userProfile: 'user_profile',
 
 	flatShareProfile: 'flat_share_profiles',
 	flatShareRequests: 'requests',

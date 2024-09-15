@@ -130,18 +130,21 @@ const ProfileSnippet = () => {
 										{`Preffered area: ${snippetData?.area} ,${snippetData?.state}`}
 									</Text>
 									<Badge
-										colorScheme={snippetData?.is_seeking ? 'cyan' : 'green'}
-										rounded="md"
-										textTransform="capitalize"
-									>
-										{snippetData?.is_seeking ? 'Seeker' : 'I have a space'}
-									</Badge>
-									<Badge
-										colorScheme="orange"
+										colorScheme="green"
 										rounded="md"
 										textTransform={'capitalize'}
 									>
 										{`House share`}
+									</Badge>
+									<Badge
+										colorScheme={snippetData?.is_seeking ? 'orange' : 'teal'}
+										// color={snippetData?.is_seeking ? 'brand_darker' : 'accent'}
+										// backgroundColor={snippetData?.is_seeking ? 'brand_lighter' : 'accent_darker'}
+										// rounded="md"
+										textTransform="capitalize"
+										// variant='outline'
+									>
+										{snippetData?.is_seeking ? 'Seeker' : 'I have a space'}
 									</Badge>
 								</Flex>
 							</CardBody>

@@ -19,7 +19,10 @@ import {
 	getDocs,
 	query,
 	where,
+	setDoc,
 } from 'firebase/firestore'
+import { createDTO } from '@/firebase/service/index.firebase'
+import SherutaDB from '@/firebase/service/index.firebase'
 
 import { promise } from 'zod'
 
@@ -34,6 +37,7 @@ export default async function page(props: any) {
 	async function getUserData() {
 		try {
 			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
+			if (!userDoc.exists()) return { user: null }
 
 			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
 
@@ -51,8 +55,8 @@ export default async function page(props: any) {
 					: null,
 			}
 		} catch (error) {
-			console.error('Error getting user profile:', error)
-			throw new Error('Failed to get user profile')
+			console.error('Error getting user:', error)
+			throw new Error('Failed to get user')
 		}
 	}
 
@@ -99,7 +103,7 @@ export default async function page(props: any) {
 						.filter((data) => data !== null)
 				}
 			} catch (error) {
-				console.error('Error fetching document:', error)
+				console.error('Error fetching interests:', error)
 			}
 
 			let habitsData: any = []
@@ -119,7 +123,7 @@ export default async function page(props: any) {
 						.filter((data) => data !== null)
 				}
 			} catch (error) {
-				console.error('Error fetching document:', error)
+				console.error('Error fetching habits:', error)
 			}
 
 			let locationValue: any = null
@@ -197,16 +201,46 @@ export default async function page(props: any) {
 
 			const plainUser = JSON.stringify(user)
 
+			// const plainUser = user
+
 			return plainUser
 		} catch (error) {
 			console.error('Error fetching document:', error)
 		}
 	}
 
-	const flatshareInfos = await getUserProfile()
-	const user = await getUserData()
+	// const flatshareInfos = await getUserProfile()
+	// const user = await getUserData()
+
+	const [user, flatshareInfos] = await Promise.all([
+		getUserData(),
+		getUserProfile(),
+	])
+
+	const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
+
+	console.log(
+		'this is the Parsed object:.................',
+		flatshareInfosParsed,
+	)
+
+	const userProfile = {
+		...user,
+		...flatshareInfosParsed,
+		profilePromo: false,
+		document_id: user_id,
+	}
+
+	// const profileData: createDTO ={
+	// 	collection_name: DBCollectionName.userProfile,
+	// data: userProfile,
+	// document_id: user_id
+	// }
+	
 
 	const userId = user.user?.id
+
+	// SherutaDB.create(profileData)
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -229,6 +263,7 @@ export default async function page(props: any) {
 								data={user}
 								flatshareInfos={flatshareInfos}
 								user_id={user_id}
+								profileInfo={userProfile}
 							/>
 						) : (
 							<PageNotFound />
