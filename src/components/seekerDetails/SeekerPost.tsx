@@ -172,7 +172,7 @@ const SeekerPost = ({
 				object_type: BookmarkType.requests,
 				_object_ref: requestRef,
 				_user_ref: authState.flat_share_profile?._user_ref,
-				uuid
+				uuid,
 			})
 
 			setBookmarkId(uuid)

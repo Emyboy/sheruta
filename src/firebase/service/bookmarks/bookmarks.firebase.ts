@@ -7,7 +7,6 @@ export default class BookmarkService extends SherutaDB {
 			collection_name: DBCollectionName.bookmarks,
 			document_id: data.uuid,
 			data: {
-				title: data.title,
 				_user_ref: data._user_ref,
 				_object_ref: data._object_ref,
 				object_type: data.object_type,

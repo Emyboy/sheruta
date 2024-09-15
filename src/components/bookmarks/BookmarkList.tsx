@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Box, Heading, Link, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Divider, Flex, Heading, Link, Spinner, Text, VStack, CardBody, Card, Stack, Image } from '@chakra-ui/react'
 import { BookmarkDataDetails } from '@/firebase/service/bookmarks/bookmarks.types'
 import { useAuthContext } from '@/context/auth.context'
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
@@ -11,6 +11,41 @@ import { HostRequestDataDetails } from '@/firebase/service/request/request.types
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { DocumentReference, getDoc } from 'firebase/firestore'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
+import { BiBookmark } from 'react-icons/bi'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+
+interface ProfileDTO {
+    _id: string,
+    avatar_url: string,
+    first_name: string,
+    last_name: string,
+    flat_share_profile: FlatShareProfileData
+}
+
+const resolveUserReferences = async (userRef: DocumentReference) => {
+    const docSnap = await getDoc(userRef)
+    if (docSnap.exists()) {
+        const docData = docSnap.data() as AuthUser
+        return await UserInfoService.get(docData._id as string)
+    }
+    return null
+}
+
+const resolveReferences = async (obj: Record<any, any>) => {
+    const refFields = Object.entries(obj).filter(([, value]) => value instanceof DocumentReference)
+ 
+    const resolvedRefs = await Promise.all(
+        refFields.map(async ([key, ref]) => {
+            const resolvedDoc = await getDoc(ref as DocumentReference)
+            return resolvedDoc.exists() ? { [key]: resolvedDoc.data() } : { [key]: null }
+        }),
+    )
+    
+    return Object.assign({}, ...resolvedRefs)
+ }
+ 
+
 
 const BookmarkList = () => {
     const [bookmarks, setBookmarks] = useState<BookmarkDataDetails[]>([])
@@ -21,76 +56,72 @@ const BookmarkList = () => {
 
     useEffect(() => {
         const fetchBookmarks = async () => {
-            setLoading(true);
+            setLoading(true)
             try {
                 if (user?._id) {
-                    const userBookmarks = await BookmarkService.getUserBookmarks(user._id) as BookmarkDataDetails[];
+                    const userBookmarks = (await BookmarkService.getUserBookmarks(user._id)) as BookmarkDataDetails[]
                     
-                    if (!userBookmarks) {
-                        setBookmarks([]);
-                        return;
+                    if (!userBookmarks || userBookmarks.length === 0) {
+                        setBookmarks([])
+                        return
                     }
     
-                    // Resolve user info for each bookmark request
                     const resolvedBookmarks = await Promise.all(
                         userBookmarks.map(async (bookmark) => {
-                            if (bookmark.object_type === 'requests' && bookmark._object_ref?._user_ref) {
-                                try {
-                                    const userRef = bookmark._object_ref._user_ref as DocumentReference;
-                                    const docSnap = await getDoc(userRef);
+                            try {
+                                if (bookmark.object_type === 'request' && bookmark._object_ref?._user_ref) {
+                                    // Resolve user info and refs for requests
+                                    const user_info = await resolveUserReferences(bookmark._object_ref._user_ref as DocumentReference)
+                                    const resolvedRefs = await resolveReferences(bookmark._object_ref)
     
-                                    if (docSnap.exists()) {
-                                        const docData = docSnap.data() as AuthUser;
-                                        const user_info = await UserInfoService.get(docData._id as string);
-    
-                                        // Resolve DocumentReference fields
-                                        const refFields = Object.entries(bookmark._object_ref).filter(
-                                            ([, value]) => value instanceof DocumentReference,
-                                        );
-    
-                                        const resolvedRefs = await Promise.all(
-                                            refFields.map(async ([key, ref]) => {
-                                                const resolvedDoc = await getDoc(ref as DocumentReference);
-                                                if (resolvedDoc.exists()) {
-                                                    return { [key]: resolvedDoc.data() };
-                                                }
-                                                return { [key]: null }; // Handle missing data
-                                            }),
-                                        );
-    
-                                        return {
-                                            ...bookmark,
-                                            _object_ref: {
-                                                ...bookmark._object_ref,
-                                                ...Object.assign({}, ...resolvedRefs), // Merge resolved refs
-                                                user_info,
-                                            },
-                                        };
+                                    return {
+                                        ...bookmark,
+                                        _object_ref: {
+                                            ...bookmark._object_ref,
+                                            ...resolvedRefs,
+                                            user_info,
+                                        },
                                     }
-                                } catch (error) {
-                                    console.error('Error resolving user reference:', error);
-                                    return bookmark; // Return the bookmark even if there's an error
-                                }
-                            }
-                            return bookmark; // Return bookmark if it's not a 'requests' type
-                        })
-                    );
+                                } else if (bookmark.object_type === 'profile') {
+                                    // Resolve flatShareProfile and refs for profiles
+                                    const userId = bookmark._object_ref.id
+                                    const flatShareProfile = await FlatShareProfileService.get(userId)
+                                    const resolvedRefs = flatShareProfile ? await resolveReferences(flatShareProfile) : {}
     
-                    setBookmarks(resolvedBookmarks.filter(Boolean) as BookmarkDataDetails[]);
+                                    return {
+                                        ...bookmark,
+                                        _object_ref: {
+                                            ...bookmark._object_ref,
+                                            flat_share_profile: {
+                                                ...flatShareProfile,
+                                                ...resolvedRefs,
+                                            },
+                                        },
+                                    }
+                                }
+                            } catch (error) {
+                                console.error(`Error resolving bookmark ID: ${bookmark.id}`, error)
+                                return bookmark
+                            }
+    
+                            return bookmark // Fallback to original bookmark if no type matches
+                        })
+                    )
+    
+                    setBookmarks(resolvedBookmarks.filter(Boolean) as BookmarkDataDetails[])
                 } else {
-                    setBookmarks([]);
+                    setBookmarks([])
                 }
             } catch (error) {
-                console.error('Error fetching bookmarks:', error);
+                console.error('Error fetching bookmarks:', error)
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
-        };
+        }
     
-        fetchBookmarks();
-    }, [user?._id]);
+        fetchBookmarks()
+    }, [user?._id])
     
-
 
     if (loading) {
         return (
@@ -101,7 +132,7 @@ const BookmarkList = () => {
         )
     }
 
-    if (bookmarks.length === 0) {
+    if (!loading && bookmarks.length === 0) {
         return (
             <Box textAlign="center" mt="20">
                 <Text>No bookmarks found.</Text>
@@ -114,52 +145,113 @@ const BookmarkList = () => {
             <Heading as="h2" size="lg">
                 My Bookmarks
             </Heading>
-            {bookmarks.map((bookmark) => {
-                let redirectLink: string = '';
-                const bookmarkType = bookmark.object_type;
+            {bookmarks.map((bookmark: BookmarkDataDetails) => {
 
-                switch (bookmarkType) {
-                    case 'requests':
-                        redirectLink = `/request/${bookmark._object_ref?.seeking ? 'seeker' : 'host'}/${bookmark._object_ref?.id ?? ''}`;
-                        break;
-                    case 'profiles':
-                        redirectLink = `/user/${bookmark._object_ref?.id ?? ''}`;
-                        break;
-                    default:
-                        redirectLink = '/';
-                        break;
-                }
+                const bookmarkType = bookmark.object_type
 
-                if (bookmarkType === 'requests') {
-                    // const userId = bookmark._object_ref?._user_ref?._id;
-                    // const request = async () => {
-                    //     if (userId) {
-                    //         const user_info = await UserInfoService.get(userId);
-                    //         return {
-                    //             ...bookmark._object_ref,
-                    //             user_info,
-                    //         };
-                    //     }
-                    //     return bookmark._object_ref;
-                    // };
-
+                if (bookmarkType === 'request') {
                     return (
                         <React.Fragment key={bookmark.id}>
-                            <EachRequest request={bookmark._object_ref} />
+                            <EachRequest request={bookmark._object_ref as unknown as HostRequestDataDetails} />
                         </React.Fragment>
-                    );
+                    )
+                } else if (bookmarkType === 'profile') {
+                    return (
+                        <React.Fragment key={bookmark.id}>
+                            <UserProfile profileData={bookmark._object_ref as unknown as ProfileDTO} />
+                        </React.Fragment>
+                    )
                 }
-
-                return (
-                    <a href={redirectLink} key={bookmark.id}>
-                        <div>{bookmark.title}</div>
-                    </a>
-                );
-            })}
-
             })}
         </VStack>
     )
 }
 
 export default BookmarkList
+
+
+const UserProfile = ({ profileData }: {
+    profileData: ProfileDTO
+}) => {
+    return (
+        <>
+            <Box w="100%">
+                <Card
+                    direction={{ base: 'column', sm: 'row' }}
+                    overflow="hidden"
+                    variant="outline"
+                    width="100%"
+                >
+                    <Image
+                        objectFit="cover"
+                        maxW={{ base: '100%', sm: '200px' }}
+                        w="600px"
+                        src={`${profileData.avatar_url}`}
+                        alt="Caffe Latte"
+                    />
+
+                    <Stack width="100%">
+                        <Link
+                            href={`/user/${profileData?._id}`}
+                            style={{ textDecoration: 'none' }}
+                        >
+                            <CardBody mb={0} border="none">
+                                {/* <Heading size='md'>The perfect latte</Heading> */}
+                                <Flex justify="space-between" align="center" mb={3}>
+                                    <Text>{`${profileData?.first_name} ${profileData?.last_name}`}</Text>
+                                    {/* <Badge color="text_color" background="border_color">
+                                        Promoted
+                                    </Badge> */}
+                                </Flex>
+
+                                <Flex>
+                                    <Text color="muted_text" py="2" fontSize="0.8em">
+                                        {profileData.flat_share_profile.bio
+                                            ? profileData.flat_share_profile.bio.length > 84
+                                                ? `${profileData.flat_share_profile.bio.substring(0, 84)}......`
+                                                : profileData.flat_share_profile.bio
+                                            : 'Hi! I am a user of Sheruta, you should go through my profile and see if we are a match'}
+                                    </Text>
+                                </Flex>
+
+                                <Flex
+                                    style={{ fontSize: '10px' }}
+                                    justify="space-between"
+                                    align="center"
+                                >
+                                    <Text color="text_muted" fontWeight="700">
+                                        {`Preffered area: ${profileData?.flat_share_profile?.location_keyword?.name} ,${profileData?.flat_share_profile?.state?.name}`}
+                                    </Text>
+                                    <Badge
+                                        colorScheme={profileData?.flat_share_profile?.seeking ? 'cyan' : 'green'}
+                                        rounded="md"
+                                        textTransform="capitalize"
+                                    >
+                                        {profileData?.flat_share_profile?.seeking ? 'Seeker' : 'I have a space'}
+                                    </Badge>
+                                    <Badge
+                                        colorScheme="orange"
+                                        rounded="md"
+                                        textTransform={'capitalize'}
+                                    >
+                                        {`House share`}
+                                    </Badge>
+                                </Flex>
+                            </CardBody>
+                        </Link>
+                        <Divider />
+                        <Flex justify="space-between" align="center" mb={2}>
+                            <Button colorScheme="lueb" color="text_muted">
+                                <BiBookmark style={{ fontSize: '1.5em' }} />
+                            </Button>
+                            <Box mr={2} color="text_muted">
+                                {`Budget: ${profileData?.flat_share_profile?.budget}/month`}
+                            </Box>
+                        </Flex>
+                    </Stack>
+                </Card>
+            </Box>
+            <Divider />
+        </>
+    )
+}
