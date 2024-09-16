@@ -1,3 +1,5 @@
+'use client'
+
 import MainSection from '@/components/atoms/MainSection'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import { Flex } from '@chakra-ui/react'
@@ -19,7 +21,7 @@ import {
 } from 'firebase/firestore'
 import { createDTO } from '@/firebase/service/index.firebase'
 import SherutaDB from '@/firebase/service/index.firebase'
-
+import { useEffect } from 'react'
 
 interface Props {
 	data: any
@@ -32,32 +34,31 @@ export default async function UserProfilePage({
 	data,
 	flatshareInfos,
 	user_id,
-	profileInfo
+	profileInfo,
 }: Props) {
 	const userProfile = JSON.parse(flatshareInfos)
 
-
-    const profileData: createDTO ={
+	const profileData: createDTO = {
 		collection_name: DBCollectionName.userProfile,
-	data: profileInfo,
-	document_id: user_id
+		data: profileInfo,
+		document_id: user_id,
 	}
 
-	// const saveProfile = async () => {
-	// 	try {
-	// 		const docRef = doc(db, DBCollectionName.userProfile, user_id)
-	// 		const docSnap = await getDoc(docRef)
-	// 		if (docSnap.exists()) {
-	// 			return alert('Slug already exist, please retry')
-	// 		}
-	// 		setDoc(docRef, profileData)
-	// 	} catch (error) {
-	// 		console.log(error)
-	// 	}
-	// }
-	// saveProfile()
+	useEffect(() => {
+		const saveProfile = async () => {
+			try {
+				const docRef = doc(db, DBCollectionName.userProfile, user_id)
+				const docSnap = await getDoc(docRef)
+				if (!docSnap.exists()) {
+					await setDoc(docRef, profileData)
+				}
+			} catch (error) {
+				console.log('There is an issue with user profile data sent', error)
+			}
+		}
 
-	console.log('User profile and data drop......................................',profileInfo)
+		saveProfile()
+	}, [user_id, profileData])
 
 	return (
 		<Flex flexDir={'column'}>

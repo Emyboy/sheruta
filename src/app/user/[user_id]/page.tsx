@@ -219,28 +219,50 @@ export default async function page(props: any) {
 
 	const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
 
-	console.log(
-		'this is the Parsed object:.................',
-		flatshareInfosParsed,
-	)
+	const habitTitle: any[] = flatshareInfosParsed.flatShareProfile.habits
+	const profileHabits = habitTitle.map((habitTitle) => habitTitle.tile)
 
-	const userProfile = {
-		...user,
-		...flatshareInfosParsed,
+	const userProfiles = {
+		first_name: user.user?.first_name,
+		last_name: user.user?.last_name,
+		email: user.user?.email,
+		avatar_url: user.user?.avatar_url,
+		id: user.user?.id,
+		occupation: flatshareInfosParsed.flatShareProfile.occupation,
+		budget: flatshareInfosParsed.flatShareProfile.budget,
+		interests: flatshareInfosParsed.flatShareProfile.interests,
+		area: flatshareInfosParsed.flatShareProfile.area,
+		habits: flatshareInfosParsed.flatShareProfile.habits,
+		work_industry: flatshareInfosParsed.flatShareProfile.work_industry,
+		credits: flatshareInfosParsed.flatShareProfile.credits,
+		gender_preference: flatshareInfosParsed.flatShareProfile.gender_preference,
+		age_preference: flatshareInfosParsed.flatShareProfile.age_preference,
+		bio: flatshareInfosParsed.flatShareProfile.bio,
+
+		twitter: flatshareInfosParsed.flatShareProfile.socials.twitter,
+		tiktok: flatshareInfosParsed.flatShareProfile.socials.tiktok,
+		facebook: flatshareInfosParsed.flatShareProfile.socials.facebook,
+		linkedin: flatshareInfosParsed.flatShareProfile.socials.linkedin,
+		instagram: flatshareInfosParsed.flatShareProfile.socials.instagram,
+
+		state: flatshareInfosParsed.flatShareProfile.state.name,
+		seeking: flatshareInfosParsed.flatShareProfile.seeking,
+		employment_status: flatshareInfosParsed.flatShareProfile.employment_status,
+		religion: flatshareInfosParsed.flatShareProfile.religion,
+		done_kyc: flatshareInfosParsed.flatShareProfile.done_kyc,
+
+		whatsapp: flatshareInfosParsed.userInfo.whatsapp,
+		phone_number: flatshareInfosParsed.userInfo.phone_number,
+		gender: flatshareInfosParsed.userInfo.gender,
+		is_verified: flatshareInfosParsed.userInfo.is_verified,
 		profilePromo: false,
 		document_id: user_id,
+		_user_ref: `/users/${user_id}`,
 	}
 
-	// const profileData: createDTO ={
-	// 	collection_name: DBCollectionName.userProfile,
-	// data: userProfile,
-	// document_id: user_id
-	// }
-	
+	// console.log(userProfiles)
 
 	const userId = user.user?.id
-
-	// SherutaDB.create(profileData)
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -263,7 +285,7 @@ export default async function page(props: any) {
 								data={user}
 								flatshareInfos={flatshareInfos}
 								user_id={user_id}
-								profileInfo={userProfile}
+								profileInfo={userProfiles}
 							/>
 						) : (
 							<PageNotFound />

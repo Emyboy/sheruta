@@ -34,9 +34,15 @@ type Props = {
 	locations: string
 	states: StateData[]
 	requests: string
+	userProfiles: any
 }
 
-export default function HomePage({ locations, states, requests }: Props) {
+export default function HomePage({
+	locations,
+	states,
+	requests,
+	userProfiles,
+}: Props) {
 	const [flatShareRequests, setFlatShareRequests] = useState<any[]>(
 		requests ? JSON.parse(requests) : [],
 	)
@@ -141,7 +147,7 @@ export default function HomePage({ locations, states, requests }: Props) {
 					<Flex flexDir={'column'}>
 						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
-						<ProfileSnippet />
+						<ProfileSnippet userProfiles={userProfiles} />
 
 						<Flex flexDirection={'column'} gap={0}>
 							{processedRequests.map((request: any, index: number) => (

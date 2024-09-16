@@ -21,6 +21,8 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 
 	const [bio, setBio] = useState(flat_share_profile?.bio || '')
 
+	const [payment_plan, setPaymentPlan] = useState(flat_share_profile?.payment_plan || '')
+
 	const [isLoading, setIsLoading] = useState(false)
 
 	const update = async (e: any) => {
@@ -39,7 +41,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 			})
 
 			await FlatShareProfileService.update({
-				data: { budget, bio },
+				data: { budget, bio , payment_plan},
 				document_id: user?._id,
 			})
 
@@ -160,6 +162,29 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								onValueChange={(value) => setBudget(parseInt(value as string))}
 							/>
 						</Flex>
+						<Flex
+								justifyContent={'flex-start'}
+								flexDir={'column'}
+								w="full"
+								gap={2}
+							>
+								<Text color={'text_muted'} fontSize={'sm'}>
+									Payment plan
+								</Text>
+								<Select
+									placeholder="Select option"
+									bg="dark"
+									required
+									onChange={(e :React.ChangeEvent<HTMLSelectElement>) => setPaymentPlan(e.target.value)}
+									value={payment_plan}
+								>
+									<option value="Weekly">Weekly</option>
+									<option value="Monthly">Monthly</option>
+									<option value="Bi-annually">Bi-annually</option>
+									<option value="Quaterly">Quaterly</option>
+									<option value="Annually">Annually</option>
+								</Select>
+							</Flex>
 					</Flex>
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 						<Flex
