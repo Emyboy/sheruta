@@ -25,11 +25,13 @@ const SearchPreferenceForm = () => {
 		age_preference: string
 		location_keyword: DocumentReference | null
 		state: DocumentReference | null
+		seeking: boolean
 	}>({
 		gender_preference: '',
 		age_preference: '',
 		location_keyword: null,
 		state: null,
+		seeking: false
 	})
 
 	const { colorMode } = useColorMode()
@@ -62,7 +64,6 @@ const SearchPreferenceForm = () => {
 	useEffect(() => {
 		const fetchLocationAndState = async () => {
 			if (flat_share_profile) {
-				console.log(flat_share_profile)
 				const stateRef = flat_share_profile.state
 				const locationRef = flat_share_profile.location_keyword
 
@@ -71,30 +72,31 @@ const SearchPreferenceForm = () => {
 					const locationData = await getDoc(locationRef)
 
 					if (stateData.exists() && locationData.exists()) {
-						const state = { ...stateData.data(), id: stateData.id } as StateData
-						const location_keyword = { ...locationData.data(), id: locationData.id } as LocationKeywordData
+						const state = {
+							...(stateData?.data() || {}),
+							id: stateData.id,
+						} as StateData
+						const location_keyword = {
+							...(locationData?.data() || {}),
+							id: locationData.id,
+						} as LocationKeywordData
 
 						console.log(state, location_keyword)
+
 						if (stateDOMRef.current) {
 							console.log('setting state value', state.id)
 							stateDOMRef.current.value = state.id
-							// setSelectedState(state.id)
 							setLocations(getLocations(state.id))
-							console.log('locations updated')
 						}
-						if (locationDOMRef.current) {
-							console.log('setting location value', location_keyword.id)
-							locationDOMRef.current.value = location_keyword.id
-							setSelectedLocation(location_keyword.id)
-						}
-					}
 
-					setFormData({
-						gender_preference: flat_share_profile?.gender_preference || '',
-						age_preference: flat_share_profile?.age_preference || '',
-						location_keyword: flat_share_profile?.location_keyword || null,
-						state: flat_share_profile?.state || null,
-					})
+						setFormData({
+							gender_preference: flat_share_profile?.gender_preference || '',
+							age_preference: flat_share_profile?.age_preference || '',
+							location_keyword: flat_share_profile?.location_keyword || null,
+							state: flat_share_profile?.state || null,
+							seeking: flat_share_profile?.seeking || false,
+						})
+					}
 				} catch (error) {
 					console.error('Error fetching state/location:', error)
 				}
@@ -103,6 +105,14 @@ const SearchPreferenceForm = () => {
 
 		fetchLocationAndState()
 	}, [flat_share_profile])
+
+	useEffect(() => {
+		if (locationDOMRef.current && locations.length > 0) {
+			locationDOMRef.current.value = flat_share_profile?.location_keyword?.id || ''
+			setSelectedLocation(flat_share_profile?.location_keyword?.id || '')
+		}
+	}, [locations])
+
 
 	useEffect(() => {
 		if (locations.length > 0 && selectedLocation) {
@@ -227,26 +237,48 @@ const SearchPreferenceForm = () => {
 						</Select>
 					</FormControl>
 
-					{(locations && locations.length > 0) && <>
-						<FormControl isRequired flex="1">
-							<FormLabel requiredIndicator={null} htmlFor="location">
-								Select location
-							</FormLabel>
-							<Select
-								ref={locationDOMRef}
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-									setSelectedLocation(e.target.value)
-								}
-								placeholder="Select a location"
-								bgColor={colorMode}
-							>
-								{(locations.map((data, index: number) => (
-									<option key={index} value={data.id}>
-										{data.name}
-									</option>)))}
-							</Select>
-						</FormControl>
-					</>}
+					{locations && locations.length > 0 && (
+						<>
+							<FormControl isRequired flex="1">
+								<FormLabel requiredIndicator={null} htmlFor="location">
+									Select location
+								</FormLabel>
+								<Select
+									ref={locationDOMRef}
+									onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+										setSelectedLocation(e.target.value)
+									}
+									placeholder="Select a location"
+									bgColor={colorMode}
+								>
+									{locations.map((data, index: number) => (
+										<option key={index} value={data.id}>
+											{data.name}
+										</option>
+									))}
+								</Select>
+							</FormControl>
+						</>
+					)}
+
+					<FormControl isRequired>
+						<FormLabel requiredIndicator={null}>What are you looking for?</FormLabel>
+						<Select
+							onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+								setFormData((prev) => ({
+									...prev,
+									seeking: e.target.value === 'true',
+								}))
+							}
+							placeholder="Select One"
+							bgColor={colorMode}
+							name='seeking'
+							value={formData.seeking?.toString()}
+						>
+							<option value={"false"}> I have an apartment</option>
+							<option value={"true"}> I&apos;m looking for an apartment</option>
+						</Select>
+					</FormControl>
 
 					<Button
 						isLoading={isLoading}

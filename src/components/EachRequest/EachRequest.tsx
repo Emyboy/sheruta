@@ -183,11 +183,11 @@ export default function EachRequest({ request }: Props) {
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
-										avatar_url: authState.user.avatar_url,
-										first_name: authState.user.first_name,
-										last_name: authState.user.last_name,
-										id: authState.user._id,
-									}
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
 									: null,
 								action_url: `/user/${request._user_ref._id}`,
 							})
@@ -216,11 +216,11 @@ export default function EachRequest({ request }: Props) {
 										type: 'profile_view',
 										sender_details: authState.user
 											? {
-												avatar_url: authState.user.avatar_url,
-												first_name: authState.user.first_name,
-												last_name: authState.user.last_name,
-												id: authState.user._id,
-											}
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
 											: null,
 										action_url: `/user/${request._user_ref._id}`,
 									})
@@ -404,14 +404,11 @@ export default function EachRequest({ request }: Props) {
 				>
 					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
 						<Flex gap={DEFAULT_PADDING}>
-							{(typeof request?.seeking !== 'undefined' && request.seeking) ?
-								<Badge
-									colorScheme={'orange'}
-									textTransform="capitalize"
-								>
+							{typeof request?.seeking !== 'undefined' && request.seeking ? (
+								<Badge colorScheme={'orange'} textTransform="capitalize">
 									Seeker
 								</Badge>
-								: null}
+							) : null}
 							<Badge
 								colorScheme="green"
 								rounded="md"
@@ -484,11 +481,11 @@ export default function EachRequest({ request }: Props) {
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
 												: null,
 										})
 									}}
