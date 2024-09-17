@@ -122,10 +122,7 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (
-			(!user?._id || !flat_share_profile?._user_ref) &&
-			formData.flat_share_profile._id === user?._id
-		)
+		if (!user?._id || !flat_share_profile?._user_ref)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -189,6 +186,7 @@ export default function UploadMedia({
 				...prev,
 				imagesRefPaths: [...oldMediaRefPaths, ...newMediaRefPaths],
 				videoRefPath,
+				_user_ref: flat_share_profile._user_ref,
 			}))
 
 			const images_urls = mediaUrls.filter((url) => url !== null)
@@ -200,6 +198,7 @@ export default function UploadMedia({
 				...cleanedFormData,
 				imagesRefPaths: [...oldMediaRefPaths, ...newMediaRefPaths],
 				videoRefPath,
+				_user_ref: flat_share_profile._user_ref,
 				seeking: false,
 				video_url,
 				images_urls,
@@ -391,7 +390,7 @@ export default function UploadMedia({
 											accept="image/*"
 											display={'none'}
 											onChange={(e) => handleUploadImages(e, i)}
-											disabled={loading}
+											isDisabled={loading}
 										/>
 									</FormLabel>
 								</GridItem>
@@ -488,13 +487,13 @@ export default function UploadMedia({
 							accept="video/*"
 							display={'none'}
 							onChange={handleVideoUpload}
-							disabled={loading}
+							isDisabled={loading}
 						/>
 					</FormLabel>
 				</VStack>
 				<br />
 				<Button
-					disabled={loading}
+					isDisabled={loading}
 					isLoading={loading}
 					bgColor={'brand'}
 					w={'100%'}

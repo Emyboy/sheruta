@@ -24,8 +24,8 @@ export default function MainIconBtn({
 				position={'relative'}
 				onClick={onClick ? onClick : () => {}}
 				p="0px"
-				h="45px"
-				w="45px"
+				h={{ base: '30px', sm: '45px' }}
+				w={{ base: '30px', sm: '45px' }}
 				border="1px"
 				borderColor={'border_color'}
 				color={active ? 'white' : 'text_muted'}
@@ -44,6 +44,7 @@ export default function MainIconBtn({
 						borderColor: 'brand',
 					},
 				}}
+				fontSize={{ base: '18px', sm: '24px' }}
 			>
 				{hasNotification && (
 					<Box
@@ -55,7 +56,7 @@ export default function MainIconBtn({
 						top={-1}
 					/>
 				)}
-				<Icon size={25} />
+				<Icon />
 			</Button>
 		</MainTooltip>
 	)

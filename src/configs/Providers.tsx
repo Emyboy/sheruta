@@ -1,16 +1,17 @@
-// app/providers.tsx
 'use client'
 
-import { Box, ChakraProvider, ColorModeScript } from '@chakra-ui/react'
-import { theme } from './theme'
-import { AuthContextProvider } from '@/context/auth.context'
 import AppLoading from '@/components/atoms/AppLoading'
-import { AppContextProvider } from '@/context/app.context'
-import { Next13ProgressBar } from 'next13-progressbar'
-import MasterPopup from '@/components/popups/MasterPopup'
-import dynamic from 'next/dynamic'
 import GetStarted from '@/components/info/GetStarted/GetStarted'
+import MasterPopup from '@/components/popups/MasterPopup'
+import { AppContextProvider } from '@/context/app.context'
+import { AuthContextProvider } from '@/context/auth.context'
+import { InspectionsProvider } from '@/context/inspections.context'
+import { NotificationsProvider } from '@/context/notifications.context'
 import { OptionsProvider } from '@/context/options.context'
+import { Box, ChakraProvider, ColorModeScript } from '@chakra-ui/react'
+import dynamic from 'next/dynamic'
+import { Next13ProgressBar } from 'next13-progressbar'
+import { theme } from './theme'
 
 const CreditOptionsPopups = dynamic(
 	() => import('@/components/popups/CreditOptionsPopups'),
@@ -26,26 +27,30 @@ export function Providers({ children }: { children: React.ReactNode }) {
 			<AppContextProvider>
 				<AuthContextProvider>
 					<OptionsProvider>
-						<Box
-							bg="white"
-							_dark={{
-								bg: 'dark',
-							}}
-							minH={'100vh'}
-							userSelect={'none'}
-						>
-							<GetStarted />
-							<CreditOptionsPopups />
-							<MasterPopup />
-							<AppLoading />
-							<Next13ProgressBar
-								height="4px"
-								color="#00bc73"
-								options={{ showSpinner: false }}
-								showOnShallow
-							/>
-							{children}
-						</Box>
+						<InspectionsProvider>
+							<NotificationsProvider>
+								<Box
+									bg="white"
+									_dark={{
+										bg: 'dark',
+									}}
+									minH={'100vh'}
+									userSelect={'none'}
+								>
+									<GetStarted />
+									<CreditOptionsPopups />
+									<MasterPopup />
+									<AppLoading />
+									<Next13ProgressBar
+										height="4px"
+										color="#00bc73"
+										options={{ showSpinner: false }}
+										showOnShallow
+									/>
+									{children}
+								</Box>
+							</NotificationsProvider>
+						</InspectionsProvider>
 					</OptionsProvider>
 				</AuthContextProvider>
 			</AppContextProvider>

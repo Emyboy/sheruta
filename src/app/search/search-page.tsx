@@ -1,25 +1,27 @@
-import EachRequest from '@/components/EachRequest/EachRequest'
+'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Flex } from '@chakra-ui/react'
-import React from 'react'
-import SearchResultUsers from './(components)/SearchResultUsers'
+import ListOfFilters from './(components)/ListOfFilters'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import EachRequest from '@/components/EachRequest/EachRequest'
+import NoApartment from './(components)/NoApartment'
 
-type Props = {}
+export default function SearchPage({ requests }: { requests: string }) {
+	const flatShareRequests: HostRequestDataDetails[] = JSON.parse(requests) || []
 
-export default function SearchPage({}: Props) {
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING}>
-			<Flex flexDir={'column'} px={DEFAULT_PADDING}>
-				{/* <EachRequest />
-				<EachRequest /> */}
-			</Flex>
-			<SearchResultUsers />
-			<Flex flexDir={'column'} px={DEFAULT_PADDING}>
-				{/* <EachRequest />
-				<EachRequest />
-				<EachRequest />
-				<EachRequest /> */}
-			</Flex>
+			<ListOfFilters length={flatShareRequests.length} />
+			{flatShareRequests.length ? (
+				flatShareRequests.map((request, i) => (
+					<Flex key={i} padding={DEFAULT_PADDING}>
+						<EachRequest request={request} />
+					</Flex>
+				))
+			) : (
+				<NoApartment />
+			)}
 		</Flex>
 	)
 }

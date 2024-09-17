@@ -1,3 +1,5 @@
+'use client'
+
 import AvailableIcon from '@/assets/svg/available-icon'
 import BookInspectionBadge from '@/assets/svg/book-inspection-badge'
 import Checked from '@/assets/svg/checked'
@@ -6,9 +8,22 @@ import MessageIcon from '@/assets/svg/message'
 import PhysicalInspectionIcon from '@/assets/svg/physical-inspection-icon'
 import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
+import {
+	InspectionData,
+	InspectionDataSchema,
+} from '@/firebase/service/inspections/inspections.types'
+import NotificationsService, {
+	NotificationsBodyMessage,
+} from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
+import { createNotification, generateRoomUrl } from '@/utils/actions'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -18,6 +33,9 @@ import {
 	Button,
 	Flex,
 	Input,
+	Modal,
+	ModalContent,
+	ModalOverlay,
 	Popover,
 	PopoverBody,
 	PopoverContent,
@@ -29,6 +47,7 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
+import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -41,13 +60,16 @@ import {
 	BiShare,
 	BiTrash,
 } from 'react-icons/bi'
-import { CiCircleInfo } from 'react-icons/ci'
 import { FaHouseChimneyUser } from 'react-icons/fa6'
 import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
 import { LuBadgeCheck } from 'react-icons/lu'
 import { MdOutlineMailOutline } from 'react-icons/md'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
+import Spinner from '../atoms/Spinner'
+import CreditInfo from '../info/CreditInfo/CreditInfo'
+import SearchLocation from './SearchLocation'
+import { handleCall } from '@/utils/index.utils'
 
 export default function ApartmentSummary({
 	request,
@@ -66,11 +88,14 @@ export default function ApartmentSummary({
 	const openModal = () => setShowBookInspectionModal(true)
 	const closeModal = () => setShowBookInspectionModal(false)
 
-	if (showBookInspectionModal)
-		return <BookInspectionModal closeModal={closeModal} />
-
 	return (
 		<>
+			<BookInspectionModal
+				closeModal={closeModal}
+				showBookInspectionModal={showBookInspectionModal}
+				host_details={request._user_ref}
+				inspection_location={request.google_location_text}
+			/>
 			<Flex
 				gap={{ base: '8px', sm: 5 }}
 				alignItems={{ base: 'start', sm: 'center' }}
@@ -136,7 +161,7 @@ export default function ApartmentSummary({
 
 				<Flex gap={{ base: '8px', md: '16px' }}>
 					<Avatar
-						src={request.flat_share_profile.avatar_url}
+						src={request._user_ref.avatar_url}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -155,18 +180,33 @@ export default function ApartmentSummary({
 						flexDir={'column'}
 					>
 						<Link
-							href={`/user/${request.flat_share_profile._id}`}
+							href={`/user/${request._user_ref._id}`}
 							style={{ textDecoration: 'none' }}
+							onClick={async () =>
+								await createNotification({
+									is_read: false,
+									message: NotificationsBodyMessage.profile_view,
+									recipient_id: request._user_ref._id,
+									type: 'profile_view',
+									sender_details: authState.user
+										? {
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
+										: null,
+								})
+							}
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 								<Text
 									textTransform={'capitalize'}
 									fontSize={{ base: 'base', md: 'lg' }}
 								>
-									{request.flat_share_profile.last_name}{' '}
-									{request.flat_share_profile.first_name}
+									{request._user_ref.last_name} {request._user_ref.first_name}
 								</Text>
-								{request.flat_share_profile.done_kyc && (
+								{request.user_info.is_verified && (
 									<LuBadgeCheck fill="#00bc73" />
 								)}
 							</Flex>
@@ -193,35 +233,52 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
+									onClick={async () => {
+										if (authState.user?._id === request._user_ref._id) return
+										await handleCall({
+											number: request.user_info.primary_phone_number,
+											recipient_id: request._user_ref._id,
+											sender_details: authState.user
+												? {
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
+												: null,
+										})
+									}}
 								>
 									<BiPhone />
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
-								<Button
-									px={0}
-									bg="none"
-									color="text_muted"
-									display={'flex'}
-									fontWeight={'light'}
-									_hover={{
-										color: 'brand',
-										bg: 'none',
-										_dark: {
+								<Link href={`/messages/${request._user_ref._id}`}>
+									<Button
+										px={0}
+										bg="none"
+										color="text_muted"
+										display={'flex'}
+										fontWeight={'light'}
+										_hover={{
 											color: 'brand',
-										},
-									}}
-									_dark={{
-										color: 'dark_lighter',
-									}}
-									fontSize={{
-										md: 'xl',
-										base: 'lg',
-									}}
-									ml={'-8px'}
-								>
-									<MdOutlineMailOutline />
-								</Button>
+											bg: 'none',
+											_dark: {
+												color: 'brand',
+											},
+										}}
+										_dark={{
+											color: 'dark_lighter',
+										}}
+										fontSize={{
+											md: 'xl',
+											base: 'lg',
+										}}
+										ml={'-8px'}
+									>
+										<MdOutlineMailOutline />
+									</Button>
+								</Link>
 							</MainTooltip>
 						</Flex>
 					</Flex>
@@ -286,7 +343,7 @@ export default function ApartmentSummary({
 											Share
 										</Text>
 									</Button>
-									{authState.user?._id === request.flat_share_profile._id && (
+									{authState.user?._id === request._user_ref._id && (
 										<>
 											<Button
 												variant="ghost"
@@ -315,7 +372,7 @@ export default function ApartmentSummary({
 												onClick={() =>
 													handleDeletePost({
 														requestId: request.id,
-														userId: request.flat_share_profile._id,
+														userId: request._user_ref._id,
 													})
 												}
 												width="100%"
@@ -555,7 +612,7 @@ export default function ApartmentSummary({
 							>
 								₦
 								{(
-									request.service_charge || 0 + request.budget
+									(request.service_charge || 0) + request.budget
 								).toLocaleString()}
 							</Text>
 						</Flex>
@@ -576,41 +633,43 @@ export default function ApartmentSummary({
 						Book Inspection
 					</Button>
 				</Flex>
-				<Flex
-					my={{ base: '24px', sm: '32px' }}
-					flexDir={'column'}
-					gap={'20px'}
-					mt={'16px'}
-				>
-					<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'300'}>
-						Amenities
-					</Text>
-					<Box
-						h={'2px'}
-						borderRadius={'4px'}
-						w={'100%'}
-						bgColor={'brand_darker'}
-						_light={{ bgColor: '#1117171A' }}
-					/>
-					<SimpleGrid columns={[2, null, 3]} spacingY="16px">
-						{request.amenities.map((amenity: string, i: number) => (
-							<Flex
-								key={i}
-								gap={'10px'}
-								alignItems={'center'}
-								justifyContent={'start'}
-							>
-								<Text
-									textTransform={'capitalize'}
-									fontWeight={'300'}
-									fontSize={{ base: 'base', md: 'lg' }}
+				{request.amenities && !!request.amenities.length && (
+					<Flex
+						my={{ base: '24px', sm: '32px' }}
+						flexDir={'column'}
+						gap={'20px'}
+						mt={'16px'}
+					>
+						<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'300'}>
+							Amenities
+						</Text>
+						<Box
+							h={'2px'}
+							borderRadius={'4px'}
+							w={'100%'}
+							bgColor={'brand_darker'}
+							_light={{ bgColor: '#1117171A' }}
+						/>
+						<SimpleGrid columns={[2, null, 3]} spacingY="16px">
+							{request.amenities.map((amenity, i) => (
+								<Flex
+									key={i}
+									gap={'10px'}
+									alignItems={'center'}
+									justifyContent={'start'}
 								>
-									{amenity}
-								</Text>
-							</Flex>
-						))}
-					</SimpleGrid>
-				</Flex>
+									<Text
+										textTransform={'capitalize'}
+										fontWeight={'300'}
+										fontSize={{ base: 'base', md: 'lg' }}
+									>
+										{amenity}
+									</Text>
+								</Flex>
+							))}
+						</SimpleGrid>
+					</Flex>
+				)}
 				<Flex
 					my={{ base: '24px', sm: '32px' }}
 					flexDir={'column'}
@@ -653,7 +712,7 @@ export default function ApartmentSummary({
 						))}
 					</SimpleGrid>
 				</Flex>
-				{request.house_rules && request.house_rules.length && (
+				{request.house_rules && !!request.house_rules.length && (
 					<Flex
 						my={{ base: '24px', sm: '32px' }}
 						flexDir={'column'}
@@ -776,7 +835,7 @@ export default function ApartmentSummary({
 					>
 						<Flex alignItems={'center'} gap={'16px'} justifyContent={'start'}>
 							<Avatar
-								src={request.flat_share_profile.avatar_url}
+								src={request._user_ref.avatar_url}
 								w={{
 									md: '100px',
 									base: '60px',
@@ -805,8 +864,7 @@ export default function ApartmentSummary({
 									_light={{ color: '#111717CC' }}
 									textTransform={'capitalize'}
 								>
-									{request.flat_share_profile.last_name}{' '}
-									{request.flat_share_profile.first_name}
+									{request._user_ref.last_name} {request._user_ref.first_name}
 								</Text>
 								<Text
 									fontWeight={'300'}
@@ -887,7 +945,7 @@ export default function ApartmentSummary({
 						</Text>
 					</Flex>
 				</SimpleGrid>
-				<SimpleGrid mt={'16px'} mb={'48px'} columns={1} spacingY="16px">
+				<SimpleGrid mt={'16px'} columns={1} spacingY="16px">
 					<Flex gap={'10px'} alignItems={'center'} justifyContent={'start'}>
 						<IoIosPeople color="00BC73" size={'24px'} />
 
@@ -913,34 +971,266 @@ export default function ApartmentSummary({
 						</Text>
 					</Flex>
 				</SimpleGrid>
+				{request.google_location_object.geometry?.location &&
+					!request.seeking && (
+						<SearchLocation
+							location={request.google_location_object.geometry.location}
+						/>
+					)}
 			</Flex>
 		</>
 	)
 }
 
-const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
+const BookInspectionModal = ({
+	closeModal,
+	showBookInspectionModal,
+	host_details,
+	inspection_location,
+}: {
+	closeModal: () => void
+	showBookInspectionModal: boolean
+	host_details: any
+	inspection_location: string
+}) => {
+	const { authState } = useAuthContext()
+	const { showToast } = useCommon()
+	const router = useRouter()
+	const [inspectionData, setInspectionData] = useState({
+		inspection_date: undefined,
+		inspection_time: undefined,
+		inspection_type: '',
+	})
+	const [showCreditInfo, setShowCreditInfo] = useState<boolean>(false)
+	const [loading, setLoading] = useState<boolean>(false)
+
+	const handleChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+	) => {
+		const { name, value } = e.target
+
+		setInspectionData((prev) => ({ ...prev, [name]: value }))
+	}
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault()
+		if (!authState.user?._id)
+			return showToast({
+				message: 'please login to book an inspection',
+				status: 'error',
+			})
+		setShowCreditInfo(true)
+	}
+
+	const createInspection = async () => {
+		if (!authState.user?._id)
+			return showToast({
+				message: 'please login to book an inspection',
+				status: 'error',
+			})
+
+		setLoading(true)
+		try {
+			const inspection_date = Timestamp.fromDate(
+				new Date(
+					`${inspectionData.inspection_date}T${inspectionData.inspection_time}:00`,
+				),
+			)
+
+			if (inspection_date.toDate() < new Date()) {
+				setLoading(false)
+				return showToast({
+					message:
+						'The inspection date cannot be earlier than the current date.',
+					status: 'error',
+				})
+			}
+
+			let roomUrl = undefined
+			let hostRoomUrl = undefined
+
+			if (inspectionData.inspection_type === 'virtual') {
+				const urls = await generateRoomUrl(
+					new Date(
+						inspection_date.toDate().getTime() + 6 * 60 * 60 * 1000,
+					).toISOString(),
+				)
+
+				roomUrl = urls.roomUrl
+				hostRoomUrl = urls.hostRoomUrl
+			}
+
+			const uuid = crypto.randomUUID()
+
+			const data: InspectionData = {
+				host_details: {
+					id: host_details._id,
+					first_name: host_details.first_name,
+					last_name: host_details.last_name,
+				},
+				seeker_details: {
+					id: authState.user._id,
+					first_name: authState.user.first_name,
+					last_name: authState.user.last_name,
+				},
+				inspection_type: inspectionData.inspection_type as
+					| 'virtual'
+					| 'physical',
+				inspection_date,
+				isCancelled: false,
+				hasOccured: false,
+				inspection_location,
+				roomUrl,
+				hostRoomUrl,
+			}
+
+			InspectionDataSchema.parse(data)
+
+			await Promise.all([
+				InspectionServices.create({
+					collection_name: DBCollectionName.inspections,
+					data,
+					document_id: uuid,
+				}),
+				FlatShareProfileService.decrementCredit({
+					collection_name: DBCollectionName.flatShareProfile,
+					document_id: authState.user._id,
+					newCredit:
+						inspectionData.inspection_type === 'virtual'
+							? creditTable.VIRTUAL_INSPECTION
+							: 0,
+				}),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						type: 'inspection',
+						message: NotificationsBodyMessage.inspection,
+						recipient_id: host_details._id,
+						sender_details: {
+							id: authState.user._id,
+							first_name: authState.user.first_name,
+							last_name: authState.user.last_name,
+							avatar_url: authState.user.avatar_url,
+						},
+					},
+				}),
+			])
+
+			showToast({
+				message: 'You have succesfully booked an inspection',
+				status: 'success',
+			})
+			router.push('/inspections')
+		} catch (error) {
+			console.error(error)
+			showToast({
+				message: 'Error booking inspection',
+				status: 'error',
+			})
+		}
+
+		setLoading(false)
+		setShowCreditInfo(false)
+		closeModal()
+	}
+
+	if (loading)
+		return (
+			<Modal isOpen={loading} onClose={() => setLoading(false)} size={'full'}>
+				<ModalOverlay
+					bg="blackAlpha.300"
+					backdropFilter="blur(10px) hue-rotate(90deg)"
+				/>
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Spinner />
+				</ModalContent>
+			</Modal>
+		)
+
+	if (showCreditInfo && !loading) {
+		return (
+			<Modal
+				isOpen={showCreditInfo}
+				onClose={() => {
+					setLoading(false)
+					setShowCreditInfo(false)
+				}}
+				size={'xl'}
+			>
+				<ModalOverlay />
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						cursor={'pointer'}
+						onClick={() => {
+							setLoading(false)
+							setShowCreditInfo(false)
+						}}
+					>
+						<CloseIcon />
+					</Box>
+					<CreditInfo
+						credit={
+							inspectionData.inspection_type === 'virtual'
+								? creditTable.VIRTUAL_INSPECTION
+								: 0
+						}
+						onUse={createInspection}
+					/>
+				</ModalContent>
+			</Modal>
+		)
+	}
+
 	return (
-		<Flex
-			pos={'fixed'}
-			bg={'transparent'}
-			zIndex={1000}
-			top={0}
-			right={0}
-			left={0}
-			bottom={0}
-			h={'100vh'}
-			w={'100vw'}
-			alignItems={'center'}
-			justifyContent={'center'}
-		>
-			<Flex
+		<Modal isOpen={showBookInspectionModal} onClose={closeModal} size={'full'}>
+			<ModalOverlay
+				bg="blackAlpha.300"
+				backdropFilter="blur(10px) hue-rotate(90deg)"
+			/>
+			<ModalContent
 				w={{
 					base: '90vw',
 					lg: '80vw',
 					xl: '70vw',
 				}}
-				h={'auto'}
-				maxH={'90%'}
 				overflowY={'auto'}
 				flexDir={'column'}
 				alignItems={'center'}
@@ -956,6 +1246,8 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 				py={{ base: '16px', md: '24px' }}
 				px={{ base: '16px', sm: '24px', md: '32px' }}
 				gap={{ base: '24px', md: '32px' }}
+				as={'form'}
+				onSubmit={handleSubmit}
 			>
 				<Box
 					pos={'absolute'}
@@ -985,30 +1277,6 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 					Book Inspection
 				</Text>
 				<Flex
-					alignItems={'center'}
-					justifyContent={'start'}
-					rounded={'8px'}
-					gap={{ base: '16px', md: '24px' }}
-					px={{ base: '18px', md: '26px' }}
-					py={{ base: '14px', md: '18px' }}
-					flex={1}
-					bgColor={'#FFA5001A'}
-				>
-					<Box display={{ base: 'none', md: 'block' }}>
-						<CiCircleInfo size={'30px'} fill="#FFA500" />
-					</Box>
-					<Box display={{ base: 'block', md: 'none' }}>
-						<CiCircleInfo size={'24px'} fill="#FFA500" />
-					</Box>
-					<Text
-						fontWeight={'light'}
-						fontSize={{ base: '14px', md: '16px' }}
-						_light={{ color: '#111717CC' }}
-					>
-						Our Inspection Service Provides you with 100% money back Guarantee
-					</Text>
-				</Flex>
-				<Flex
 					gap={DEFAULT_PADDING}
 					w="full"
 					flexDir={{ base: 'column', md: 'row' }}
@@ -1027,7 +1295,9 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 						</Text>
 						<Select
 							required
-							name="inspectionMode"
+							value={inspectionData.inspection_type}
+							onChange={handleChange}
+							name="inspection_type"
 							borderColor={'border_color'}
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Virual/Physical"
@@ -1051,12 +1321,20 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 						<Flex gap={'16px'} flexDir={{ base: 'column', sm: 'row' }}>
 							<Input
 								type="date"
+								required
+								value={inspectionData.inspection_date}
+								onChange={handleChange}
+								name="inspection_date"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Select Date"
 							/>
 							<Input
 								type="time"
+								required
+								value={inspectionData.inspection_time}
+								onChange={handleChange}
+								name="inspection_time"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Select Time"
@@ -1071,6 +1349,7 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 					bgColor={'#E4FAA81A'}
 					gap={'32px'}
 					flexDir={{ base: 'column', md: 'row' }}
+					justifyContent={'space-between'}
 					w={'100%'}
 				>
 					<Flex flexDir={'column'} gap={{ base: '16px', md: '24px' }}>
@@ -1084,7 +1363,7 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 							>
 								Virtual Inspection Cost{' '}
 								<Text as={'span'} fontWeight={'400'}>
-									N5000
+									N1950
 								</Text>
 							</Text>
 						</Flex>
@@ -1146,7 +1425,7 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 							>
 								Physical Inspection Cost{' '}
 								<Text as={'span'} fontWeight={'400'}>
-									N10000
+									N0
 								</Text>
 							</Text>
 						</Flex>
@@ -1212,18 +1491,20 @@ const BookInspectionModal = ({ closeModal }: { closeModal: () => void }) => {
 					</Button>
 					<Button
 						rounded={DEFAULT_PADDING}
-						paddingX={'50px'}
-						paddingY={'16px'}
+						type="submit"
+						paddingX={{ base: '36px', md: '50px' }}
+						paddingY={{ base: '12px', md: '16px' }}
 						h={{ base: '48px', md: '54px' }}
 						bgColor={'#00BC7399'}
 						textColor={'white'}
 						fontSize={{ base: 'sm', md: 'base' }}
+						// onClick={handleSubmit}
 					>
 						Proceed to Payment
 					</Button>
 				</Flex>
-			</Flex>
-		</Flex>
+			</ModalContent>
+		</Modal>
 	)
 }
 

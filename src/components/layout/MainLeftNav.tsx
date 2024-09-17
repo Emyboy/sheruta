@@ -1,23 +1,27 @@
 'use client'
+
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import { useAppContext } from '@/context/app.context'
 import { useAuthContext } from '@/context/auth.context'
-import { Box, Divider, Flex, Hide, Text, Icon } from '@chakra-ui/react'
-import React from 'react'
+import { Divider, Flex, Text } from '@chakra-ui/react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
 	BiCalendarAlt,
+	BiCheckShield,
 	BiLogInCircle,
 	BiMessageSquareDetail,
-	BiRocket,
 	BiWallet,
 	BiWrench,
 } from 'react-icons/bi'
-import Link from 'next/link'
 
 type Props = {}
 
 export default function MainLeftNav({}: Props) {
-	const { logout } = useAuthContext()
+	const {
+		logout,
+		authState: { user_info },
+	} = useAuthContext()
 	return (
 		<Flex
 			flexDirection={'column'}
@@ -35,9 +39,20 @@ export default function MainLeftNav({}: Props) {
 			<Link href={'/groups'}>
 				<EachNav Icon={BiMessageSquareDetail} label="Chat rooms" />
 			</Link>
-			<EachNav Icon={BiCalendarAlt} label="Inspections" />
+			<Link href={'/inspections'}>
+				<EachNav Icon={BiCalendarAlt} label="Inspections" />
+			</Link>
 			<EachNav Icon={BiWallet} label="Wallet" />
-			<EachNav Icon={BiWrench} label="Settings" />
+			{user_info && user_info._user_id ? (
+				<Link href={'/settings'}>
+					<EachNav Icon={BiWrench} label="Settings" />
+				</Link>
+			) : null}
+			{!user_info?.is_verified ? (
+				<Link href="/verification">
+					<EachNav Icon={BiCheckShield} label="Verification" />
+				</Link>
+			) : null}
 			<Divider
 				color="border_color"
 				_dark={{
@@ -61,6 +76,8 @@ const EachNav = ({
 	onClick?: () => void
 }) => {
 	const { setAppState } = useAppContext()
+	const pathname = usePathname()
+
 	return (
 		<Flex
 			onClick={() => {
@@ -85,9 +102,18 @@ const EachNav = ({
 					color: 'white',
 				},
 			}}
+			_light={{
+				bg: pathname.startsWith(`/${label.toLocaleLowerCase()}`) && 'dark',
+				color: pathname.startsWith(`/${label.toLocaleLowerCase()}`) && 'white',
+			}}
 			cursor={'pointer'}
 			_dark={{
-				color: 'dark_lighter',
+				color: pathname.startsWith(`/${label.toLocaleLowerCase()}`)
+					? 'white'
+					: 'dark_lighter',
+				bg: pathname.startsWith(`/${label.toLocaleLowerCase()}`)
+					? 'dark_light'
+					: 'none',
 			}}
 		>
 			<Icon size={25} />

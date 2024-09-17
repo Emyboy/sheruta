@@ -1,6 +1,5 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
-
 export interface RequestData {
 	title?: string
 	description?: string
@@ -39,6 +38,17 @@ export interface RequestData {
 	updatedAt: Timestamp
 }
 
+export interface LocationObject {
+	formatted_address?: string
+	geometry?: {
+		location?: {
+			lat: number
+			lng: number
+		}
+	}
+	[key: string]: any
+}
+
 export type PaymentPlan =
 	| 'monthly'
 	| 'annually'
@@ -48,14 +58,6 @@ export type PaymentPlan =
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
-export type userSchema = {
-	done_kyc: boolean
-	_id: string
-	first_name: string
-	last_name: string
-	avatar_url: string
-}
-
 const timestampSchema = z.object({
 	seconds: z.number().int().positive(),
 	nanoseconds: z.number().int().nonnegative().max(999_999_999),
@@ -63,7 +65,6 @@ const timestampSchema = z.object({
 
 export const createHostRequestDTO = z.object({
 	uuid: z.string(),
-
 	description: z.string(),
 	budget: z.number(),
 	service_charge: z.number().nullable(),
@@ -89,7 +90,7 @@ export const createHostRequestDTO = z.object({
 
 	seeking: z.boolean(),
 
-	google_location_object: z.record(z.string(), z.any()),
+	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
 
 	_location_keyword_ref: z.custom<DocumentReference | undefined>(
@@ -122,7 +123,12 @@ export const createHostRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	flat_share_profile: z.custom<userSchema>(),
+	_user_ref: z.custom<DocumentReference | undefined>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
 
 	imagesRefPaths: z.array(z.string()),
 	videoRefPath: z.string().nullable(),
@@ -137,7 +143,7 @@ export const createSeekerRequestDTO = z.object({
 
 	budget: z.number(),
 
-	google_location_object: z.record(z.string(), z.any()),
+	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
 	_location_keyword_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
@@ -145,7 +151,6 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-	flat_share_profile: z.custom<userSchema>(),
 
 	_state_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
@@ -159,7 +164,12 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
-
+	_user_ref: z.custom<DocumentReference | undefined>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
 	payment_type: z.enum([
 		'monthly',
 		'annually',
@@ -184,6 +194,7 @@ export type HostRequestDataDetails = Omit<
 	| '_service_ref'
 	| '_category_ref'
 	| '_property_type_ref'
+	| '_user_ref'
 > & {
 	id: string
 	_location_keyword_ref: { slug: string }
@@ -191,16 +202,44 @@ export type HostRequestDataDetails = Omit<
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
 	_state_ref: { title: string; slug: string }
+	_user_ref: {
+		first_name: string
+		last_name: string
+		avatar_url: string
+		_id: string
+		email: string
+	}
+	user_info: {
+		primary_phone_number: string
+		hide_profile: boolean
+		is_verified: boolean
+		hide_phone: boolean
+		gender: string
+	}
 }
 
 export type SeekerRequestDataDetails = Omit<
 	SeekerRequestData,
-	'_location_keyword_ref' | '_state_ref' | '_service_ref'
+	'_location_keyword_ref' | '_state_ref' | '_service_ref' | '_user_ref'
 > & {
 	id: string
-	_location_keyword_ref: {}
-	_service_ref: { title: string; about: string }
-	_category_ref: { title: string }
+	_location_keyword_ref: { slug: string }
+	_service_ref: { title: string; about: string; slug: string }
+	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string }
-	_state_ref: {}
+	_state_ref: { title: string; slug: string }
+	_user_ref: {
+		first_name: string
+		last_name: string
+		avatar_url: string
+		_id: string
+		email: string
+	}
+	flat_share_profile: { bio: string | null }
+	user_info: {
+		primary_phone_number: string
+		hide_profile: boolean
+		is_verified: boolean
+		gender: string
+	}
 }

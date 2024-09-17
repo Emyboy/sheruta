@@ -1,4 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { libraries } from '@/constants'
 import { useOptionsContext } from '@/context/options.context'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
@@ -24,11 +25,10 @@ import {
 import { Autocomplete, LoadScript } from '@react-google-maps/api'
 import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
-
-const libraries: 'places'[] = ['places']
+import { useAuthContext } from '@/context/auth.context'
 
 interface LocationObject {
 	formatted_address?: string
@@ -45,6 +45,9 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	const { optionsState: options } = useOptionsContext()
 	const toast = useToast()
 	const router = useRouter()
+	const {
+		authState: { flat_share_profile },
+	} = useAuthContext()
 
 	const [loading, setLoading] = useState(false)
 
@@ -59,10 +62,13 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (autocompleteInstance: google.maps.places.Autocomplete) =>
-		setAutocomplete(autocompleteInstance)
+	const handleLoad = useCallback(
+		(autocompleteInstance: google.maps.places.Autocomplete) =>
+			setAutocomplete(autocompleteInstance),
+		[],
+	)
 
-	const handlePlaceChanged = () => {
+	const handlePlaceChanged = useCallback(() => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
 
@@ -87,7 +93,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				google_location_text: locationText,
 			}))
 		}
-	}
+	}, [autocomplete, formData.google_location_text])
 
 	const addHouseRule = () => setHouseRules((prev) => [...prev, ''])
 
@@ -167,6 +173,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				_service_ref: selectedService._ref,
 				_category_ref: selectedCategory._ref,
 				_property_type_ref: selectedProperty._ref,
+				_user_ref: flat_share_profile?._user_ref,
 				seeking: false,
 				updatedAt: Timestamp.now(),
 			}
@@ -249,7 +256,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Budget
+								Rent
 							</Text>
 							<Input
 								_placeholder={{ color: 'text_muted' }}
@@ -553,9 +560,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 											value={amenity.title}
 											key={amenity.id}
 											textColor={'white'}
-											defaultChecked={formData.amenities.includes(
-												amenity.title,
-											)}
+											isChecked={formData.amenities.includes(amenity.title)}
 											onChange={(e) => {
 												const { checked, value } = e.target
 												if (checked) {

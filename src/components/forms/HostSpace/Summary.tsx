@@ -1,5 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { libraries } from '@/constants'
 import { useOptionsContext } from '@/context/options.context'
+import { LocationObject } from '@/firebase/service/request/request.types'
 import {
 	Box,
 	Button,
@@ -19,19 +21,6 @@ import React, { useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
 
-const libraries: 'places'[] = ['places']
-
-interface LocationObject {
-	formatted_address?: string
-	geometry?: {
-		location?: {
-			lat: number
-			lng: number
-		}
-	}
-	[key: string]: any
-}
-
 export default function Summary({
 	next,
 	formData,
@@ -50,41 +39,46 @@ export default function Summary({
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
-	const handleLoad = (autocompleteInstance: google.maps.places.Autocomplete) =>
-		setAutocomplete(autocompleteInstance)
+	const handleLoad = (
+		autocompleteInstance: google.maps.places.Autocomplete,
+	) => {
+		if (autocompleteInstance) {
+			setAutocomplete(autocompleteInstance)
+		}
+	}
 
 	const handlePlaceChanged = () => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
 
-			const locationObject: LocationObject = {
-				formatted_address: place.formatted_address,
-				geometry: place.geometry
-					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
-					: undefined,
-			}
+			if (place && place.geometry && place.geometry.location) {
+				const locationObject: LocationObject = {
+					formatted_address: place.formatted_address || '',
+					geometry: {
+						location: {
+							lat: place.geometry.location.lat(),
+							lng: place.geometry.location.lng(),
+						},
+					},
+				}
 
-			const locationText =
-				locationObject.formatted_address || formData.google_location_text
+				const locationText =
+					locationObject.formatted_address || formData.google_location_text
 
-			setFormData((prev) => ({
-				...prev,
-				google_location_object: locationObject,
-				google_location_text: locationText,
-			}))
-			localStorage.setItem(
-				'host_space_form',
-				JSON.stringify({
-					...formData,
+				setFormData((prev) => ({
+					...prev,
 					google_location_object: locationObject,
 					google_location_text: locationText,
-				}),
-			)
+				}))
+				localStorage.setItem(
+					'host_space_form',
+					JSON.stringify({
+						...formData,
+						google_location_object: locationObject,
+						google_location_text: locationText,
+					}),
+				)
+			}
 		}
 	}
 
@@ -275,7 +269,7 @@ export default function Summary({
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Budget
+								Rent
 							</Text>
 							<Input
 								_placeholder={{ color: 'text_muted' }}
@@ -346,38 +340,6 @@ export default function Summary({
 								</option>
 								<option style={{ color: 'black' }} value="bi-annually">
 									Bi-Annually
-								</option>
-							</Select>
-						</Flex>
-						<Flex
-							justifyContent={'flex-start'}
-							flexDir={'column'}
-							w="full"
-							gap={3}
-						>
-							<Text color={'text_muted'} fontSize={'base'}>
-								Select availability status
-							</Text>
-							<Select
-								onChange={handleChange}
-								required
-								value={formData.availability_status || ''}
-								name="availability_status"
-								borderColor={'border_color'}
-								_dark={{ borderColor: 'dark_light' }}
-								_placeholder={{ color: 'text_muted' }}
-								_light={{ color: 'dark' }}
-								placeholder="Availability Status"
-								size="md"
-							>
-								<option style={{ color: 'black' }} value="available">
-									Available
-								</option>
-								<option style={{ color: 'black' }} value="unavailable">
-									Unavailable
-								</option>
-								<option style={{ color: 'black' }} value="reserved">
-									Reserved
 								</option>
 							</Select>
 						</Flex>
@@ -570,14 +532,14 @@ export default function Summary({
 							<SimpleGrid columns={[1, 2, 3]} spacingY="8px">
 								{options.amenities.map((amenity) => (
 									<Checkbox
+										key={amenity.id}
 										textTransform={'capitalize'}
 										color={'border_color'}
 										colorScheme="green"
 										_light={{ color: 'dark' }}
 										value={amenity.title}
-										key={amenity.id}
 										textColor={'white'}
-										defaultChecked={formData.amenities.includes(amenity.title)}
+										isChecked={formData.amenities.includes(amenity.title)}
 										onChange={(e) => {
 											const { checked, value } = e.target
 											if (checked) {
@@ -701,7 +663,6 @@ export default function Summary({
 								))}
 							</Select>
 						</Flex>
-
 						<Flex
 							justifyContent={'flex-start'}
 							flexDir={'column'}
@@ -737,7 +698,6 @@ export default function Summary({
 							</Select>
 						</Flex>
 					</Flex>
-
 					{formData.area && (
 						<LoadScript
 							googleMapsApiKey={
@@ -747,7 +707,7 @@ export default function Summary({
 						>
 							<FormControl mt={'-1.5rem'}>
 								<FormLabel htmlFor="address">
-									Choose a more descriptive location in {formData.area}?
+									Where in {formData.area}?
 								</FormLabel>
 								<Autocomplete
 									onLoad={handleLoad}
@@ -770,11 +730,9 @@ export default function Summary({
 					)}
 				</VStack>
 				<br />
-				<Button
-					bgColor={'brand'}
-					color={'white'}
-					type={'submit'}
-				>{`Next`}</Button>
+				<Button bgColor={'brand'} color={'white'} type={'submit'}>
+					Next
+				</Button>
 			</Flex>
 		</>
 	)
