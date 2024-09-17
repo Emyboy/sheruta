@@ -126,7 +126,7 @@ export default function EachRequest({ request }: Props) {
 									>
 										{request._user_ref.last_name} {request._user_ref.first_name}
 									</Text>
-									{request.user_info.is_verified && (
+									{request.user_info?.is_verified && (
 										<LuBadgeCheck fill="#00bc73" />
 									)}
 								</Flex>

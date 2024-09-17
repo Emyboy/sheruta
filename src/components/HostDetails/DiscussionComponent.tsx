@@ -189,8 +189,10 @@ const DiscussionComponent = ({
 					status: 'success',
 				})
 			}, 1000)
-			revalidatePathOnClient(pathname)
 			router.push(pathname + '?tab=Discussion')
+			revalidatePathOnClient(pathname)
+			setIsReplying(false)
+			setMessage('')
 		} catch (err: any) {
 			console.log(err)
 			showToast({
@@ -218,7 +220,7 @@ const DiscussionComponent = ({
 	}
 
 	return (
-		<Box width="100%" overflowY={'scroll'} pos={'relative'}>
+		<Box gap={4} width="100%" overflowY={'scroll'} pos={'relative'}>
 			<Box overflowY={'scroll'} minH={'50dvh'}>
 				<VStack align="start" spacing={2} w="100%">
 					{!discussions?.length ? (
@@ -249,71 +251,69 @@ const DiscussionComponent = ({
 				</VStack>
 			</Box>
 
-			{/* Reply Box */}
-			<Box>
-				<Box
-					ref={replyBoxRef}
-					// p={4}
-					bg="dark"
-					pos={'fixed'}
-					right={0}
-					bottom={0}
-					left={{ base: 0, lg: '50%' }}
-					borderRadius="md"
-					boxShadow="md"
-					mx="auto"
-				>
-					<InputGroup>
-						<Input
-							placeholder="Type message here"
-							// bg="#f9f9f9"
-							border="1px solid #ddd"
-							borderRadius="md"
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-								const inputValue = e.target.value
+			<Box
+				ref={replyBoxRef}
+				bg="dark"
+				pos={'fixed'}
+				right={0}
+				bottom={0}
+				left={{ base: 0, lg: '50%' }}
+				borderRadius="md"
+				boxShadow="md"
+				mx="auto"
+				as="form"
+				onSubmit={handleNewComment}
+			>
+				<InputGroup>
+					<Input
+						placeholder="Type message here"
+						// bg="#f9f9f9"
+						border="1px solid #ddd"
+						borderRadius="md"
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+							const inputValue = e.target.value
 
-								if (isReplying) {
-									// If input is cleared, don't prepend the userHandle
-									if (inputValue.trim() === '') {
-										setMessage('')
-									} else if (userHandle && !inputValue.startsWith(userHandle)) {
-										// If the message doesn't already start with userHandle, prepend it
-										setMessage(`${userHandle} ${inputValue}`)
-									} else {
-										// If the userHandle is already there, just update the message
-										setMessage(inputValue)
-									}
+							if (isReplying) {
+								// If input is cleared, don't prepend the userHandle
+								if (inputValue.trim() === '') {
+									setMessage('')
+								} else if (userHandle && !inputValue.startsWith(userHandle)) {
+									// If the message doesn't already start with userHandle, prepend it
+									setMessage(`${userHandle} ${inputValue}`)
 								} else {
+									// If the userHandle is already there, just update the message
 									setMessage(inputValue)
-									//user is not replying to any comment
-									setNestLevel(1)
 								}
-							}}
-							value={
-								isReplying
-									? userHandle && message.startsWith(userHandle)
-										? message
-										: `${userHandle} ${message}`
-									: message
+							} else {
+								setMessage(inputValue)
+								//user is not replying to any comment
+								setNestLevel(1)
 							}
-							disabled={isLoading}
-							_placeholder={{ color: 'gray.400' }}
+						}}
+						value={
+							isReplying
+								? userHandle && message.startsWith(userHandle)
+									? message
+									: `${userHandle} ${message}`
+								: message
+						}
+						disabled={isLoading}
+						_placeholder={{ color: 'gray.400' }}
+					/>
+					<InputRightElement py={5}>
+						<IconButton
+							onClick={handleNewComment}
+							disabled={message.trim() === '' || isLoading}
+							isLoading={isLoading}
+							aria-label="Send message"
+							icon={<BiSend />}
+							bg="black"
+							color="white"
+							borderRadius="md"
+							_hover={{ bg: 'gray.700' }}
 						/>
-						<InputRightElement py={5}>
-							<IconButton
-								onClick={handleNewComment}
-								disabled={message.trim() === '' || isLoading}
-								isLoading={isLoading}
-								aria-label="Send message"
-								icon={<BiSend />}
-								bg="black"
-								color="white"
-								borderRadius="md"
-								_hover={{ bg: 'gray.700' }}
-							/>
-						</InputRightElement>
-					</InputGroup>
-				</Box>
+					</InputRightElement>
+				</InputGroup>
 			</Box>
 		</Box>
 	)

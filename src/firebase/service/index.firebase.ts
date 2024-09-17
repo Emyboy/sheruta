@@ -248,6 +248,7 @@ export const DBCollectionName = {
 	inspections: 'inspections',
 	notifications: 'notifications',
 	bookmarks: 'bookmarks',
+	reservations: 'reservations',
 
 	// options
 	propertyTypes: 'property_types',

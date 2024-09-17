@@ -133,6 +133,9 @@ export const createHostRequestDTO = z.object({
 	imagesRefPaths: z.array(z.string()),
 	videoRefPath: z.string().nullable(),
 
+	reserved_by: z.string().optional(),
+	reservation_expiry: z.instanceof(Timestamp).optional(),
+
 	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })

@@ -12,11 +12,7 @@ import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
 import { useBookmarksContext } from '@/context/bookmarks.context'
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import {
-	BookmarkData,
-	BookmarkDTO,
-	BookmarkType,
-} from '@/firebase/service/bookmarks/bookmarks.types'
+import { BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
@@ -28,6 +24,11 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import ReservationService from '@/firebase/service/reservations/reservations.firebase'
+import {
+	ReservationDTO,
+	ReservationType,
+} from '@/firebase/service/reservations/reservations.types'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
 import {
@@ -58,10 +59,9 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
-import { randomUUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
 	BiBookmark,
@@ -171,12 +171,12 @@ export default function ApartmentSummary({
 
 	return (
 		<>
-			{/* <BookmarkApartmentModal
-				closeModal={closeBookmarkModal}
-				showBookApartmentModal={showBookmarkApartmentModal}
+			<ReserveApartmentModal
+				closeModal={closeReserveApartmentModal}
+				showBookApartmentModal={showReserveApartmentModal}
 				request_id={request.id}
 				recipient_id={request._user_ref._id}
-			/> */}
+			/>
 			<BookInspectionModal
 				closeModal={closeModal}
 				showBookInspectionModal={showBookInspectionModal}
@@ -239,11 +239,11 @@ export default function ApartmentSummary({
 						paddingY={{ base: '12px', md: DEFAULT_PADDING }}
 						bgColor={'black'}
 						_light={{ color: 'white' }}
-						onClick={openModal}
+						onClick={openReserveApartmentModal}
 						fontSize={{ base: 'sm', md: 'base' }}
 						isDisabled={request.availability_status === 'reserved'}
 					>
-						Book Inspection
+						Reserve Apartment
 					</Button>
 				</Flex>
 
@@ -723,7 +723,10 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={request.availability_status === 'reserved'}
+						isDisabled={
+							request.availability_status === 'reserved' &&
+							request?.reserved_by !== authState.user?._id
+						}
 					>
 						Book Inspection
 					</Button>
@@ -1077,11 +1080,11 @@ export default function ApartmentSummary({
 	)
 }
 
-const BookmarkApartmentModal = ({
+const ReserveApartmentModal = ({
 	closeModal,
 	showBookApartmentModal,
-	recipient_id,
 	request_id,
+	recipient_id,
 }: {
 	closeModal: () => void
 	showBookApartmentModal: boolean
@@ -1090,47 +1093,56 @@ const BookmarkApartmentModal = ({
 }) => {
 	const { authState } = useAuthContext()
 	const { showToast } = useCommon()
+	const pathname = usePathname()
 
 	const [loading, setLoading] = useState<boolean>(false)
+	const [showCreditInfo, setShowCreditInfo] = useState<boolean>(false)
 
-	const bookmarkApartment = async () => {
-		if (!authState.flat_share_profile?._user_id || !authState.user?._id)
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault()
+		if (!authState.user?._id)
 			return showToast({
-				message: 'please login to book an inspection',
+				message: 'please login to reserve an apartment',
+				status: 'error',
+			})
+		setShowCreditInfo(true)
+	}
+
+	const reserveApartment = async () => {
+		if (!authState.user?._id)
+			return showToast({
+				message: 'please login to reserve an apartment',
 				status: 'error',
 			})
 
 		setLoading(true)
+
 		try {
 			const uuid = crypto.randomUUID()
 
-			const data: BookmarkData = {
+			const data: ReservationType = {
 				uuid,
-				object_type: BookmarkType.requests,
-				_user_ref: authState.flat_share_profile._user_ref,
+				startTime: Timestamp.fromDate(new Date()),
+				endTime: Timestamp.fromDate(new Date(Date.now() + 48 * 60 * 60 * 1000)),
+				reserved_by: authState.user._id,
 				request_id,
 			}
 
-			BookmarkDTO.parse(data)
+			ReservationDTO.parse(data)
 
 			await Promise.all([
-				BookmarkService.create({
-					collection_name: DBCollectionName.bookmarks,
-					data,
-					document_id: uuid,
+				ReservationService.reserveListing(data),
+				FlatShareProfileService.decrementCredit({
+					collection_name: DBCollectionName.flatShareProfile,
+					document_id: authState.user._id,
+					newCredit: creditTable.RESERVATION,
 				}),
-				// RequestService.reserveListing(request_id),
-				// FlatShareProfileService.decrementCredit({
-				// 	collection_name: DBCollectionName.flatShareProfile,
-				// 	document_id: authState.flat_share_profile._user_id,
-				// 	newCredit: 0,
-				// }),
 				NotificationsService.create({
 					collection_name: DBCollectionName.notifications,
 					data: {
 						is_read: false,
-						type: 'bookmark',
-						message: NotificationsBodyMessage.inspection,
+						type: 'reservation',
+						message: NotificationsBodyMessage.reservation,
 						recipient_id,
 						sender_details: {
 							id: authState.user._id,
@@ -1144,10 +1156,10 @@ const BookmarkApartmentModal = ({
 			])
 
 			showToast({
-				message: 'You have succesfully saved this apartment listing',
+				message: 'You have succesfully reserved this apartment listing',
 				status: 'success',
 			})
-			revalidatePathOnClient('/bookmarks')
+			revalidatePathOnClient(pathname)
 		} catch (error) {
 			console.error(error)
 			showToast({
@@ -1157,7 +1169,7 @@ const BookmarkApartmentModal = ({
 		}
 
 		setLoading(false)
-
+		setShowCreditInfo(false)
 		closeModal()
 	}
 
@@ -1191,19 +1203,70 @@ const BookmarkApartmentModal = ({
 			</Modal>
 		)
 
+	if (showCreditInfo && !loading) {
+		return (
+			<Modal
+				isOpen={showCreditInfo}
+				onClose={() => {
+					setLoading(false)
+					setShowCreditInfo(false)
+				}}
+				size={'xl'}
+			>
+				<ModalOverlay />
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						cursor={'pointer'}
+						onClick={() => {
+							setLoading(false)
+							setShowCreditInfo(false)
+						}}
+					>
+						<CloseIcon />
+					</Box>
+					<CreditInfo
+						credit={creditTable.RESERVATION}
+						onUse={reserveApartment}
+					/>
+				</ModalContent>
+			</Modal>
+		)
+	}
+
 	return (
-		<Modal
-			isOpen={showBookApartmentModal}
-			onClose={() => {
-				setLoading(false)
-				closeModal()
-			}}
-			size={'xl'}
-		>
-			<ModalOverlay />
+		<Modal isOpen={showBookApartmentModal} onClose={closeModal} size={'xl'}>
+			<ModalOverlay
+				bg="blackAlpha.300"
+				backdropFilter="blur(10px) hue-rotate(90deg)"
+			/>
 			<ModalContent
-				w={'100%'}
-				margin={'auto'}
+				w={{
+					base: '90vw',
+					lg: '80vw',
+					xl: '70vw',
+				}}
+				height={'60vh'}
+				overflowY={'auto'}
 				flexDir={'column'}
 				alignItems={'center'}
 				justifyContent={'center'}
@@ -1218,20 +1281,78 @@ const BookmarkApartmentModal = ({
 				py={{ base: '16px', md: '24px' }}
 				px={{ base: '16px', sm: '24px', md: '32px' }}
 				gap={{ base: '24px', md: '32px' }}
+				as={'form'}
+				onSubmit={handleSubmit}
 			>
 				<Box
 					pos={'absolute'}
 					top={{ base: '16px', md: '30px' }}
 					right={{ base: '16px', md: '30px' }}
 					cursor={'pointer'}
-					onClick={() => {
-						setLoading(false)
-						closeModal()
-					}}
+					onClick={closeModal}
 				>
 					<CloseIcon />
 				</Box>
-				<CreditInfo credit={0} onUse={bookmarkApartment} />
+
+				<Text
+					fontWeight={'500'}
+					fontSize={{ base: '20px', md: '24px' }}
+					_dark={{ color: 'white' }}
+					_light={{ color: '#111717' }}
+				>
+					Reserve Apartment
+				</Text>
+
+				<Text
+					mt={'-20px'}
+					fontWeight={'300'}
+					fontSize={{ base: 'base', md: 'lg' }}
+					textAlign={'center'}
+					color="text_muted"
+				>
+					Reserving an apartment will cost{' '}
+					<Box as="span" fontWeight={'400'} color={'brand'}>
+						5000 credits
+					</Box>{' '}
+					and will be available for inspection to only you for a period of{' '}
+					<Box as="span" fontWeight={'400'} color={'brand'}>
+						2 days.
+					</Box>
+				</Text>
+
+				<Flex
+					gap={{ base: '20px', md: '32px' }}
+					justifyContent={'center'}
+					flexWrap={'wrap'}
+					mb={{ base: '32px', md: 0 }}
+				>
+					<Button
+						rounded={DEFAULT_PADDING}
+						paddingX={'50px'}
+						paddingY={'16px'}
+						h={{ base: '48px', md: '54px' }}
+						bgColor={'transparent'}
+						textColor={'brand'}
+						border={'1px'}
+						borderColor={'brand'}
+						onClick={closeModal}
+						fontSize={{ base: 'sm', md: 'base' }}
+					>
+						Cancel
+					</Button>
+					<Button
+						rounded={DEFAULT_PADDING}
+						type="submit"
+						paddingX={{ base: '36px', md: '50px' }}
+						paddingY={{ base: '12px', md: '16px' }}
+						h={{ base: '48px', md: '54px' }}
+						bgColor={'#00BC7399'}
+						textColor={'white'}
+						fontSize={{ base: 'sm', md: 'base' }}
+					>
+						Proceed to Payment
+					</Button>
+				</Flex>
 			</ModalContent>
 		</Modal>
 	)

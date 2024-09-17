@@ -37,7 +37,6 @@ export default class BookmarkService extends SherutaDB {
 		user_id: string
 		document_id: string
 	}): Promise<boolean> {
-		//check if bookmark belongs to user
 		const bookmark = await this.getSingleBookmark(data.document_id)
 
 		if (bookmark?._user_ref._id !== data.user_id) {

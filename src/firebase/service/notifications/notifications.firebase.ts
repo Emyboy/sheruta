@@ -17,6 +17,7 @@ export const NotificationsBodyMessage: Record<
 	NotificationsType['type'],
 	string
 > = {
+	reservation: 'Reserved your apartment listing',
 	rescheduled: 'Rescheduled your inspection',
 	call: 'Tried to call you',
 	inspection: 'Booked an inspection with you',
@@ -25,7 +26,7 @@ export const NotificationsBodyMessage: Record<
 	comment_reply: 'Replied your comment',
 	profile_view: 'Viewed your profile',
 	cancelled: 'Cancelled your inspection',
-	bookmark: 'Reserved your apartment listing',
+	bookmark: 'Saved your apartment listing',
 }
 
 export default class NotificationsService {

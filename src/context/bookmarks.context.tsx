@@ -34,7 +34,6 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 		try {
 			const res = await BookmarkService.getUserBookmarks(id)
 
-			console.log(res)
 			setBookmarks(res)
 		} catch (error) {
 			console.error('Error', error)
