@@ -27,7 +27,7 @@ const SettingOption = ({
 	icon,
 	label,
 	href,
-	color
+	color,
 }: {
 	icon: IconType
 	label: string
@@ -58,7 +58,6 @@ const SettingOption = ({
 }
 
 const Settings = () => {
-
 	const { toggleColorMode, colorMode } = useColorMode()
 
 	const textColor = useColorModeValue('#000', 'dark_lighter')
@@ -141,8 +140,13 @@ const Settings = () => {
 						},
 					}}
 				>
-					<Icon as={(colorMode === 'dark') ? BiSolidSun : BiSolidMoon} w={6} h={6} mr={4} />
-					<Text fontSize="lg">{`Toggle ${(colorMode === 'dark') ? 'light' : 'dark'} mode`}</Text>
+					<Icon
+						as={colorMode === 'dark' ? BiSolidSun : BiSolidMoon}
+						w={6}
+						h={6}
+						mr={4}
+					/>
+					<Text fontSize="lg">{`Toggle ${colorMode === 'dark' ? 'light' : 'dark'} mode`}</Text>
 				</Flex>
 			</Stack>
 		</Box>

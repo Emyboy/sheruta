@@ -31,7 +31,7 @@ const SearchPreferenceForm = () => {
 		age_preference: '',
 		location_keyword: null,
 		state: null,
-		seeking: false
+		seeking: false,
 	})
 
 	const { colorMode } = useColorMode()
@@ -81,10 +81,7 @@ const SearchPreferenceForm = () => {
 							id: locationData.id,
 						} as LocationKeywordData
 
-						console.log(state, location_keyword)
-
 						if (stateDOMRef.current) {
-							console.log('setting state value', state.id)
 							stateDOMRef.current.value = state.id
 							setLocations(getLocations(state.id))
 						}
@@ -108,11 +105,11 @@ const SearchPreferenceForm = () => {
 
 	useEffect(() => {
 		if (locationDOMRef.current && locations.length > 0) {
-			locationDOMRef.current.value = flat_share_profile?.location_keyword?.id || ''
+			locationDOMRef.current.value =
+				flat_share_profile?.location_keyword?.id || ''
 			setSelectedLocation(flat_share_profile?.location_keyword?.id || '')
 		}
 	}, [locations])
-
 
 	useEffect(() => {
 		if (locations.length > 0 && selectedLocation) {
@@ -262,7 +259,9 @@ const SearchPreferenceForm = () => {
 					)}
 
 					<FormControl isRequired>
-						<FormLabel requiredIndicator={null}>What are you looking for?</FormLabel>
+						<FormLabel requiredIndicator={null}>
+							What are you looking for?
+						</FormLabel>
 						<Select
 							onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
 								setFormData((prev) => ({
@@ -272,11 +271,11 @@ const SearchPreferenceForm = () => {
 							}
 							placeholder="Select One"
 							bgColor={colorMode}
-							name='seeking'
+							name="seeking"
 							value={formData.seeking?.toString()}
 						>
-							<option value={"false"}> I have an apartment</option>
-							<option value={"true"}> I&apos;m looking for an apartment</option>
+							<option value={'false'}> I have an apartment</option>
+							<option value={'true'}> I&apos;m looking for an apartment</option>
 						</Select>
 					</FormControl>
 
