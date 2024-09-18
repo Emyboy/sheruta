@@ -42,15 +42,13 @@ import {
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
 import useCommon from '@/hooks/useCommon'
-import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import { v4 as generateUId } from 'uuid'
 import {
-	BookmarkDataDetails,
 	BookmarkType,
 } from '@/firebase/service/bookmarks/bookmarks.types'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { doc } from 'firebase/firestore'
 import { db } from '@/firebase'
+import { useBookmarkContext } from '@/context/bookmarks.context'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -64,54 +62,30 @@ export default function EachRequest({ request }: Props) {
 	const { copyShareUrl, handleDeletePost, isLoading, setIsLoading } =
 		useShareSpace()
 
-	const updateBookmark = async () => {
+	const { updateBookmark, getBookmarkStatusAndId, bookmarkLoading, deleteBookmark } = useBookmarkContext()
+
+	const handleBookmarkUpdate = async () => {
 		try {
-			if (!(authState.user && authState.user?._id)) {
-				return showToast({
-					message: 'Please login to perform this action',
-					status: 'info',
-				})
-			}
 
-			setIsLoading(true)
-
-			//check if user has saved this bookmark already, then unsave it
 			if (isBookmarked && bookmarkId) {
-				await BookmarkService.deleteBookmark({
-					user_id: authState.user._id,
-					document_id: bookmarkId,
-				})
-
+				await deleteBookmark(bookmarkId)
 				setIsBookmarked(false)
 				setBookmarkId(null)
-				setIsLoading(false)
-				return showToast({
-					message: 'Bookmark removed successfully',
-					status: 'success',
-				})
+				return
 			}
-
-			const uuid = generateUId()
-			const requestRef = doc(
+			const objectType = BookmarkType.requests;
+			const objectRef = doc(
 				db,
 				DBCollectionName.flatShareRequests,
 				request.id as string,
 			)
 
-			await BookmarkService.createBookmark({
-				object_type: BookmarkType.requests,
-				_object_ref: requestRef,
-				_user_ref: authState.flat_share_profile?._user_ref,
-				uuid,
+			await updateBookmark({
+				objectType, objectRef
 			})
 
-			setBookmarkId(uuid)
-			setIsLoading(false)
-			setIsBookmarked(true)
-			return showToast({
-				message: 'Bookmark added successfully',
-				status: 'success',
-			})
+			return
+
 		} catch (err) {
 			showToast({
 				message: 'Failed to update bookmark',
@@ -120,39 +94,43 @@ export default function EachRequest({ request }: Props) {
 		}
 	}
 
+	const deletePost = async(): Promise<void> => {
+		try{
+			if(isBookmarked && bookmarkId){
+				await Promise.all([
+					handleDeletePost({
+						requestId: request.id,
+						userId: request._user_ref._id,
+					}),
+					deleteBookmark(bookmarkId)
+				])
+			}else{
+				await handleDeletePost({
+					requestId: request.id,
+					userId: request._user_ref._id,
+				})
+			}
+		}catch(err){
+			showToast({
+				message: 'This post was not deleted',
+				status: 'error'
+			})
+		}
+	}
 	useEffect(() => {
-		const isBookmarked = async (): Promise<void> => {
+		const checkBookmark = async (): Promise<void> => {
 			try {
-				if (!(authState.user && authState.user._id)) {
-					setIsBookmarked(false)
-					return
-				}
-
-				const myBookmarks = (await BookmarkService.getUserBookmarks(
-					authState.user._id,
-				)) as BookmarkDataDetails[]
-
-				// Find the bookmark by request_id
-				const theBookmark = myBookmarks.find(
-					(bookmark) => bookmark._object_ref?.id === request.id,
-				)
-
-				// Set bookmarkId if a bookmark is found
-				if (theBookmark) {
-					setBookmarkId(theBookmark.id)
-					setIsBookmarked(true)
-				} else {
-					setIsBookmarked(false)
-				}
+				const { isBookmarked, bookmarkId } = await getBookmarkStatusAndId(request.id)
+				setIsBookmarked(isBookmarked)
+				setBookmarkId(bookmarkId)
 			} catch (err: any) {
 				console.error('Error checking if request is bookmarked:', err)
-				setIsBookmarked(false)
 			}
 		}
-
-		isBookmarked()
-	}, [authState, request])
-
+	
+		checkBookmark()
+	}, [request?.id, getBookmarkStatusAndId])
+	
 	return (
 		<Box
 			position={'relative'}
@@ -183,11 +161,11 @@ export default function EachRequest({ request }: Props) {
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
+										avatar_url: authState.user.avatar_url,
+										first_name: authState.user.first_name,
+										last_name: authState.user.last_name,
+										id: authState.user._id,
+									}
 									: null,
 								action_url: `/user/${request._user_ref._id}`,
 							})
@@ -216,11 +194,11 @@ export default function EachRequest({ request }: Props) {
 										type: 'profile_view',
 										sender_details: authState.user
 											? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
 											: null,
 										action_url: `/user/${request._user_ref._id}`,
 									})
@@ -340,10 +318,7 @@ export default function EachRequest({ request }: Props) {
 															bgColor: 'none',
 														}}
 														onClick={async () =>
-															await handleDeletePost({
-																requestId: request.id,
-																userId: request._user_ref._id,
-															})
+															await deletePost()
 														}
 														width="100%"
 														display="flex"
@@ -481,11 +456,11 @@ export default function EachRequest({ request }: Props) {
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
 												: null,
 										})
 									}}
@@ -530,9 +505,9 @@ export default function EachRequest({ request }: Props) {
 						</MainTooltip>
 						<MainTooltip label="Bookmark" placement="top">
 							<Button
-								onClick={() => updateBookmark()}
-								isLoading={isLoading}
-								disabled={isLoading}
+								onClick={() => handleBookmarkUpdate()}
+								isLoading={bookmarkLoading}
+								disabled={bookmarkLoading}
 								px={0}
 								bg="none"
 								color="text_muted"

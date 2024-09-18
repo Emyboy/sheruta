@@ -54,7 +54,7 @@ export default class BookmarkService extends SherutaDB {
 		const userBookmarks = await Promise.all(
 			bookmarks.map(async (bookmark: BookmarkDataDetails) => {
 				// Ensure _user_ref exists before performing operations
-				if (bookmark._user_ref && bookmark._user_ref._id === user_id) {
+				if (bookmark._object_ref && bookmark._user_ref && bookmark._user_ref._id === user_id) {
 					return bookmark
 				}
 				return null
