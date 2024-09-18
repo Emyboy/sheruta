@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
 	Badge,
 	Box,
@@ -26,6 +26,18 @@ import { HostRequestDataDetails } from '@/firebase/service/request/request.types
 import { BiBookmark } from 'react-icons/bi'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { useBookmarkContext } from '@/context/bookmarks.context'
+import {
+	collection,
+	DocumentData,
+	limit,
+	orderBy,
+	query,
+	startAfter,
+	getDocs,
+} from 'firebase/firestore'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { resolveArrayOfReferences, resolveSingleObjectReferences } from '@/utils/index.utils'
 
 interface ProfileDTO {
 	_id: string
@@ -41,7 +53,121 @@ const BookmarkList = () => {
 		authState: { user },
 	} = useAuthContext()
 
-	const {bookmarks, bookmarkLoading} = useBookmarkContext()
+	const { bookmarks, bookmarkLoading } = useBookmarkContext()
+	const [isLoading, setIsLoading] = useState<boolean>(false)
+
+	const [processedBookmarks, setProcessedBookmarks] = useState<
+		BookmarkDataDetails[]
+	>([])
+
+	useEffect(() => {
+		if (bookmarks && bookmarks.length > 0) {
+			setProcessedBookmarks(bookmarks)
+		}
+	}, [bookmarks])
+
+	const [hasMore, setHasMore] = useState(true)
+	const [lastVisible, setLastVisible] = useState<DocumentData | null>(null) // Store the last document
+
+	const lastRequestRef = useRef<HTMLDivElement | null>(null)
+	const observer = useRef<IntersectionObserver | null>(null)
+
+	const loadMore = async () => {
+		setIsLoading(true)
+		try {
+			const requestsRef = collection(db, DBCollectionName.bookmarks)
+			let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
+
+			if (lastVisible) {
+				requestsQuery = query(requestsQuery, startAfter(lastVisible))
+			}
+
+			const querySnapshot = await getDocs(requestsQuery)
+
+			if (querySnapshot.empty) {
+				setHasMore(false)
+			} else {
+				// Map and resolve document references for new bookmarks
+				const newBookmarks = querySnapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				})) as BookmarkDataDetails[]
+
+				// Resolve document references in the new bookmarks
+				const resolvedBookmarks1 = await resolveArrayOfReferences(newBookmarks)
+
+				// Further resolve _object_ref and filter out any bookmarks not belonging to the current user
+				const resolvedBookmarks2 = await Promise.all(
+					resolvedBookmarks1.map(async (bookmark: BookmarkDataDetails) => {
+						// Ensure the bookmark belongs to the current user
+						if (bookmark._user_ref._id !== user?._id) {
+							return null
+						}
+
+						// Resolve any references in _object_ref
+						const resolvedObjectRefs = await resolveSingleObjectReferences(
+							bookmark._object_ref,
+						)
+
+						return {
+							...bookmark,
+							_object_ref: resolvedObjectRefs,
+						}
+					}),
+				)
+
+				// Filter out null values after the user check
+				const filteredBookmarks = resolvedBookmarks2.filter(
+					(bookmark) => bookmark !== null,
+				)
+
+				// Update state with new, non-duplicate bookmarks
+				setProcessedBookmarks((prev) => {
+					const existingIds = new Set(prev.map((bookmark) => bookmark.id))
+
+					// Filter out bookmarks that are already in the current state
+					const newUniqueBookmarks = filteredBookmarks.filter(
+						(bookmark) => !existingIds.has(bookmark?.id),
+					)
+
+					return [...prev, ...newUniqueBookmarks]
+				})
+
+				// Update the last visible document to handle pagination
+				setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
+			}
+		} catch (error) {
+			console.error('Failed to load more data', error)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	useEffect(() => {
+
+		if (isLoading) return
+
+		if (observer.current) observer.current.disconnect()
+
+		observer.current = new IntersectionObserver((entries) => {
+			if (entries[0].isIntersecting && hasMore) {
+				loadMore()
+			}
+		})
+
+		if (lastRequestRef.current) observer.current.observe(lastRequestRef.current)
+
+		return () => {
+			if (observer.current) observer.current.disconnect()
+		}
+	}, [isLoading, hasMore, lastRequestRef])
+
+	// Assign ref to the last item
+	const setRef = (node: HTMLDivElement | null) => {
+		if (observer.current) observer.current.disconnect()
+		lastRequestRef.current = node
+		if (node) observer.current?.observe(node)
+	}
 
 	if (!user) {
 		return <NoBookmarks />
@@ -67,31 +193,53 @@ const BookmarkList = () => {
 	return (
 		<VStack p={6} spacing={4} mt={5} align="start">
 			<Heading as="h2" size="lg">
-				My Bookmarks {(bookmarks.length > 0) ? `(${bookmarks.length})` : null}
+				My Bookmarks {processedBookmarks.length > 0 ? `(${processedBookmarks.length})` : null}
 			</Heading>
-			{bookmarks.map((bookmark: BookmarkDataDetails) => {
-				const bookmarkType = bookmark.object_type
 
-				if (bookmarkType === 'request') {
-					return (
-						<React.Fragment key={bookmark.id}>
-							<EachRequest
-								request={
-									bookmark._object_ref as unknown as HostRequestDataDetails
-								}
-							/>
-						</React.Fragment>
-					)
-				} else if (bookmarkType === 'profile') {
-					return (
-						<React.Fragment key={bookmark.id}>
-							<UserProfile
-								profileData={bookmark._object_ref as unknown as ProfileDTO}
-							/>
-						</React.Fragment>
-					)
-				}
-			})}
+			{processedBookmarks.map(
+				(bookmark: BookmarkDataDetails, index: number) => {
+					const bookmarkType = bookmark.object_type;
+
+					// Check if the ref is to be assigned
+					const isLastItem = index === processedBookmarks.length - 1;
+					const refProp = isLastItem ? { ref: setRef } : {};
+
+					if (bookmarkType === 'request') {
+						return (
+							<Box key={bookmark.id} {...refProp} style={{ transition: 'opacity 0.3s ease-in-out' }}>
+								<EachRequest
+									request={bookmark._object_ref as unknown as HostRequestDataDetails}
+								/>
+							</Box>
+						);
+					} else if (bookmarkType === 'profile') {
+						return (
+							<Box key={bookmark.id} {...refProp} style={{ transition: 'opacity 0.3s ease-in-out' }}>
+								<UserProfile
+									profileData={bookmark._object_ref as unknown as ProfileDTO}
+								/>
+							</Box>
+						);
+					} else {
+						return null;
+					}
+				},
+			)}
+
+			{(isLoading && processedBookmarks.length > 0)  && (
+				<Box textAlign="center" mt="4" width="100%">
+					<Spinner size="xl" />
+					<Text mt="4">Loading more bookmarks...</Text>
+				</Box>
+			)}
+
+			{!hasMore && (
+				<Box mt={3} width={"100%"}>
+					<Text align={'center'}>
+						You have reached the end of your bookmarks.
+					</Text>
+				</Box>
+			)}
 		</VStack>
 	)
 }

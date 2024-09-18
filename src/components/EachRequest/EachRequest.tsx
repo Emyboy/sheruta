@@ -42,9 +42,7 @@ import {
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
 import useCommon from '@/hooks/useCommon'
-import {
-	BookmarkType,
-} from '@/firebase/service/bookmarks/bookmarks.types'
+import { BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { doc } from 'firebase/firestore'
 import { db } from '@/firebase'
@@ -62,18 +60,22 @@ export default function EachRequest({ request }: Props) {
 	const { copyShareUrl, handleDeletePost, isLoading, setIsLoading } =
 		useShareSpace()
 
-	const { updateBookmark, getBookmarkStatusAndId, bookmarkLoading, deleteBookmark } = useBookmarkContext()
+	const {
+		updateBookmark,
+		getBookmarkStatusAndId,
+		bookmarkLoading,
+		deleteBookmark,
+	} = useBookmarkContext()
 
 	const handleBookmarkUpdate = async () => {
 		try {
-
 			if (isBookmarked && bookmarkId) {
 				await deleteBookmark(bookmarkId)
 				setIsBookmarked(false)
 				setBookmarkId(null)
 				return
 			}
-			const objectType = BookmarkType.requests;
+			const objectType = BookmarkType.requests
 			const objectRef = doc(
 				db,
 				DBCollectionName.flatShareRequests,
@@ -81,11 +83,11 @@ export default function EachRequest({ request }: Props) {
 			)
 
 			await updateBookmark({
-				objectType, objectRef
+				objectType,
+				objectRef,
 			})
 
 			return
-
 		} catch (err) {
 			showToast({
 				message: 'Failed to update bookmark',
@@ -94,43 +96,45 @@ export default function EachRequest({ request }: Props) {
 		}
 	}
 
-	const deletePost = async(): Promise<void> => {
-		try{
-			if(isBookmarked && bookmarkId){
+	const deletePost = async (): Promise<void> => {
+		try {
+			if (isBookmarked && bookmarkId) {
 				await Promise.all([
 					handleDeletePost({
 						requestId: request.id,
 						userId: request._user_ref._id,
 					}),
-					deleteBookmark(bookmarkId)
+					deleteBookmark(bookmarkId),
 				])
-			}else{
+			} else {
 				await handleDeletePost({
 					requestId: request.id,
 					userId: request._user_ref._id,
 				})
 			}
-		}catch(err){
+		} catch (err) {
 			showToast({
 				message: 'This post was not deleted',
-				status: 'error'
+				status: 'error',
 			})
 		}
 	}
 	useEffect(() => {
 		const checkBookmark = async (): Promise<void> => {
 			try {
-				const { isBookmarked, bookmarkId } = await getBookmarkStatusAndId(request.id)
+				const { isBookmarked, bookmarkId } = await getBookmarkStatusAndId(
+					request.id,
+				)
 				setIsBookmarked(isBookmarked)
 				setBookmarkId(bookmarkId)
 			} catch (err: any) {
 				console.error('Error checking if request is bookmarked:', err)
 			}
 		}
-	
+
 		checkBookmark()
 	}, [request?.id, getBookmarkStatusAndId])
-	
+
 	return (
 		<Box
 			position={'relative'}
@@ -161,11 +165,11 @@ export default function EachRequest({ request }: Props) {
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
-										avatar_url: authState.user.avatar_url,
-										first_name: authState.user.first_name,
-										last_name: authState.user.last_name,
-										id: authState.user._id,
-									}
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
 									: null,
 								action_url: `/user/${request._user_ref._id}`,
 							})
@@ -194,11 +198,11 @@ export default function EachRequest({ request }: Props) {
 										type: 'profile_view',
 										sender_details: authState.user
 											? {
-												avatar_url: authState.user.avatar_url,
-												first_name: authState.user.first_name,
-												last_name: authState.user.last_name,
-												id: authState.user._id,
-											}
+													avatar_url: authState.user.avatar_url,
+													first_name: authState.user.first_name,
+													last_name: authState.user.last_name,
+													id: authState.user._id,
+												}
 											: null,
 										action_url: `/user/${request._user_ref._id}`,
 									})
@@ -317,9 +321,7 @@ export default function EachRequest({ request }: Props) {
 														_active={{
 															bgColor: 'none',
 														}}
-														onClick={async () =>
-															await deletePost()
-														}
+														onClick={async () => await deletePost()}
 														width="100%"
 														display="flex"
 														alignItems="center"
@@ -456,11 +458,11 @@ export default function EachRequest({ request }: Props) {
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
 												: null,
 										})
 									}}

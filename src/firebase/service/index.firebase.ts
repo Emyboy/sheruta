@@ -66,7 +66,7 @@ export default class SherutaDB {
 		queryObj = {},
 	}: {
 		collection_name: string
-		_limit: number
+		_limit?: number
 		queryObj?: {
 			budget?: string
 			service?: string
@@ -126,11 +126,11 @@ export default class SherutaDB {
 		const documents = await Promise.all(
 			querySnapshot.docs.map(async (doc) => {
 				const docData = { ...doc.data() }
-		
+
 				const refFields = Object.entries(docData).filter(
 					([_, value]) => value instanceof DocumentReference,
 				)
-		
+
 				const resolvedRefs = await Promise.all(
 					refFields.map(async ([key, ref]) => {
 						const docSnap = await getDoc(ref as DocumentReference)
@@ -141,13 +141,12 @@ export default class SherutaDB {
 						}
 					}),
 				)
-		
+
 				Object.assign(docData, ...resolvedRefs)
-		
+
 				return { id: doc.id, ...docData, ref: doc.ref }
 			}),
 		)
-		
 
 		return await Promise.all(documents)
 	}

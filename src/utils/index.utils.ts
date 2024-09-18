@@ -3,6 +3,7 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import { formatDuration, intervalToDuration } from 'date-fns'
+import { DocumentReference, getDoc } from 'firebase/firestore'
 
 export const hasEmptyValue = (obj: any): boolean => {
 	for (const key in obj) {
@@ -140,4 +141,47 @@ export const handleDM = (userId: string | null) => {
 export const truncateText = (text: string, maxChars?: number) =>
 	text.length > (maxChars || 50)
 		? text.substring(0, maxChars || 50) + '... '
-		: text
+		: text;
+
+export const resolveArrayOfReferences = async (objArray: Record<any, any>[]) => {
+	const resolvedObjects = await Promise.all(
+		objArray.map(async (item) => {
+			// Resolve all fields that are DocumentReferences in the current item
+			const refFields = Object.entries(item).filter(
+				([, value]) => value instanceof DocumentReference,
+			)
+
+			const resolvedRefs = await Promise.all(
+				refFields.map(async ([key, ref]) => {
+					const docSnap = await getDoc(ref as DocumentReference)
+					return { [key]: docSnap.exists() ? docSnap.data() : null }
+				}),
+			)
+
+			// Merge resolved references back into the object
+			return { ...item, ...Object.assign({}, ...resolvedRefs) }
+		}),
+	)
+
+	return resolvedObjects
+}
+
+
+export const resolveSingleObjectReferences = async (obj: Record<any, any>) => {
+	const refFields = Object.entries(obj).filter(
+		([, value]) => value instanceof DocumentReference,
+	)
+
+	const resolvedRefs = await Promise.all(
+		refFields.map(async ([key, ref]) => {
+			const docSnap = await getDoc(ref as DocumentReference)
+			if (docSnap.exists()) {
+				return { [key]: docSnap.data() }
+			} else {
+				return { [key]: null }
+			}
+		}),
+	)
+
+	return { ...obj, ...Object.assign({}, ...resolvedRefs) }
+}

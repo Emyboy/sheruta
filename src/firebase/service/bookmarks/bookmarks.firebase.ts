@@ -47,14 +47,18 @@ export default class BookmarkService extends SherutaDB {
 	): Promise<BookmarkDataDetails[]> {
 		const bookmarks = await this.getAll({
 			collection_name: DBCollectionName.bookmarks,
-			_limit: 1000,
+			_limit: 10,
 		})
 
 		// Filter bookmarks based on _user_ref matching the given user_id
 		const userBookmarks = await Promise.all(
 			bookmarks.map(async (bookmark: BookmarkDataDetails) => {
 				// Ensure _user_ref exists before performing operations
-				if (bookmark._object_ref && bookmark._user_ref && bookmark._user_ref._id === user_id) {
+				if (
+					bookmark._object_ref &&
+					bookmark._user_ref &&
+					bookmark._user_ref._id === user_id
+				) {
 					return bookmark
 				}
 				return null
