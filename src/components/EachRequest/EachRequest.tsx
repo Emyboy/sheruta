@@ -1,8 +1,10 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
+import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
-import { handleCall } from '@/utils/index.utils'
+import { createNotification } from '@/utils/actions'
+import { handleCall, timeAgo } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -36,11 +38,6 @@ import {
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
-import NotificationsService, {
-	NotificationsBodyMessage,
-} from '@/firebase/service/notifications/notifications.firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { createNotification } from '@/utils/actions'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -49,7 +46,6 @@ export default function EachRequest({ request }: Props) {
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
-
 	return (
 		<Box
 			position={'relative'}
@@ -70,13 +66,13 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request.flat_share_profile._id}`}
+						href={`/user/${request._user_ref._id}`}
 						style={{ textDecoration: 'none' }}
 						onClick={async () =>
 							await createNotification({
 								is_read: false,
 								message: NotificationsBodyMessage.profile_view,
-								recipient_id: request.flat_share_profile._id,
+								recipient_id: request._user_ref._id,
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
@@ -86,11 +82,12 @@ export default function EachRequest({ request }: Props) {
 											id: authState.user._id,
 										}
 									: null,
+								action_url: `/user/${request._user_ref._id}`,
 							})
 						}
 					>
 						<Avatar
-							src={request.flat_share_profile.avatar_url}
+							src={request._user_ref.avatar_url}
 							size={{
 								md: 'md',
 								base: 'md',
@@ -102,13 +99,13 @@ export default function EachRequest({ request }: Props) {
 					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
 							<Link
-								href={`/user/${request.flat_share_profile._id}`}
+								href={`/user/${request._user_ref._id}`}
 								style={{ textDecoration: 'none' }}
 								onClick={async () =>
 									await createNotification({
 										is_read: false,
 										message: NotificationsBodyMessage.profile_view,
-										recipient_id: request.flat_share_profile._id,
+										recipient_id: request._user_ref._id,
 										type: 'profile_view',
 										sender_details: authState.user
 											? {
@@ -118,6 +115,7 @@ export default function EachRequest({ request }: Props) {
 													id: authState.user._id,
 												}
 											: null,
+										action_url: `/user/${request._user_ref._id}`,
 									})
 								}
 							>
@@ -126,10 +124,9 @@ export default function EachRequest({ request }: Props) {
 										textTransform={'capitalize'}
 										fontSize={{ base: 'base', md: 'lg' }}
 									>
-										{request.flat_share_profile.last_name}{' '}
-										{request.flat_share_profile.first_name}
+										{request._user_ref.last_name} {request._user_ref.first_name}
 									</Text>
-									{request.flat_share_profile.is_verified && (
+									{request.user_info?.is_verified && (
 										<LuBadgeCheck fill="#00bc73" />
 									)}
 								</Flex>
@@ -199,8 +196,7 @@ export default function EachRequest({ request }: Props) {
 													Share
 												</Text>
 											</Button>
-											{authState.user?._id ===
-												request.flat_share_profile._id && (
+											{authState.user?._id === request._user_ref._id && (
 												<>
 													<Button
 														variant="ghost"
@@ -239,7 +235,7 @@ export default function EachRequest({ request }: Props) {
 														onClick={async () =>
 															await handleDeletePost({
 																requestId: request.id,
-																userId: request.flat_share_profile._id,
+																userId: request._user_ref._id,
 															})
 														}
 														width="100%"
@@ -265,13 +261,7 @@ export default function EachRequest({ request }: Props) {
 							</Popover>
 						</Flex>
 						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
-							{formatDistanceToNow(
-								new Date(
-									request.updatedAt.seconds * 1000 +
-										request.updatedAt.nanoseconds / 1000000,
-								),
-								{ addSuffix: true },
-							)}
+							{timeAgo(request.updatedAt)}
 						</Text>
 					</Flex>
 				</Flex>
@@ -292,7 +282,8 @@ export default function EachRequest({ request }: Props) {
 								<BiLocationPlus size={'16px'} />
 							</Box>
 							<Truncate
-								text={request.google_location_text}
+								//@ts-ignore
+								text={request._location_keyword_ref.name}
 								max={70}
 								showReadMore={false}
 							/>
@@ -351,38 +342,52 @@ export default function EachRequest({ request }: Props) {
 					justifyContent={'space-between'}
 				>
 					<Flex gap={DEFAULT_PADDING}>
-						<MainTooltip label="Call me" placement="top">
-							<Button
-								px={0}
-								bg="none"
-								color="text_muted"
-								display={'flex'}
-								gap={1}
-								fontWeight={'light'}
-								_hover={{
-									color: 'brand',
-									bg: 'none',
-									_dark: {
+						{!request.user_info?.hide_phone ? (
+							<MainTooltip label="Call me" placement="top">
+								<Button
+									px={0}
+									bg="none"
+									color="text_muted"
+									display={'flex'}
+									gap={1}
+									fontWeight={'light'}
+									_hover={{
 										color: 'brand',
-									},
-								}}
-								_dark={{
-									color: 'dark_lighter',
-								}}
-								fontSize={{
-									md: 'xl',
-									sm: 'lg',
-									base: 'base',
-								}}
-								onClick={() =>
-									handleCall(request.flat_share_profile.primary_phone_number)
-								}
-							>
-								<BiPhone /> 35
-							</Button>
-						</MainTooltip>
+									}}
+									_dark={{
+										color: 'dark_lighter',
+									}}
+									fontSize={{
+										md: 'xl',
+										sm: 'lg',
+										base: 'base',
+									}}
+									onClick={async () => {
+										if (authState.user?._id === request._user_ref._id) return
+										await handleCall({
+											number: request.user_info.primary_phone_number,
+											recipient_id: request._user_ref._id,
+											sender_details: authState.user
+												? {
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
+												: null,
+										})
+									}}
+								>
+									<BiPhone /> 35
+								</Button>
+							</MainTooltip>
+						) : null}
+
 						<MainTooltip label="Ask questions" placement="top">
-							<Link href={`/messsages/${request.flat_share_profile._id}`}>
+							<Link
+								href={`/messsages/${request._user_ref._id}`}
+								style={{ textDecoration: 'none' }}
+							>
 								<Button
 									px={0}
 									bg="none"
@@ -393,6 +398,7 @@ export default function EachRequest({ request }: Props) {
 									_hover={{
 										color: 'brand',
 										bg: 'none',
+										textDecoration: 'none',
 										_dark: {
 											color: 'brand',
 										},

@@ -17,14 +17,16 @@ export const NotificationsBodyMessage: Record<
 	NotificationsType['type'],
 	string
 > = {
-	rescheduled: 'Your inspection has been rescheduled by',
-	missed_call: 'You have a missed call from',
-	call: 'You have a call from',
-	inspection: 'You have an inspection with',
-	message: 'You have a new message from',
-	comment: 'You have a comment from',
-	profile_view: 'A user viewed your profile',
-	cancelled: 'Your Inspection has been cancelled by',
+	reservation: 'Reserved your apartment listing',
+	rescheduled: 'Rescheduled your inspection',
+	call: 'Tried to call you',
+	inspection: 'Booked an inspection with you',
+	message: 'Messaged you',
+	comment: 'Commented on your apartment listing',
+	comment_reply: 'Replied your comment',
+	profile_view: 'Viewed your profile',
+	cancelled: 'Cancelled your inspection',
+	bookmark: 'Saved your apartment listing',
 }
 
 export default class NotificationsService {

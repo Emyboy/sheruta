@@ -5,12 +5,8 @@ import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import MainHeader from '@/components/layout/MainHeader'
 import NextLink from 'next/link'
-import SherutaDB from '@/firebase/service/index.firebase'
-import { RequestData } from '@/firebase/service/request/request.types'
 import EditSeekerForm from '@/components/forms/EditSeekerForm'
-import { DocumentData } from 'firebase/firestore'
-import { redirect } from 'next/navigation'
-import { SuperJSON } from 'superjson'
+import { getSeekerRequestData } from '../page'
 
 type Props = {
 	params: any
@@ -19,13 +15,7 @@ type Props = {
 export default async function Page({ params }: Props) {
 	const requestId = params.request_id
 
-	let result: any = await getRequest(requestId)
-
-	if (result) {
-		result = SuperJSON.parse(result) as RequestData
-	} else {
-		redirect('/')
-	}
+	const requestData: string | undefined = await getSeekerRequestData(requestId)
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -63,28 +53,11 @@ export default async function Page({ params }: Props) {
 							</Box>
 						</Box>
 						<Box maxWidth="600px" mx="auto">
-							<EditSeekerForm requestId={requestId} editFormData={result} />
+							<EditSeekerForm requestId={requestId} requestData={requestData} />
 						</Box>
 					</Box>
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
 	)
-}
-
-const getRequest = async (requestId: string): Promise<string | undefined> => {
-	try {
-		const result: DocumentData | null = await SherutaDB.get({
-			collection_name: 'requests',
-			document_id: requestId as string,
-		})
-
-		if (result && Object.keys(result).length) {
-			return SuperJSON.stringify(result)
-		}
-
-		return undefined
-	} catch (error: any) {
-		console.log(error)
-	}
 }

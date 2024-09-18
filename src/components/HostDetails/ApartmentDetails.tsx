@@ -3,6 +3,9 @@
 import ApartmentSummary from '@/components/HostDetails/ApartmentSummary'
 import { Flex, Text } from '@chakra-ui/react'
 import { useState } from 'react'
+import DiscussionComponent from './DiscussionComponent'
+import { useSearchParams } from 'next/navigation'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -11,8 +14,21 @@ const mini_nav_items = [
 	'Pay Details',
 ]
 
-export default function ApartmentDetails({ request }: { request: string }) {
-	const [activeTab, setActiveTab] = useState('Apartment Summary')
+export default function ApartmentDetails({
+	request,
+	discussions,
+}: {
+	request: string
+	discussions: string | undefined
+}) {
+	const params = useSearchParams()
+	const [activeTab, setActiveTab] = useState(
+		params.get('tab')?.toString() || 'Apartment Summary',
+	)
+
+	const parsedRequest: HostRequestDataDetails = JSON.parse(request)
+
+	const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
 
 	return (
 		<>
@@ -73,9 +89,15 @@ export default function ApartmentDetails({ request }: { request: string }) {
 			</Flex>
 
 			{activeTab === 'Apartment Summary' && (
-				<ApartmentSummary request={JSON.parse(request)} />
+				<ApartmentSummary request={parsedRequest} />
 			)}
-			{activeTab === 'Discussion' && <Text>Discussion coming soon</Text>}
+			{activeTab === 'Discussion' && (
+				<DiscussionComponent
+					requestId={parsedRequest.id}
+					discussions={parsedDiscussions}
+					hostId={parsedRequest._user_ref._id}
+				/>
+			)}
 			{activeTab === 'Verification' && <Text>Verification coming soon</Text>}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>

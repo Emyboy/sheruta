@@ -1,22 +1,23 @@
-import React from 'react'
-import UserProfilePage from './(user-profile)/UserProfilePage'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import MainContainer from '@/components/layout/MainContainer'
-import { Flex } from '@chakra-ui/react'
+import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
+import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
+import { Flex } from '@chakra-ui/react'
+import UserProfilePage from './(user-profile)/UserProfilePage'
+
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
+// import { db } from '@/firebase'
+// import { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
 	collection,
 	doc,
+	DocumentReference,
+	DocumentSnapshot,
 	getDoc,
 	getDocs,
 	query,
 	where,
-	DocumentReference,
-	DocumentSnapshot,
-	DocumentData,
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { promise } from 'zod'
@@ -190,19 +191,21 @@ export default async function page(props: any) {
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
-				<ThreeColumnLayout header={<MainBackHeader />}>
+				<ThreeColumnLayout header={<MainHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
 					{user ? (
-						<UserProfilePage data={user} userId={otherInfos} />
+						<UserProfilePage
+							data={user}
+							userId={otherInfos}
+							user_id={user_id}
+						/>
 					) : (
 						<PageNotFound />
 					)}
 				</ThreeColumnLayout>
-				
 			</MainContainer>
-			
 		</Flex>
 	)
 }

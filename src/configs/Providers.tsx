@@ -12,6 +12,7 @@ import { Box, ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 import { Next13ProgressBar } from 'next13-progressbar'
 import { theme } from './theme'
+import { BookmarksProvider } from '@/context/bookmarks.context'
 
 const CreditOptionsPopups = dynamic(
 	() => import('@/components/popups/CreditOptionsPopups'),
@@ -29,26 +30,28 @@ export function Providers({ children }: { children: React.ReactNode }) {
 					<OptionsProvider>
 						<InspectionsProvider>
 							<NotificationsProvider>
-								<Box
-									bg="white"
-									_dark={{
-										bg: 'dark',
-									}}
-									minH={'100vh'}
-									userSelect={'none'}
-								>
-									<GetStarted />
-									<CreditOptionsPopups />
-									<MasterPopup />
-									<AppLoading />
-									<Next13ProgressBar
-										height="4px"
-										color="#00bc73"
-										options={{ showSpinner: false }}
-										showOnShallow
-									/>
-									{children}
-								</Box>
+								<BookmarksProvider>
+									<Box
+										bg="white"
+										_dark={{
+											bg: 'dark',
+										}}
+										minH={'100vh'}
+										userSelect={'none'}
+									>
+										<GetStarted />
+										<CreditOptionsPopups />
+										<MasterPopup />
+										<AppLoading />
+										<Next13ProgressBar
+											height="4px"
+											color="#00bc73"
+											options={{ showSpinner: false }}
+											showOnShallow
+										/>
+										{children}
+									</Box>
+								</BookmarksProvider>
 							</NotificationsProvider>
 						</InspectionsProvider>
 					</OptionsProvider>

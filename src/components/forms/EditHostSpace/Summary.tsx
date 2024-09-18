@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
+import { useAuthContext } from '@/context/auth.context'
 
 interface LocationObject {
 	formatted_address?: string
@@ -44,6 +45,9 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	const { optionsState: options } = useOptionsContext()
 	const toast = useToast()
 	const router = useRouter()
+	const {
+		authState: { flat_share_profile },
+	} = useAuthContext()
 
 	const [loading, setLoading] = useState(false)
 
@@ -169,6 +173,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				_service_ref: selectedService._ref,
 				_category_ref: selectedCategory._ref,
 				_property_type_ref: selectedProperty._ref,
+				_user_ref: flat_share_profile?._user_ref,
 				seeking: false,
 				updatedAt: Timestamp.now(),
 			}
