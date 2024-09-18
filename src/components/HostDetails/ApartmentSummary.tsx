@@ -241,7 +241,10 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openReserveApartmentModal}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={request.availability_status === 'reserved'}
+						isDisabled={
+							request.availability_status === 'reserved' ||
+							authState.user?._id === request._user_ref._id
+						}
 					>
 						Reserve Apartment
 					</Button>
@@ -724,8 +727,9 @@ export default function ApartmentSummary({
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
 						isDisabled={
-							request.availability_status === 'reserved' &&
-							request?.reserved_by !== authState.user?._id
+							(request.availability_status === 'reserved' &&
+								request?.reserved_by !== authState.user?._id) ||
+							authState.user?._id === request._user_ref._id
 						}
 					>
 						Book Inspection
