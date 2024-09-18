@@ -18,7 +18,7 @@ import {
 
 type Props = {}
 
-export default function MainLeftNav({ }: Props) {
+export default function MainLeftNav({}: Props) {
 	const {
 		logout,
 		authState: { user_info },

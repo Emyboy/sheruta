@@ -66,8 +66,8 @@ const PersonalInfoForm = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
-	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-	const [avatarFile, setAvatarFile] = useState<File | null>(null);
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+	const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -82,118 +82,124 @@ const PersonalInfoForm = () => {
 	}
 
 	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
+		const file = e.target.files?.[0]
 		if (file) {
-			setAvatarFile(file);
-			const reader = new FileReader();
-			reader.onloadend = () => setAvatarUrl(reader.result as string);
-			reader.readAsDataURL(file);
+			setAvatarFile(file)
+			const reader = new FileReader()
+			reader.onloadend = () => setAvatarUrl(reader.result as string)
+			reader.readAsDataURL(file)
 		}
-	};
+	}
 
 	const handleSubmit = async (e: React.FormEvent): Promise<any> => {
 		try {
-		  e.preventDefault();
-		  setIsLoading(true);
-	  
-		  if (
-			!(user && user_info && flat_share_profile && user?._id && user_info?._user_id && flat_share_profile?._user_id)
-		  ) {
-			setIsLoading(false);
-			return showToast({
-			  message: 'Please refresh this page and sign in again',
-			  status: 'error',
-			});
-		  }
-	  
-		  let downloadURL: string | undefined = user?.avatar_url;
-	  
-		  // If the user has a new avatar to upload
-		  if (avatarFile) {
-			// Step 1: Delete the existing avatar from Firebase Storage if it exists
-			if (user?.avatar_url) {
-			  await SherutaDB.deleteMedia(user.avatar_url);
+			e.preventDefault()
+			setIsLoading(true)
+
+			if (
+				!(
+					user &&
+					user_info &&
+					flat_share_profile &&
+					user?._id &&
+					user_info?._user_id &&
+					flat_share_profile?._user_id
+				)
+			) {
+				setIsLoading(false)
+				return showToast({
+					message: 'Please refresh this page and sign in again',
+					status: 'error',
+				})
 			}
-	  
-			// Step 2: Upload the new avatar
-			const uploadAvatar = new Promise<string | undefined>((resolve, reject) => {
-			  const reader = new FileReader();
-			  reader.readAsDataURL(avatarFile);
-			  reader.onload = async () => {
-				if (reader.result) {
-				  try {
-					const storageUrl = `images/profiles/${user?._id}/${avatarFile.name}`;
-	  
-					await SherutaDB.uploadMedia({
-					  data: reader.result as string, // Convert result to string
-					  storageUrl,
-					});
-	  
-					// Get the download URL after upload
-					const url = await SherutaDB.getMediaUrl(storageUrl);
-					resolve(url || '');
-				  } catch (error) {
-					console.error('Error uploading avatar:', error);
-					reject(undefined);
-				  }
-				} else {
-				  reject(undefined);
+
+			let downloadURL: string | undefined = user?.avatar_url
+
+			// If the user has a new avatar to upload
+			if (avatarFile) {
+				// Step 1: Delete the existing avatar from Firebase Storage if it exists
+				if (user?.avatar_url) {
+					await SherutaDB.deleteMedia(user.avatar_url)
 				}
-			  };
-			  reader.onerror = () => reject(undefined);
-			});
-	  
-			downloadURL = await uploadAvatar;
-			setAvatarUrl(downloadURL || '');
-		  }
-	  
-		  // Proceed with updating user data after avatar upload completes
-		  await Promise.all([
-			UserInfoService.update({
-			  data: {
-				primary_phone_number: formData.phone,
-				gender: formData.gender,
-			  },
-			  document_id: user_info._user_id,
-			}),
-			UserService.update({
-			  data: {
-				first_name: formData.firstName,
-				last_name: formData.lastName,
-				avatar_url: downloadURL, // Use the uploaded URL here
-			  },
-			  document_id: user._id,
-			}),
-			FlatShareProfileService.update({
-			  data: {
-				bio: formData.bio,
-				religion: formData.religion,
-			  },
-			  document_id: flat_share_profile?._user_id,
-			}),
-		  ]);
-	  
-		  setIsLoading(false);
-	  
-		  showToast({
-			message: 'Your information has been updated',
-			status: 'success',
-		  });
-	  
-		  return setTimeout(() => {
-			window.location.href = '/settings';
-		  }, 1000);
+
+				// Step 2: Upload the new avatar
+				const uploadAvatar = new Promise<string | undefined>(
+					(resolve, reject) => {
+						const reader = new FileReader()
+						reader.readAsDataURL(avatarFile)
+						reader.onload = async () => {
+							if (reader.result) {
+								try {
+									const storageUrl = `images/profiles/${user?._id}/${avatarFile.name}`
+
+									await SherutaDB.uploadMedia({
+										data: reader.result as string, // Convert result to string
+										storageUrl,
+									})
+
+									// Get the download URL after upload
+									const url = await SherutaDB.getMediaUrl(storageUrl)
+									resolve(url || '')
+								} catch (error) {
+									console.error('Error uploading avatar:', error)
+									reject(undefined)
+								}
+							} else {
+								reject(undefined)
+							}
+						}
+						reader.onerror = () => reject(undefined)
+					},
+				)
+
+				downloadURL = await uploadAvatar
+				setAvatarUrl(downloadURL || '')
+			}
+
+			// Proceed with updating user data after avatar upload completes
+			await Promise.all([
+				UserInfoService.update({
+					data: {
+						primary_phone_number: formData.phone,
+						gender: formData.gender,
+					},
+					document_id: user_info._user_id,
+				}),
+				UserService.update({
+					data: {
+						first_name: formData.firstName,
+						last_name: formData.lastName,
+						avatar_url: downloadURL, // Use the uploaded URL here
+					},
+					document_id: user._id,
+				}),
+				FlatShareProfileService.update({
+					data: {
+						bio: formData.bio,
+						religion: formData.religion,
+					},
+					document_id: flat_share_profile?._user_id,
+				}),
+			])
+
+			setIsLoading(false)
+
+			showToast({
+				message: 'Your information has been updated',
+				status: 'success',
+			})
+
+			return setTimeout(() => {
+				window.location.href = '/settings'
+			}, 1000)
 		} catch (err: any) {
-		  setIsLoading(false);
-		  showToast({
-			message: 'An error occurred while updating your information',
-			status: 'error',
-		  });
+			setIsLoading(false)
+			showToast({
+				message: 'An error occurred while updating your information',
+				status: 'error',
+			})
 		}
-	  };
-	  
-
-
+	}
 
 	// const hanndleSubmit = async (e: React.FormEvent) => {
 	// 	e.preventDefault();
@@ -217,7 +223,6 @@ const PersonalInfoForm = () => {
 	// 				// Get the download URL after upload
 	// 				const downloadURL = await SherutaDB.getMediaUrl(storageUrl);
 	// 				setAvatarUrl(downloadURL || '');
-
 
 	// 				setIsLoading(false);
 	// 				alert('Profile updated successfully');
@@ -246,7 +251,12 @@ const PersonalInfoForm = () => {
 						{/* <FormLabel>Update Profile Picture</FormLabel> */}
 						<Box display="flex" alignItems="center" gap={4}>
 							<Avatar size="xl" src={avatarUrl || ''} />
-							<Input borderWidth="0px" type="file" accept="image/*" onChange={handleAvatarChange} />
+							<Input
+								borderWidth="0px"
+								type="file"
+								accept="image/*"
+								onChange={handleAvatarChange}
+							/>
 						</Box>
 					</FormControl>
 
