@@ -26,7 +26,7 @@ import {
 } from '@chakra-ui/react'
 import { DocumentReference, Timestamp, doc } from 'firebase/firestore'
 import { usePathname, useRouter } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
 import { v4 as generateUId } from 'uuid'
 
@@ -34,9 +34,9 @@ interface DiscussionDTO {
 	uuid: string | undefined
 	_request_ref: DocumentReference | undefined
 	_sender_ref: DocumentReference | undefined
-	_receiver_ref?: DocumentReference | undefined //the userRef of the person you're replying to
-	reply_to?: string | undefined //the message ID you're replying to
-	nest_level: number //the message level limit is 3 levels
+	_receiver_ref?: DocumentReference | undefined
+	reply_to?: string | undefined
+	nest_level: number
 	message: string
 	timestamp: Timestamp
 	type: string
@@ -189,7 +189,7 @@ const DiscussionComponent = ({
 					status: 'success',
 				})
 			}, 1000)
-			router.push(pathname + '?tab=Discussion')
+			// router.push(pathname + '?tab=Discussion')
 			revalidatePathOnClient(pathname)
 			setIsReplying(false)
 			setMessage('')
@@ -205,19 +205,6 @@ const DiscussionComponent = ({
 
 	const getCommentReplies = (commentId: string): DiscussionData[] =>
 		discussions.filter((comment) => comment.reply_to === commentId) || []
-
-	// Create a ref for the reply box
-	const replyBoxRef = useRef<HTMLDivElement>(null)
-
-	// Function to scroll into view
-	const scrollToCommentInputBox = () => {
-		if (replyBoxRef.current) {
-			replyBoxRef.current.scrollIntoView({
-				behavior: 'smooth',
-				block: 'start',
-			})
-		}
-	}
 
 	return (
 		<Box gap={4} width="100%" overflowY={'scroll'} pos={'relative'}>
@@ -237,7 +224,6 @@ const DiscussionComponent = ({
 											comment={singleComment}
 											getCommentReplies={getCommentReplies}
 											commentId={singleComment.id as string}
-											scrollToCommentInputBox={scrollToCommentInputBox}
 											setIsReplying={setIsReplying}
 											setCommentId={setCommentId}
 										/>
@@ -252,8 +238,10 @@ const DiscussionComponent = ({
 			</Box>
 
 			<Box
-				ref={replyBoxRef}
-				bg="dark"
+				bg={{
+					_dark: 'dark',
+					_light: '#fff',
+				}}
 				pos={'fixed'}
 				right={0}
 				bottom={0}
@@ -325,7 +313,6 @@ const CommentComponent = ({
 	setReceiverRef,
 	setNestLevel,
 	getCommentReplies,
-	scrollToCommentInputBox,
 	setIsReplying,
 	setCommentId,
 	commentId,
@@ -334,7 +321,6 @@ const CommentComponent = ({
 	setUserHandle: (arg: string) => void
 	setReceiverRef: (arg: any) => void
 	setNestLevel: (arg: number) => void
-	scrollToCommentInputBox: () => void
 	setIsReplying: (arg: boolean) => void
 	setCommentId: (arg: string | undefined) => void
 	getCommentReplies: (arg: string) => DiscussionData[]
@@ -395,7 +381,7 @@ const CommentComponent = ({
 								setUserHandle(`@${userName}`)
 								setIsReplying(true)
 								setCommentId(comment.id)
-								scrollToCommentInputBox()
+
 								setNestLevel(2)
 								setReceiverRef(comment._sender_ref)
 							}}
@@ -423,7 +409,6 @@ const CommentComponent = ({
 								setReceiverRef={setReceiverRef}
 								setCommentId={setCommentId}
 								setUserHandle={setUserHandle}
-								scrollToCommentInputBox={scrollToCommentInputBox}
 								key={singleReply.id}
 								reply={singleReply}
 							/>
@@ -448,7 +433,6 @@ const CommentComponent = ({
 										setReceiverRef={setReceiverRef}
 										setCommentId={setCommentId}
 										setUserHandle={setUserHandle}
-										scrollToCommentInputBox={scrollToCommentInputBox}
 										key={subReply.id}
 										reply={subReply}
 									/>
@@ -464,7 +448,6 @@ const CommentComponent = ({
 							setReceiverRef={setReceiverRef}
 							setCommentId={setCommentId}
 							setUserHandle={setUserHandle}
-							scrollToCommentInputBox={scrollToCommentInputBox}
 							key={singleReply.id}
 							reply={singleReply}
 						/>
@@ -477,7 +460,7 @@ const CommentComponent = ({
 
 const ReplyComponent = ({
 	reply,
-	scrollToCommentInputBox,
+
 	setUserHandle,
 	setNestLevel,
 	setReceiverRef,
@@ -485,7 +468,7 @@ const ReplyComponent = ({
 	setCommentId,
 }: {
 	reply: DiscussionData
-	scrollToCommentInputBox: () => void
+
 	setUserHandle: (prev: string) => void
 	setNestLevel: (arg: number) => void
 	setReceiverRef: (arg: any) => void
@@ -553,7 +536,6 @@ const ReplyComponent = ({
 									setUserHandle(`@${userName}`)
 									setIsReplying(true)
 									setCommentId(reply.id)
-									scrollToCommentInputBox()
 									setNestLevel(3)
 									setReceiverRef(reply._sender_ref)
 								}}

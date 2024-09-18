@@ -1,11 +1,11 @@
 'use client'
 
 import ApartmentSummary from '@/components/HostDetails/ApartmentSummary'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import { Flex, Text } from '@chakra-ui/react'
+import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import DiscussionComponent from './DiscussionComponent'
-import { useSearchParams } from 'next/navigation'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 
 const mini_nav_items = [
 	'Apartment Summary',
