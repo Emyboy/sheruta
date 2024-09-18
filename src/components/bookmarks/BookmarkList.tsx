@@ -16,6 +16,9 @@ import {
 	Card,
 	Stack,
 	Image,
+	Circle,
+	useColorModeValue,
+	Icon,
 } from '@chakra-ui/react'
 import { BookmarkDataDetails } from '@/firebase/service/bookmarks/bookmarks.types'
 import { useAuthContext } from '@/context/auth.context'
@@ -64,6 +67,8 @@ const resolveReferences = async (obj: Record<any, any>) => {
 	return Object.assign({}, ...resolvedRefs)
 }
 
+//TODO: Refresh bookmarks on deletion
+//TODO: Add inifinite scrolling
 const BookmarkList = () => {
 	const [bookmarks, setBookmarks] = useState<BookmarkDataDetails[]>([])
 	const [loading, setLoading] = useState(true)
@@ -156,6 +161,10 @@ const BookmarkList = () => {
 		fetchBookmarks()
 	}, [user?._id])
 
+	if (!user) {
+		return <NoBookmarks />
+	}
+
 	if (loading) {
 		return (
 			<Box textAlign="center" mt="20">
@@ -202,6 +211,36 @@ const BookmarkList = () => {
 				}
 			})}
 		</VStack>
+	)
+}
+
+const NoBookmarks = () => {
+	const circleBgColor = useColorModeValue('#e4faa85c', '#e4faa814')
+
+	return (
+		<Flex
+			flexDir={'column'}
+			justifyContent={'center'}
+			width="100%"
+			minH="100dvh"
+		>
+			<Flex alignItems={'center'} flexDir={'column'} gap="10px">
+				<Circle
+					borderRadius={'full'}
+					bgColor={circleBgColor}
+					minW={'100px'}
+					minH={'100px'}
+				>
+					<Icon as={BiBookmark} w={16} h={16} color="green.400" />
+				</Circle>
+				<Flex gap="5px" alignItems={'center'} flexDir={'column'}>
+					<Text fontWeight={'600'}>No Bookmarks Yet</Text>
+					<Text textAlign={'center'}>
+						Login / signup to view your bookmarks
+					</Text>
+				</Flex>
+			</Flex>
+		</Flex>
 	)
 }
 

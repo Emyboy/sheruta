@@ -1,4 +1,5 @@
 'use client'
+import { useAuthContext } from '@/context/auth.context'
 import {
 	Box,
 	Flex,
@@ -59,6 +60,7 @@ const SettingOption = ({
 
 const Settings = () => {
 	const { toggleColorMode, colorMode } = useColorMode()
+	const { authState: { user_info } } = useAuthContext()
 
 	const textColor = useColorModeValue('#000', 'dark_lighter')
 
@@ -67,61 +69,65 @@ const Settings = () => {
 			<Heading mb={10} color={'dark-light'}>
 				Settings
 			</Heading>
-
 			<Stack spacing={4}>
-				<Text color={'dark-light'} fontSize="lg" fontWeight="bold">
-					Personal Information
-				</Text>
-				<SettingOption
-					color={textColor}
-					href="/settings/personal-info"
-					icon={BiSolidUserCircle}
-					label="Personal Info"
-				/>
-				<SettingOption
-					color={textColor}
-					href="/settings/flat-share-profile"
-					icon={BiBuildings}
-					label="Flat share profile"
-				/>
-				<SettingOption
-					color={textColor}
-					href="/settings/update-habits"
-					icon={BiLike}
-					label="Habits"
-				/>
 
-				<Divider />
+				{user_info && user_info._user_id ? <>
 
-				<Text fontSize="lg" fontWeight="bold">
-					Preferences
-				</Text>
+					<Text color={'dark-light'} fontSize="lg" fontWeight="bold">
+						Personal Information
+					</Text>
+					<SettingOption
+						color={textColor}
+						href="/settings/personal-info"
+						icon={BiSolidUserCircle}
+						label="Personal Info"
+					/>
+					<SettingOption
+						color={textColor}
+						href="/settings/flat-share-profile"
+						icon={BiBuildings}
+						label="Flat share profile"
+					/>
+					<SettingOption
+						color={textColor}
+						href="/settings/update-habits"
+						icon={BiLike}
+						label="Habits"
+					/>
 
-				<SettingOption
-					color={textColor}
-					href="/settings/search-preferences"
-					icon={BiSolidMap}
-					label="Search Preferences"
-				/>
-				<SettingOption
-					color={textColor}
-					href="/settings/update-interests"
-					icon={BiSolidSmile}
-					label="Interests"
-				/>
+					<Divider />
 
-				<Divider />
+					<Text fontSize="lg" fontWeight="bold">
+						Preferences
+					</Text>
 
-				<Text fontSize="lg" fontWeight="bold">
-					Privacy & Security
-				</Text>
-				<SettingOption
-					color={textColor}
-					href="/settings/privacy-settings"
-					icon={BiSolidLock}
-					label="Update Privacy Settings"
-				/>
+					<SettingOption
+						color={textColor}
+						href="/settings/search-preferences"
+						icon={BiSolidMap}
+						label="Search Preferences"
+					/>
+					<SettingOption
+						color={textColor}
+						href="/settings/update-interests"
+						icon={BiSolidSmile}
+						label="Interests"
+					/>
 
+					<Divider />
+
+					<Text fontSize="lg" fontWeight="bold">
+						Privacy & Security
+					</Text>
+					<SettingOption
+						color={textColor}
+						href="/settings/privacy-settings"
+						icon={BiSolidLock}
+						label="Update Privacy Settings"
+					/>
+				</>
+					: null}
+					
 				<Text fontSize="lg" fontWeight="bold">
 					Display mode
 				</Text>
