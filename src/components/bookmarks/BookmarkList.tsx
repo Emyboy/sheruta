@@ -37,7 +37,10 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { resolveArrayOfReferences, resolveSingleObjectReferences } from '@/utils/index.utils'
+import {
+	resolveArrayOfReferences,
+	resolveSingleObjectReferences,
+} from '@/utils/index.utils'
 
 interface ProfileDTO {
 	_id: string
@@ -47,7 +50,6 @@ interface ProfileDTO {
 	flat_share_profile: FlatShareProfileData
 }
 
-//TODO: Add inifinite scrolling
 const BookmarkList = () => {
 	const {
 		authState: { user },
@@ -144,7 +146,6 @@ const BookmarkList = () => {
 	}
 
 	useEffect(() => {
-
 		if (isLoading) return
 
 		if (observer.current) observer.current.disconnect()
@@ -193,40 +194,53 @@ const BookmarkList = () => {
 	return (
 		<VStack p={6} spacing={4} mt={5} align="start">
 			<Heading as="h2" size="lg">
-				My Bookmarks {processedBookmarks.length > 0 ? `(${processedBookmarks.length})` : null}
+				My Bookmarks{' '}
+				{processedBookmarks.length > 0
+					? `(${processedBookmarks.length})`
+					: null}
 			</Heading>
 
 			{processedBookmarks.map(
 				(bookmark: BookmarkDataDetails, index: number) => {
-					const bookmarkType = bookmark.object_type;
+					const bookmarkType = bookmark.object_type
 
 					// Check if the ref is to be assigned
-					const isLastItem = index === processedBookmarks.length - 1;
-					const refProp = isLastItem ? { ref: setRef } : {};
+					const isLastItem = index === processedBookmarks.length - 1
+					const refProp = isLastItem ? { ref: setRef } : {}
 
 					if (bookmarkType === 'request') {
 						return (
-							<Box key={bookmark.id} {...refProp} style={{ transition: 'opacity 0.3s ease-in-out' }}>
+							<Box
+								key={bookmark.id}
+								{...refProp}
+								style={{ transition: 'opacity 0.3s ease-in-out' }}
+							>
 								<EachRequest
-									request={bookmark._object_ref as unknown as HostRequestDataDetails}
+									request={
+										bookmark._object_ref as unknown as HostRequestDataDetails
+									}
 								/>
 							</Box>
-						);
+						)
 					} else if (bookmarkType === 'profile') {
 						return (
-							<Box key={bookmark.id} {...refProp} style={{ transition: 'opacity 0.3s ease-in-out' }}>
+							<Box
+								key={bookmark.id}
+								{...refProp}
+								style={{ transition: 'opacity 0.3s ease-in-out' }}
+							>
 								<UserProfile
 									profileData={bookmark._object_ref as unknown as ProfileDTO}
 								/>
 							</Box>
-						);
+						)
 					} else {
-						return null;
+						return null
 					}
 				},
 			)}
 
-			{(isLoading && processedBookmarks.length > 0)  && (
+			{isLoading && processedBookmarks.length > 0 && (
 				<Box textAlign="center" mt="4" width="100%">
 					<Spinner size="xl" />
 					<Text mt="4">Loading more bookmarks...</Text>
@@ -234,7 +248,7 @@ const BookmarkList = () => {
 			)}
 
 			{!hasMore && (
-				<Box mt={3} width={"100%"}>
+				<Box mt={3} width={'100%'}>
 					<Text align={'center'}>
 						You have reached the end of your bookmarks.
 					</Text>

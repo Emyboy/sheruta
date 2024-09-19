@@ -57,7 +57,7 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 		authState: { user, flat_share_profile },
 	} = useAuthContext()
 	const [bookmarks, setBookmarks] = useState<BookmarkDataDetails[]>([])
-	const [bookmarkLoading, setBookmarkLoading] = useState(true)
+	const [bookmarkLoading, setBookmarkLoading] = useState(false)
 	const { showToast } = useCommon()
 
 	const fetchBookmarks = async (userId: string) => {
@@ -148,7 +148,7 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 			if (!(user && user?._id)) {
 				return showToast({
 					message: 'Please login to perform this action',
-					status: 'info',
+					status: 'error',
 				})
 			}
 
@@ -180,7 +180,7 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 			if (!(user && user?._id)) {
 				return showToast({
 					message: 'Please login to perform this action',
-					status: 'info',
+					status: 'error',
 				})
 			}
 

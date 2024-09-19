@@ -92,7 +92,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 					auth_loading: true,
 				})
 				const user = result.user
-
+ 
 				let data: RegisterDTO = {
 					displayName: user.displayName || '',
 					email: user.email || '',
@@ -117,6 +117,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 				console.log('LOGIN ERROR::', error)
 				toast({ title: 'Error, please try again', status: 'error' })
 			})
+	}
+
+	const loginWithEmail = (data: RegisterDTO) => {
+
 	}
 
 	useEffect(() => {

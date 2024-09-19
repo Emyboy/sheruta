@@ -32,7 +32,7 @@ const FlatShareProfileForm = () => {
 		linkedin: string
 		facebook: string
 		instagram: string
-		// payment_type: PaymentPlan
+		payment_type: PaymentPlan
 	}>({
 		budget: 0,
 		occupation: '',
@@ -43,7 +43,7 @@ const FlatShareProfileForm = () => {
 		linkedin: '',
 		facebook: '',
 		instagram: '',
-		// payment_type: 'weekly'
+		payment_type: 'weekly',
 	})
 
 	const {
@@ -65,7 +65,7 @@ const FlatShareProfileForm = () => {
 				linkedin: flat_share_profile.linkedin || '',
 				facebook: flat_share_profile.facebook || '',
 				instagram: flat_share_profile.instagram || '',
-				// payment_type: flat_share_profile?.payment_type || 'weekly',
+				payment_type: flat_share_profile?.payment_type || 'weekly',
 			})
 			return
 		}
@@ -126,6 +126,23 @@ const FlatShareProfileForm = () => {
 			</Text>
 			<form onSubmit={handleSubmit}>
 				<VStack spacing={4} align="stretch">
+					<FormControl id="payment_type">
+						<FormLabel requiredIndicator={null}>Select Payment Plan</FormLabel>
+						<Select
+							placeholder="Choose payment plan"
+							value={formData.payment_type}
+							onChange={handleChange}
+							bgColor={colorMode}
+							name="payment_type"
+						>
+							<option value="monthly">Monthly</option>
+							<option value="annually">Annually</option>
+							<option value="bi-annually">Bi-Annually</option>
+							<option value="quarterly">Quarterly</option>
+							<option value="weekly">Weekly</option>
+						</Select>
+					</FormControl>
+
 					<FormControl id="budget" isRequired>
 						<FormLabel requiredIndicator={null}>Budget</FormLabel>
 						<Input

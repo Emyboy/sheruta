@@ -141,9 +141,11 @@ export const handleDM = (userId: string | null) => {
 export const truncateText = (text: string, maxChars?: number) =>
 	text.length > (maxChars || 50)
 		? text.substring(0, maxChars || 50) + '... '
-		: text;
+		: text
 
-export const resolveArrayOfReferences = async (objArray: Record<any, any>[]) => {
+export const resolveArrayOfReferences = async (
+	objArray: Record<any, any>[],
+) => {
 	const resolvedObjects = await Promise.all(
 		objArray.map(async (item) => {
 			// Resolve all fields that are DocumentReferences in the current item
@@ -165,7 +167,6 @@ export const resolveArrayOfReferences = async (objArray: Record<any, any>[]) => 
 
 	return resolvedObjects
 }
-
 
 export const resolveSingleObjectReferences = async (obj: Record<any, any>) => {
 	const refFields = Object.entries(obj).filter(
