@@ -1,4 +1,4 @@
-import { collection, getDocs, doc } from 'firebase/firestore'
+import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 
@@ -16,5 +16,19 @@ export const getAllProfileDocs = async (): Promise<any[] | undefined> => {
 		console.log('Error while trying to retrieve profile collection: ', e)
 	}
 
-	getAllProfileDocs
+	
 }
+
+
+export const saveProfileDocs = async (profileData: Record<string, any>, user_id: string): Promise<void> => {
+	try {
+		const docRef = doc(db, DBCollectionName.userProfile, user_id)
+		const docSnap = await getDoc(docRef)
+		if (!docSnap.exists()) {
+			await setDoc(docRef, profileData)
+		}
+	} catch (error) {
+		console.log('Error saving user profile data', error)
+	}
+}
+

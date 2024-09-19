@@ -220,8 +220,6 @@ export default async function page(props: any) {
 
 	const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
 
-	const habitTitle: any[] = flatshareInfosParsed.flatShareProfile.habits
-	const profileHabits = habitTitle.map((habitTitle) => habitTitle.tile)
 
 	const userProfiles = {
 		first_name: user.user?.first_name,
@@ -262,7 +260,7 @@ export default async function page(props: any) {
 		_user_ref: `/users/${user_id}`,
 	}
 
-	// console.log(userProfiles)
+
 
 	const userId = user.user?.id
 

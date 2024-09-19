@@ -22,6 +22,7 @@ import {
 import { createDTO } from '@/firebase/service/index.firebase'
 import SherutaDB from '@/firebase/service/index.firebase'
 import { useEffect } from 'react'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 interface Props {
 	data: any
@@ -45,19 +46,7 @@ export default async function UserProfilePage({
 	}
 
 	useEffect(() => {
-		const saveProfile = async () => {
-			try {
-				const docRef = doc(db, DBCollectionName.userProfile, user_id)
-				const docSnap = await getDoc(docRef)
-				if (!docSnap.exists()) {
-					await setDoc(docRef, profileData)
-				}
-			} catch (error) {
-				console.log('There is an issue with user profile data sent', error)
-			}
-		}
-
-		saveProfile()
+	  saveProfileDocs(profileData, user_id)
 	}, [user_id, profileData])
 
 	return (
