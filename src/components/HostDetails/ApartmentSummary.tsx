@@ -124,12 +124,32 @@ export default function ApartmentSummary({
 
 		try {
 			if (!prev) {
-				await BookmarkService.createBookmark({
-					uuid,
-					object_type: BookmarkType.requests,
-					request_id: request.id,
-					_user_ref: authState.flat_share_profile._user_ref,
-				})
+				await Promise.all([
+					BookmarkService.createBookmark({
+						uuid,
+						object_type: BookmarkType.requests,
+						request_id: request.id,
+						_user_ref: authState.flat_share_profile._user_ref,
+					}),
+					NotificationsService.create({
+						collection_name: DBCollectionName.notifications,
+						data: {
+							type: 'bookmark',
+							message: NotificationsBodyMessage.bookmark,
+							recipient_id: request._user_ref._id,
+							sender_details: authState.user
+								? {
+										id: authState.user._id,
+										avatar_url: authState.user.avatar_url,
+										first_name: authState.user.first_name,
+										last_name: authState.user.last_name,
+									}
+								: null,
+							is_read: false,
+							action_url: `/messages/${authState.flat_share_profile._user_id}`,
+						},
+					}),
+				])
 
 				fetchBookmarks(authState.flat_share_profile._user_id)
 
@@ -246,7 +266,9 @@ export default function ApartmentSummary({
 							authState.user?._id === request._user_ref._id
 						}
 					>
-						Reserve Apartment
+						{request.availability_status === 'reserved'
+							? 'Apartment Reserved'
+							: 'Reserve Apartment'}
 					</Button>
 				</Flex>
 
@@ -271,9 +293,22 @@ export default function ApartmentSummary({
 						flexDir={'column'}
 					>
 						<Link
-							href={`/user/${request._user_ref._id}`}
+							href={
+								(request.availability_status === 'reserved' &&
+									authState.user?._id !== request.reserved_by) ||
+								authState.user?._id === request._user_ref._id
+									? ''
+									: `/user/${request._user_ref._id}`
+							}
 							style={{ textDecoration: 'none' }}
-							onClick={async () =>
+							onClick={async () => {
+								if (
+									(request.availability_status === 'reserved' &&
+										authState.user?._id !== request.reserved_by) ||
+									authState.user?._id === request._user_ref._id
+								)
+									return
+
 								await createNotification({
 									is_read: false,
 									message: NotificationsBodyMessage.profile_view,
@@ -289,7 +324,7 @@ export default function ApartmentSummary({
 										: null,
 									action_url: `/user/${request._user_ref._id}`,
 								})
-							}
+							}}
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 								<Text
@@ -307,6 +342,11 @@ export default function ApartmentSummary({
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									px={0}
+									isDisabled={
+										(request.availability_status === 'reserved' &&
+											authState.user?._id !== request.reserved_by) ||
+										authState.user?._id === request._user_ref._id
+									}
 									bg="none"
 									color="text_muted"
 									display={'flex'}
@@ -326,7 +366,13 @@ export default function ApartmentSummary({
 										base: 'lg',
 									}}
 									onClick={async () => {
-										if (authState.user?._id === request._user_ref._id) return
+										if (
+											(request.availability_status === 'reserved' &&
+												authState.user?._id !== request.reserved_by) ||
+											authState.user?._id === request._user_ref._id
+										)
+											return
+
 										await handleCall({
 											number: request.user_info.primary_phone_number,
 											recipient_id: request._user_ref._id,
@@ -345,9 +391,22 @@ export default function ApartmentSummary({
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
-								<Link href={`/messages/${request._user_ref._id}`}>
+								<Link
+									href={
+										(request.availability_status === 'reserved' &&
+											authState.user?._id !== request.reserved_by) ||
+										authState.user?._id === request._user_ref._id
+											? ''
+											: `/messages/${request._user_ref._id}`
+									}
+								>
 									<Button
 										px={0}
+										isDisabled={
+											(request.availability_status === 'reserved' &&
+												authState.user?._id !== request.reserved_by) ||
+											authState.user?._id === request._user_ref._id
+										}
 										bg="none"
 										color="text_muted"
 										display={'flex'}
@@ -367,6 +426,35 @@ export default function ApartmentSummary({
 											base: 'lg',
 										}}
 										ml={'-8px'}
+										onClick={async () => {
+											if (
+												(request.availability_status === 'reserved' &&
+													authState.user?._id !== request.reserved_by) ||
+												authState.user?._id === request._user_ref._id
+											)
+												return
+
+											await NotificationsService.create({
+												collection_name: DBCollectionName.notifications,
+												data: {
+													type: 'message',
+													message: NotificationsBodyMessage.message,
+													recipient_id: request._user_ref._id,
+													sender_details: authState.user
+														? {
+																id: authState.user._id,
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+															}
+														: null,
+													is_read: false,
+													action_url: authState.user
+														? `/messages/${authState.user._id}`
+														: '',
+												},
+											})
+										}}
 									>
 										<MdOutlineMailOutline />
 									</Button>
