@@ -124,12 +124,32 @@ export default function ApartmentSummary({
 
 		try {
 			if (!prev) {
-				await BookmarkService.createBookmark({
-					uuid,
-					object_type: BookmarkType.requests,
-					request_id: request.id,
-					_user_ref: authState.flat_share_profile._user_ref,
-				})
+				await Promise.all([
+					BookmarkService.createBookmark({
+						uuid,
+						object_type: BookmarkType.requests,
+						request_id: request.id,
+						_user_ref: authState.flat_share_profile._user_ref,
+					}),
+					NotificationsService.create({
+						collection_name: DBCollectionName.notifications,
+						data: {
+							type: 'bookmark',
+							message: NotificationsBodyMessage.bookmark,
+							recipient_id: request._user_ref._id,
+							sender_details: authState.user
+								? {
+										id: authState.user._id,
+										avatar_url: authState.user.avatar_url,
+										first_name: authState.user.first_name,
+										last_name: authState.user.last_name,
+									}
+								: null,
+							is_read: false,
+							action_url: `/messages/${authState.flat_share_profile._user_id}`,
+						},
+					}),
+				])
 
 				fetchBookmarks(authState.flat_share_profile._user_id)
 
@@ -168,6 +188,12 @@ export default function ApartmentSummary({
 			bookmarks.some((bookmark) => bookmark.request_id === request.id),
 		)
 	}, [authState.user])
+
+	const canInteract = !(
+		(request.availability_status === 'reserved' &&
+			authState.user?._id !== request.reserved_by) ||
+		authState.user?._id === request._user_ref._id
+	)
 
 	return (
 		<>
@@ -241,12 +267,11 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openReserveApartmentModal}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={
-							request.availability_status === 'reserved' ||
-							authState.user?._id === request._user_ref._id
-						}
+						isDisabled={!canInteract}
 					>
-						Reserve Apartment
+						{request.availability_status === 'reserved'
+							? 'Apartment Reserved'
+							: 'Reserve Apartment'}
 					</Button>
 				</Flex>
 
@@ -271,10 +296,11 @@ export default function ApartmentSummary({
 						flexDir={'column'}
 					>
 						<Link
-							href={`/user/${request._user_ref._id}`}
+							href={canInteract ? `/user/${request._user_ref._id}` : ''}
 							style={{ textDecoration: 'none' }}
 							onClick={async () =>
-								await createNotification({
+								canInteract &&
+								(await createNotification({
 									is_read: false,
 									message: NotificationsBodyMessage.profile_view,
 									recipient_id: request._user_ref._id,
@@ -288,7 +314,7 @@ export default function ApartmentSummary({
 											}
 										: null,
 									action_url: `/user/${request._user_ref._id}`,
-								})
+								}))
 							}
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
@@ -307,6 +333,7 @@ export default function ApartmentSummary({
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									px={0}
+									isDisabled={!canInteract}
 									bg="none"
 									color="text_muted"
 									display={'flex'}
@@ -325,9 +352,9 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
-									onClick={async () => {
-										if (authState.user?._id === request._user_ref._id) return
-										await handleCall({
+									onClick={async () =>
+										canInteract &&
+										(await handleCall({
 											number: request.user_info.primary_phone_number,
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
@@ -338,16 +365,19 @@ export default function ApartmentSummary({
 														id: authState.user._id,
 													}
 												: null,
-										})
-									}}
+										}))
+									}
 								>
 									<BiPhone />
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
-								<Link href={`/messages/${request._user_ref._id}`}>
+								<Link
+									href={canInteract ? `/messages/${request._user_ref._id}` : ''}
+								>
 									<Button
 										px={0}
+										isDisabled={!canInteract}
 										bg="none"
 										color="text_muted"
 										display={'flex'}
@@ -367,6 +397,29 @@ export default function ApartmentSummary({
 											base: 'lg',
 										}}
 										ml={'-8px'}
+										onClick={async () =>
+											canInteract &&
+											(await NotificationsService.create({
+												collection_name: DBCollectionName.notifications,
+												data: {
+													type: 'message',
+													message: NotificationsBodyMessage.message,
+													recipient_id: request._user_ref._id,
+													sender_details: authState.user
+														? {
+																id: authState.user._id,
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+															}
+														: null,
+													is_read: false,
+													action_url: authState.user
+														? `/messages/${authState.user._id}`
+														: '',
+												},
+											}))
+										}
 									>
 										<MdOutlineMailOutline />
 									</Button>
@@ -726,11 +779,7 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={
-							(request.availability_status === 'reserved' &&
-								request?.reserved_by !== authState.user?._id) ||
-							authState.user?._id === request._user_ref._id
-						}
+						isDisabled={!canInteract}
 					>
 						Book Inspection
 					</Button>

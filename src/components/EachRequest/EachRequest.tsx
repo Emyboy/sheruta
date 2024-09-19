@@ -22,6 +22,7 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
+import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -40,11 +41,33 @@ import MainTooltip from '../atoms/MainTooltip'
 
 type Props = { request: HostRequestDataDetails }
 
+function getTimeDifferenceInHours(timestamp?: Timestamp) {
+	if (!timestamp) return 48
+
+	const { nanoseconds, seconds } = timestamp
+
+	const expiryInMilliseconds = seconds * 1000 + nanoseconds / 1e6
+
+	const nowInMilliseconds = new Date().getTime()
+
+	const hoursDifference =
+		(expiryInMilliseconds - nowInMilliseconds) / (1000 * 60 * 60)
+
+	return Math.ceil(hoursDifference)
+}
+
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+
+	const canInteract = !(
+		(request.availability_status === 'reserved' &&
+			authState.user?._id !== request.reserved_by) ||
+		authState.user?._id === request._user_ref._id
+	)
+
 	return (
 		<Box
 			position={'relative'}
@@ -65,10 +88,11 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request._user_ref._id}`}
+						href={canInteract ? `/user/${request._user_ref._id}` : ''}
 						style={{ textDecoration: 'none' }}
 						onClick={async () =>
-							await createNotification({
+							canInteract &&
+							(await createNotification({
 								is_read: false,
 								message: NotificationsBodyMessage.profile_view,
 								recipient_id: request._user_ref._id,
@@ -82,7 +106,7 @@ export default function EachRequest({ request }: Props) {
 										}
 									: null,
 								action_url: `/user/${request._user_ref._id}`,
-							})
+							}))
 						}
 					>
 						<Avatar
@@ -98,10 +122,11 @@ export default function EachRequest({ request }: Props) {
 					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
 							<Link
-								href={`/user/${request._user_ref._id}`}
+								href={canInteract ? `/user/${request._user_ref._id}` : ''}
 								style={{ textDecoration: 'none' }}
 								onClick={async () =>
-									await createNotification({
+									canInteract &&
+									(await createNotification({
 										is_read: false,
 										message: NotificationsBodyMessage.profile_view,
 										recipient_id: request._user_ref._id,
@@ -115,7 +140,7 @@ export default function EachRequest({ request }: Props) {
 												}
 											: null,
 										action_url: `/user/${request._user_ref._id}`,
-									})
+									}))
 								}
 							>
 								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
@@ -123,7 +148,9 @@ export default function EachRequest({ request }: Props) {
 										textTransform={'capitalize'}
 										fontSize={{ base: 'base', md: 'lg' }}
 									>
-										{request._user_ref.last_name} {request._user_ref.first_name}
+										{request.availability_status === 'reserved'
+											? `Reserved for ${getTimeDifferenceInHours(request.reservation_expiry)} hours`
+											: `${request._user_ref.last_name} ${request._user_ref.first_name}`}
 									</Text>
 									{request.user_info?.is_verified && (
 										<LuBadgeCheck fill="#00bc73" />
@@ -344,6 +371,7 @@ export default function EachRequest({ request }: Props) {
 						{!request.user_info?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
+									isDisabled={!canInteract}
 									px={0}
 									bg="none"
 									color="text_muted"
@@ -361,9 +389,9 @@ export default function EachRequest({ request }: Props) {
 										sm: 'lg',
 										base: 'base',
 									}}
-									onClick={async () => {
-										if (authState.user?._id === request._user_ref._id) return
-										await handleCall({
+									onClick={async () =>
+										canInteract &&
+										(await handleCall({
 											number: request.user_info.primary_phone_number,
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
@@ -374,8 +402,8 @@ export default function EachRequest({ request }: Props) {
 														id: authState.user._id,
 													}
 												: null,
-										})
-									}}
+										}))
+									}
 								>
 									<BiPhone /> 35
 								</Button>
@@ -384,10 +412,11 @@ export default function EachRequest({ request }: Props) {
 
 						<MainTooltip label="Ask questions" placement="top">
 							<Link
-								href={`/messsages/${request._user_ref._id}`}
+								href={canInteract ? `/messsages/${request._user_ref._id}` : ''}
 								style={{ textDecoration: 'none' }}
 							>
 								<Button
+									isDisabled={!canInteract}
 									px={0}
 									bg="none"
 									color="text_muted"
