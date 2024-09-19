@@ -19,6 +19,7 @@ const ButtonText: Record<NotificationsType['type'], string> = {
 	comment_reply: 'Reply',
 	profile_view: 'View',
 	bookmark: 'Message',
+	reservation: 'Message',
 }
 
 export default function NotificationsPage({}: Props) {

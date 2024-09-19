@@ -22,7 +22,6 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
-import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -503,7 +502,7 @@ const EachRequestMedia = ({
 					p={'32px'}
 				>
 					{type === 'img' ? (
-						<Box overflow={'hidden'} rounded="md" bg="dark" w={'60%'} h={'60%'}>
+						<Box overflow={'hidden'} rounded="md" bg="dark" w={'70%'} h={'70%'}>
 							<Image
 								src={url}
 								alt="shared space"
