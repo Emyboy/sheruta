@@ -189,6 +189,12 @@ export default function ApartmentSummary({
 		)
 	}, [authState.user])
 
+	const canInteract = !(
+		(request.availability_status === 'reserved' &&
+			authState.user?._id !== request.reserved_by) ||
+		authState.user?._id === request._user_ref._id
+	)
+
 	return (
 		<>
 			<ReserveApartmentModal
@@ -261,10 +267,7 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openReserveApartmentModal}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={
-							request.availability_status === 'reserved' ||
-							authState.user?._id === request._user_ref._id
-						}
+						isDisabled={!canInteract}
 					>
 						{request.availability_status === 'reserved'
 							? 'Apartment Reserved'
@@ -293,23 +296,11 @@ export default function ApartmentSummary({
 						flexDir={'column'}
 					>
 						<Link
-							href={
-								(request.availability_status === 'reserved' &&
-									authState.user?._id !== request.reserved_by) ||
-								authState.user?._id === request._user_ref._id
-									? ''
-									: `/user/${request._user_ref._id}`
-							}
+							href={canInteract ? `/user/${request._user_ref._id}` : ''}
 							style={{ textDecoration: 'none' }}
-							onClick={async () => {
-								if (
-									(request.availability_status === 'reserved' &&
-										authState.user?._id !== request.reserved_by) ||
-									authState.user?._id === request._user_ref._id
-								)
-									return
-
-								await createNotification({
+							onClick={async () =>
+								canInteract &&
+								(await createNotification({
 									is_read: false,
 									message: NotificationsBodyMessage.profile_view,
 									recipient_id: request._user_ref._id,
@@ -323,8 +314,8 @@ export default function ApartmentSummary({
 											}
 										: null,
 									action_url: `/user/${request._user_ref._id}`,
-								})
-							}}
+								}))
+							}
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 								<Text
@@ -342,11 +333,7 @@ export default function ApartmentSummary({
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									px={0}
-									isDisabled={
-										(request.availability_status === 'reserved' &&
-											authState.user?._id !== request.reserved_by) ||
-										authState.user?._id === request._user_ref._id
-									}
+									isDisabled={!canInteract}
 									bg="none"
 									color="text_muted"
 									display={'flex'}
@@ -365,15 +352,9 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
-									onClick={async () => {
-										if (
-											(request.availability_status === 'reserved' &&
-												authState.user?._id !== request.reserved_by) ||
-											authState.user?._id === request._user_ref._id
-										)
-											return
-
-										await handleCall({
+									onClick={async () =>
+										canInteract &&
+										(await handleCall({
 											number: request.user_info.primary_phone_number,
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
@@ -384,29 +365,19 @@ export default function ApartmentSummary({
 														id: authState.user._id,
 													}
 												: null,
-										})
-									}}
+										}))
+									}
 								>
 									<BiPhone />
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
 								<Link
-									href={
-										(request.availability_status === 'reserved' &&
-											authState.user?._id !== request.reserved_by) ||
-										authState.user?._id === request._user_ref._id
-											? ''
-											: `/messages/${request._user_ref._id}`
-									}
+									href={canInteract ? `/messages/${request._user_ref._id}` : ''}
 								>
 									<Button
 										px={0}
-										isDisabled={
-											(request.availability_status === 'reserved' &&
-												authState.user?._id !== request.reserved_by) ||
-											authState.user?._id === request._user_ref._id
-										}
+										isDisabled={!canInteract}
 										bg="none"
 										color="text_muted"
 										display={'flex'}
@@ -426,15 +397,9 @@ export default function ApartmentSummary({
 											base: 'lg',
 										}}
 										ml={'-8px'}
-										onClick={async () => {
-											if (
-												(request.availability_status === 'reserved' &&
-													authState.user?._id !== request.reserved_by) ||
-												authState.user?._id === request._user_ref._id
-											)
-												return
-
-											await NotificationsService.create({
+										onClick={async () =>
+											canInteract &&
+											(await NotificationsService.create({
 												collection_name: DBCollectionName.notifications,
 												data: {
 													type: 'message',
@@ -453,8 +418,8 @@ export default function ApartmentSummary({
 														? `/messages/${authState.user._id}`
 														: '',
 												},
-											})
-										}}
+											}))
+										}
 									>
 										<MdOutlineMailOutline />
 									</Button>
@@ -814,11 +779,7 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={
-							(request.availability_status === 'reserved' &&
-								request?.reserved_by !== authState.user?._id) ||
-							authState.user?._id === request._user_ref._id
-						}
+						isDisabled={!canInteract}
 					>
 						Book Inspection
 					</Button>
