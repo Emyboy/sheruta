@@ -44,6 +44,7 @@ import {
 	Badge,
 	Box,
 	Button,
+	Center,
 	Flex,
 	Input,
 	Modal,
@@ -72,6 +73,7 @@ import {
 	BiPhone,
 	BiShare,
 	BiTrash,
+	BiMessageSquareError
 } from 'react-icons/bi'
 import { FaHouseChimneyUser } from 'react-icons/fa6'
 import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
@@ -83,6 +85,23 @@ import MainTooltip from '../atoms/MainTooltip'
 import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
+
+function getTimeDifferenceInHours(timestamp?: Timestamp) {
+	if (!timestamp) return 48
+
+	const { nanoseconds, seconds } = timestamp
+
+	const expiryInMilliseconds = seconds * 1000 + nanoseconds / 1e6
+
+	const nowInMilliseconds = new Date().getTime()
+
+	const hoursDifference =
+		(expiryInMilliseconds - nowInMilliseconds) / (1000 * 60 * 60)
+
+	return Math.ceil(hoursDifference)
+}
+
+
 
 export default function ApartmentSummary({
 	request,
@@ -682,6 +701,7 @@ export default function ApartmentSummary({
 					<AvailabilityStatusCard
 						status={request.availability_status}
 						updatedAt={request.updatedAt}
+						updateReservation={request.reservation_expiry}
 					/>
 				</Flex>
 				<Flex
@@ -1318,7 +1338,7 @@ const ReserveApartmentModal = ({
 					lg: '80vw',
 					xl: '70vw',
 				}}
-				height={'60vh'}
+				height={'75vh'}
 				overflowY={'auto'}
 				flexDir={'column'}
 				alignItems={'center'}
@@ -1363,14 +1383,37 @@ const ReserveApartmentModal = ({
 					textAlign={'center'}
 					color="text_muted"
 				>
-					Reserving an apartment will cost{' '}
+					Reserving this listing will cost{' '}
 					<Box as="span" fontWeight={'400'} color={'brand'}>
-						5000 credits
+						5000 credits.
 					</Box>{' '}
-					and will be available for inspection to only you for a period of{' '}
+					It will be reserved solely for you to inspect for a period of{' '}
 					<Box as="span" fontWeight={'400'} color={'brand'}>
 						2 days.
 					</Box>
+					
+					<Flex flexDirection={'column'}>
+					<Flex justifyContent={"center"} alignItems={'center'}>
+					
+					<BiMessageSquareError color={'brand'}/>
+					<Box as="span" fontWeight={'500'}  ml={3} my={2} color={'brand'}>
+						Tips to know
+					</Box>
+					</Flex>
+					
+					<Box as="span" fontWeight={'400'} >
+						1. Endevour to inspect within the reserved period
+					</Box>
+				
+					<Box as="span" fontWeight={'400'} my={2} >
+						2. Communicate with space provider before reservation
+					</Box>
+					
+					<Box as="span" fontWeight={'400'} >
+						3. You can't reserve more than one space at a time
+					</Box>
+					
+					</Flex>
 				</Text>
 
 				<Flex
@@ -1941,9 +1984,11 @@ const BookInspectionModal = ({
 const AvailabilityStatusCard = ({
 	status,
 	updatedAt,
+	updateReservation
 }: {
 	status: 'available' | 'unavailable' | 'reserved' | null
 	updatedAt: { seconds: number; nanoseconds: number }
+	updateReservation: any
 }) => {
 	if (status === 'available')
 		return (
@@ -2040,7 +2085,8 @@ const AvailabilityStatusCard = ({
 					>
 						{status}:{' '}
 					</Text>
-					This space has been reserved for a premium community member.
+					{`This space has been reserved by a community member for an inspection advantage.
+					Bookmark post or check back in ${getTimeDifferenceInHours(updateReservation)} hours` }
 				</Text>
 			</Flex>
 		)
