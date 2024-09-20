@@ -69,7 +69,7 @@ export default function EditHostSpace({ data }: { data: string }) {
 		description: request.description || '',
 		service_charge: request.service_charge || 0,
 		budget: request.budget || 0,
-		payment_type: request.payment_type as PaymentPlan || PaymentPlan.monthly,
+		payment_type: (request.payment_type as PaymentPlan) || PaymentPlan.monthly,
 		bathrooms: request.bathrooms || 0,
 		toilets: request.toilets || 0,
 		living_rooms: request.living_rooms || 0,

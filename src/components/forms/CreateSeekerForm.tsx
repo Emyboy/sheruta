@@ -173,11 +173,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -417,24 +417,12 @@ const CreateSeekerForm: React.FC = () => {
 					<FormLabel requiredIndicator={null} htmlFor="address">
 						Where in {selectedLocation}
 					</FormLabel>
-					{
-						(typeof window !== 'undefined' && !window.google) ?
-							<LoadScript
-								googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
-								libraries={libraries}>
-								<Autocomplete
-									onLoad={handleLoad}
-									onPlaceChanged={handlePlaceChanged}
-								>
-									<Input
-										id="address"
-										type="text"
-										placeholder="Select..."
-										value={googleLocationText}
-										onChange={(e) => setGoogleLocationText(e.target.value)}
-									/>
-								</Autocomplete>
-							</LoadScript> : <Autocomplete
+					{typeof window !== 'undefined' && !window.google ? (
+						<LoadScript
+							googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
+							libraries={libraries}
+						>
+							<Autocomplete
 								onLoad={handleLoad}
 								onPlaceChanged={handlePlaceChanged}
 							>
@@ -446,7 +434,21 @@ const CreateSeekerForm: React.FC = () => {
 									onChange={(e) => setGoogleLocationText(e.target.value)}
 								/>
 							</Autocomplete>
-					}
+						</LoadScript>
+					) : (
+						<Autocomplete
+							onLoad={handleLoad}
+							onPlaceChanged={handlePlaceChanged}
+						>
+							<Input
+								id="address"
+								type="text"
+								placeholder="Select..."
+								value={googleLocationText}
+								onChange={(e) => setGoogleLocationText(e.target.value)}
+							/>
+						</Autocomplete>
+					)}
 				</FormControl>
 			)}
 

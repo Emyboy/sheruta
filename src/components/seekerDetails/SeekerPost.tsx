@@ -9,7 +9,6 @@ import {
 	timeAgo,
 	handleCall,
 	handleDM,
-	truncateText,
 } from '@/utils/index.utils'
 import {
 	Avatar,
@@ -226,7 +225,7 @@ const SeekerPost = ({
 	return (
 		<>
 			{typeof postData !== 'undefined' &&
-			Object.values(postData || {}).length ? (
+				Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -405,9 +404,21 @@ const SeekerPost = ({
 												border="none"
 												fontSize={'24px'}
 												icon={<BiPhone />}
-												// onClick={() =>
-												// 	handleCall(postData.user_info.primary_phone_number)
-												// }
+												onClick={async () => {
+													if (authState.user?._id === postData._user_ref._id) return
+													await handleCall({
+														number: postData.user_info.primary_phone_number,
+														recipient_id: postData._user_ref._id,
+														sender_details: authState.user
+															? {
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+																id: authState.user._id,
+															}
+															: null,
+													})
+												}}
 											/>
 										</Tooltip>
 									) : null}
@@ -447,15 +458,7 @@ const SeekerPost = ({
 					</Box>
 					<Box marginTop={10} paddingBottom="70px">
 						<UserCard
-							name={
-								capitalizeString(postData._user_ref.first_name) +
-								' ' +
-								postData._user_ref.last_name
-							}
-							handle={postData._user_ref.first_name}
-							userInfo={postData.user_info}
-							profilePicture={postData._user_ref.avatar_url}
-							bio={postData.flat_share_profile.bio || 'No Bio Available'}
+							postData={postData}
 						/>
 					</Box>
 				</>
@@ -468,19 +471,16 @@ const SeekerPost = ({
 	)
 }
 
-const UserCard = ({
-	name,
-	handle,
-	bio,
-	profilePicture,
-	userInfo,
-}: {
-	name: string
-	handle: string
-	bio: string | undefined
-	profilePicture: string | undefined
-	userInfo: any
-}) => {
+const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
+
+	const { authState } = useAuthContext();
+
+	const name = capitalizeString(postData._user_ref.first_name) + ' ' + postData._user_ref.last_name;
+	const handle = postData._user_ref.first_name;
+	const userInfo = postData.user_info;
+	const bio = postData.flat_share_profile.bio || 'No Bio Available'
+	const profilePicture = postData._user_ref.avatar_url;
+
 	return (
 		<Box bgColor="#202020" borderRadius="15px">
 			<Flex bg="brand_darker" p={4} alignItems="center" borderRadius="15px">
@@ -520,7 +520,7 @@ const UserCard = ({
 						variant="ghost"
 						colorScheme="white"
 						size={'md'}
-						onClick={() => handleDM(userInfo?._user_id)}
+						onClick={() => handleDM(postData._user_ref._id)}
 					/>
 					{userInfo?.primary_phone_number ? (
 						<IconButton
@@ -530,7 +530,21 @@ const UserCard = ({
 							colorScheme="white"
 							ml={2}
 							size={'md'}
-							onClick={() => handleCall(userInfo.primary_phone_number)}
+							onClick={async () => {
+								if (authState.user?._id === postData._user_ref._id) return
+								await handleCall({
+									number: userInfo.primary_phone_number,
+									recipient_id: postData._user_ref._id,
+									sender_details: authState.user
+										? {
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
+										: null,
+								})
+							}}
 						/>
 					) : null}
 				</Flex>

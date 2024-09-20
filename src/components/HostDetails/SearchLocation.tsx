@@ -207,7 +207,7 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 							</Button>
 						</MainTooltip>
 					</Flex>
-					{(typeof window !== 'undefined' && !window.google) ?
+					{typeof window !== 'undefined' && !window.google ? (
 						<LoadScript
 							googleMapsApiKey={
 								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
@@ -236,7 +236,9 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 									/>
 								</InputGroup>
 							</Autocomplete>
-						</LoadScript> : <Autocomplete
+						</LoadScript>
+					) : (
+						<Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
 						>
@@ -258,7 +260,7 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 								/>
 							</InputGroup>
 						</Autocomplete>
-					}
+					)}
 
 					<Flex mt={'8px'} flexDir={'column'} gap={'8px'}>
 						<Text fontWeight={'600'} fontSize={'2xl'} color={'dark'}>

@@ -76,11 +76,11 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 
@@ -708,8 +708,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 						</Flex>
 					</Flex>
 
-					{formData.area && (
-						(typeof window !== 'undefined' && !window.google) ?
+					{formData.area &&
+						(typeof window !== 'undefined' && !window.google ? (
 							<LoadScript
 								googleMapsApiKey={
 									process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
@@ -736,7 +736,9 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 										/>
 									</Autocomplete>
 								</FormControl>
-							</LoadScript> : <FormControl mt={'-1.5rem'}>
+							</LoadScript>
+						) : (
+							<FormControl mt={'-1.5rem'}>
 								<FormLabel htmlFor="address">
 									Choose a more descriptive location in {formData.area}?
 								</FormLabel>
@@ -756,7 +758,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 									/>
 								</Autocomplete>
 							</FormControl>
-					)}
+						))}
 				</VStack>
 				<br />
 				<Button bgColor={'brand'} color={'white'} type={'submit'}>

@@ -65,7 +65,9 @@ const FlatShareProfileForm = () => {
 				linkedin: flat_share_profile.linkedin || '',
 				facebook: flat_share_profile.facebook || '',
 				instagram: flat_share_profile.instagram || '',
-				payment_type: flat_share_profile?.payment_type as PaymentPlan || PaymentPlan.weekly,
+				payment_type:
+					(flat_share_profile?.payment_type as PaymentPlan) ||
+					PaymentPlan.weekly,
 			})
 			return
 		}
