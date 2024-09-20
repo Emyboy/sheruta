@@ -93,5 +93,5 @@ export const flatShareProfileDefaults = {
 	gender_preference: null,
 	age_preference: null,
 	bio: '',
-	payment_type: 'weekly',
+	payment_type: PaymentPlan.weekly,
 }
