@@ -195,6 +195,8 @@ export default function ApartmentSummary({
 		authState.user?._id === request._user_ref._id
 	)
 
+	console.log(request.description)
+
 	return (
 		<>
 			<ReserveApartmentModal
@@ -597,7 +599,11 @@ export default function ApartmentSummary({
 						{request.google_location_text}
 					</Text>
 				</Flex>
-				<Text fontSize={{ base: 'sm', sm: 'base' }} fontWeight={'light'}>
+				<Text
+					fontSize={{ base: 'sm', sm: 'base' }}
+					fontWeight={'light'}
+					whiteSpace={'pre-wrap'}
+				>
 					{request.description}
 				</Text>
 				<Flex gap={'10px'}>
