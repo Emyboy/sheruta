@@ -32,7 +32,7 @@ import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 
-interface Props { }
+interface Props {}
 
 export default function AuthPopup(props: Props) {
 	const { authState } = useAuthContext()
@@ -55,9 +55,9 @@ export default function AuthPopup(props: Props) {
 				<Flex minH={'200px'} justifyContent={'center'} alignItems={'center'}>
 					<Spinner size="lg" />
 				</Flex>
-			) :
+			) : (
 				<AuthForm isSignUp={isSignUp} setIsSignUp={setIsSignUp} />
-			}
+			)}
 		</MainModal>
 	)
 }
@@ -351,7 +351,11 @@ const AuthForm: React.FC<{
 			</VStack>
 
 			<HStack justifyContent={'center'} mt={4} spacing={4}>
-				<EachSocial Icon={BiLogoGoogle} label='Sign in with Google' onClick={loginWithGoogle} />
+				<EachSocial
+					Icon={BiLogoGoogle}
+					label="Sign in with Google"
+					onClick={loginWithGoogle}
+				/>
 				{/* <IconButton
 					width="full"
 					borderColor={'border_color'}

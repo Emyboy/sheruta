@@ -131,7 +131,7 @@ const PersonalInfoForm = () => {
 									const storageUrl = `images/profiles/${user?._id}/${avatarFile.name}`
 
 									await SherutaDB.uploadMedia({
-										data: reader.result as string, 
+										data: reader.result as string,
 										storageUrl,
 									})
 
@@ -250,7 +250,7 @@ const PersonalInfoForm = () => {
 					</Flex>
 					<FormLabel mt={3} width="100%" textAlign={'center'}>
 						Update your avatar
-					</FormLabel	>
+					</FormLabel>
 
 					<Flex gap={4}>
 						<FormControl

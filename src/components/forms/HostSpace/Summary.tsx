@@ -699,13 +699,35 @@ export default function Summary({
 						</Flex>
 					</Flex>
 					{formData.area && (
-						<LoadScript
-							googleMapsApiKey={
-								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
-							}
-							libraries={libraries}
-						>
-							<FormControl mt={'-1.5rem'}>
+						(typeof window !== 'undefined' && !window.google) ?
+							<LoadScript
+								googleMapsApiKey={
+									process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
+								}
+								libraries={libraries}
+							>
+								<FormControl mt={'-1.5rem'}>
+									<FormLabel htmlFor="address">
+										Where in {formData.area}?
+									</FormLabel>
+									<Autocomplete
+										onLoad={handleLoad}
+										onPlaceChanged={handlePlaceChanged}
+									>
+										<Input
+											_placeholder={{ color: 'text_muted' }}
+											borderColor={'border_color'}
+											_dark={{ borderColor: 'dark_light' }}
+											id="address"
+											type="text"
+											placeholder="Enter a location"
+											name="google_location_text"
+											value={formData.google_location_text}
+											onChange={handleChange}
+										/>
+									</Autocomplete>
+								</FormControl>
+							</LoadScript> : <FormControl mt={'-1.5rem'}>
 								<FormLabel htmlFor="address">
 									Where in {formData.area}?
 								</FormLabel>
@@ -726,7 +748,6 @@ export default function Summary({
 									/>
 								</Autocomplete>
 							</FormControl>
-						</LoadScript>
 					)}
 				</VStack>
 				<br />

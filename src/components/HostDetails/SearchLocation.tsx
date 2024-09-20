@@ -207,13 +207,36 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 							</Button>
 						</MainTooltip>
 					</Flex>
-					<LoadScript
-						googleMapsApiKey={
-							process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
-						}
-						libraries={libraries}
-					>
-						<Autocomplete
+					{(typeof window !== 'undefined' && !window.google) ?
+						<LoadScript
+							googleMapsApiKey={
+								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
+							}
+							libraries={libraries}
+						>
+							<Autocomplete
+								onLoad={handleLoad}
+								onPlaceChanged={handlePlaceChanged}
+							>
+								<InputGroup>
+									<InputLeftElement pointerEvents="none">
+										<CiSearch color="gray" />
+									</InputLeftElement>
+									<Input
+										type="text"
+										color={'gray'}
+										borderColor={'border_color'}
+										_dark={{ borderColor: 'dark_light' }}
+										placeholder="Search Location"
+										bgColor={'white'}
+										_placeholder={{ color: 'text_muted' }}
+										_focus={{ ring: 0, outline: 0 }}
+										value={text}
+										onChange={(e) => setText(e.target.value)}
+									/>
+								</InputGroup>
+							</Autocomplete>
+						</LoadScript> : <Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
 						>
@@ -235,7 +258,7 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 								/>
 							</InputGroup>
 						</Autocomplete>
-					</LoadScript>
+					}
 
 					<Flex mt={'8px'} flexDir={'column'} gap={'8px'}>
 						<Text fontWeight={'600'} fontSize={'2xl'} color={'dark'}>
