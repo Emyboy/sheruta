@@ -25,12 +25,15 @@ import {
 import MainModal from '../atoms/MainModal'
 import { useAuthContext } from '@/context/auth.context'
 import { useAppContext } from '@/context/app.context'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import {
+	createUserWithEmailAndPassword,
+	signInWithEmailAndPassword,
+} from 'firebase/auth'
 import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 
-interface Props { }
+interface Props {}
 
 export default function AuthPopup(props: Props) {
 	const { loginWithGoogle } = useAuthContext()
@@ -140,7 +143,6 @@ const AuthForm: React.FC<{
 	isSignUp: boolean
 	setIsSignUp: (arg: boolean) => void
 }> = ({ isSignUp, setIsSignUp }) => {
-
 	const [formData, setFormData] = useState<{
 		firstName: string
 		lastName: string
@@ -150,7 +152,7 @@ const AuthForm: React.FC<{
 		firstName: '',
 		lastName: '',
 		email: '',
-		password: ''
+		password: '',
 	})
 
 	const { colorMode } = useColorMode()
@@ -160,46 +162,48 @@ const AuthForm: React.FC<{
 		email: '',
 		password: '',
 		firstName: '',
-		lastName: ''
-	});
+		lastName: '',
+	})
 
 	const { showToast } = useCommon()
 
+	const [loading, setIsLoading] = useState<boolean>(false)
+
 	const validateForm = () => {
-		let isValid = true;
-		let emailError = '';
-		let passwordError = '';
-		let firstNameError = '';
-		let lastNameError = '';
+		let isValid = true
+		let emailError = ''
+		let passwordError = ''
+		let firstNameError = ''
+		let lastNameError = ''
 
 		// Email validation
 		if (!formData.email) {
-			emailError = 'Email is required';
-			isValid = false;
+			emailError = 'Email is required'
+			isValid = false
 		} else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-			emailError = 'Email is invalid';
-			isValid = false;
+			emailError = 'Email is invalid'
+			isValid = false
 		}
 
 		// Password validation
 		if (!formData.password) {
-			passwordError = 'Password is required';
-			isValid = false;
+			passwordError = 'Password is required'
+			isValid = false
 		} else if (formData.password.length < 6) {
-			passwordError = 'Password must be at least 6 characters';
-			isValid = false;
+			passwordError = 'Password must be at least 6 characters'
+			isValid = false
 		}
 
 		// First name validation
 		if (!formData.firstName) {
-			firstNameError = 'First name is required';
-			isValid = false;
+			firstNameError = 'First name is required'
+			isValid = false
 		}
 
 		// Last name validation
 		if (!formData.lastName) {
-			lastNameError = 'Last name is required';
-			isValid = false;
+			lastNameError = 'Last name is required'
+			isValid = false
 		}
 
 		// Update errors state
@@ -207,24 +211,26 @@ const AuthForm: React.FC<{
 			email: emailError,
 			password: passwordError,
 			firstName: firstNameError,
-			lastName: lastNameError
-		});
+			lastName: lastNameError,
+		})
 
-		return isValid;
-	};
-
+		return isValid
+	}
 
 	const handleChage = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target
 
 		setFormData((prev) => ({
 			...prev,
-			[name]: value
+			[name]: value,
 		}))
 	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		try {
+
+			setIsLoading(true);
+
 			e.preventDefault()
 
 			if (!validateForm()) {
@@ -252,19 +258,21 @@ const AuthForm: React.FC<{
 					photoURL: user.photoURL,
 				})
 			} else {
-				await signInWithEmailAndPassword(auth, email, password);
+				await signInWithEmailAndPassword(auth, email, password)
 			}
 
 			return showToast({
 				message: `${isSignUp ? 'Account created successfully!' : 'Logged in successfully!'}`,
-				status: 'success'
+				status: 'success',
 			})
 		} catch (err) {
-			console.log(err);
+			console.log(err)
 			showToast({
-				message: `An error occurred while ${(isSignUp) ? 'signing up' : 'logging in'}. Please try again later.`,
-				status: 'error'
+				message: `An error occurred while ${isSignUp ? 'signing up' : 'logging in'}. Please try again later.`,
+				status: 'error',
 			})
+		} finally {
+			setIsLoading(false)
 		}
 	}
 
@@ -278,60 +286,63 @@ const AuthForm: React.FC<{
 				</Center>
 				<form onSubmit={handleSubmit}>
 					<VStack spacing={2} width={'100%'}>
-						{(isSignUp) ? <>
-							{/* First Name Field */}
-							<FormControl width="100%" isInvalid={!!errors.firstName}>
-								<FormLabel>First Name</FormLabel>
-								<Input
-									name='firstName'
-									size={'lg'}
-									type="text"
-									value={formData.firstName}
-									onChange={handleChage}
-									placeholder="Enter your first name"
-								/>
-								{errors.firstName && (
-									<FormErrorMessage>{errors.firstName}</FormErrorMessage>
-								)}
-							</FormControl>
+						{isSignUp ? (
+							<>
+								{/* First Name Field */}
+								<FormControl width="100%" isInvalid={!!errors.firstName}>
+									<FormLabel>First Name</FormLabel>
+									<Input
+										name="firstName"
+										size={'lg'}
+										type="text"
+										value={formData.firstName}
+										onChange={handleChage}
+										placeholder="Enter your first name"
+									/>
+									{errors.firstName && (
+										<FormErrorMessage>{errors.firstName}</FormErrorMessage>
+									)}
+								</FormControl>
 
-							{/* Last Name Field */}
-							<FormControl width="100%" isInvalid={!!errors.lastName}>
-								<FormLabel>Last Name</FormLabel>
-								<Input
-									name='lastName'
-									size={'lg'}
-									type="text"
-									value={formData.lastName}
-									onChange={handleChage}
-									placeholder="Enter your last name"
-								/>
-								{errors.lastName && (
-									<FormErrorMessage>{errors.lastName}</FormErrorMessage>
-								)}
-							</FormControl>
-						</> : null}
-
+								{/* Last Name Field */}
+								<FormControl width="100%" isInvalid={!!errors.lastName}>
+									<FormLabel>Last Name</FormLabel>
+									<Input
+										name="lastName"
+										size={'lg'}
+										type="text"
+										value={formData.lastName}
+										onChange={handleChage}
+										placeholder="Enter your last name"
+									/>
+									{errors.lastName && (
+										<FormErrorMessage>{errors.lastName}</FormErrorMessage>
+									)}
+								</FormControl>
+							</>
+						) : null}
 
 						{/* Email Field */}
 						<FormControl width="100%" isInvalid={!!errors.email}>
 							<FormLabel>Email</FormLabel>
 							<Input
-								name='email'
+								name="email"
 								size={'lg'}
 								type="email"
 								value={formData.email}
 								onChange={handleChage}
 								placeholder="Enter your email"
 							/>
-							{errors.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
+							{errors.email && (
+								<FormErrorMessage>{errors.email}</FormErrorMessage>
+							)}
 						</FormControl>
 
 						{/* Password Field */}
 						<FormControl isInvalid={!!errors.password}>
 							<FormLabel>Password</FormLabel>
 							<Input
-								name='password'
+								name="password"
 								type="password"
 								value={formData.password}
 								onChange={handleChage}
@@ -343,7 +354,7 @@ const AuthForm: React.FC<{
 						</FormControl>
 
 						{/* Submit Button */}
-						<Button type="submit" colorScheme="teal" mt={4} width="full">
+						<Button isLoading={loading} disabled={loading} type="submit" colorScheme="teal" mt={4} width="full">
 							{isSignUp ? 'Sign Up' : 'Login'}
 						</Button>
 
@@ -368,7 +379,6 @@ const AuthForm: React.FC<{
 						</Box>
 					</VStack>
 				</form>
-
 			</VStack>
 
 			<HStack justifyContent={'center'} mt={4} spacing={4}>

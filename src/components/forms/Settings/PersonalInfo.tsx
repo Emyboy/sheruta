@@ -24,6 +24,7 @@ import {
 	Avatar,
 } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
+import { BiCamera } from 'react-icons/bi'
 
 const PersonalInfoForm = () => {
 	const [formData, setFormData] = useState<{
@@ -247,18 +248,45 @@ const PersonalInfoForm = () => {
 			</Alert>
 			<form onSubmit={handleSubmit}>
 				<VStack spacing={4} align="stretch">
-					<FormControl id="avatar">
-						{/* <FormLabel>Update Profile Picture</FormLabel> */}
-						<Box display="flex" alignItems="center" gap={4}>
-							<Avatar size="xl" src={avatarUrl || ''} />
-							<Input
-								borderWidth="0px"
-								type="file"
-								accept="image/*"
-								onChange={handleAvatarChange}
-							/>
-						</Box>
-					</FormControl>
+					
+					<Flex justifyContent={'center'}>
+						<Flex
+							cursor={'pointer'}
+							htmlFor="file-selector"
+							as={'label'}
+							bg={'brand'}
+							h={'170px'}
+							w={'170px'}
+							rounded={'full'}
+							p={1}
+							alignItems={'center'}
+							justifyContent={'center'}
+							color={'text_muted'}
+						>
+							{user?.avatar_url ? (
+								<div
+									style={{
+										backgroundImage: `url(${user?.avatar_url})`,
+										backgroundSize: 'cover',
+										backgroundPosition: 'center',
+										width: '100%',
+										height: '100%',
+										borderRadius: '50%',
+									}}
+								/>
+							) : (
+								<BiCamera size={50} />
+							)}
+						</Flex>
+						<input
+							type="file"
+							id="file-selector"
+							accept="image/*"
+							onChange={handleAvatarChange}
+							style={{ display: 'none' }}
+						/>
+					</Flex>
+					<Text mt={3} width="100%" textAlign={"center"}>Update your avatar</Text>
 
 					<Flex gap={4}>
 						<FormControl
