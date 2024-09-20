@@ -116,14 +116,11 @@ const PersonalInfoForm = () => {
 
 			let downloadURL: string | undefined = user?.avatar_url
 
-			// If the user has a new avatar to upload
 			if (avatarFile) {
-				// Step 1: Delete the existing avatar from Firebase Storage if it exists
 				if (user?.avatar_url) {
 					await SherutaDB.deleteMedia(user.avatar_url)
 				}
 
-				// Step 2: Upload the new avatar
 				const uploadAvatar = new Promise<string | undefined>(
 					(resolve, reject) => {
 						const reader = new FileReader()
@@ -134,11 +131,10 @@ const PersonalInfoForm = () => {
 									const storageUrl = `images/profiles/${user?._id}/${avatarFile.name}`
 
 									await SherutaDB.uploadMedia({
-										data: reader.result as string, // Convert result to string
+										data: reader.result as string, 
 										storageUrl,
 									})
 
-									// Get the download URL after upload
 									const url = await SherutaDB.getMediaUrl(storageUrl)
 									resolve(url || '')
 								} catch (error) {
@@ -157,7 +153,6 @@ const PersonalInfoForm = () => {
 				setAvatarUrl(downloadURL || '')
 			}
 
-			// Proceed with updating user data after avatar upload completes
 			await Promise.all([
 				UserInfoService.update({
 					data: {
@@ -170,7 +165,7 @@ const PersonalInfoForm = () => {
 					data: {
 						first_name: formData.firstName,
 						last_name: formData.lastName,
-						avatar_url: downloadURL, // Use the uploaded URL here
+						avatar_url: downloadURL,
 					},
 					document_id: user._id,
 				}),
@@ -202,38 +197,6 @@ const PersonalInfoForm = () => {
 		}
 	}
 
-	// const hanndleSubmit = async (e: React.FormEvent) => {
-	// 	e.preventDefault();
-	// 	if (!avatarFile) return;
-
-	// 	setIsLoading(true);
-	// 	try {
-
-	// 		// Convert the image to base64 for storage as a data URL
-	// 		const reader = new FileReader();
-	// 		reader.readAsDataURL(avatarFile);
-	// 		reader.onload = async () => {
-	// 			if (reader.result) {
-	// 				// Upload the avatar
-	// 				const storageUrl = `images/profiles/${user?._id}/${avatarFile.name}`;
-	// 				await SherutaDB.uploadMedia({
-	// 					data: reader.result as string, // Convert result to string
-	// 					storageUrl,
-	// 				});
-
-	// 				// Get the download URL after upload
-	// 				const downloadURL = await SherutaDB.getMediaUrl(storageUrl);
-	// 				setAvatarUrl(downloadURL || '');
-
-	// 				setIsLoading(false);
-	// 				alert('Profile updated successfully');
-	// 			}
-	// 		};
-	// 	} catch (error) {
-	// 		console.error('Error uploading file:', error);
-	// 		setIsLoading(false);
-	// 	}
-
 	return (
 		<Box maxW="600px" mx="auto" p={6}>
 			<Text fontSize={'3xl'} fontWeight={500} mb="5" textAlign={'center'}>
@@ -248,7 +211,6 @@ const PersonalInfoForm = () => {
 			</Alert>
 			<form onSubmit={handleSubmit}>
 				<VStack spacing={4} align="stretch">
-					
 					<Flex justifyContent={'center'}>
 						<Flex
 							cursor={'pointer'}
@@ -263,10 +225,10 @@ const PersonalInfoForm = () => {
 							justifyContent={'center'}
 							color={'text_muted'}
 						>
-							{user?.avatar_url ? (
+							{avatarUrl || user?.avatar_url ? (
 								<div
 									style={{
-										backgroundImage: `url(${user?.avatar_url})`,
+										backgroundImage: `url(${avatarUrl || user?.avatar_url})`,
 										backgroundSize: 'cover',
 										backgroundPosition: 'center',
 										width: '100%',
@@ -286,7 +248,9 @@ const PersonalInfoForm = () => {
 							style={{ display: 'none' }}
 						/>
 					</Flex>
-					<Text mt={3} width="100%" textAlign={"center"}>Update your avatar</Text>
+					<FormLabel mt={3} width="100%" textAlign={'center'}>
+						Update your avatar
+					</FormLabel	>
 
 					<Flex gap={4}>
 						<FormControl

@@ -11,12 +11,11 @@ import {
 	Input,
 	FormErrorMessage,
 	VStack,
-	Heading,
 	HStack,
 	IconButton,
 	useColorMode,
 } from '@chakra-ui/react'
-import React, { FormEvent, useState } from 'react'
+import React, { useState } from 'react'
 import {
 	BiLogoFacebook,
 	BiLogoFacebookCircle,
@@ -33,10 +32,9 @@ import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 
-interface Props {}
+interface Props { }
 
 export default function AuthPopup(props: Props) {
-	const { loginWithGoogle } = useAuthContext()
 	const { authState } = useAuthContext()
 	const { user, auth_loading } = authState
 	const { appState, setAppState } = useAppContext()
@@ -53,91 +51,57 @@ export default function AuthPopup(props: Props) {
 			isOpen={show_login}
 			onClose={() => setAppState({ show_login: false })}
 		>
-			<AuthForm isSignUp={isSignUp} setIsSignUp={setIsSignUp} />
-
-			{/* {auth_loading ? (
+			{auth_loading ? (
 				<Flex minH={'200px'} justifyContent={'center'} alignItems={'center'}>
 					<Spinner size="lg" />
 				</Flex>
-			) : (
-				<>
-					<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
-						<EachSocial
-							label="Login with Google"
-							Icon={BiLogoGoogle}
-							onClick={loginWithGoogle}
-						/>
-						<EachSocial
-							label="Login with Facebook"
-							Icon={BiLogoFacebookCircle}
-							onClick={() => { }}
-						/>
-					</Flex>
-					<Button
-						variant={'ghost'}
-						padding={DEFAULT_PADDING}
-						_dark={{
-							borderColor: 'dark_light',
-						}}
-						rounded={'md'}
-						alignItems={'center'}
-						gap={DEFAULT_PADDING}
-						justifyContent={'center'}
-						cursor={'pointer'}
-						py={7}
-						// _hover={{
-						//     bg: 'none'
-						// }}
-						onClick={() => setAppState({ show_login: false })}
-					>
-						Cancel
-					</Button>
-				</>
-			)} */}
+			) :
+				<AuthForm isSignUp={isSignUp} setIsSignUp={setIsSignUp} />
+			}
 		</MainModal>
 	)
 }
 
-// const EachSocial = ({
-// 	Icon,
-// 	label,
-// 	onClick,
-// }: {
-// 	Icon: any
-// 	label: string
-// 	onClick: () => void
-// }) => {
-// 	return (
-// 		<Flex
-// 			onClick={onClick}
-// 			padding={DEFAULT_PADDING}
-// 			border={'1px'}
-// 			borderColor={'border_color'}
-// 			_dark={{
-// 				borderColor: 'dark_light',
-// 			}}
-// 			rounded={'md'}
-// 			alignItems={'center'}
-// 			gap={DEFAULT_PADDING}
-// 			justifyContent={'center'}
-// 			cursor={'pointer'}
-// 			_hover={{
-// 				bg: 'dark',
-// 				color: 'white',
-// 				_dark: {
-// 					bg: 'dark_light',
-// 				},
-// 			}}
-// 		>
-// 			<Box>
-// 				<Icon size={25} />
-// 			</Box>
-// 			<Flex>
-// 				<Text>{label}</Text>
-// 			</Flex>
-// 		</Flex>
-// 	)
-// }
+const EachSocial = ({
+	Icon,
+	label,
+	onClick,
+}: {
+	Icon: any
+	label: string
+	onClick: () => void
+}) => {
+	return (
+		<Flex
+			onClick={onClick}
+			padding={DEFAULT_PADDING}
+			border={'1px'}
+			borderColor={'border_color'}
+			_dark={{
+				borderColor: 'dark_light',
+			}}
+			rounded={'md'}
+			alignItems={'center'}
+			gap={DEFAULT_PADDING}
+			justifyContent={'center'}
+			cursor={'pointer'}
+			_hover={{
+				bg: 'dark',
+				color: 'white',
+				_dark: {
+					bg: 'dark_light',
+				},
+			}}
+		>
+			<Box>
+				<Icon size={25} />
+			</Box>
+			<Flex>
+				<Text>{label}</Text>
+			</Flex>
+		</Flex>
+	)
+}
 
 const AuthForm: React.FC<{
 	isSignUp: boolean
@@ -176,7 +140,6 @@ const AuthForm: React.FC<{
 		let firstNameError = ''
 		let lastNameError = ''
 
-		// Email validation
 		if (!formData.email) {
 			emailError = 'Email is required'
 			isValid = false
@@ -185,7 +148,6 @@ const AuthForm: React.FC<{
 			isValid = false
 		}
 
-		// Password validation
 		if (!formData.password) {
 			passwordError = 'Password is required'
 			isValid = false
@@ -194,19 +156,18 @@ const AuthForm: React.FC<{
 			isValid = false
 		}
 
-		// First name validation
-		if (!formData.firstName) {
-			firstNameError = 'First name is required'
-			isValid = false
+		if (isSignUp) {
+			if (!formData.firstName) {
+				firstNameError = 'First name is required'
+				isValid = false
+			}
+
+			if (!formData.lastName) {
+				lastNameError = 'Last name is required'
+				isValid = false
+			}
 		}
 
-		// Last name validation
-		if (!formData.lastName) {
-			lastNameError = 'Last name is required'
-			isValid = false
-		}
-
-		// Update errors state
 		setErrors({
 			email: emailError,
 			password: passwordError,
@@ -228,8 +189,7 @@ const AuthForm: React.FC<{
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		try {
-
-			setIsLoading(true);
+			setIsLoading(true)
 
 			e.preventDefault()
 
@@ -249,7 +209,7 @@ const AuthForm: React.FC<{
 
 				const user = userCredential.user
 
-				await AuthService.createNewUser({
+				await AuthService.loginUser({
 					displayName: `${firstName} ${lastName}`,
 					email: user.email as string,
 					providerId: 'email',
@@ -262,15 +222,22 @@ const AuthForm: React.FC<{
 			}
 
 			return showToast({
-				message: `${isSignUp ? 'Account created successfully!' : 'Logged in successfully!'}`,
+				message: `${isSignUp ? 'Account created successfully!' : 'You have logged in successfully!'}`,
 				status: 'success',
 			})
-		} catch (err) {
+		} catch (err: any) {
 			console.log(err)
-			showToast({
-				message: `An error occurred while ${isSignUp ? 'signing up' : 'logging in'}. Please try again later.`,
-				status: 'error',
-			})
+			if (err.message.includes('email-already-in-use')) {
+				showToast({
+					message: 'Email already exists. Please try signing in.',
+					status: 'error',
+				})
+			} else {
+				showToast({
+					message: `An error occurred while ${isSignUp ? 'signing up' : 'logging in'}. Please try again later.`,
+					status: 'error',
+				})
+			}
 		} finally {
 			setIsLoading(false)
 		}
@@ -288,7 +255,6 @@ const AuthForm: React.FC<{
 					<VStack spacing={2} width={'100%'}>
 						{isSignUp ? (
 							<>
-								{/* First Name Field */}
 								<FormControl width="100%" isInvalid={!!errors.firstName}>
 									<FormLabel>First Name</FormLabel>
 									<Input
@@ -304,7 +270,6 @@ const AuthForm: React.FC<{
 									)}
 								</FormControl>
 
-								{/* Last Name Field */}
 								<FormControl width="100%" isInvalid={!!errors.lastName}>
 									<FormLabel>Last Name</FormLabel>
 									<Input
@@ -322,7 +287,6 @@ const AuthForm: React.FC<{
 							</>
 						) : null}
 
-						{/* Email Field */}
 						<FormControl width="100%" isInvalid={!!errors.email}>
 							<FormLabel>Email</FormLabel>
 							<Input
@@ -338,7 +302,6 @@ const AuthForm: React.FC<{
 							)}
 						</FormControl>
 
-						{/* Password Field */}
 						<FormControl isInvalid={!!errors.password}>
 							<FormLabel>Password</FormLabel>
 							<Input
@@ -353,8 +316,14 @@ const AuthForm: React.FC<{
 							)}
 						</FormControl>
 
-						{/* Submit Button */}
-						<Button isLoading={loading} disabled={loading} type="submit" colorScheme="teal" mt={4} width="full">
+						<Button
+							isLoading={loading}
+							disabled={loading}
+							type="submit"
+							colorScheme="teal"
+							mt={4}
+							width="full"
+						>
 							{isSignUp ? 'Sign Up' : 'Login'}
 						</Button>
 
@@ -382,7 +351,13 @@ const AuthForm: React.FC<{
 			</VStack>
 
 			<HStack justifyContent={'center'} mt={4} spacing={4}>
-				<IconButton
+				<EachSocial Icon={BiLogoGoogle} label='Sign in with Google' onClick={loginWithGoogle} />
+				{/* <IconButton
+					width="full"
+					borderColor={'border_color'}
+					_dark={{
+						borderColor: 'dark_light',
+					}}
 					onClick={loginWithGoogle}
 					colorScheme={colorMode === 'dark' ? '' : 'gray'}
 					fontSize={'24px'}
@@ -395,9 +370,9 @@ const AuthForm: React.FC<{
 							bg: 'dark_light',
 						},
 					}}
-				/>
+				/> */}
 
-				<IconButton
+				{/* <IconButton
 					colorScheme={colorMode === 'dark' ? '' : 'gray'}
 					fontSize={'24px'}
 					aria-label="Options"
@@ -409,7 +384,7 @@ const AuthForm: React.FC<{
 							bg: 'dark_light',
 						},
 					}}
-				/>
+				/> */}
 			</HStack>
 		</Box>
 	)
