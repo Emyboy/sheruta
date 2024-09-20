@@ -121,42 +121,51 @@ export default function EachRequest({ request }: Props) {
 					</Link>
 					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Link
-								href={canInteract ? `/user/${request._user_ref._id}` : ''}
-								style={{ textDecoration: 'none' }}
-								onClick={async () =>
-									canInteract &&
-									(await createNotification({
-										is_read: false,
-										message: NotificationsBodyMessage.profile_view,
-										recipient_id: request._user_ref._id,
-										type: 'profile_view',
-										sender_details: authState.user
-											? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
-											: null,
-										action_url: `/user/${request._user_ref._id}`,
-									}))
-								}
-							>
-								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
-									<Text
-										textTransform={'capitalize'}
-										fontSize={{ base: 'base', md: 'lg' }}
-									>
-										{request.availability_status === 'reserved'
-											? `Reserved for ${getTimeDifferenceInHours(request.reservation_expiry)} hours`
-											: `${request._user_ref.last_name} ${request._user_ref.first_name}`}
-									</Text>
-									{request.user_info?.is_verified && (
-										<LuBadgeCheck fill="#00bc73" />
-									)}
-								</Flex>
-							</Link>
+							{canInteract ? (
+								<Link
+									href={`/user/${request._user_ref._id}`}
+									style={{ textDecoration: 'none' }}
+									onClick={async () =>
+										await createNotification({
+											is_read: false,
+											message: NotificationsBodyMessage.profile_view,
+											recipient_id: request._user_ref._id,
+											type: 'profile_view',
+											sender_details: authState.user
+												? {
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
+												: null,
+											action_url: `/user/${request._user_ref._id}`,
+										})
+									}
+								>
+									<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+										<Text
+											textTransform={'capitalize'}
+											fontSize={{ base: 'base', md: 'lg' }}
+										>
+											`${request._user_ref.last_name} $
+											{request._user_ref.first_name}`
+										</Text>
+										{request.user_info?.is_verified && (
+											<LuBadgeCheck fill="#00bc73" />
+										)}
+									</Flex>
+								</Link>
+							) : (
+								<Text
+									textTransform={'capitalize'}
+									fontSize={{ base: 'base', md: 'lg' }}
+									fontWeight={600}
+								>
+									Reserved
+								</Text>
+							)}
+
 							<Popover>
 								<PopoverTrigger>
 									<Button
@@ -287,7 +296,10 @@ export default function EachRequest({ request }: Props) {
 							</Popover>
 						</Flex>
 						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
-							{timeAgo(request.updatedAt)}
+							{request.availability_status === 'reserved'
+								? `Checkback in
+									${getTimeDifferenceInHours(request.reservation_expiry)} hours`
+								: timeAgo(request.updatedAt)}
 						</Text>
 					</Flex>
 				</Flex>
