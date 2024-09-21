@@ -4,7 +4,11 @@ import { NotificationsBodyMessage } from '@/firebase/service/notifications/notif
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification } from '@/utils/actions'
-import { handleCall, timeAgo } from '@/utils/index.utils'
+import {
+	getTimeDifferenceInHours,
+	handleCall,
+	timeAgo,
+} from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -22,7 +26,6 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
-import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -40,21 +43,6 @@ import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
 
 type Props = { request: HostRequestDataDetails }
-
-function getTimeDifferenceInHours(timestamp?: Timestamp) {
-	if (!timestamp) return 48
-
-	const { nanoseconds, seconds } = timestamp
-
-	const expiryInMilliseconds = seconds * 1000 + nanoseconds / 1e6
-
-	const nowInMilliseconds = new Date().getTime()
-
-	const hoursDifference =
-		(expiryInMilliseconds - nowInMilliseconds) / (1000 * 60 * 60)
-
-	return Math.ceil(hoursDifference)
-}
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()

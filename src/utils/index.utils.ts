@@ -3,6 +3,7 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import { formatDuration, intervalToDuration } from 'date-fns'
+import { Timestamp } from 'firebase/firestore'
 
 export const hasEmptyValue = (obj: any): boolean => {
 	for (const key in obj) {
@@ -135,4 +136,19 @@ export const handleCall = async (data: {
 
 export const handleDM = (userId: string | null) => {
 	window.location.href = `/messages/${userId}`
+}
+
+export function getTimeDifferenceInHours(timestamp?: Timestamp) {
+	if (!timestamp) return 48
+
+	const { nanoseconds, seconds } = timestamp
+
+	const expiryInMilliseconds = seconds * 1000 + nanoseconds / 1e6
+
+	const nowInMilliseconds = new Date().getTime()
+
+	const hoursDifference =
+		(expiryInMilliseconds - nowInMilliseconds) / (1000 * 60 * 60)
+
+	return Math.ceil(hoursDifference)
 }
