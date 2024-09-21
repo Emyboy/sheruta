@@ -39,8 +39,10 @@ import {
 	BiShare,
 	BiTrash,
 } from 'react-icons/bi'
+import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
+import CloseIcon from '@/assets/svg/close-icon-dark'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -506,14 +508,23 @@ const EachRequestMedia = ({
 	images: string[]
 	video?: string | null
 }) => {
-	const [clicked, setClicked] = useState(false)
-	const [url, setUrl] = useState<string>('')
-	const [type, setType] = useState<'video' | 'img'>('img')
+	const allMedias: {
+		url: string
+		type: string
+	}[] = video
+		? [
+				{ url: video, type: 'video' },
+				...images.map((url) => ({ url, type: 'img' })),
+			]
+		: images.map((url) => ({ url, type: 'img' }))
 
-	const handleClick = (url: string, type: 'video' | 'img') => {
-		setType(type)
-		setUrl(url)
-		setClicked(true)
+	const [clicked, setClicked] = useState(false)
+	const [activeIdx, setActiveIdx] = useState<number>(0)
+
+	const handleClick = (idx: number) => {
+		if (!clicked) setClicked(true)
+
+		setActiveIdx(idx)
 	}
 
 	const close = () => setClicked(false)
@@ -532,13 +543,48 @@ const EachRequestMedia = ({
 					alignItems={'center'}
 					justifyContent={'center'}
 					cursor={'pointer'}
-					onClick={close}
-					p={'32px'}
 				>
-					{type === 'img' ? (
-						<Box overflow={'hidden'} rounded="md" bg="dark" w={'70%'} h={'70%'}>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						onClick={close}
+						zIndex={1001}
+					>
+						<CloseIcon />
+					</Box>
+					{activeIdx < allMedias.length - 1 && (
+						<Box
+							position={'absolute'}
+							right={'30%'}
+							top={'50%'}
+							transform={'translateY(-50%)'}
+							color={'white'}
+							fontSize={'48px'}
+							zIndex={1001}
+							onClick={() => setActiveIdx((prev) => prev + 1)}
+						>
+							<FaChevronCircleRight />
+						</Box>
+					)}
+					{activeIdx > 0 && (
+						<Box
+							position={'absolute'}
+							left={'30%'}
+							top={'50%'}
+							transform={'translateY(-50%)'}
+							color={'white'}
+							fontSize={'48px'}
+							zIndex={1001}
+							onClick={() => setActiveIdx((prev) => prev - 1)}
+						>
+							<FaChevronCircleLeft />
+						</Box>
+					)}
+					{allMedias[activeIdx].type === 'img' ? (
+						<Box overflow={'hidden'} rounded="md" w={'70%'} h={'70%'}>
 							<Image
-								src={url}
+								src={allMedias[activeIdx].url}
 								alt="shared space"
 								width={'full'}
 								height={'full'}
@@ -552,7 +598,6 @@ const EachRequestMedia = ({
 							zIndex={50}
 							overflow={'hidden'}
 							rounded="md"
-							bg="dark"
 							maxH={'60%'}
 							maxW={'700px'}
 							minH={'500px'}
@@ -562,7 +607,11 @@ const EachRequestMedia = ({
 							alignItems={'center'}
 							justifyContent={'center'}
 						>
-							<iframe src={url} width={'100%'} height={'100%'} />
+							<iframe
+								src={allMedias[activeIdx].url}
+								width={'100%'}
+								height={'100%'}
+							/>
 						</Flex>
 					)}
 				</Flex>
@@ -583,38 +632,45 @@ const EachRequestMedia = ({
 					flexWrap={'wrap'}
 					h={'full'}
 				>
-					{video && (
-						<Flex
-							position={'relative'}
-							overflow={'hidden'}
-							cursor={'pointer'}
-							rounded="md"
-							alignItems={'center'}
-							justifyContent={'center'}
-							onClick={() => handleClick(video, 'video')}
-						>
-							<video src={video} width={'100%'} height={'100%'} />
-							<Box pos="absolute" zIndex={0}>
-								<BiPlayCircle size={'80px'} fill="#00bc73" cursor={'pointer'} />
-							</Box>
-						</Flex>
-					)}
-					{images.map((imgUrl, i) => (
-						<Box
-							key={i}
-							position={'relative'}
-							overflow={'hidden'}
-							cursor={'pointer'}
-							rounded="md"
-							bg="dark"
-							onClick={() => handleClick(imgUrl, 'img')}
-						>
-							<Image
-								src={imgUrl}
-								alt="image of the shared space"
-								position={'relative'}
-							/>
-						</Box>
+					{allMedias.map((media, i) => (
+						<>
+							{media.type === 'video' ? (
+								<Flex
+									position={'relative'}
+									overflow={'hidden'}
+									cursor={'pointer'}
+									rounded="md"
+									alignItems={'center'}
+									justifyContent={'center'}
+									onClick={() => handleClick(i)}
+								>
+									<video src={media.url} width={'100%'} height={'100%'} />
+									<Box pos="absolute" zIndex={0}>
+										<BiPlayCircle
+											size={'80px'}
+											fill="#00bc73"
+											cursor={'pointer'}
+										/>
+									</Box>
+								</Flex>
+							) : (
+								<Box
+									key={i}
+									position={'relative'}
+									overflow={'hidden'}
+									cursor={'pointer'}
+									rounded="md"
+									bg="dark"
+									onClick={() => handleClick(i)}
+								>
+									<Image
+										src={media.url}
+										alt="image of the shared space"
+										position={'relative'}
+									/>
+								</Box>
+							)}
+						</>
 					))}
 				</Flex>
 			</Flex>

@@ -1954,7 +1954,6 @@ const BookInspectionModal = ({
 						bgColor={'#00BC7399'}
 						textColor={'white'}
 						fontSize={{ base: 'sm', md: 'base' }}
-						// onClick={handleSubmit}
 					>
 						Proceed to Payment
 					</Button>
