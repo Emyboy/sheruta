@@ -172,7 +172,7 @@ const FlatShareProfileForm = () => {
 								name="work_industry"
 								value={formData.work_industry}
 								onChange={handleChange}
-								placeholder="Select your work industry"
+								placeholder=""
 								bgColor={colorMode}
 							>
 								{industries.map((industry) => {
@@ -307,7 +307,6 @@ const FlatShareProfileForm = () => {
 						</Text>
 						<Input
 							name="linkedin"
-							required
 							borderColor={'border_color'}
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Ex. https://www.linkedin.com/in/xyz"
