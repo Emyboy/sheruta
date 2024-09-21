@@ -63,9 +63,8 @@ export default function EachRequest({ request }: Props) {
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
 	const canInteract = !(
-		(request.availability_status === 'reserved' &&
-			authState.user?._id !== request.reserved_by) ||
-		authState.user?._id === request._user_ref._id
+		request.availability_status === 'reserved' &&
+		authState.user?._id !== request.reserved_by
 	)
 
 	return (
@@ -91,7 +90,7 @@ export default function EachRequest({ request }: Props) {
 						href={canInteract ? `/user/${request._user_ref._id}` : ''}
 						style={{ textDecoration: 'none' }}
 						onClick={async () =>
-							canInteract &&
+							(canInteract || authState.user?._id !== request._user_ref._id) &&
 							(await createNotification({
 								is_read: false,
 								message: NotificationsBodyMessage.profile_view,
@@ -126,7 +125,8 @@ export default function EachRequest({ request }: Props) {
 									href={`/user/${request._user_ref._id}`}
 									style={{ textDecoration: 'none' }}
 									onClick={async () =>
-										await createNotification({
+										authState.user?._id !== request._user_ref._id &&
+										(await createNotification({
 											is_read: false,
 											message: NotificationsBodyMessage.profile_view,
 											recipient_id: request._user_ref._id,
@@ -140,7 +140,7 @@ export default function EachRequest({ request }: Props) {
 													}
 												: null,
 											action_url: `/user/${request._user_ref._id}`,
-										})
+										}))
 									}
 								>
 									<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
@@ -148,8 +148,8 @@ export default function EachRequest({ request }: Props) {
 											textTransform={'capitalize'}
 											fontSize={{ base: 'base', md: 'lg' }}
 										>
-											`${request._user_ref.last_name} $
-											{request._user_ref.first_name}`
+											{request._user_ref.last_name}{' '}
+											{request._user_ref.first_name}
 										</Text>
 										{request.user_info?.is_verified && (
 											<LuBadgeCheck fill="#00bc73" />
@@ -320,7 +320,6 @@ export default function EachRequest({ request }: Props) {
 								<BiLocationPlus size={'16px'} />
 							</Box>
 							<Truncate
-								//@ts-ignore
 								text={request._location_keyword_ref.name}
 								max={70}
 								showReadMore={false}
@@ -383,7 +382,10 @@ export default function EachRequest({ request }: Props) {
 						{!request.user_info?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
-									isDisabled={!canInteract}
+									isDisabled={
+										!canInteract ||
+										authState.user?._id === request._user_ref._id
+									}
 									px={0}
 									bg="none"
 									color="text_muted"
@@ -428,7 +430,10 @@ export default function EachRequest({ request }: Props) {
 								style={{ textDecoration: 'none' }}
 							>
 								<Button
-									isDisabled={!canInteract}
+									isDisabled={
+										!canInteract ||
+										authState.user?._id === request._user_ref._id
+									}
 									px={0}
 									bg="none"
 									color="text_muted"

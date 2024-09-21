@@ -120,7 +120,7 @@ export default function ApartmentSummary({
 
 		const prev = isApartmentBookmarked
 
-		setIsApartmentBookmarked(!isApartmentBookmarked)
+		setIsApartmentBookmarked(!prev)
 
 		try {
 			if (!prev) {
@@ -194,8 +194,6 @@ export default function ApartmentSummary({
 			authState.user?._id !== request.reserved_by) ||
 		authState.user?._id === request._user_ref._id
 	)
-
-	console.log(request.description)
 
 	return (
 		<>
