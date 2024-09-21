@@ -1,4 +1,12 @@
-import { Button, Flex, Input, Text, Textarea, VStack, Select } from '@chakra-ui/react'
+import {
+	Button,
+	Flex,
+	Input,
+	Text,
+	Textarea,
+	VStack,
+	Select,
+} from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import CurrencyInput from 'react-currency-input-field'

@@ -256,7 +256,7 @@ export default function PersonalInfoForm({ done }: Props) {
 									required
 									onChange={(e) => setAgePreference(e.target.value)}
 									value={age_preference}
-								>  
+								>
 									<option value="18 - 23 yrs">18 - 23 yrs</option>
 									<option value="24 - 29 yrs">25 - 29 yrs</option>
 									<option value="30 - 35 yrs">30 - 35 yrs</option>

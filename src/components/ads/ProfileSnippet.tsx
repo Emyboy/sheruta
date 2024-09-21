@@ -114,7 +114,6 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 
 	return (
 		<>
-			
 			{parsedUserProfile.length > 0 ? (
 				parsedUserProfile.map((item, index) => {
 					const ProfileSnippetBio = item.data?.bio
@@ -130,7 +129,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 									objectFit="cover"
 									maxW={{ base: '100%', sm: '200px' }}
 									w="600px"
-									src={`${item.data?.avatar_url}`} 
+									src={`${item.data?.avatar_url}`}
 									alt="Profile Image"
 								/>
 
@@ -164,7 +163,6 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 											>
 												<Text color="text_muted" fontWeight="700">
 													{`Preferred area: ${item.data?.area} ,${item.data?.state}`}{' '}
-													
 												</Text>
 												<Badge
 													colorScheme="green"
@@ -188,8 +186,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 											<BiBookmark style={{ fontSize: '1.5em' }} />
 										</Button>
 										<Box mr={2} color="text_muted">
-											{`${item.data?.seeking ? 'Budget:' : 'Rent:'} ${item.data?.budget}/${item.data?.payment_plan ? item.data?.payment_plan : "" }`}{' '}
-										
+											{`${item.data?.seeking ? 'Budget:' : 'Rent:'} ${item.data?.budget}/${item.data?.payment_plan ? item.data?.payment_plan : ''}`}{' '}
 										</Box>
 									</Flex>
 								</Stack>

@@ -15,12 +15,12 @@ export const getAllProfileDocs = async (): Promise<any[] | undefined> => {
 	} catch (e) {
 		console.log('Error while trying to retrieve profile collection: ', e)
 	}
-
-	
 }
 
-
-export const saveProfileDocs = async (profileData: Record<string, any>, user_id: string): Promise<void> => {
+export const saveProfileDocs = async (
+	profileData: Record<string, any>,
+	user_id: string,
+): Promise<void> => {
 	try {
 		const docRef = doc(db, DBCollectionName.userProfile, user_id)
 		const docSnap = await getDoc(docRef)
@@ -31,4 +31,3 @@ export const saveProfileDocs = async (profileData: Record<string, any>, user_id:
 		console.log('Error saving user profile data', error)
 	}
 }
-

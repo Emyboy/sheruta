@@ -46,7 +46,7 @@ export default async function UserProfilePage({
 	}
 
 	useEffect(() => {
-	  saveProfileDocs(profileData, user_id)
+		saveProfileDocs(profileData, user_id)
 	}, [user_id, profileData])
 
 	return (

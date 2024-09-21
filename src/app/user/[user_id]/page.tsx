@@ -220,7 +220,6 @@ export default async function page(props: any) {
 
 	const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
 
-
 	const userProfiles = {
 		first_name: user.user?.first_name,
 		last_name: user.user?.last_name,
@@ -259,8 +258,6 @@ export default async function page(props: any) {
 		document_id: user_id,
 		_user_ref: `/users/${user_id}`,
 	}
-
-
 
 	const userId = user.user?.id
 
