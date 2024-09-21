@@ -7,8 +7,8 @@ import UserProfilePage from './(user-profile)/UserProfilePage'
 
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
+// import { db } from '@/firebase'
+// import { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
 	collection,
 	doc,
@@ -19,6 +19,10 @@ import {
 	query,
 	where,
 } from 'firebase/firestore'
+import { db } from '@/firebase'
+import { promise } from 'zod'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import MobileNavFooter from '@/components/layout/MobileNavFooter'
 
 export const revalidate = CACHE_TTL.LONG
 

@@ -4,6 +4,7 @@ import { Flex } from '@chakra-ui/react'
 import ProfileAboutMe from './ProfileAboutMe'
 import ProfileHero from './ProfileHero'
 import PersonalInfo from './personal-info/PersonalInfo'
+import EachRequest from '@/components/EachRequest/EachRequest'
 
 interface Props {
 	data: any
