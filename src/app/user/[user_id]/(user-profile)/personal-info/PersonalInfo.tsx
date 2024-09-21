@@ -49,11 +49,13 @@ export default function PersonalInfo({ userProfile }: Props) {
 	const socials: Socials = userProfile.flatShareProfile.socials
 	const habits: Habits[] = userProfile.flatShareProfile.habits
 
-	const instagramUrl = `https://instagram.com/${_userFlatshareProfile?.instagram}`
-	const facebookUrl = `https://facebook.com/${_userFlatshareProfile?.facebook}`
-	const twitterUrl = `https://x.com/${_userFlatshareProfile?.twitter}`
-	const linkedinUrl = `https://linkedin.com/in/${_userFlatshareProfile?.linkedin}`
-	const tiktokUrl = `https://tiktok.com/@${_userFlatshareProfile?.tiktok}`
+	const instagramUrl  = `https://instagram.com/${socials?.instagram}`
+	const facebookUrl = `https://facebook.com/${socials?.facebook}`
+	const twitterUrl = `https://x.com/${socials?.twitter}`
+	const linkedinUrl = `https://linkedin.com/in/${socials?.linkedin}`
+	const tiktokUrl = `https://tiktok.com/@${socials?.tiktok}`
+
+	console.log('instagram>>>>>>>>>>>>>>>>>>>:', instagramUrl)
 
 	// const handleInstagramClick = () => {
 	// 	window.open(
