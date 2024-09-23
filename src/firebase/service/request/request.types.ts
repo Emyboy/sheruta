@@ -49,12 +49,13 @@ export interface LocationObject {
 	[key: string]: any
 }
 
-export type PaymentPlan =
-	| 'monthly'
-	| 'annually'
-	| 'quarterly'
-	| 'bi-annually'
-	| 'weekly'
+export enum PaymentPlan {
+	monthly = 'monthly',
+	annually = 'annually',
+	quarterly = 'quarterly',
+	biannually = 'bi-annually',
+	weekly = 'weekly',
+}
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
@@ -219,6 +220,7 @@ export type HostRequestDataDetails = Omit<
 		hide_phone: boolean
 		gender: string
 	}
+	ref: DocumentReference
 }
 
 export type SeekerRequestDataDetails = Omit<
@@ -245,4 +247,5 @@ export type SeekerRequestDataDetails = Omit<
 		is_verified: boolean
 		gender: string
 	}
+	ref: DocumentReference
 }

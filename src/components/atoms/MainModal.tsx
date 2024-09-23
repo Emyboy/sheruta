@@ -2,6 +2,7 @@ import React from 'react'
 import {
 	Modal,
 	ModalBody,
+	ModalCloseButton,
 	ModalContent,
 	ModalOverlay,
 	ModalProps,
@@ -16,7 +17,7 @@ export default function MainModal(props: Props) {
 		<Modal isOpen={isOpen} onClose={onClose} isCentered>
 			<ModalOverlay />
 			<ModalContent rounded={'xl'}>
-				{/* <ModalCloseButton /> */}
+				<ModalCloseButton />
 				<ModalBody
 					_dark={{
 						bg: 'dark',

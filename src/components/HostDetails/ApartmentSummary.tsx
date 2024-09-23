@@ -10,9 +10,6 @@ import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
-import { useBookmarksContext } from '@/context/bookmarks.context'
-import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import { BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
@@ -30,6 +27,7 @@ import {
 	ReservationType,
 } from '@/firebase/service/reservations/reservations.types'
 import useCommon from '@/hooks/useCommon'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
 import {
 	createNotification,
@@ -62,7 +60,7 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -92,103 +90,23 @@ export default function ApartmentSummary({
 }) {
 	const router = useRouter()
 
-	const { bookmarks, fetchBookmarks } = useBookmarksContext()
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
-	const { showToast } = useCommon()
+
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
+		useHandleBookmark(request.id, request._user_ref._id)
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
 	const [showReserveApartmentModal, setShowReserveApartmentModal] =
 		useState<boolean>(false)
-	const [isApartmentBookmarked, setIsApartmentBookmarked] = useState(false)
 
 	const openModal = () => setShowBookInspectionModal(true)
 	const closeModal = () => setShowBookInspectionModal(false)
 
 	const openReserveApartmentModal = () => setShowReserveApartmentModal(true)
 	const closeReserveApartmentModal = () => setShowReserveApartmentModal(false)
-
-	const toggleSaveApartment = async () => {
-		const uuid = crypto.randomUUID()
-
-		if (!authState.flat_share_profile)
-			return showToast({
-				message: 'Login to save an apartment',
-				status: 'error',
-			})
-
-		const prev = isApartmentBookmarked
-
-		setIsApartmentBookmarked(!prev)
-
-		try {
-			if (!prev) {
-				await Promise.all([
-					BookmarkService.createBookmark({
-						uuid,
-						object_type: BookmarkType.requests,
-						request_id: request.id,
-						_user_ref: authState.flat_share_profile._user_ref,
-					}),
-					NotificationsService.create({
-						collection_name: DBCollectionName.notifications,
-						data: {
-							type: 'bookmark',
-							message: NotificationsBodyMessage.bookmark,
-							recipient_id: request._user_ref._id,
-							sender_details: authState.user
-								? {
-										id: authState.user._id,
-										avatar_url: authState.user.avatar_url,
-										first_name: authState.user.first_name,
-										last_name: authState.user.last_name,
-									}
-								: null,
-							is_read: false,
-							action_url: `/messages/${authState.flat_share_profile._user_id}`,
-						},
-					}),
-				])
-
-				fetchBookmarks(authState.flat_share_profile._user_id)
-
-				showToast({
-					message: 'Successfully bookmarked apartment',
-					status: 'success',
-				})
-			} else {
-				await BookmarkService.deleteBookmark({
-					user_id: authState.flat_share_profile._user_id,
-					document_id: bookmarks.find(
-						(bookmark) => bookmark.request_id === request.id,
-					)?.id as string,
-				})
-				setIsApartmentBookmarked(true)
-
-				showToast({
-					message: 'Successfully removed apartment from bookmarks',
-					status: 'success',
-				})
-			}
-		} catch (error) {
-			console.error('Error toggling bookmark:', error)
-			setIsApartmentBookmarked(prev)
-			showToast({
-				message: 'error saving this apartment',
-				status: 'error',
-			})
-		}
-	}
-
-	useEffect(() => {
-		if (!authState.user) return
-
-		setIsApartmentBookmarked(
-			bookmarks.some((bookmark) => bookmark.request_id === request.id),
-		)
-	}, [authState.user])
 
 	const canInteract = !(
 		(request.availability_status === 'reserved' &&
@@ -562,8 +480,10 @@ export default function ApartmentSummary({
 							}}
 							ml={'-8px'}
 							onClick={toggleSaveApartment}
+							isLoading={isBookmarkLoading}
+							isDisabled={isBookmarkLoading}
 						>
-							{isApartmentBookmarked ? (
+							{bookmarkId ? (
 								<PiBookmarkSimpleFill fill={'#00bc73'} />
 							) : (
 								<BiBookmark />

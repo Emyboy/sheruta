@@ -7,6 +7,7 @@ import { Divider, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+	BiBookmark,
 	BiCalendarAlt,
 	BiCheckShield,
 	BiLogInCircle,
@@ -43,16 +44,18 @@ export default function MainLeftNav({}: Props) {
 				<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			</Link>
 			<EachNav Icon={BiWallet} label="Wallet" />
-			{user_info && user_info._user_id ? (
-				<Link href={'/settings'}>
-					<EachNav Icon={BiWrench} label="Settings" />
-				</Link>
-			) : null}
-			{!user_info?.is_verified ? (
+			<Link href={'/settings'}>
+				<EachNav Icon={BiWrench} label="Settings" />
+			</Link>
+
+			{user_info && !user_info?.is_verified ? (
 				<Link href="/verification">
 					<EachNav Icon={BiCheckShield} label="Verification" />
 				</Link>
 			) : null}
+			<Link href="/bookmarks">
+				<EachNav Icon={BiBookmark} label="Bookmarks" />
+			</Link>
 			<Divider
 				color="border_color"
 				_dark={{
@@ -95,11 +98,12 @@ const EachNav = ({
 			rounded={'md'}
 			color="dark_light"
 			_hover={{
-				bg: 'dark',
-				color: 'white',
+				color: 'brand',
+				// bg: 'dark',
+				// color: 'white',
 				_dark: {
-					bg: 'dark_light',
-					color: 'white',
+					// bg: 'dark',
+					color: 'brand',
 				},
 			}}
 			_light={{

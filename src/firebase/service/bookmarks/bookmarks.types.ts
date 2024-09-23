@@ -1,5 +1,6 @@
 import { DocumentReference } from 'firebase/firestore'
 import { z } from 'zod'
+import { HostRequestData, SeekerRequestData } from '../request/request.types'
 
 export enum BookmarkType {
 	requests = 'requests',
@@ -14,24 +15,25 @@ export const BookmarkDTO = z.object({
 		BookmarkType.listings,
 		BookmarkType.profiles,
 	]),
-	_object_ref: z
-		.custom<DocumentReference | undefined>(
-			(val) => val instanceof DocumentReference,
-			{
-				message: 'Must be a DocumentReference',
-			},
-		)
-		.optional(),
+	request_id: z.string(),
 	_user_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
 		},
 	),
-	request_id: z.string(),
 })
 
 export type BookmarkData = z.infer<typeof BookmarkDTO>
+
+// interface ProfileDTO {
+//     _id: string,
+//     avatar_url: string,
+//     first_name: string,
+//     last_name: string,
+// 	_user_ref: DocumentReference,
+//     flat_share_profile: FlatShareProfileData
+// }
 
 export type BookmarkDataDetails = Omit<BookmarkData, '_user_ref'> & {
 	id: string
@@ -42,11 +44,5 @@ export type BookmarkDataDetails = Omit<BookmarkData, '_user_ref'> & {
 		_id: string
 		email: string
 	}
-	object_type: BookmarkType
-	_object_ref:
-		| {
-				id: string
-		  }
-		| undefined
-	request_id: string
+	_object_ref: SeekerRequestData | HostRequestData
 }

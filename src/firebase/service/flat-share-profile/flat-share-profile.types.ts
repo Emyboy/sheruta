@@ -1,5 +1,6 @@
 import { DocumentReference } from 'firebase/firestore'
 import { z } from 'zod'
+import { PaymentPlan } from '../request/request.types'
 
 // Define the Zod schema for FlatShareProfileData
 const FlatShareProfileDataSchema = z.object({
@@ -27,6 +28,13 @@ const FlatShareProfileDataSchema = z.object({
 	gender_preference: z.string().nullable().optional(),
 	age_preference: z.string().nullable().optional(),
 	bio: z.string().optional(),
+	payment_type: z.enum([
+		'monthly',
+		'annually',
+		'bi-annually',
+		'quarterly',
+		'weekly',
+	]),
 	// socials: z.object({
 	// 	twitter: z.string().optional(),
 	// 	facebook: z.string().optional(),
@@ -59,6 +67,7 @@ export type UpdateFlatShareProfileDataDTO = {
 	bio?: string
 	gender_preference?: string
 	age_preference?: string
+	payment_type?: PaymentPlan
 	// socials: object
 }
 
@@ -84,4 +93,5 @@ export const flatShareProfileDefaults = {
 	gender_preference: null,
 	age_preference: null,
 	bio: '',
+	payment_type: PaymentPlan.weekly,
 }

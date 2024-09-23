@@ -61,8 +61,6 @@ export async function getSeekerRequestData(
 			document_id: requestId,
 		})
 
-		console.log(result)
-
 		if (
 			result &&
 			Object.keys(result).length > 0 &&

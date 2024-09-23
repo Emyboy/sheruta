@@ -1,13 +1,19 @@
+'use client'
+
+import CloseIcon from '@/assets/svg/close-icon-dark'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import useCommon from '@/hooks/useCommon'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification } from '@/utils/actions'
 import {
 	getTimeDifferenceInHours,
 	handleCall,
 	timeAgo,
+	truncateText,
 } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
@@ -29,7 +35,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
-	BiBarChart,
+	BiBookmark,
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
@@ -37,25 +43,43 @@ import {
 	BiPhone,
 	BiPlayCircle,
 	BiShare,
+	BiSolidBookmark,
 	BiTrash,
 } from 'react-icons/bi'
 import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
-import CloseIcon from '@/assets/svg/close-icon-dark'
 
 type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
+	const { showToast } = useCommon()
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
-	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+
+	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
+		useHandleBookmark(request.id || request.uuid, request._user_ref._id)
 
 	const canInteract = !(
 		request.availability_status === 'reserved' &&
 		authState.user?._id !== request.reserved_by
 	)
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+
+	const deletePost = async (): Promise<void> => {
+		try {
+			await handleDeletePost({
+				requestId: request.id || request.uuid,
+				userId: request._user_ref._id,
+			})
+		} catch (err) {
+			showToast({
+				message: 'This post was not deleted',
+				status: 'error',
+			})
+		}
+	}
 
 	return (
 		<Box
@@ -197,7 +221,7 @@ export default function EachRequest({ request }: Props) {
 												bgColor="none"
 												onClick={() =>
 													copyShareUrl(
-														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`,
 														request.seeking
 															? 'Looking for apartment'
 															: 'New apartment',
@@ -236,7 +260,7 @@ export default function EachRequest({ request }: Props) {
 														}}
 														onClick={() => {
 															router.push(
-																`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
+																`request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}/edit`,
 															)
 														}}
 														width="100%"
@@ -257,12 +281,7 @@ export default function EachRequest({ request }: Props) {
 														_active={{
 															bgColor: 'none',
 														}}
-														onClick={async () =>
-															await handleDeletePost({
-																requestId: request.id,
-																userId: request._user_ref._id,
-															})
-														}
+														onClick={async () => await deletePost()}
 														width="100%"
 														display="flex"
 														alignItems="center"
@@ -295,7 +314,7 @@ export default function EachRequest({ request }: Props) {
 				</Flex>
 
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex flexDirection={'column'}>
@@ -319,11 +338,16 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
 						<Flex gap={DEFAULT_PADDING}>
+							{typeof request?.seeking !== 'undefined' && request.seeking ? (
+								<Badge colorScheme={'orange'} textTransform="capitalize">
+									Seeker
+								</Badge>
+							) : null}
 							<Badge
 								colorScheme="green"
 								rounded="md"
@@ -409,7 +433,7 @@ export default function EachRequest({ request }: Props) {
 										}))
 									}
 								>
-									<BiPhone /> 35
+									<BiPhone />
 								</Button>
 							</MainTooltip>
 						) : null}
@@ -447,12 +471,15 @@ export default function EachRequest({ request }: Props) {
 										base: 'base',
 									}}
 								>
-									<BiMessageRoundedDetail /> 35
+									<BiMessageRoundedDetail />
 								</Button>
 							</Link>
 						</MainTooltip>
-						<MainTooltip label="Engagements" placement="top">
+						<MainTooltip label="Bookmark" placement="top">
 							<Button
+								onClick={toggleSaveApartment}
+								isLoading={isBookmarkLoading}
+								isDisabled={isBookmarkLoading}
 								px={0}
 								bg="none"
 								color="text_muted"
@@ -475,7 +502,7 @@ export default function EachRequest({ request }: Props) {
 									base: 'base',
 								}}
 							>
-								<BiBarChart /> 135
+								{bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 							</Button>
 						</MainTooltip>
 					</Flex>
@@ -689,12 +716,9 @@ const Truncate = ({
 }) => {
 	const maxChars = max || 200
 
-	const truncatedText =
-		text.length > maxChars ? text.substring(0, maxChars) + '... ' : text
-
 	return (
 		<Text>
-			{truncatedText}
+			{truncateText(text, maxChars)}
 			{text.length > maxChars && showReadMore && (
 				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
 					Read more..

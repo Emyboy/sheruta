@@ -7,11 +7,16 @@ import {
 	FormLabel,
 	Input,
 	Select,
+	Text,
 	Textarea,
 	useColorMode,
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
-import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import {
+	LoadScript,
+	Autocomplete,
+	useJsApiLoader,
+} from '@react-google-maps/api'
 
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
@@ -107,12 +112,15 @@ const CreateSeekerForm: React.FC = () => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
+		libraries,
+	})
+
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const {
 		authState: { flat_share_profile, user, user_info },
 	} = useAuthContext()
-
-	console.log(flat_share_profile, user, user_info)
 
 	const [userInfo, setUserInfo] = useState<userInfo>({
 		state: undefined,
@@ -414,15 +422,16 @@ const CreateSeekerForm: React.FC = () => {
 				</FormControl>
 			</Flex>
 
-			{selectedLocation && (
-				<FormControl isRequired mb={4}>
-					<FormLabel requiredIndicator={null} htmlFor="address">
-						Where in {selectedLocation}
-					</FormLabel>
-					<LoadScript
-						googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
-						libraries={libraries}
-					>
+			{selectedLocation &&
+				(!isLoaded ? (
+					<Text width={'full'} textAlign={'center'}>
+						Loading google maps
+					</Text>
+				) : (
+					<FormControl isRequired mb={4}>
+						<FormLabel requiredIndicator={null} htmlFor="address">
+							Where in {selectedLocation}
+						</FormLabel>
 						<Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
@@ -435,9 +444,8 @@ const CreateSeekerForm: React.FC = () => {
 								onChange={(e) => setGoogleLocationText(e.target.value)}
 							/>
 						</Autocomplete>
-					</LoadScript>
-				</FormControl>
-			)}
+					</FormControl>
+				))}
 
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">

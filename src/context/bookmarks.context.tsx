@@ -2,7 +2,8 @@
 
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
 import { BookmarkDataDetails } from '@/firebase/service/bookmarks/bookmarks.types'
-import React, {
+import useCommon from '@/hooks/useCommon'
+import {
 	createContext,
 	ReactNode,
 	useContext,
@@ -11,55 +12,64 @@ import React, {
 } from 'react'
 import { useAuthContext } from './auth.context'
 
-interface InspectionsContextType {
+interface BookmarksContextType {
 	bookmarks: BookmarkDataDetails[]
-	fetchBookmarks: (id: string) => Promise<void>
-	loadingBookmarks: boolean
+	fetchBookmarks: (userId: string) => Promise<void>
+	bookmarkLoading: boolean
 }
 
-const BookmarksContext = createContext<InspectionsContextType | undefined>(
+const BookmarkContext = createContext<BookmarksContextType | undefined>(
 	undefined,
 )
 
 export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 	children,
 }) => {
-	const { authState } = useAuthContext()
-
+	const {
+		authState: { user },
+	} = useAuthContext()
 	const [bookmarks, setBookmarks] = useState<BookmarkDataDetails[]>([])
-	const [loadingBookmarks, setLoadingBookmarks] = useState(false)
+	const [bookmarkLoading, setBookmarkLoading] = useState(false)
 
 	const fetchBookmarks = async (id: string) => {
-		setLoadingBookmarks(true)
+		setBookmarkLoading(true)
+
 		try {
 			const res = await BookmarkService.getUserBookmarks(id)
 
 			setBookmarks(res)
 		} catch (error) {
-			console.error('Error', error)
+			console.error('Error fetching bookmarks:', error)
+		} finally {
+			setBookmarkLoading(false)
 		}
-		setLoadingBookmarks(false)
 	}
 
 	useEffect(() => {
-		if (!authState.user?._id) return
+		if (!user?._id) return
 
-		fetchBookmarks(authState.user._id)
-	}, [authState.user?._id])
+		fetchBookmarks(user._id)
+	}, [user?._id])
 
 	return (
-		<BookmarksContext.Provider
-			value={{ bookmarks, loadingBookmarks, fetchBookmarks }}
+		<BookmarkContext.Provider
+			value={{
+				bookmarkLoading,
+				fetchBookmarks,
+				bookmarks,
+			}}
 		>
 			{children}
-		</BookmarksContext.Provider>
+		</BookmarkContext.Provider>
 	)
 }
 
-export const useBookmarksContext = () => {
-	const context = useContext(BookmarksContext)
+export const useBookmarkContext = () => {
+	const context = useContext(BookmarkContext)
 	if (context === undefined) {
-		throw new Error('useBookmarks must be used within an BookmarksProvider')
+		throw new Error(
+			'useBookmarkContext must be used within the BookmarksProvider',
+		)
 	}
 	return context
 }

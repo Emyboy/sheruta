@@ -1,24 +1,33 @@
 import { db } from '@/firebase'
+import { resolveDocumentReferences } from '@/utils/index.utils'
 import {
 	collection,
 	doc,
-	DocumentReference,
-	getDoc,
 	getDocs,
 	orderBy,
 	query,
 	where,
 } from 'firebase/firestore'
-import SherutaDB from '../index.firebase'
-import { DBCollectionName } from './../index.firebase'
+import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { BookmarkData, BookmarkDataDetails } from './bookmarks.types'
 
 export default class BookmarkService extends SherutaDB {
-	static async createBookmark(data: BookmarkData): Promise<void> {
+	static async createBookmark({
+		request_id,
+		object_type,
+		_user_ref,
+		uuid,
+	}: BookmarkData): Promise<void> {
+		const _object_ref = doc(db, DBCollectionName.flatShareRequests, request_id)
+
 		await this.create({
 			collection_name: DBCollectionName.bookmarks,
-			document_id: data.uuid,
-			data,
+			document_id: uuid,
+			data: {
+				object_type,
+				_user_ref,
+				_object_ref,
+			},
 		})
 	}
 
@@ -67,20 +76,10 @@ export default class BookmarkService extends SherutaDB {
 		const documents = querySnapshot.docs.map(async (doc) => {
 			const docData = { ...doc.data() }
 
-			const refFields = Object.entries(docData).filter(
-				([key, value]) => value instanceof DocumentReference,
-			)
+			// Resolve top-level and nested DocumentReference objects
+			const resolvedData = await resolveDocumentReferences(docData)
 
-			const resolvedRefs = await Promise.all(
-				refFields.map(async ([key, ref]) => {
-					const resolvedDoc = await getDoc(ref)
-					return { [key]: resolvedDoc.data() }
-				}),
-			)
-
-			Object.assign(docData, ...resolvedRefs)
-
-			return { id: doc.id, ...docData } as BookmarkDataDetails
+			return { id: doc.id, ...resolvedData } as BookmarkDataDetails
 		})
 
 		return await Promise.all(documents)

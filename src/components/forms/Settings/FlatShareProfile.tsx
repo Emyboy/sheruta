@@ -3,6 +3,7 @@
 import { industries } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { PaymentPlan } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import {
 	Box,
@@ -31,6 +32,7 @@ const FlatShareProfileForm = () => {
 		linkedin: string
 		facebook: string
 		instagram: string
+		payment_type: PaymentPlan
 	}>({
 		budget: 0,
 		occupation: '',
@@ -41,6 +43,7 @@ const FlatShareProfileForm = () => {
 		linkedin: '',
 		facebook: '',
 		instagram: '',
+		payment_type: PaymentPlan.weekly,
 	})
 
 	const {
@@ -62,6 +65,9 @@ const FlatShareProfileForm = () => {
 				linkedin: flat_share_profile.linkedin || '',
 				facebook: flat_share_profile.facebook || '',
 				instagram: flat_share_profile.instagram || '',
+				payment_type:
+					(flat_share_profile?.payment_type as PaymentPlan) ||
+					PaymentPlan.weekly,
 			})
 			return
 		}
@@ -122,6 +128,23 @@ const FlatShareProfileForm = () => {
 			</Text>
 			<form onSubmit={handleSubmit}>
 				<VStack spacing={4} align="stretch">
+					<FormControl id="payment_type">
+						<FormLabel requiredIndicator={null}>Select Payment Plan</FormLabel>
+						<Select
+							placeholder="Choose payment plan"
+							value={formData.payment_type}
+							onChange={handleChange}
+							bgColor={colorMode}
+							name="payment_type"
+						>
+							<option value="monthly">Monthly</option>
+							<option value="annually">Annually</option>
+							<option value="bi-annually">Bi-Annually</option>
+							<option value="quarterly">Quarterly</option>
+							<option value="weekly">Weekly</option>
+						</Select>
+					</FormControl>
+
 					<FormControl id="budget" isRequired>
 						<FormLabel requiredIndicator={null}>Budget</FormLabel>
 						<Input
@@ -149,7 +172,7 @@ const FlatShareProfileForm = () => {
 								name="work_industry"
 								value={formData.work_industry}
 								onChange={handleChange}
-								placeholder="Select your work industry"
+								placeholder=""
 								bgColor={colorMode}
 							>
 								{industries.map((industry) => {
@@ -284,7 +307,6 @@ const FlatShareProfileForm = () => {
 						</Text>
 						<Input
 							name="linkedin"
-							required
 							borderColor={'border_color'}
 							_dark={{ borderColor: 'dark_light' }}
 							placeholder="Ex. https://www.linkedin.com/in/xyz"
