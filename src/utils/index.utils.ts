@@ -3,6 +3,7 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import { formatDuration, intervalToDuration } from 'date-fns'
+import { DocumentReference, getDoc } from 'firebase/firestore'
 
 export const hasEmptyValue = (obj: any): boolean => {
 	for (const key in obj) {
@@ -89,6 +90,25 @@ export function convertSeconds(seconds: number) {
 	return formattedDuration
 }
 
+export function convertTimestampToTime(timestamp: {
+	seconds: number
+	nanoseconds: number
+}): string {
+	const date = new Date(timestamp.seconds * 1000)
+
+	let hours = date.getHours()
+	const minutes = date.getMinutes()
+
+	const ampm = hours >= 12 ? 'PM' : 'AM'
+
+	hours = hours % 12
+	hours = hours ? hours : 12
+
+	const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
+
+	return `${hours}:${formattedMinutes}${ampm}`
+}
+
 export const handleCall = async (data: {
 	number: string | null
 	recipient_id: string
@@ -109,10 +129,60 @@ export const handleCall = async (data: {
 			message: NotificationsBodyMessage.call,
 			recipient_id: data.recipient_id,
 			sender_details: data.sender_details,
+			action_url: '',
 		},
 	})
 }
 
 export const handleDM = (userId: string | null) => {
 	window.location.href = `/messages/${userId}`
+}
+
+export const truncateText = (text: string, maxChars?: number) =>
+	text.length > (maxChars || 50)
+		? text.substring(0, maxChars || 50) + '... '
+		: text
+
+export const resolveArrayOfReferences = async (
+	objArray: Record<any, any>[],
+) => {
+	const resolvedObjects = await Promise.all(
+		objArray.map(async (item) => {
+			// Resolve all fields that are DocumentReferences in the current item
+			const refFields = Object.entries(item).filter(
+				([, value]) => value instanceof DocumentReference,
+			)
+
+			const resolvedRefs = await Promise.all(
+				refFields.map(async ([key, ref]) => {
+					const docSnap = await getDoc(ref as DocumentReference)
+					return { [key]: docSnap.exists() ? docSnap.data() : null }
+				}),
+			)
+
+			// Merge resolved references back into the object
+			return { ...item, ...Object.assign({}, ...resolvedRefs) }
+		}),
+	)
+
+	return resolvedObjects
+}
+
+export const resolveSingleObjectReferences = async (obj: Record<any, any>) => {
+	const refFields = Object.entries(obj).filter(
+		([, value]) => value instanceof DocumentReference,
+	)
+
+	const resolvedRefs = await Promise.all(
+		refFields.map(async ([key, ref]) => {
+			const docSnap = await getDoc(ref as DocumentReference)
+			if (docSnap.exists()) {
+				return { [key]: docSnap.data() }
+			} else {
+				return { [key]: null }
+			}
+		}),
+	)
+
+	return { ...obj, ...Object.assign({}, ...resolvedRefs) }
 }

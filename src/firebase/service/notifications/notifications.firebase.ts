@@ -18,11 +18,11 @@ export const NotificationsBodyMessage: Record<
 	string
 > = {
 	rescheduled: 'Your inspection has been rescheduled by',
-	missed_call: 'You have a missed call from',
 	call: 'You have a call attempt from',
 	inspection: 'You have an upcoming inspection with',
 	message: 'You have a new message from',
 	comment: 'You have a comment from',
+	comment_reply: 'You have a reply from',
 	profile_view: 'A user viewed your profile',
 	cancelled: 'Your Inspection has been cancelled by',
 }

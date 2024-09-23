@@ -399,10 +399,25 @@ const EditSeekerForm: React.FC<{
 					<FormLabel requiredIndicator={null} htmlFor="address">
 						Where in {selectedLocation}
 					</FormLabel>
-					<LoadScript
-						googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
-						libraries={libraries}
-					>
+					{typeof window !== 'undefined' && !window.google ? (
+						<LoadScript
+							googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
+							libraries={libraries}
+						>
+							<Autocomplete
+								onLoad={handleLoad}
+								onPlaceChanged={handlePlaceChanged}
+							>
+								<Input
+									id="address"
+									type="text"
+									placeholder="Select..."
+									value={googleLocationText}
+									onChange={(e) => setGoogleLocationText(e.target.value)}
+								/>
+							</Autocomplete>
+						</LoadScript>
+					) : (
 						<Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
@@ -415,7 +430,7 @@ const EditSeekerForm: React.FC<{
 								onChange={(e) => setGoogleLocationText(e.target.value)}
 							/>
 						</Autocomplete>
-					</LoadScript>
+					)}
 				</FormControl>
 			)}
 

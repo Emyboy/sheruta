@@ -35,6 +35,12 @@ const UserVerification = () => {
 	const [hasEnoughCredits, setHasEnoughCredits] = useState<boolean>(false)
 
 	useEffect(() => {
+		if (typeof window !== 'undefined' && !user_info) {
+			window.location.assign('/')
+		}
+	}, [user_info])
+
+	useEffect(() => {
 		if (
 			typeof user_info?.is_verified !== 'undefined' &&
 			typeof user_info?.is_verified === 'boolean'

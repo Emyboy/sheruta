@@ -196,6 +196,7 @@ export default function ApartmentSummary({
 												id: authState.user._id,
 											}
 										: null,
+									action_url: `/user/${request._user_ref._id}`,
 								})
 							}
 						>
@@ -1113,6 +1114,7 @@ const BookInspectionModal = ({
 							last_name: authState.user.last_name,
 							avatar_url: authState.user.avatar_url,
 						},
+						action_url: '/inspections',
 					},
 				}),
 			])

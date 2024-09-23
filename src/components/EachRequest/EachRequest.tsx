@@ -1,10 +1,12 @@
+'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification } from '@/utils/actions'
-import { handleCall } from '@/utils/index.utils'
+import { handleCall, truncateText, timeAgo } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -24,9 +26,9 @@ import {
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
-	BiBarChart,
+	BiBookmark,
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
@@ -34,18 +36,105 @@ import {
 	BiPhone,
 	BiPlayCircle,
 	BiShare,
+	BiSolidBookmark,
 	BiTrash,
 } from 'react-icons/bi'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
+import useCommon from '@/hooks/useCommon'
+import { BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { doc } from 'firebase/firestore'
+import { db } from '@/firebase'
+import { useBookmarkContext } from '@/context/bookmarks.context'
 
 type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
+	const { showToast } = useCommon()
+	const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
+	const [bookmarkId, setBookmarkId] = useState<string | null>(null)
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
-	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+	const { copyShareUrl, handleDeletePost, isLoading, setIsLoading } =
+		useShareSpace()
+
+	const {
+		updateBookmark,
+		getBookmarkStatusAndId,
+		bookmarkLoading,
+		deleteBookmark,
+	} = useBookmarkContext()
+
+	const handleBookmarkUpdate = async () => {
+		try {
+			if (isBookmarked && bookmarkId) {
+				await deleteBookmark(bookmarkId)
+				setIsBookmarked(false)
+				setBookmarkId(null)
+				return
+			}
+			const objectType = BookmarkType.requests
+			const objectRef = doc(
+				db,
+				DBCollectionName.flatShareRequests,
+				request.id as string,
+			)
+
+			await updateBookmark({
+				objectType,
+				objectRef,
+			})
+
+			return
+		} catch (err) {
+			showToast({
+				message: 'Failed to update bookmark',
+				status: 'error',
+			})
+		}
+	}
+
+	const deletePost = async (): Promise<void> => {
+		try {
+			if (isBookmarked && bookmarkId) {
+				await Promise.all([
+					handleDeletePost({
+						requestId: request.id,
+						userId: request._user_ref._id,
+					}),
+					deleteBookmark(bookmarkId),
+				])
+			} else {
+				await handleDeletePost({
+					requestId: request.id,
+					userId: request._user_ref._id,
+				})
+			}
+		} catch (err) {
+			showToast({
+				message: 'This post was not deleted',
+				status: 'error',
+			})
+		}
+	}
+	useEffect(() => {
+		const checkBookmark = async (): Promise<void> => {
+			try {
+				const { isBookmarked, bookmarkId } = await getBookmarkStatusAndId(
+					request.id,
+				)
+				setIsBookmarked(isBookmarked)
+				setBookmarkId(bookmarkId)
+			} catch (err: any) {
+				console.error('Error checking if request is bookmarked:', err)
+			}
+		}
+
+		checkBookmark()
+	}, [request?.id, getBookmarkStatusAndId])
+
 	return (
 		<Box
 			position={'relative'}
@@ -82,6 +171,7 @@ export default function EachRequest({ request }: Props) {
 											id: authState.user._id,
 										}
 									: null,
+								action_url: `/user/${request._user_ref._id}`,
 							})
 						}
 					>
@@ -114,6 +204,7 @@ export default function EachRequest({ request }: Props) {
 													id: authState.user._id,
 												}
 											: null,
+										action_url: `/user/${request._user_ref._id}`,
 									})
 								}
 							>
@@ -124,7 +215,7 @@ export default function EachRequest({ request }: Props) {
 									>
 										{request._user_ref.last_name} {request._user_ref.first_name}
 									</Text>
-									{request.user_info.is_verified && (
+									{request.user_info?.is_verified && (
 										<LuBadgeCheck fill="#00bc73" />
 									)}
 								</Flex>
@@ -230,12 +321,7 @@ export default function EachRequest({ request }: Props) {
 														_active={{
 															bgColor: 'none',
 														}}
-														onClick={async () =>
-															await handleDeletePost({
-																requestId: request.id,
-																userId: request._user_ref._id,
-															})
-														}
+														onClick={async () => await deletePost()}
 														width="100%"
 														display="flex"
 														alignItems="center"
@@ -259,13 +345,7 @@ export default function EachRequest({ request }: Props) {
 							</Popover>
 						</Flex>
 						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
-							{formatDistanceToNow(
-								new Date(
-									request.updatedAt.seconds * 1000 +
-										request.updatedAt.nanoseconds / 1000000,
-								),
-								{ addSuffix: true },
-							)}
+							{timeAgo(request.updatedAt)}
 						</Text>
 					</Flex>
 				</Flex>
@@ -301,6 +381,11 @@ export default function EachRequest({ request }: Props) {
 				>
 					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
 						<Flex gap={DEFAULT_PADDING}>
+							{typeof request?.seeking !== 'undefined' && request.seeking ? (
+								<Badge colorScheme={'orange'} textTransform="capitalize">
+									Seeker
+								</Badge>
+							) : null}
 							<Badge
 								colorScheme="green"
 								rounded="md"
@@ -382,7 +467,7 @@ export default function EachRequest({ request }: Props) {
 										})
 									}}
 								>
-									<BiPhone /> 35
+									<BiPhone />
 								</Button>
 							</MainTooltip>
 						) : null}
@@ -416,12 +501,15 @@ export default function EachRequest({ request }: Props) {
 										base: 'base',
 									}}
 								>
-									<BiMessageRoundedDetail /> 35
+									<BiMessageRoundedDetail />
 								</Button>
 							</Link>
 						</MainTooltip>
-						<MainTooltip label="Engagements" placement="top">
+						<MainTooltip label="Bookmark" placement="top">
 							<Button
+								onClick={() => handleBookmarkUpdate()}
+								isLoading={bookmarkLoading}
+								disabled={bookmarkLoading}
 								px={0}
 								bg="none"
 								color="text_muted"
@@ -444,7 +532,7 @@ export default function EachRequest({ request }: Props) {
 									base: 'base',
 								}}
 							>
-								<BiBarChart /> 135
+								{isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
 							</Button>
 						</MainTooltip>
 					</Flex>
@@ -604,12 +692,9 @@ const Truncate = ({
 }) => {
 	const maxChars = max || 200
 
-	const truncatedText =
-		text.length > maxChars ? text.substring(0, maxChars) + '... ' : text
-
 	return (
 		<Text>
-			{truncatedText}
+			{truncateText(text, maxChars)}
 			{text.length > maxChars && showReadMore && (
 				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
 					Read more..

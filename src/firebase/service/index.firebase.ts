@@ -66,7 +66,7 @@ export default class SherutaDB {
 		queryObj = {},
 	}: {
 		collection_name: string
-		_limit: number
+		_limit?: number
 		queryObj?: {
 			budget?: string
 			service?: string
@@ -123,24 +123,30 @@ export default class SherutaDB {
 
 		const querySnapshot = await getDocs(q)
 
-		const documents = querySnapshot.docs.map(async (doc) => {
-			const docData = { ...doc.data() }
+		const documents = await Promise.all(
+			querySnapshot.docs.map(async (doc) => {
+				const docData = { ...doc.data() }
 
-			const refFields = Object.entries(docData).filter(
-				([key, value]) => value instanceof DocumentReference,
-			)
+				const refFields = Object.entries(docData).filter(
+					([_, value]) => value instanceof DocumentReference,
+				)
 
-			const resolvedRefs = await Promise.all(
-				refFields.map(async ([key, ref]) => {
-					const resolvedDoc = await getDoc(ref)
-					return { [key]: resolvedDoc.data() }
-				}),
-			)
+				const resolvedRefs = await Promise.all(
+					refFields.map(async ([key, ref]) => {
+						const docSnap = await getDoc(ref as DocumentReference)
+						if (docSnap.exists()) {
+							return { [key]: { ...docSnap.data(), id: docSnap.id } }
+						} else {
+							return { [key]: null }
+						}
+					}),
+				)
 
-			Object.assign(docData, ...resolvedRefs)
+				Object.assign(docData, ...resolvedRefs)
 
-			return { id: doc.id, ...docData, ref: doc.ref }
-		})
+				return { id: doc.id, ...docData, ref: doc.ref }
+			}),
+		)
 
 		return await Promise.all(documents)
 	}
@@ -240,6 +246,7 @@ export const DBCollectionName = {
 	userSecrets: 'user_secrets',
 	userSettings: 'user_settings',
 
+	bookmarks: 'bookmarks',
 	flatShareProfile: 'flat_share_profiles',
 	flatShareRequests: 'requests',
 
