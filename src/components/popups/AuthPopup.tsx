@@ -14,23 +14,20 @@ import {
 	HStack,
 	InputGroup,
 	InputRightElement,
+	Alert,
+	AlertIcon,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import {
-	BiLogoFacebook,
-	BiLogoFacebookCircle,
 	BiLogoGoogle,
 } from 'react-icons/bi'
-import {
-BsEyeFill,
-BsEyeSlash,
-BsEyeSlashFill
-} from 'react-icons/bs'
+import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs'
 import MainModal from '../atoms/MainModal'
 import { useAuthContext } from '@/context/auth.context'
 import { useAppContext } from '@/context/app.context'
 import {
 	createUserWithEmailAndPassword,
+	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 } from 'firebase/auth'
 import { auth } from '@/firebase'
@@ -46,6 +43,7 @@ export default function AuthPopup(props: Props) {
 	const { show_login } = appState
 
 	const [isSignUp, setIsSignUp] = useState<boolean>(true)
+	const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false)
 
 	if (user) {
 		return null
@@ -60,9 +58,9 @@ export default function AuthPopup(props: Props) {
 				<Flex minH={'200px'} justifyContent={'center'} alignItems={'center'}>
 					<Spinner size="lg" />
 				</Flex>
-			) : (
-				<AuthForm isSignUp={isSignUp} setIsSignUp={setIsSignUp} />
-			)}
+			) : (isPasswordReset) ? <PasswordResetForm setIsPasswordReset={setIsPasswordReset} setIsSignUp={setIsSignUp} /> :
+				<AuthForm isSignUp={isSignUp} setIsSignUp={setIsSignUp} setIsPasswordReset={setIsPasswordReset} />
+			}
 		</MainModal>
 	)
 }
@@ -108,10 +106,93 @@ const EachSocial = ({
 	)
 }
 
+const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordReset: (arg: boolean) => void, setIsSignUp: (arg: boolean) => void }) => {
+	const [email, setEmail] = useState('')
+	// const [message, setMessage] = useState('')
+	// const [error, setError] = useState('')
+	const [isSubmitting, setIsSubmitting] = useState(false)
+
+	const { showToast } = useCommon()
+
+	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setEmail(e.target.value)
+	}
+
+
+	const handlePasswordReset = async (e: React.FormEvent) => {
+		e.preventDefault()
+		setIsSubmitting(true)
+
+		try {
+			await sendPasswordResetEmail(auth, email)
+			showToast({
+				message: 'Password reset email sent successfully!',
+				status: 'success',
+			})
+			setIsPasswordReset(false)
+		} catch (err) {
+			showToast({
+				message: `An error occurred while sending password reset email. Please try again later.`,
+				status: 'error',
+			})
+		} finally {
+			setIsSubmitting(false)
+		}
+	}
+
+	return (
+		<form onSubmit={handlePasswordReset}>
+			<Center mb={DEFAULT_PADDING}>
+				<Text fontSize={'x-large'} fontWeight={'bold'}>
+					Reset your password
+				</Text>
+			</Center>
+			<Alert mb={5} status="info" variant="subtle">
+				<AlertIcon />
+				Enter the email address linked to your account and click on the reset password button
+			</Alert>
+			<VStack spacing={4} width="100%">
+				<FormControl>
+					<FormLabel>Email</FormLabel>
+					<Input
+						type="email"
+						value={email}
+						onChange={handleEmailChange}
+						placeholder="Enter your email"
+						isRequired
+					/>
+				</FormControl>
+
+				<Button
+					type="submit"
+					bgColor={"brand"}
+					width="full"
+					isLoading={isSubmitting}
+				>
+					Reset Password
+				</Button>
+
+				<Box width={"full"} textAlign={"center"}>
+					<Text
+						cursor={'pointer'}
+						textDecoration="underline"
+						onClick={() => {
+							setIsSignUp(false),
+								setIsPasswordReset(false)
+						}}
+					>Have you remembered your password?</Text>
+				</Box>
+			</VStack>
+		</form>
+	)
+}
+
+
 const AuthForm: React.FC<{
 	isSignUp: boolean
 	setIsSignUp: (arg: boolean) => void
-}> = ({ isSignUp, setIsSignUp }) => {
+	setIsPasswordReset: (arg: boolean) => void
+}> = ({ isSignUp, setIsSignUp, setIsPasswordReset }) => {
 	const [formData, setFormData] = useState<{
 		firstName: string
 		lastName: string
@@ -239,6 +320,11 @@ const AuthForm: React.FC<{
 					message: 'Email already exists. Please try signing in.',
 					status: 'error',
 				})
+			} else if (err.message.includes('invalid-credential')) {
+				showToast({
+					message: 'Invalid email or password.',
+					status: 'error',
+				})
 			} else {
 				showToast({
 					message: `An error occurred while ${isSignUp ? 'signing up' : 'logging in'}. Please try again later.`,
@@ -320,7 +406,7 @@ const AuthForm: React.FC<{
 								/>
 								<InputRightElement width="">
 									<Button onClick={handlePasswordVisibility}>
-										{showPassword ? <BsEyeSlashFill /> : <BsEyeFill/>}
+										{showPassword ? <BsEyeSlashFill /> : <BsEyeFill />}
 									</Button>
 								</InputRightElement>
 							</InputGroup>
@@ -328,16 +414,26 @@ const AuthForm: React.FC<{
 								<FormErrorMessage>{errors.password}</FormErrorMessage>
 							)}
 						</FormControl>
+
 						<Button
 							isLoading={loading}
 							disabled={loading}
 							type="submit"
-							colorScheme="teal"
+							bgColor="brand"
 							mt={4}
 							width="full"
 						>
 							{isSignUp ? 'Sign Up' : 'Login'}
 						</Button>
+
+						{!isSignUp ?
+							<Box mt={2} width={"full"} textAlign={"center"}>
+								<Text
+									cursor={'pointer'}
+									textDecoration="underline"
+									onClick={() => setIsPasswordReset(true)}
+								>Forgot password?</Text>
+							</Box> : null}
 
 						<Box color="gray.500" mt={2}>
 							{isSignUp ? (

@@ -98,11 +98,12 @@ const EachNav = ({
 			rounded={'md'}
 			color="dark_light"
 			_hover={{
-				bg: 'dark',
-				color: 'white',
+				color: 'brand',
+				// bg: 'dark',
+				// color: 'white',
 				_dark: {
-					bg: 'dark_light',
-					color: 'white',
+					// bg: 'dark',
+					color: 'brand',
 				},
 			}}
 			_light={{
