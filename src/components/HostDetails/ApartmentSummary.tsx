@@ -21,9 +21,20 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import ReservationService from '@/firebase/service/reservations/reservations.firebase'
+import {
+	ReservationDTO,
+	ReservationType,
+} from '@/firebase/service/reservations/reservations.types'
 import useCommon from '@/hooks/useCommon'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
-import { createNotification, generateRoomUrl } from '@/utils/actions'
+import {
+	createNotification,
+	generateRoomUrl,
+	revalidatePathOnClient,
+} from '@/utils/actions'
+import { getTimeDifferenceInHours, handleCall } from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -48,13 +59,14 @@ import {
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
+	BiMessageSquareError,
 	BiPencil,
 	BiPhone,
 	BiShare,
@@ -64,12 +76,12 @@ import { FaHouseChimneyUser } from 'react-icons/fa6'
 import { IoIosCheckmarkCircleOutline, IoIosPeople } from 'react-icons/io'
 import { LuBadgeCheck } from 'react-icons/lu'
 import { MdOutlineMailOutline } from 'react-icons/md'
+import { PiBookmarkSimpleFill } from 'react-icons/pi'
 import { VscQuestion } from 'react-icons/vsc'
 import MainTooltip from '../atoms/MainTooltip'
 import Spinner from '../atoms/Spinner'
 import CreditInfo from '../info/CreditInfo/CreditInfo'
 import SearchLocation from './SearchLocation'
-import { handleCall } from '@/utils/index.utils'
 
 export default function ApartmentSummary({
 	request,
@@ -80,16 +92,36 @@ export default function ApartmentSummary({
 
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
+
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
+		useHandleBookmark(request.id, request._user_ref._id)
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
+		useState<boolean>(false)
+	const [showReserveApartmentModal, setShowReserveApartmentModal] =
 		useState<boolean>(false)
 
 	const openModal = () => setShowBookInspectionModal(true)
 	const closeModal = () => setShowBookInspectionModal(false)
 
+	const openReserveApartmentModal = () => setShowReserveApartmentModal(true)
+	const closeReserveApartmentModal = () => setShowReserveApartmentModal(false)
+
+	const canInteract = !(
+		(request.availability_status === 'reserved' &&
+			authState.user?._id !== request.reserved_by) ||
+		authState.user?._id === request._user_ref._id
+	)
+
 	return (
 		<>
+			<ReserveApartmentModal
+				closeModal={closeReserveApartmentModal}
+				showBookApartmentModal={showReserveApartmentModal}
+				request_id={request.id}
+				recipient_id={request._user_ref._id}
+			/>
 			<BookInspectionModal
 				closeModal={closeModal}
 				showBookInspectionModal={showBookInspectionModal}
@@ -152,10 +184,13 @@ export default function ApartmentSummary({
 						paddingY={{ base: '12px', md: DEFAULT_PADDING }}
 						bgColor={'black'}
 						_light={{ color: 'white' }}
-						onClick={openModal}
+						onClick={openReserveApartmentModal}
 						fontSize={{ base: 'sm', md: 'base' }}
+						isDisabled={!canInteract}
 					>
-						Book Inspection
+						{request.availability_status === 'reserved'
+							? 'Apartment Reserved'
+							: 'Reserve Apartment'}
 					</Button>
 				</Flex>
 
@@ -180,10 +215,11 @@ export default function ApartmentSummary({
 						flexDir={'column'}
 					>
 						<Link
-							href={`/user/${request._user_ref._id}`}
+							href={canInteract ? `/user/${request._user_ref._id}` : ''}
 							style={{ textDecoration: 'none' }}
 							onClick={async () =>
-								await createNotification({
+								canInteract &&
+								(await createNotification({
 									is_read: false,
 									message: NotificationsBodyMessage.profile_view,
 									recipient_id: request._user_ref._id,
@@ -197,7 +233,7 @@ export default function ApartmentSummary({
 											}
 										: null,
 									action_url: `/user/${request._user_ref._id}`,
-								})
+								}))
 							}
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
@@ -216,6 +252,7 @@ export default function ApartmentSummary({
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									px={0}
+									isDisabled={!canInteract}
 									bg="none"
 									color="text_muted"
 									display={'flex'}
@@ -234,9 +271,9 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
-									onClick={async () => {
-										if (authState.user?._id === request._user_ref._id) return
-										await handleCall({
+									onClick={async () =>
+										canInteract &&
+										(await handleCall({
 											number: request.user_info.primary_phone_number,
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
@@ -247,16 +284,19 @@ export default function ApartmentSummary({
 														id: authState.user._id,
 													}
 												: null,
-										})
-									}}
+										}))
+									}
 								>
 									<BiPhone />
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
-								<Link href={`/messages/${request._user_ref._id}`}>
+								<Link
+									href={canInteract ? `/messages/${request._user_ref._id}` : ''}
+								>
 									<Button
 										px={0}
+										isDisabled={!canInteract}
 										bg="none"
 										color="text_muted"
 										display={'flex'}
@@ -276,6 +316,29 @@ export default function ApartmentSummary({
 											base: 'lg',
 										}}
 										ml={'-8px'}
+										onClick={async () =>
+											canInteract &&
+											(await NotificationsService.create({
+												collection_name: DBCollectionName.notifications,
+												data: {
+													type: 'message',
+													message: NotificationsBodyMessage.message,
+													recipient_id: request._user_ref._id,
+													sender_details: authState.user
+														? {
+																id: authState.user._id,
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+															}
+														: null,
+													is_read: false,
+													action_url: authState.user
+														? `/messages/${authState.user._id}`
+														: '',
+												},
+											}))
+										}
 									>
 										<MdOutlineMailOutline />
 									</Button>
@@ -398,7 +461,7 @@ export default function ApartmentSummary({
 						<Button
 							px={0}
 							bg="none"
-							color="text_muted"
+							color={'text_muted'}
 							display={'flex'}
 							fontWeight={'light'}
 							_hover={{
@@ -416,8 +479,15 @@ export default function ApartmentSummary({
 								base: 'lg',
 							}}
 							ml={'-8px'}
+							onClick={toggleSaveApartment}
+							isLoading={isBookmarkLoading}
+							isDisabled={isBookmarkLoading}
 						>
-							<BiBookmark />
+							{bookmarkId ? (
+								<PiBookmarkSimpleFill fill={'#00bc73'} />
+							) : (
+								<BiBookmark />
+							)}
 						</Button>
 					</MainTooltip>
 				</Flex>
@@ -448,7 +518,11 @@ export default function ApartmentSummary({
 						{request.google_location_text}
 					</Text>
 				</Flex>
-				<Text fontSize={{ base: 'sm', sm: 'base' }} fontWeight={'light'}>
+				<Text
+					fontSize={{ base: 'sm', sm: 'base' }}
+					fontWeight={'light'}
+					whiteSpace={'pre-wrap'}
+				>
 					{request.description}
 				</Text>
 				<Flex gap={'10px'}>
@@ -533,6 +607,7 @@ export default function ApartmentSummary({
 					<AvailabilityStatusCard
 						status={request.availability_status}
 						updatedAt={request.updatedAt}
+						updateReservation={request.reservation_expiry}
 					/>
 				</Flex>
 				<Flex
@@ -630,6 +705,7 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
+						isDisabled={!canInteract}
 					>
 						Book Inspection
 					</Button>
@@ -980,6 +1056,304 @@ export default function ApartmentSummary({
 					)}
 			</Flex>
 		</>
+	)
+}
+
+const ReserveApartmentModal = ({
+	closeModal,
+	showBookApartmentModal,
+	request_id,
+	recipient_id,
+}: {
+	closeModal: () => void
+	showBookApartmentModal: boolean
+	request_id: string
+	recipient_id: string
+}) => {
+	const { authState } = useAuthContext()
+	const { showToast } = useCommon()
+	const pathname = usePathname()
+
+	const [loading, setLoading] = useState<boolean>(false)
+	const [showCreditInfo, setShowCreditInfo] = useState<boolean>(false)
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault()
+		if (!authState.user?._id)
+			return showToast({
+				message: 'please login to reserve an apartment',
+				status: 'error',
+			})
+		setShowCreditInfo(true)
+	}
+
+	const reserveApartment = async () => {
+		if (!authState.user?._id)
+			return showToast({
+				message: 'please login to reserve an apartment',
+				status: 'error',
+			})
+
+		setLoading(true)
+
+		try {
+			const uuid = crypto.randomUUID()
+
+			const data: ReservationType = {
+				uuid,
+				startTime: Timestamp.fromDate(new Date()),
+				endTime: Timestamp.fromDate(new Date(Date.now() + 48 * 60 * 60 * 1000)),
+				reserved_by: authState.user._id,
+				request_id,
+			}
+
+			ReservationDTO.parse(data)
+
+			await Promise.all([
+				ReservationService.reserveListing(data),
+				FlatShareProfileService.decrementCredit({
+					collection_name: DBCollectionName.flatShareProfile,
+					document_id: authState.user._id,
+					newCredit: creditTable.RESERVATION,
+				}),
+				NotificationsService.create({
+					collection_name: DBCollectionName.notifications,
+					data: {
+						is_read: false,
+						type: 'reservation',
+						message: NotificationsBodyMessage.reservation,
+						recipient_id,
+						sender_details: {
+							id: authState.user._id,
+							first_name: authState.user.first_name,
+							last_name: authState.user.last_name,
+							avatar_url: authState.user.avatar_url,
+						},
+						action_url: `/messages/${authState.user._id}`,
+					},
+				}),
+			])
+
+			showToast({
+				message: 'You have succesfully reserved this apartment listing',
+				status: 'success',
+			})
+			revalidatePathOnClient(pathname)
+		} catch (error) {
+			console.error(error)
+			showToast({
+				message: 'Error saving apartment',
+				status: 'error',
+			})
+		}
+
+		setLoading(false)
+		setShowCreditInfo(false)
+		closeModal()
+	}
+
+	if (loading)
+		return (
+			<Modal isOpen={loading} onClose={() => setLoading(false)} size={'full'}>
+				<ModalOverlay
+					bg="blackAlpha.300"
+					backdropFilter="blur(10px) hue-rotate(90deg)"
+				/>
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Spinner />
+				</ModalContent>
+			</Modal>
+		)
+
+	if (showCreditInfo && !loading) {
+		return (
+			<Modal
+				isOpen={showCreditInfo}
+				onClose={() => {
+					setLoading(false)
+					setShowCreditInfo(false)
+				}}
+				size={'xl'}
+			>
+				<ModalOverlay />
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						cursor={'pointer'}
+						onClick={() => {
+							setLoading(false)
+							setShowCreditInfo(false)
+						}}
+					>
+						<CloseIcon />
+					</Box>
+					<CreditInfo
+						credit={creditTable.RESERVATION}
+						onUse={reserveApartment}
+					/>
+				</ModalContent>
+			</Modal>
+		)
+	}
+
+	return (
+		<Modal isOpen={showBookApartmentModal} onClose={closeModal} size={'xl'}>
+			<ModalOverlay
+				bg="blackAlpha.300"
+				backdropFilter="blur(10px) hue-rotate(90deg)"
+			/>
+			<ModalContent
+				w={{
+					base: '90vw',
+					lg: '80vw',
+					xl: '70vw',
+				}}
+				height={'75vh'}
+				overflowY={'auto'}
+				flexDir={'column'}
+				alignItems={'center'}
+				justifyContent={'center'}
+				position={'relative'}
+				rounded={'16px'}
+				_dark={{ bgColor: 'black' }}
+				_light={{
+					bgColor: '#FDFDFD',
+					border: '1px',
+					borderColor: 'text_muted',
+				}}
+				py={{ base: '16px', md: '24px' }}
+				px={{ base: '16px', sm: '24px', md: '32px' }}
+				gap={{ base: '24px', md: '32px' }}
+				as={'form'}
+				onSubmit={handleSubmit}
+			>
+				<Box
+					pos={'absolute'}
+					top={{ base: '16px', md: '30px' }}
+					right={{ base: '16px', md: '30px' }}
+					cursor={'pointer'}
+					onClick={closeModal}
+				>
+					<CloseIcon />
+				</Box>
+
+				<Text
+					fontWeight={'500'}
+					fontSize={{ base: '20px', md: '24px' }}
+					_dark={{ color: 'white' }}
+					_light={{ color: '#111717' }}
+				>
+					Reserve Apartment
+				</Text>
+
+				<Text
+					mt={'-20px'}
+					fontWeight={'300'}
+					fontSize={{ base: 'base', md: 'lg' }}
+					textAlign={'center'}
+					color="text_muted"
+				>
+					Reserving this listing will cost{' '}
+					<Box as="span" fontWeight={'400'} color={'brand'}>
+						5000 credits.
+					</Box>{' '}
+					It will be reserved solely for you to inspect for a period of{' '}
+					<Box as="span" fontWeight={'400'} color={'brand'}>
+						2 days.
+					</Box>
+					<Flex flexDirection={'column'}>
+						<Flex justifyContent={'center'} alignItems={'center'}>
+							<BiMessageSquareError color={'brand'} />
+							<Box as="span" fontWeight={'500'} ml={3} my={2} color={'brand'}>
+								Tips to know
+							</Box>
+						</Flex>
+
+						<Box as="span" fontWeight={'400'}>
+							1. Endevour to inspect within the reserved period
+						</Box>
+
+						<Box as="span" fontWeight={'400'} my={2}>
+							2. Communicate with space provider before reservation
+						</Box>
+
+						<Box as="span" fontWeight={'400'}>
+							3. You can&apos;t reserve more than one space at a time
+						</Box>
+					</Flex>
+				</Text>
+
+				<Flex
+					gap={{ base: '20px', md: '32px' }}
+					justifyContent={'center'}
+					flexWrap={'wrap'}
+					mb={{ base: '32px', md: 0 }}
+				>
+					<Button
+						rounded={DEFAULT_PADDING}
+						paddingX={'50px'}
+						paddingY={'16px'}
+						h={{ base: '48px', md: '54px' }}
+						bgColor={'transparent'}
+						textColor={'brand'}
+						border={'1px'}
+						borderColor={'brand'}
+						onClick={closeModal}
+						fontSize={{ base: 'sm', md: 'base' }}
+					>
+						Cancel
+					</Button>
+					<Button
+						rounded={DEFAULT_PADDING}
+						type="submit"
+						paddingX={{ base: '36px', md: '50px' }}
+						paddingY={{ base: '12px', md: '16px' }}
+						h={{ base: '48px', md: '54px' }}
+						bgColor={'#00BC7399'}
+						textColor={'white'}
+						fontSize={{ base: 'sm', md: 'base' }}
+					>
+						Proceed to Payment
+					</Button>
+				</Flex>
+			</ModalContent>
+		</Modal>
 	)
 }
 
@@ -1500,7 +1874,6 @@ const BookInspectionModal = ({
 						bgColor={'#00BC7399'}
 						textColor={'white'}
 						fontSize={{ base: 'sm', md: 'base' }}
-						// onClick={handleSubmit}
 					>
 						Proceed to Payment
 					</Button>
@@ -1513,9 +1886,11 @@ const BookInspectionModal = ({
 const AvailabilityStatusCard = ({
 	status,
 	updatedAt,
+	updateReservation,
 }: {
 	status: 'available' | 'unavailable' | 'reserved' | null
 	updatedAt: { seconds: number; nanoseconds: number }
+	updateReservation: any
 }) => {
 	if (status === 'available')
 		return (
@@ -1612,7 +1987,8 @@ const AvailabilityStatusCard = ({
 					>
 						{status}:{' '}
 					</Text>
-					This space has been reserved for a premium community member.
+					{`This space has been reserved by a community member for an inspection advantage.
+					Bookmark post or check back in ${getTimeDifferenceInHours(updateReservation)} hours`}
 				</Text>
 			</Flex>
 		)

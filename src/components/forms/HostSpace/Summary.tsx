@@ -16,7 +16,11 @@ import {
 	Textarea,
 	VStack,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript, useJsApiLoader } from '@react-google-maps/api'
+import {
+	Autocomplete,
+	LoadScript,
+	useJsApiLoader,
+} from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
@@ -29,7 +33,6 @@ export default function Summary({
 	formData,
 	setFormData,
 }: HostSpaceFormProps) {
-
 	const { optionsState: options } = useOptionsContext()
 
 	const [houseRules, setHouseRules] = useState<string[]>(
@@ -39,7 +42,7 @@ export default function Summary({
 	const { isLoaded } = useJsApiLoader({
 		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
 		libraries,
-	});
+	})
 
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
 		options.location_keywords,
@@ -707,8 +710,12 @@ export default function Summary({
 							</Select>
 						</Flex>
 					</Flex>
-					{formData.area && (
-						(!isLoaded) ? <Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
+					{formData.area &&
+						(!isLoaded ? (
+							<Text width={'full'} textAlign={'center'}>
+								Loading google maps
+							</Text>
+						) : (
 							<FormControl mt={1}>
 								<FormLabel htmlFor="address">
 									Where in {formData.area}?
@@ -730,7 +737,7 @@ export default function Summary({
 									/>
 								</Autocomplete>
 							</FormControl>
-					)}
+						))}
 				</VStack>
 				<br />
 				<Button bgColor={'brand'} color={'white'} type={'submit'}>

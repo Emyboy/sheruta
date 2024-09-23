@@ -5,6 +5,7 @@ export const creditTable = {
 	PERSONAL_INFO_VIEW: 500,
 	CALLS: 70,
 	VIRTUAL_INSPECTION: 1950,
+	RESERVATION: 5000,
 }
 
 export const FUNCTION_URL = process.env.NEXT_PUBLIC_CLOUD_FUNCTION_URL

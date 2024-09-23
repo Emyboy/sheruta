@@ -22,7 +22,11 @@ import {
 	Timestamp,
 } from 'firebase/firestore'
 import Link from 'next/link'
-import { LoadScript, Autocomplete, useJsApiLoader } from '@react-google-maps/api'
+import {
+	LoadScript,
+	Autocomplete,
+	useJsApiLoader,
+} from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
@@ -98,7 +102,7 @@ const EditSeekerForm: React.FC<{
 	const { isLoaded } = useJsApiLoader({
 		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
 		libraries,
-	});
+	})
 
 	const {
 		authState: { flat_share_profile },
@@ -181,11 +185,11 @@ const EditSeekerForm: React.FC<{
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -398,8 +402,12 @@ const EditSeekerForm: React.FC<{
 				</FormControl>
 			</Flex>
 
-			{selectedLocation && (
-				(!isLoaded) ? <Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
+			{selectedLocation &&
+				(!isLoaded ? (
+					<Text width={'full'} textAlign={'center'}>
+						Loading google maps
+					</Text>
+				) : (
 					<FormControl isRequired mb={4}>
 						<FormLabel requiredIndicator={null} htmlFor="address">
 							Where in {selectedLocation}
@@ -417,7 +425,7 @@ const EditSeekerForm: React.FC<{
 							/>
 						</Autocomplete>
 					</FormControl>
-			)}
+				))}
 
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">

@@ -11,7 +11,11 @@ import {
 	InputLeftElement,
 	Text,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript, useJsApiLoader } from '@react-google-maps/api'
+import {
+	Autocomplete,
+	LoadScript,
+	useJsApiLoader,
+} from '@react-google-maps/api'
 import axios from 'axios'
 import { useCallback, useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
@@ -38,7 +42,7 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 	const { isLoaded } = useJsApiLoader({
 		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
 		libraries,
-	});
+	})
 
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
@@ -215,8 +219,11 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 							</Button>
 						</MainTooltip>
 					</Flex>
-					{(!isLoaded) ? 
-					<Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
+					{!isLoaded ? (
+						<Text width={'full'} textAlign={'center'}>
+							Loading google maps
+						</Text>
+					) : (
 						<Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
@@ -239,7 +246,7 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 								/>
 							</InputGroup>
 						</Autocomplete>
-					}
+					)}
 
 					<Flex mt={'8px'} flexDir={'column'} gap={'8px'}>
 						<Text fontWeight={'600'} fontSize={'2xl'} color={'dark'}>

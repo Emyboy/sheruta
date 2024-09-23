@@ -10,16 +10,16 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { FaAngleLeft } from 'react-icons/fa'
 
+const size = {
+	base: '98vw',
+	xl: '1300px',
+}
+
 export default async function page({
 	params: { request_id },
 }: {
 	params: { request_id: string }
 }) {
-	let size = {
-		base: '98vw',
-		xl: '1300px',
-	}
-
 	const [requestData, discussionsData] = await Promise.all([
 		SherutaDB.get({
 			document_id: request_id,

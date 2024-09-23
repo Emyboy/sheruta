@@ -134,6 +134,9 @@ export const createHostRequestDTO = z.object({
 	imagesRefPaths: z.array(z.string()),
 	videoRefPath: z.string().nullable(),
 
+	reserved_by: z.string().optional(),
+	reservation_expiry: z.instanceof(Timestamp).optional(),
+
 	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })
@@ -198,7 +201,7 @@ export type HostRequestDataDetails = Omit<
 	| '_user_ref'
 > & {
 	id: string
-	_location_keyword_ref: { slug: string }
+	_location_keyword_ref: { slug: string; name: string }
 	_service_ref: { title: string; about: string; slug: string }
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
@@ -217,6 +220,7 @@ export type HostRequestDataDetails = Omit<
 		hide_phone: boolean
 		gender: string
 	}
+	ref: DocumentReference
 }
 
 export type SeekerRequestDataDetails = Omit<
@@ -243,4 +247,5 @@ export type SeekerRequestDataDetails = Omit<
 		is_verified: boolean
 		gender: string
 	}
+	ref: DocumentReference
 }
