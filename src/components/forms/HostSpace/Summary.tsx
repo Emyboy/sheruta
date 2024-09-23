@@ -16,21 +16,30 @@ import {
 	Textarea,
 	VStack,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript } from '@react-google-maps/api'
+import { Autocomplete, LoadScript, useJsApiLoader } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
+
+const GOOGLE_PLACES_API_KEY: string | undefined =
+	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
 export default function Summary({
 	next,
 	formData,
 	setFormData,
 }: HostSpaceFormProps) {
+
 	const { optionsState: options } = useOptionsContext()
 
 	const [houseRules, setHouseRules] = useState<string[]>(
 		formData.house_rules ? formData.house_rules : [''],
 	)
+
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
+		libraries,
+	});
 
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
 		options.location_keywords,
@@ -698,38 +707,9 @@ export default function Summary({
 							</Select>
 						</Flex>
 					</Flex>
-					{formData.area &&
-						(typeof window !== 'undefined' && !window.google ? (
-							<LoadScript
-								googleMapsApiKey={
-									process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
-								}
-								libraries={libraries}
-							>
-								<FormControl mt={'-1.5rem'}>
-									<FormLabel htmlFor="address">
-										Where in {formData.area}?
-									</FormLabel>
-									<Autocomplete
-										onLoad={handleLoad}
-										onPlaceChanged={handlePlaceChanged}
-									>
-										<Input
-											_placeholder={{ color: 'text_muted' }}
-											borderColor={'border_color'}
-											_dark={{ borderColor: 'dark_light' }}
-											id="address"
-											type="text"
-											placeholder="Enter a location"
-											name="google_location_text"
-											value={formData.google_location_text}
-											onChange={handleChange}
-										/>
-									</Autocomplete>
-								</FormControl>
-							</LoadScript>
-						) : (
-							<FormControl mt={'-1.5rem'}>
+					{formData.area && (
+						(!isLoaded) ? <Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
+							<FormControl mt={1}>
 								<FormLabel htmlFor="address">
 									Where in {formData.area}?
 								</FormLabel>
@@ -750,7 +730,7 @@ export default function Summary({
 									/>
 								</Autocomplete>
 							</FormControl>
-						))}
+					)}
 				</VStack>
 				<br />
 				<Button bgColor={'brand'} color={'white'} type={'submit'}>
