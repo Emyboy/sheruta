@@ -12,8 +12,8 @@ import {
 	FormErrorMessage,
 	VStack,
 	HStack,
-	IconButton,
-	useColorMode,
+	InputGroup,
+	InputRightElement,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import {
@@ -21,6 +21,11 @@ import {
 	BiLogoFacebookCircle,
 	BiLogoGoogle,
 } from 'react-icons/bi'
+import {
+BsEyeFill,
+BsEyeSlash,
+BsEyeSlashFill
+} from 'react-icons/bs'
 import MainModal from '../atoms/MainModal'
 import { useAuthContext } from '@/context/auth.context'
 import { useAppContext } from '@/context/app.context'
@@ -32,7 +37,7 @@ import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 
-interface Props {}
+interface Props { }
 
 export default function AuthPopup(props: Props) {
 	const { authState } = useAuthContext()
@@ -119,7 +124,6 @@ const AuthForm: React.FC<{
 		password: '',
 	})
 
-	const { colorMode } = useColorMode()
 	const { loginWithGoogle } = useAuthContext()
 
 	const [errors, setErrors] = useState({
@@ -132,6 +136,9 @@ const AuthForm: React.FC<{
 	const { showToast } = useCommon()
 
 	const [loading, setIsLoading] = useState<boolean>(false)
+	const [showPassword, setShowPassword] = useState(false)
+
+	const handlePasswordVisibility = () => setShowPassword(!showPassword)
 
 	const validateForm = () => {
 		let isValid = true
@@ -178,7 +185,7 @@ const AuthForm: React.FC<{
 		return isValid
 	}
 
-	const handleChage = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target
 
 		setFormData((prev) => ({
@@ -262,7 +269,7 @@ const AuthForm: React.FC<{
 										size={'lg'}
 										type="text"
 										value={formData.firstName}
-										onChange={handleChage}
+										onChange={handleChange}
 										placeholder="Enter your first name"
 									/>
 									{errors.firstName && (
@@ -277,7 +284,7 @@ const AuthForm: React.FC<{
 										size={'lg'}
 										type="text"
 										value={formData.lastName}
-										onChange={handleChage}
+										onChange={handleChange}
 										placeholder="Enter your last name"
 									/>
 									{errors.lastName && (
@@ -294,28 +301,33 @@ const AuthForm: React.FC<{
 								size={'lg'}
 								type="email"
 								value={formData.email}
-								onChange={handleChage}
+								onChange={handleChange}
 								placeholder="Enter your email"
 							/>
 							{errors.email && (
 								<FormErrorMessage>{errors.email}</FormErrorMessage>
 							)}
 						</FormControl>
-
 						<FormControl isInvalid={!!errors.password}>
 							<FormLabel>Password</FormLabel>
-							<Input
-								name="password"
-								type="password"
-								value={formData.password}
-								onChange={handleChage}
-								placeholder="Enter your password"
-							/>
+							<InputGroup>
+								<Input
+									name="password"
+									type={showPassword ? 'text' : 'password'}
+									value={formData.password}
+									onChange={handleChange}
+									placeholder="Enter your password"
+								/>
+								<InputRightElement width="">
+									<Button onClick={handlePasswordVisibility}>
+										{showPassword ? <BsEyeSlashFill /> : <BsEyeFill/>}
+									</Button>
+								</InputRightElement>
+							</InputGroup>
 							{errors.password && (
 								<FormErrorMessage>{errors.password}</FormErrorMessage>
 							)}
 						</FormControl>
-
 						<Button
 							isLoading={loading}
 							disabled={loading}

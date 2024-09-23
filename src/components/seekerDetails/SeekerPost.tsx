@@ -225,7 +225,7 @@ const SeekerPost = ({
 	return (
 		<>
 			{typeof postData !== 'undefined' &&
-				Object.values(postData || {}).length ? (
+			Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -405,17 +405,18 @@ const SeekerPost = ({
 												fontSize={'24px'}
 												icon={<BiPhone />}
 												onClick={async () => {
-													if (authState.user?._id === postData._user_ref._id) return
+													if (authState.user?._id === postData._user_ref._id)
+														return
 													await handleCall({
 														number: postData.user_info.primary_phone_number,
 														recipient_id: postData._user_ref._id,
 														sender_details: authState.user
 															? {
-																avatar_url: authState.user.avatar_url,
-																first_name: authState.user.first_name,
-																last_name: authState.user.last_name,
-																id: authState.user._id,
-															}
+																	avatar_url: authState.user.avatar_url,
+																	first_name: authState.user.first_name,
+																	last_name: authState.user.last_name,
+																	id: authState.user._id,
+																}
 															: null,
 													})
 												}}
@@ -457,9 +458,7 @@ const SeekerPost = ({
 						></HStack>
 					</Box>
 					<Box marginTop={10} paddingBottom="70px">
-						<UserCard
-							postData={postData}
-						/>
+						<UserCard postData={postData} />
 					</Box>
 				</>
 			) : (
@@ -472,14 +471,16 @@ const SeekerPost = ({
 }
 
 const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
+	const { authState } = useAuthContext()
 
-	const { authState } = useAuthContext();
-
-	const name = capitalizeString(postData._user_ref.first_name) + ' ' + postData._user_ref.last_name;
-	const handle = postData._user_ref.first_name;
-	const userInfo = postData.user_info;
+	const name =
+		capitalizeString(postData._user_ref.first_name) +
+		' ' +
+		postData._user_ref.last_name
+	const handle = postData._user_ref.first_name
+	const userInfo = postData.user_info
 	const bio = postData.flat_share_profile.bio || 'No Bio Available'
-	const profilePicture = postData._user_ref.avatar_url;
+	const profilePicture = postData._user_ref.avatar_url
 
 	return (
 		<Box bgColor="#202020" borderRadius="15px">
@@ -537,11 +538,11 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 									recipient_id: postData._user_ref._id,
 									sender_details: authState.user
 										? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
 										: null,
 								})
 							}}
