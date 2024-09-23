@@ -632,7 +632,12 @@ const VideoCallModal = ({
 						</Button>
 					</MainTooltip>
 				</Box>
-				<WherebyEmbed roomUrl={roomUrl} hostRoomUrl={hostRoomUrl} user={user} host_details={host_details} />
+				<WherebyEmbed
+					roomUrl={roomUrl}
+					hostRoomUrl={hostRoomUrl}
+					user={user}
+					host_details={host_details}
+				/>
 			</ModalContent>
 		</Modal>
 	)
@@ -723,6 +728,7 @@ const CancelBookingModal = ({
 										first_name: user.first_name,
 										last_name: user.last_name,
 									},
+									action_url: '/inspections',
 								},
 							}),
 						]
@@ -748,6 +754,7 @@ const CancelBookingModal = ({
 										first_name: user.first_name,
 										last_name: user.last_name,
 									},
+									action_url: '/inspections',
 								},
 							}),
 						]
@@ -988,6 +995,7 @@ const ResheduleInspectionModal = ({
 							first_name: user.first_name,
 							last_name: user.last_name,
 						},
+						action_url: '/inspections',
 					},
 				}),
 			])

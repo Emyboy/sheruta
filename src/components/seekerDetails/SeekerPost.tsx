@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB from '@/firebase/service/index.firebase'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import useShareSpace from '@/hooks/useShareSpace'
 import {
@@ -42,9 +42,18 @@ import {
 	BiShare,
 	BiTrash,
 	BiSolidBadgeCheck,
+	BiSolidBookmark,
 } from 'react-icons/bi'
 import SuperJSON from 'superjson'
 import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
+import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
+import {
+	BookmarkDataDetails,
+	BookmarkType,
+} from '@/firebase/service/bookmarks/bookmarks.types'
+import { v4 as generateUId } from 'uuid'
+import { doc } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 const SeekerPost = ({
 	requestData,
@@ -68,6 +77,9 @@ const SeekerPost = ({
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)
+
+	const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
+	const [bookmarkId, setBookmarkId] = useState<string | null>(null)
 
 	useEffect(() => {
 		if (
@@ -120,6 +132,95 @@ const SeekerPost = ({
 			setIsLoading(false)
 		}
 	}
+
+	const updateBookmark = async () => {
+		try {
+			if (!(authState.user && authState.user?._id)) {
+				return showToast({
+					message: 'Please login to perform this action',
+					status: 'info',
+				})
+			}
+
+			setIsLoading(true)
+
+			//check if user has saved this bookmark already, then unsave it
+			if (isBookmarked && bookmarkId) {
+				await BookmarkService.deleteBookmark({
+					user_id: authState.user._id,
+					document_id: bookmarkId,
+				})
+
+				setIsBookmarked(false)
+				setBookmarkId(null)
+				setIsLoading(false)
+				return showToast({
+					message: 'Bookmark removed successfully',
+					status: 'success',
+				})
+			}
+
+			const uuid = generateUId()
+			const requestRef = doc(
+				db,
+				DBCollectionName.flatShareRequests,
+				requestId as string,
+			)
+
+			await BookmarkService.createBookmark({
+				object_type: BookmarkType.requests,
+				_object_ref: requestRef,
+				_user_ref: authState.flat_share_profile?._user_ref,
+				uuid,
+			})
+
+			setBookmarkId(uuid)
+			setIsLoading(false)
+			setIsBookmarked(true)
+			return showToast({
+				message: 'Bookmark added successfully',
+				status: 'success',
+			})
+		} catch (err) {
+			showToast({
+				message: 'Failed to update bookmark',
+				status: 'error',
+			})
+		}
+	}
+
+	useEffect(() => {
+		const isBookmarked = async (): Promise<void> => {
+			try {
+				if (!(authState.user && authState.user._id)) {
+					setIsBookmarked(false)
+					return
+				}
+
+				const myBookmarks = (await BookmarkService.getUserBookmarks(
+					authState.user._id,
+				)) as BookmarkDataDetails[]
+
+				// Find the bookmark by request_id
+				const theBookmark = myBookmarks.find(
+					(bookmark) => bookmark._object_ref?.id === requestId,
+				)
+
+				// Set bookmarkId if a bookmark is found
+				if (theBookmark) {
+					setBookmarkId(theBookmark.id)
+					setIsBookmarked(true)
+				} else {
+					setIsBookmarked(false)
+				}
+			} catch (err: any) {
+				console.error('Error checking if request is bookmarked:', err)
+				setIsBookmarked(false)
+			}
+		}
+
+		isBookmarked()
+	}, [authState, requestId])
 
 	return (
 		<>
@@ -237,10 +338,20 @@ const SeekerPost = ({
 									</PopoverContent>
 								</Popover>
 								<IconButton
+									onClick={() => updateBookmark()}
+									disabled={isLoading}
+									_hover={{
+										color: 'brand',
+										bg: 'none',
+										_dark: {
+											color: 'brand',
+										},
+									}}
+									isLoading={isLoading}
 									colorScheme={colorMode === 'dark' ? '' : 'gray'}
 									fontSize="24px"
 									aria-label="Bookmark"
-									icon={<BiBookmark />}
+									icon={isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
 								/>
 							</HStack>
 						</Flex>
@@ -293,9 +404,22 @@ const SeekerPost = ({
 												border="none"
 												fontSize={'24px'}
 												icon={<BiPhone />}
-												// onClick={() =>
-												// 	handleCall(postData.user_info.primary_phone_number)
-												// }
+												onClick={async () => {
+													if (authState.user?._id === postData._user_ref._id)
+														return
+													await handleCall({
+														number: postData.user_info.primary_phone_number,
+														recipient_id: postData._user_ref._id,
+														sender_details: authState.user
+															? {
+																	avatar_url: authState.user.avatar_url,
+																	first_name: authState.user.first_name,
+																	last_name: authState.user.last_name,
+																	id: authState.user._id,
+																}
+															: null,
+													})
+												}}
 											/>
 										</Tooltip>
 									) : null}
@@ -334,17 +458,7 @@ const SeekerPost = ({
 						></HStack>
 					</Box>
 					<Box marginTop={10} paddingBottom="70px">
-						<UserCard
-							name={
-								capitalizeString(postData._user_ref.first_name) +
-								' ' +
-								postData._user_ref.last_name
-							}
-							handle={postData._user_ref.first_name}
-							userInfo={postData.user_info}
-							profilePicture={postData._user_ref.avatar_url}
-							bio={postData.flat_share_profile.bio || 'No Bio Available'}
-						/>
+						<UserCard postData={postData} />
 					</Box>
 				</>
 			) : (
@@ -356,19 +470,18 @@ const SeekerPost = ({
 	)
 }
 
-const UserCard = ({
-	name,
-	handle,
-	bio,
-	profilePicture,
-	userInfo,
-}: {
-	name: string
-	handle: string
-	bio: string | undefined
-	profilePicture: string | undefined
-	userInfo: any
-}) => {
+const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
+	const { authState } = useAuthContext()
+
+	const name =
+		capitalizeString(postData._user_ref.first_name) +
+		' ' +
+		postData._user_ref.last_name
+	const handle = postData._user_ref.first_name
+	const userInfo = postData.user_info
+	const bio = postData.flat_share_profile.bio || 'No Bio Available'
+	const profilePicture = postData._user_ref.avatar_url
+
 	return (
 		<Box bgColor="#202020" borderRadius="15px">
 			<Flex bg="brand_darker" p={4} alignItems="center" borderRadius="15px">
@@ -408,7 +521,7 @@ const UserCard = ({
 						variant="ghost"
 						colorScheme="white"
 						size={'md'}
-						onClick={() => handleDM(userInfo?._user_id)}
+						onClick={() => handleDM(postData._user_ref._id)}
 					/>
 					{userInfo?.primary_phone_number ? (
 						<IconButton
@@ -418,7 +531,21 @@ const UserCard = ({
 							colorScheme="white"
 							ml={2}
 							size={'md'}
-							onClick={() => handleCall(userInfo.primary_phone_number)}
+							onClick={async () => {
+								if (authState.user?._id === postData._user_ref._id) return
+								await handleCall({
+									number: userInfo.primary_phone_number,
+									recipient_id: postData._user_ref._id,
+									sender_details: authState.user
+										? {
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
+										: null,
+								})
+							}}
 						/>
 					) : null}
 				</Flex>

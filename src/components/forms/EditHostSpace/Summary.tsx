@@ -708,13 +708,36 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 						</Flex>
 					</Flex>
 
-					{formData.area && (
-						<LoadScript
-							googleMapsApiKey={
-								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
-							}
-							libraries={libraries}
-						>
+					{formData.area &&
+						(typeof window !== 'undefined' && !window.google ? (
+							<LoadScript
+								googleMapsApiKey={
+									process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
+								}
+								libraries={libraries}
+							>
+								<FormControl mt={'-1.5rem'}>
+									<FormLabel htmlFor="address">
+										Choose a more descriptive location in {formData.area}?
+									</FormLabel>
+									<Autocomplete
+										onLoad={handleLoad}
+										onPlaceChanged={handlePlaceChanged}
+									>
+										<Input
+											_placeholder={{ color: 'text_muted' }}
+											id="address"
+											type="text"
+											required
+											placeholder="Enter a location"
+											name="google_location_text"
+											value={formData.google_location_text}
+											onChange={handleChange}
+										/>
+									</Autocomplete>
+								</FormControl>
+							</LoadScript>
+						) : (
 							<FormControl mt={'-1.5rem'}>
 								<FormLabel htmlFor="address">
 									Choose a more descriptive location in {formData.area}?
@@ -735,8 +758,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 									/>
 								</Autocomplete>
 							</FormControl>
-						</LoadScript>
-					)}
+						))}
 				</VStack>
 				<br />
 				<Button bgColor={'brand'} color={'white'} type={'submit'}>

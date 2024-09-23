@@ -84,5 +84,5 @@ export default function useShareSpace() {
 		}
 	}
 
-	return { copyShareUrl, handleDeletePost, isLoading }
+	return { copyShareUrl, handleDeletePost, isLoading, setIsLoading }
 }
