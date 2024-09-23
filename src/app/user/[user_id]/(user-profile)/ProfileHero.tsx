@@ -17,20 +17,45 @@ import {
 	BiSolidLocationPlus,
 	BiStore,
 } from 'react-icons/bi'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import { createDTO } from '@/firebase/service/index.firebase'
+import { use, useEffect } from 'react'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 
 type Props = {
 	data: any
 	userProfile: any
 	user_id: string
+	profileInfo: any
 }
 
-export default function ProfileHero({ data, userProfile, user_id }: Props) {
+export default function ProfileHero({ data, userProfile, user_id, profileInfo }: Props) {
 	const _user: AuthUser = data.user
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
 	const { authState } = useAuthContext()
 
+	const profileData: createDTO = {
+		collection_name: DBCollectionName.userProfile,
+		data: userProfile,
+		document_id: user_id,
+	}
+
+
+    const sendProfile = ()=>{
+
+		useEffect(()=>{
+
+      
+			saveProfileDocs(profileInfo, user_id)
+	
+		},[profileData, user_id] )
+		console.log('done.....................')
+	}
+	sendProfile()
+
 	const _userInfo: UserInfo = userProfile.userInfo
+
 
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>
@@ -121,25 +146,25 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 
 				<Flex gap={DEFAULT_PADDING}>
 					<Button
-						onClick={async () => {
-							if (authState.user?._id === user_id) return
-							await handleCall({
-								number: _userInfo.primary_phone_number,
-								recipient_id: user_id,
-								sender_details: authState.user
-									? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
-									: null,
-							})
-						}}
+					// onClick={async () => {
+					// 	if (authState.user?._id === user_id) return
+					// 	await handleCall({
+					// 		number: _userInfo.primary_phone_number,
+					// 		recipient_id: user_id,
+					// 		sender_details: authState.user
+					// 			? {
+					// 					avatar_url: authState.user.avatar_url,
+					// 					first_name: authState.user.first_name,
+					// 					last_name: authState.user.last_name,
+					// 					id: authState.user._id,
+					// 				}
+					// 			: null,
+					// 	})
+					// }}
 					>
 						Call Me
 					</Button>
-					<Link href={`/messages/${_user._id}`}>
+					<Link href={`/messages/${user_id}`}>
 						<Button>
 							<BiMessageRoundedDetail size={25} />
 						</Button>

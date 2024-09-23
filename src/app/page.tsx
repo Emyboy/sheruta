@@ -27,14 +27,12 @@ export default async function page() {
 		getAllProfileDocs(),
 	])
 
-	// requests?.map((index, item) => {
-	// 	console.log(`Index: ${index}, Request:`, item)
-	// })
+	
 
-	console.log(
-		'This it the user profile for 202:,.......................',
-		userProfiles,
-	)
+	// console.log(
+	// 	'This it the user profile for 202:,.......................',
+	// 	userProfiles,
+	// )
 	const finalRequests = await Promise.all(
 		requests
 			?.filter((request: HostRequestDataDetails) => request?._user_ref?._id)

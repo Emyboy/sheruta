@@ -3,13 +3,13 @@ import { db } from '@/firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 
 
-export const getAllProfileDocs = async (): Promise<any[] | undefined> => {
+export const getAllProfileSnippetDocs = async (): Promise<any[] | undefined> => {
 
 	
 	try {
 		const _limit: number = 10
 		const profileData = await getDocs(
-			collection(db, DBCollectionName.userProfile),
+			collection(db, DBCollectionName.userProfileSnippet),
 		)
 		const profileDataArray: any[] = []
 		profileData.forEach((doc) => {
@@ -22,13 +22,13 @@ export const getAllProfileDocs = async (): Promise<any[] | undefined> => {
 	
 }
 
-export const saveProfileDocs = async (
+export const saveProfileSnippetDocs = async (
 	profileData: Record<string, any>,
 	user_id: string,
 	
 ): Promise<void> => {
 	try {
-		const docRef = doc(db, DBCollectionName.userProfile, user_id)
+		const docRef = doc(db, DBCollectionName.userProfileSnippet, user_id)
 		const docSnap = await getDoc(docRef)
 		
 			await setDoc(docRef, {
@@ -41,10 +41,10 @@ export const saveProfileDocs = async (
 	}
 }
 
-export const updateProfileDocs = async (profileData: Record<string, any>,
+export const updateProfileSnippetDocs = async (profileData: Record<string, any>,
 	user_id: string,): Promise<void> =>{
 	try{
-	  const docRef = doc(db, DBCollectionName.userProfile, user_id);
+	  const docRef = doc(db, DBCollectionName.userProfileSnippet, user_id);
 	  const docSnap = await updateDoc(docRef, {
 		...profileData, 
 		updatedAt: serverTimestamp()

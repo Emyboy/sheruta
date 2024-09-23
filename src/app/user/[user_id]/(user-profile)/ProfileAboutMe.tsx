@@ -1,5 +1,3 @@
-'use client'
-
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Badge, Flex, Text } from '@chakra-ui/react'
 import React, { useState } from 'react'

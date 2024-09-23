@@ -26,7 +26,7 @@ export default function GetStarted() {
 
 	const allSteps = (): any[] => {
 		return [
-			<GetStartedBeginning key={'get-started'} done={next} />,
+			<GetStartedBeginning key={'get-started'} done={next}/>,
 			<SeekingStatusSelector key={'agenda'} done={next} />,
 			<GenderSelect key={'my-gender'} done={next} />,
 			<AuthInfoForm key={'auth-form'} done={next} />,

@@ -81,7 +81,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 
 	interface UserProfile {
 		collection_name: string
-		data: {
+		
 			twitter: string
 			employment_status: string
 			state: string
@@ -101,23 +101,24 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 			_id: string
 			budget: number
 			payment_plan: string
-			// Add any other fields if needed
-		}
-		document_id: string
+			
+	
+	
 	}
 
-	console.log(typeof userProfiles) // This will print the datatype (e.g., object, array, etc.)
+	console.log(typeof userProfiles)
 
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
 	console.log(typeof parsedUserProfile)
-	console.log(parsedUserProfile)
+	// console.log('pasrsed profile...............................................',parsedUserProfile)
 
 	return (
 		<>
 			{parsedUserProfile.length > 0 ? (
 				parsedUserProfile.map((item, index) => {
-					const ProfileSnippetBio = item.data?.bio
+					const ProfileSnippetBio = item?.bio
 					const maxBioLength = 84
+					
 					return (
 						<Box m={4} key={index}>
 							<Card
@@ -129,18 +130,18 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 									objectFit="cover"
 									maxW={{ base: '100%', sm: '200px' }}
 									w="600px"
-									src={`${item.data?.avatar_url}`}
+									src={`${item?.avatar_url}`}
 									alt="Profile Image"
 								/>
 
 								<Stack>
 									<Link
-										href={`/user/${item.data?.document_id}`}
+										href={`/user/${item?.document_id}`}
 										style={{ textDecoration: 'none' }}
 									>
 										<CardBody mb={0} border="none">
 											<Flex justify="space-between" align="center" mb={3}>
-												<Text>{`${item.data?.first_name} ${item.data?.last_name}`}</Text>
+												<Text>{`${item?.first_name} ${item.last_name}`}</Text>
 												<Badge color="text_color" background="border_color">
 													Promoted
 												</Badge>
@@ -162,7 +163,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 												align="center"
 											>
 												<Text color="text_muted" fontWeight="700">
-													{`Preferred area: ${item.data?.area} ,${item.data?.state}`}{' '}
+													{`Preferred area: ${item.area} ,${item.state}`}{' '}
 												</Text>
 												<Badge
 													colorScheme="green"
@@ -172,10 +173,10 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 													{`House share`}
 												</Badge>
 												<Badge
-													colorScheme={item.data?.seeking ? 'orange' : 'teal'}
+													colorScheme={item.seeking ? 'orange' : 'teal'}
 													textTransform="capitalize"
 												>
-													{item.data?.seeking ? 'Seeker' : 'I have a space'}
+													{item?.seeking ? 'Seeker' : 'I have a space'}
 												</Badge>
 											</Flex>
 										</CardBody>
@@ -186,7 +187,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 											<BiBookmark style={{ fontSize: '1.5em' }} />
 										</Button>
 										<Box mr={2} color="text_muted">
-											{`${item.data?.seeking ? 'Budget:' : 'Rent:'} ${item.data?.budget}/${item.data?.payment_plan ? item.data?.payment_plan : ''}`}{' '}
+											{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_plan ? item?.payment_plan : ''}`}{' '}
 										</Box>
 									</Flex>
 								</Stack>
@@ -196,7 +197,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 				})
 			) : (
 				<Box>
-					<Text>No user profiles found.</Text>
+					<Text>Feature your profile here.</Text>
 				</Box>
 			)}
 

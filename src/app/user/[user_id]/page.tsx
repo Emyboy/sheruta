@@ -27,6 +27,7 @@ import SherutaDB from '@/firebase/service/index.firebase'
 import { promise } from 'zod'
 
 import { ShareButton } from '@/components/atoms/ShareButton'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -236,7 +237,7 @@ export default async function page(props: any) {
 		gender_preference: flatshareInfosParsed.flatShareProfile.gender_preference,
 		age_preference: flatshareInfosParsed.flatShareProfile.age_preference,
 		bio: flatshareInfosParsed.flatShareProfile.bio,
-		payment_plan: flatshareInfosParsed.flatShareProfile.payment_plan,
+		payment_plan: flatshareInfosParsed.flatShareProfile.payment_plan || null,
 
 		twitter: flatshareInfosParsed.flatShareProfile.socials.twitter,
 		tiktok: flatshareInfosParsed.flatShareProfile.socials.tiktok,
@@ -260,6 +261,14 @@ export default async function page(props: any) {
 	}
 
 	const userId = user.user?.id
+
+	// const profileData: createDTO = {
+	// 	collection_name: DBCollectionName.userProfile,
+	// 	data: userProfiles,
+	// 	document_id: user_id,
+	// }
+
+	// await saveProfileDocs(profileData, user_id)
 
 	return (
 		<Flex justifyContent={'center'}>

@@ -16,6 +16,7 @@ import { industries } from '@/constants'
 import useCommon from '@/hooks/useCommon'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { useAuthContext } from '@/context/auth.context'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 type Props = {
 	done?: () => void
@@ -74,6 +75,20 @@ export default function PersonalInfoForm({ done }: Props) {
 					age_preference,
 				},
 			})
+			await saveProfileDocs({
+				 occupation,
+				 employment_status,
+				 work_industry,
+				 religion,
+				tiktok,
+				facebook,
+				 instagram,
+				 twitter,
+				 linkedin,
+				 gender_preference,
+				 age_preference,
+				 is_verified: false
+				},user?._id as string)
 			if (user) {
 				await FlatShareProfileService.update({
 					data: {

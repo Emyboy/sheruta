@@ -14,6 +14,7 @@ import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
@@ -50,10 +51,14 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 				document_id: user._id,
 			})
 
+			await saveProfileDocs({first_name, last_name, primary_phone_number,budget, bio, payment_plan, document_id: user?._id, _user_ref: `/users/${user?._id}`}, user?._id)
+
 			await FlatShareProfileService.update({
 				data: { budget, bio, payment_plan },
 				document_id: user?._id,
 			})
+
+
 
 			await getAuthDependencies()
 
