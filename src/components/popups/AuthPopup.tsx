@@ -18,9 +18,7 @@ import {
 	AlertIcon,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
-import {
-	BiLogoGoogle,
-} from 'react-icons/bi'
+import { BiLogoGoogle } from 'react-icons/bi'
 import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs'
 import MainModal from '../atoms/MainModal'
 import { useAuthContext } from '@/context/auth.context'
@@ -34,7 +32,7 @@ import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 
-interface Props { }
+interface Props {}
 
 export default function AuthPopup(props: Props) {
 	const { authState } = useAuthContext()
@@ -58,9 +56,18 @@ export default function AuthPopup(props: Props) {
 				<Flex minH={'200px'} justifyContent={'center'} alignItems={'center'}>
 					<Spinner size="lg" />
 				</Flex>
-			) : (isPasswordReset) ? <PasswordResetForm setIsPasswordReset={setIsPasswordReset} setIsSignUp={setIsSignUp} /> :
-				<AuthForm isSignUp={isSignUp} setIsSignUp={setIsSignUp} setIsPasswordReset={setIsPasswordReset} />
-			}
+			) : isPasswordReset ? (
+				<PasswordResetForm
+					setIsPasswordReset={setIsPasswordReset}
+					setIsSignUp={setIsSignUp}
+				/>
+			) : (
+				<AuthForm
+					isSignUp={isSignUp}
+					setIsSignUp={setIsSignUp}
+					setIsPasswordReset={setIsPasswordReset}
+				/>
+			)}
 		</MainModal>
 	)
 }
@@ -106,7 +113,13 @@ const EachSocial = ({
 	)
 }
 
-const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordReset: (arg: boolean) => void, setIsSignUp: (arg: boolean) => void }) => {
+const PasswordResetForm = ({
+	setIsPasswordReset,
+	setIsSignUp,
+}: {
+	setIsPasswordReset: (arg: boolean) => void
+	setIsSignUp: (arg: boolean) => void
+}) => {
 	const [email, setEmail] = useState('')
 	// const [message, setMessage] = useState('')
 	// const [error, setError] = useState('')
@@ -117,7 +130,6 @@ const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordR
 	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setEmail(e.target.value)
 	}
-
 
 	const handlePasswordReset = async (e: React.FormEvent) => {
 		e.preventDefault()
@@ -149,7 +161,8 @@ const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordR
 			</Center>
 			<Alert mb={5} status="info" variant="subtle">
 				<AlertIcon />
-				Enter the email address linked to your account and click on the reset password button
+				Enter the email address linked to your account and click on the reset
+				password button
 			</Alert>
 			<VStack spacing={4} width="100%">
 				<FormControl>
@@ -165,28 +178,28 @@ const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordR
 
 				<Button
 					type="submit"
-					bgColor={"brand"}
+					bgColor={'brand'}
 					width="full"
 					isLoading={isSubmitting}
 				>
 					Reset Password
 				</Button>
 
-				<Box width={"full"} textAlign={"center"}>
+				<Box width={'full'} textAlign={'center'}>
 					<Text
 						cursor={'pointer'}
 						textDecoration="underline"
 						onClick={() => {
-							setIsSignUp(false),
-								setIsPasswordReset(false)
+							setIsSignUp(false), setIsPasswordReset(false)
 						}}
-					>Have you remembered your password?</Text>
+					>
+						Have you remembered your password?
+					</Text>
 				</Box>
 			</VStack>
 		</form>
 	)
 }
-
 
 const AuthForm: React.FC<{
 	isSignUp: boolean
@@ -426,14 +439,17 @@ const AuthForm: React.FC<{
 							{isSignUp ? 'Sign Up' : 'Login'}
 						</Button>
 
-						{!isSignUp ?
-							<Box mt={2} width={"full"} textAlign={"center"}>
+						{!isSignUp ? (
+							<Box mt={2} width={'full'} textAlign={'center'}>
 								<Text
 									cursor={'pointer'}
 									textDecoration="underline"
 									onClick={() => setIsPasswordReset(true)}
-								>Forgot password?</Text>
-							</Box> : null}
+								>
+									Forgot password?
+								</Text>
+							</Box>
+						) : null}
 
 						<Box color="gray.500" mt={2}>
 							{isSignUp ? (

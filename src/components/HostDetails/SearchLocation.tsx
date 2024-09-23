@@ -11,7 +11,7 @@ import {
 	InputLeftElement,
 	Text,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript } from '@react-google-maps/api'
+import { Autocomplete, LoadScript, useJsApiLoader } from '@react-google-maps/api'
 import axios from 'axios'
 import { useCallback, useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
@@ -24,6 +24,9 @@ type LatLng = {
 	lng: number
 }
 
+const GOOGLE_PLACES_API_KEY: string | undefined =
+	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
+
 export default function SearchLocation({ location }: { location: LatLng }) {
 	const [text, setText] = useState('')
 
@@ -31,6 +34,11 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 		distanceMeters: number
 		duration: string
 	}>()
+
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
+		libraries,
+	});
 
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
@@ -207,37 +215,8 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 							</Button>
 						</MainTooltip>
 					</Flex>
-					{typeof window !== 'undefined' && !window.google ? (
-						<LoadScript
-							googleMapsApiKey={
-								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
-							}
-							libraries={libraries}
-						>
-							<Autocomplete
-								onLoad={handleLoad}
-								onPlaceChanged={handlePlaceChanged}
-							>
-								<InputGroup>
-									<InputLeftElement pointerEvents="none">
-										<CiSearch color="gray" />
-									</InputLeftElement>
-									<Input
-										type="text"
-										color={'gray'}
-										borderColor={'border_color'}
-										_dark={{ borderColor: 'dark_light' }}
-										placeholder="Search Location"
-										bgColor={'white'}
-										_placeholder={{ color: 'text_muted' }}
-										_focus={{ ring: 0, outline: 0 }}
-										value={text}
-										onChange={(e) => setText(e.target.value)}
-									/>
-								</InputGroup>
-							</Autocomplete>
-						</LoadScript>
-					) : (
+					{(!isLoaded) ? 
+					<Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
 						<Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
@@ -260,7 +239,7 @@ export default function SearchLocation({ location }: { location: LatLng }) {
 								/>
 							</InputGroup>
 						</Autocomplete>
-					)}
+					}
 
 					<Flex mt={'8px'} flexDir={'column'} gap={'8px'}>
 						<Text fontWeight={'600'} fontSize={'2xl'} color={'dark'}>

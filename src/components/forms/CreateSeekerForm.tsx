@@ -7,11 +7,12 @@ import {
 	FormLabel,
 	Input,
 	Select,
+	Text,
 	Textarea,
 	useColorMode,
 } from '@chakra-ui/react'
 import { Timestamp, DocumentReference, DocumentData } from 'firebase/firestore'
-import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import { LoadScript, Autocomplete, useJsApiLoader } from '@react-google-maps/api'
 
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
@@ -107,6 +108,11 @@ const CreateSeekerForm: React.FC = () => {
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
 
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
+		libraries,
+	});
+
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const {
 		authState: { flat_share_profile, user, user_info },
@@ -173,11 +179,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
+						location: {
+							lat: place.geometry.location?.lat() ?? 0,
+							lng: place.geometry.location?.lng() ?? 0,
+						},
+					}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -413,42 +419,23 @@ const CreateSeekerForm: React.FC = () => {
 			</Flex>
 
 			{selectedLocation && (
+				(!isLoaded) ? <Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
 				<FormControl isRequired mb={4}>
 					<FormLabel requiredIndicator={null} htmlFor="address">
 						Where in {selectedLocation}
 					</FormLabel>
-					{typeof window !== 'undefined' && !window.google ? (
-						<LoadScript
-							googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
-							libraries={libraries}
-						>
-							<Autocomplete
-								onLoad={handleLoad}
-								onPlaceChanged={handlePlaceChanged}
-							>
-								<Input
-									id="address"
-									type="text"
-									placeholder="Select..."
-									value={googleLocationText}
-									onChange={(e) => setGoogleLocationText(e.target.value)}
-								/>
-							</Autocomplete>
-						</LoadScript>
-					) : (
-						<Autocomplete
-							onLoad={handleLoad}
-							onPlaceChanged={handlePlaceChanged}
-						>
-							<Input
-								id="address"
-								type="text"
-								placeholder="Select..."
-								value={googleLocationText}
-								onChange={(e) => setGoogleLocationText(e.target.value)}
-							/>
-						</Autocomplete>
-					)}
+					<Autocomplete
+						onLoad={handleLoad}
+						onPlaceChanged={handlePlaceChanged}
+					>
+						<Input
+							id="address"
+							type="text"
+							placeholder="Select..."
+							value={googleLocationText}
+							onChange={(e) => setGoogleLocationText(e.target.value)}
+						/>
+					</Autocomplete>
 				</FormControl>
 			)}
 

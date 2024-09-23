@@ -22,7 +22,7 @@ import {
 	Timestamp,
 } from 'firebase/firestore'
 import Link from 'next/link'
-import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import { LoadScript, Autocomplete, useJsApiLoader } from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
@@ -94,7 +94,11 @@ const EditSeekerForm: React.FC<{
 
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
-	const router = useRouter()
+
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
+		libraries,
+	});
 
 	const {
 		authState: { flat_share_profile },
@@ -177,11 +181,11 @@ const EditSeekerForm: React.FC<{
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
+						location: {
+							lat: place.geometry.location?.lat() ?? 0,
+							lng: place.geometry.location?.lng() ?? 0,
+						},
+					}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -395,29 +399,11 @@ const EditSeekerForm: React.FC<{
 			</Flex>
 
 			{selectedLocation && (
-				<FormControl isRequired mb={4}>
-					<FormLabel requiredIndicator={null} htmlFor="address">
-						Where in {selectedLocation}
-					</FormLabel>
-					{typeof window !== 'undefined' && !window.google ? (
-						<LoadScript
-							googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
-							libraries={libraries}
-						>
-							<Autocomplete
-								onLoad={handleLoad}
-								onPlaceChanged={handlePlaceChanged}
-							>
-								<Input
-									id="address"
-									type="text"
-									placeholder="Select..."
-									value={googleLocationText}
-									onChange={(e) => setGoogleLocationText(e.target.value)}
-								/>
-							</Autocomplete>
-						</LoadScript>
-					) : (
+				(!isLoaded) ? <Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
+					<FormControl isRequired mb={4}>
+						<FormLabel requiredIndicator={null} htmlFor="address">
+							Where in {selectedLocation}
+						</FormLabel>
 						<Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
@@ -430,8 +416,7 @@ const EditSeekerForm: React.FC<{
 								onChange={(e) => setGoogleLocationText(e.target.value)}
 							/>
 						</Autocomplete>
-					)}
-				</FormControl>
+					</FormControl>
 			)}
 
 			<Flex mb={4} gap={4}>
