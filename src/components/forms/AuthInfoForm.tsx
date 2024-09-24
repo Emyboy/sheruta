@@ -51,14 +51,24 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 				document_id: user._id,
 			})
 
-			await saveProfileDocs({first_name, last_name, primary_phone_number,budget, bio, payment_plan, document_id: user?._id, _user_ref: `/users/${user?._id}`}, user?._id)
+			await saveProfileDocs(
+				{
+					first_name,
+					last_name,
+					primary_phone_number,
+					budget,
+					bio,
+					payment_plan,
+					document_id: user?._id,
+					_user_ref: `/users/${user?._id}`,
+				},
+				user?._id,
+			)
 
 			await FlatShareProfileService.update({
 				data: { budget, bio, payment_plan },
 				document_id: user?._id,
 			})
-
-
 
 			await getAuthDependencies()
 

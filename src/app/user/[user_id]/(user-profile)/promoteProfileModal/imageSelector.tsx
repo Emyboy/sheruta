@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Box, Button, Center, Flex, Text } from '@chakra-ui/react'
+import { Box, Button, Center, Flex, Text, useColorMode } from '@chakra-ui/react'
 import { BiCamera } from 'react-icons/bi'
 import { Cropper, CropperRef, CircleStencil } from 'react-advanced-cropper'
 import { useAuthContext } from '@/context/auth.context'
@@ -13,12 +13,12 @@ import {
 import UserService from '@/firebase/service/user/user.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
-export default function ProfilePictureSelector({
-	done,
-}: {
-	done?: () => void
-}) {
-	const {
+
+
+export const ImageSelector = ()=>{
+
+   
+    const {
 		authState: { user },
 		getAuthDependencies,
 	} = useAuthContext()
@@ -124,13 +124,12 @@ export default function ProfilePictureSelector({
 						data: { avatar_url: downloadURL },
 						document_id: user?._id,
 					})
-					await saveProfileDocs({ avatar_url: downloadURL }, user?._id )
-
+					await saveProfileDocs({ avatar_url: downloadURL }, user?._id)
 					await getAuthDependencies()
 					setLoading(false)
-					if (done) {
-						done()
-					}
+					// if (done) {
+					// 	done()
+					// }
 				})
 			},
 		)
@@ -141,23 +140,14 @@ export default function ProfilePictureSelector({
 			return uploadImage()
 		}
 
-		if (user?.avatar_url && done) {
-			done()
-		} else {
-			showToast({
-				message: 'Please select an image',
-				status: 'info',
-			})
-		}
+		
 	}
 
-	return (
+    return (
 		<>
 			{showCropper && (
 				<>
-					<br />
-					<br />
-					<br />
+					
 					<Flex
 						flexDir={'column'}
 						justifyContent={'center'}
@@ -219,20 +209,12 @@ export default function ProfilePictureSelector({
 					<Text
 						textAlign={'center'}
 						as={'h1'}
-						fontSize={'3xl'}
+						fontSize={'xl'}
 						className={'animate__animated animate__fadeInUp animate__faster'}
 					>
-						{`Profile picture`}
+						
 					</Text>
-					<Text
-						textAlign={'center'}
-						color={'dark_lighter'}
-						className={'animate__animated animate__fadeInUp'}
-					>
-						{`It's nice to put a face to the name`}
-					</Text>
-					<br />
-
+					
 					<Flex justifyContent={'center'}>
 						<Flex
 							cursor={'pointer'}
@@ -242,11 +224,14 @@ export default function ProfilePictureSelector({
 							h={'170px'}
 							w={'170px'}
 							rounded={'full'}
-							my={10}
+							mt={5}
+                            mb={3}
 							p={1}
 							alignItems={'center'}
 							justifyContent={'center'}
 							color={'text_muted'}
+
+
 						>
 							{croppedImage || user?.avatar_url ? (
 								<div
@@ -257,25 +242,35 @@ export default function ProfilePictureSelector({
 										width: '100%',
 										height: '100%',
 										borderRadius: '50%',
+                                     
 									}}
 								/>
 							) : (
 								<BiCamera size={50} />
 							)}
 						</Flex>
-						<input
+                        <input
 							type="file"
 							id="file-selector"
 							accept="image/*"
 							onChange={handleFileSelect}
 							style={{ display: 'none' }}
+                            justify-content={'center'}
 						/>
+                       
 					</Flex>
-
-					<br />
-					<Button onClick={update} isLoading={loading}>
+                    <Text
+						textAlign={'center'}
+						color={'dark_lighter'}
+						className={'animate__animated animate__fadeInUp'}
+                        justifyContent={'center'}
+					>
+						{`Update display picture`}
+					</Text>
+                   
+					{/* <Button onClick={update} isLoading={loading}>
 						{user?.avatar_url ? 'Next' : 'Upload'}
-					</Button>
+					</Button> */}
 				</Flex>
 			)}
 		</>

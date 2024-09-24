@@ -27,8 +27,6 @@ export default async function page() {
 		getAllProfileDocs(),
 	])
 
-	
-
 	// console.log(
 	// 	'This it the user profile for 202:,.......................',
 	// 	userProfiles,

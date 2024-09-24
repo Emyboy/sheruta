@@ -1,3 +1,5 @@
+"use client"
+
 import {
 	Popover,
 	PopoverTrigger,
@@ -16,14 +18,33 @@ import {
 	BiTrash,
 } from 'react-icons/bi'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
+import { useEffect, useState } from 'react'
 
 interface Props {
 	userId: any
+	moreButtonList: object[]
 }
 
-export function ShareButton({ userId }: Props) {
-	// const { authState } = useAuthContext()
-	// const { colorMode } = useColorMode()
+export function MoreButton({ userId, moreButtonList }: Props) {
+
+	const [profileOwner, setProfileOwner] = useState(false);
+
+	const { authState } = useAuthContext();
+	
+	useEffect(()=>{
+		
+		const {user} = authState;
+		const currentUser = user?._id
+    const viewedProfileId = userId;
+
+	if(viewedProfileId === currentUser){
+		setProfileOwner(true)
+	}
+	},[userId, authState ])
+
+	
+
 
 	return (
 		<Flex mr="10px">
@@ -32,7 +53,7 @@ export function ShareButton({ userId }: Props) {
 					<Button
 						w="45px"
 						height="45px"
-						border={'1px'}
+						border={''}
 						rounded={'md'}
 						borderColor="dark_light"
 						px={0}
@@ -61,7 +82,7 @@ export function ShareButton({ userId }: Props) {
 				<PopoverContent color={'dark'} bg={'dark'} width={'100%'} padding={4}>
 					<PopoverBody p={0} zIndex={1000}>
 						<VStack spacing={1} align="flex-start">
-							<Button
+						{!profileOwner && (<Button
 								variant="ghost"
 								leftIcon={<BiShare />}
 								bgColor="none"
@@ -75,8 +96,8 @@ export function ShareButton({ userId }: Props) {
 								<Text width={'100%'} textAlign={'left'}>
 									Share
 								</Text>
-							</Button>
-							{userId && (
+							</Button>)}
+							{profileOwner && (
 								<>
 									<Button
 										variant="ghost"

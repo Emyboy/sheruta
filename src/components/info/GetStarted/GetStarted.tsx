@@ -26,7 +26,7 @@ export default function GetStarted() {
 
 	const allSteps = (): any[] => {
 		return [
-			<GetStartedBeginning key={'get-started'} done={next}/>,
+			<GetStartedBeginning key={'get-started'} done={next} />,
 			<SeekingStatusSelector key={'agenda'} done={next} />,
 			<GenderSelect key={'my-gender'} done={next} />,
 			<AuthInfoForm key={'auth-form'} done={next} />,
@@ -45,7 +45,7 @@ export default function GetStarted() {
 		setPercentage(calculatedPercentage)
 	}, [step])
 
-	// return null
+	
 
 	if (!user) {
 		return null
@@ -58,7 +58,7 @@ export default function GetStarted() {
 		!flat_share_profile?.budget ||
 		!flat_share_profile?.done_kyc
 	) {
-		// return null
+		
 		return (
 			<>
 				<Flex

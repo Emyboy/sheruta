@@ -26,7 +26,7 @@ import SherutaDB from '@/firebase/service/index.firebase'
 
 import { promise } from 'zod'
 
-import { ShareButton } from '@/components/atoms/ShareButton'
+import { MoreButton } from '@/components/atoms/MoreButton'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export const revalidate = CACHE_TTL.LONG
@@ -219,46 +219,46 @@ export default async function page(props: any) {
 		getUserProfile(),
 	])
 
-	const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
+	// const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
 
-	const userProfiles = {
-		first_name: user.user?.first_name,
-		last_name: user.user?.last_name,
-		email: user.user?.email,
-		avatar_url: user.user?.avatar_url,
-		id: user.user?.id,
-		occupation: flatshareInfosParsed.flatShareProfile.occupation,
-		budget: flatshareInfosParsed.flatShareProfile.budget,
-		interests: flatshareInfosParsed.flatShareProfile.interests,
-		area: flatshareInfosParsed.flatShareProfile.area,
-		habits: flatshareInfosParsed.flatShareProfile.habits,
-		work_industry: flatshareInfosParsed.flatShareProfile.work_industry,
-		credits: flatshareInfosParsed.flatShareProfile.credits,
-		gender_preference: flatshareInfosParsed.flatShareProfile.gender_preference,
-		age_preference: flatshareInfosParsed.flatShareProfile.age_preference,
-		bio: flatshareInfosParsed.flatShareProfile.bio,
-		payment_plan: flatshareInfosParsed.flatShareProfile.payment_plan || null,
+	// const userProfiles = {
+	// 	first_name: user.user?.first_name,
+	// 	last_name: user.user?.last_name,
+	// 	email: user.user?.email,
+	// 	avatar_url: user.user?.avatar_url,
+	// 	id: user.user?.id,
+	// 	occupation: flatshareInfosParsed.flatShareProfile.occupation,
+	// 	budget: flatshareInfosParsed.flatShareProfile.budget,
+	// 	interests: flatshareInfosParsed.flatShareProfile.interests,
+	// 	area: flatshareInfosParsed.flatShareProfile.area,
+	// 	habits: flatshareInfosParsed.flatShareProfile.habits,
+	// 	work_industry: flatshareInfosParsed.flatShareProfile.work_industry,
+	// 	credits: flatshareInfosParsed.flatShareProfile.credits,
+	// 	gender_preference: flatshareInfosParsed.flatShareProfile.gender_preference,
+	// 	age_preference: flatshareInfosParsed.flatShareProfile.age_preference,
+	// 	bio: flatshareInfosParsed.flatShareProfile.bio,
+	// 	payment_plan: flatshareInfosParsed.flatShareProfile.payment_plan || null,
 
-		twitter: flatshareInfosParsed.flatShareProfile.socials.twitter,
-		tiktok: flatshareInfosParsed.flatShareProfile.socials.tiktok,
-		facebook: flatshareInfosParsed.flatShareProfile.socials.facebook,
-		linkedin: flatshareInfosParsed.flatShareProfile.socials.linkedin,
-		instagram: flatshareInfosParsed.flatShareProfile.socials.instagram,
+	// 	twitter: flatshareInfosParsed.flatShareProfile.socials.twitter,
+	// 	tiktok: flatshareInfosParsed.flatShareProfile.socials.tiktok,
+	// 	facebook: flatshareInfosParsed.flatShareProfile.socials.facebook,
+	// 	linkedin: flatshareInfosParsed.flatShareProfile.socials.linkedin,
+	// 	instagram: flatshareInfosParsed.flatShareProfile.socials.instagram,
 
-		state: flatshareInfosParsed.flatShareProfile.state.name,
-		seeking: flatshareInfosParsed.flatShareProfile.seeking,
-		employment_status: flatshareInfosParsed.flatShareProfile.employment_status,
-		religion: flatshareInfosParsed.flatShareProfile.religion,
-		done_kyc: flatshareInfosParsed.flatShareProfile.done_kyc,
+	// 	state: flatshareInfosParsed.flatShareProfile.state.name,
+	// 	seeking: flatshareInfosParsed.flatShareProfile.seeking,
+	// 	employment_status: flatshareInfosParsed.flatShareProfile.employment_status,
+	// 	religion: flatshareInfosParsed.flatShareProfile.religion,
+	// 	done_kyc: flatshareInfosParsed.flatShareProfile.done_kyc,
 
-		whatsapp: flatshareInfosParsed.userInfo.whatsapp,
-		phone_number: flatshareInfosParsed.userInfo.phone_number,
-		gender: flatshareInfosParsed.userInfo.gender,
-		is_verified: flatshareInfosParsed.userInfo.is_verified,
-		profilePromo: false,
-		document_id: user_id,
-		_user_ref: `/users/${user_id}`,
-	}
+	// 	whatsapp: flatshareInfosParsed.userInfo.whatsapp,
+	// 	phone_number: flatshareInfosParsed.userInfo.phone_number,
+	// 	gender: flatshareInfosParsed.userInfo.gender,
+	// 	is_verified: flatshareInfosParsed.userInfo.is_verified,
+	// 	profilePromo: false,
+	// 	document_id: user_id,
+	// 	_user_ref: `/users/${user_id}`,
+	// }
 
 	const userId = user.user?.id
 
@@ -280,9 +280,12 @@ export default async function page(props: any) {
 
 					<Flex flexDirection={'column'} w="full">
 						<Box my={3}>
-							<Flex>
+							<Flex alignContent={'center'}>
 								<MainBackHeader />
-								<ShareButton userId={userId} />
+								<MoreButton
+									userId={userId}
+									moreButtonList={[{ label: 'share' }, { label: 'promote' }]}
+								/>
 							</Flex>
 						</Box>
 
@@ -291,7 +294,7 @@ export default async function page(props: any) {
 								data={user}
 								flatshareInfos={flatshareInfos}
 								user_id={user_id}
-								profileInfo={userProfiles}
+								// profileInfo={userProfiles}
 							/>
 						) : (
 							<PageNotFound />

@@ -9,7 +9,7 @@ import { useAuthContext } from '@/context/auth.context'
 import DotsLoading from '@/components/info/GetStarted/DotsLoading'
 import { getDoc } from 'firebase/firestore'
 import { useOptionsContext } from '@/context/options.context'
-import {saveProfileDocs} from '@/firebase/service/userProfile/user-profile'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export default function HabitsSelector({ done }: { done?: () => void }) {
 	const {
@@ -70,9 +70,9 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 				data: { habits: selectedHabits.map((val) => val._ref) },
 				document_id: user?._id,
 			})
-            await saveProfileDocs(
-				 { habits: selectedHabits.map((val) => val._ref) },
-				 user?._id
+			await saveProfileDocs(
+				{ habits: selectedHabits.map((val) => val._ref) },
+				user?._id,
 			)
 			await getAuthDependencies()
 			setLoading(false)

@@ -26,36 +26,33 @@ type Props = {
 	data: any
 	userProfile: any
 	user_id: string
-	profileInfo: any
+	// profileInfo: any
 }
 
-export default function ProfileHero({ data, userProfile, user_id, profileInfo }: Props) {
+export default function ProfileHero({ data, userProfile, user_id }: Props) {
 	const _user: AuthUser = data.user
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
 	const { authState } = useAuthContext()
 
-	const profileData: createDTO = {
-		collection_name: DBCollectionName.userProfile,
-		data: userProfile,
-		document_id: user_id,
-	}
+	// const profileData: createDTO = {
+	// 	collection_name: DBCollectionName.userProfile,
+	// 	data: userProfile,
+	// 	document_id: user_id,
+	// }
 
+	// const sendProfile = ()=>{
 
-    const sendProfile = ()=>{
+	// 	useEffect(()=>{
 
-		useEffect(()=>{
+	// 		saveProfileDocs(profileInfo, user_id)
 
-      
-			saveProfileDocs(profileInfo, user_id)
-	
-		},[profileData, user_id] )
-		console.log('done.....................')
-	}
-	sendProfile()
+	// 	},[profileData, user_id] )
+	// 	console.log('done.....................')
+	// }
+	// sendProfile()
 
 	const _userInfo: UserInfo = userProfile.userInfo
-
 
 	return (
 		<Flex gap={DEFAULT_PADDING} maxW={'90%'} minW={'60%'}>

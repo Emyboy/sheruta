@@ -81,29 +81,26 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 
 	interface UserProfile {
 		collection_name: string
-		
-			twitter: string
-			employment_status: string
-			state: string
-			phone_number: string
-			linkedin: string
-			work_industry: string
-			instagram: string
-			seeking: boolean
-			document_id: string
-			religion: string
-			avatar_url: string
-			first_name: string
-			last_name: string
-			email: string
-			area: string
-			bio: string
-			_id: string
-			budget: number
-			payment_plan: string
-			
-	
-	
+
+		twitter: string
+		employment_status: string
+		state: string
+		phone_number: string
+		linkedin: string
+		work_industry: string
+		instagram: string
+		seeking: boolean
+		document_id: string
+		religion: string
+		avatar_url: string
+		first_name: string
+		last_name: string
+		email: string
+		area: string
+		bio: string
+		_id: string
+		budget: number
+		payment_plan: string
 	}
 
 	console.log(typeof userProfiles)
@@ -118,7 +115,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 				parsedUserProfile.map((item, index) => {
 					const ProfileSnippetBio = item?.bio
 					const maxBioLength = 84
-					
+
 					return (
 						<Box m={4} key={index}>
 							<Card
