@@ -1,6 +1,7 @@
 import ApartmentDetails from '@/components/HostDetails/ApartmentDetails'
 import MediaCarousel from '@/components/HostDetails/MediaCarousel'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import DiscussionService from '@/firebase/service/discussions/discussions.firebase'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
@@ -20,47 +21,24 @@ export default async function page({
 }: {
 	params: { request_id: string }
 }) {
-	const [requestData, discussionsData] = await Promise.all([
+	const [requestData, messages] = await Promise.all([
 		SherutaDB.get({
 			document_id: request_id,
 			collection_name: DBCollectionName.flatShareRequests,
 		}),
-		SherutaDB.getAll({
-			collection_name: DBCollectionName.messages,
-			_limit: 1000,
-		}),
+		DiscussionService.fetchMessages({ request_id }),
 	])
 
 	let finalRequest: DocumentData | null = requestData
 
-	if (
-		finalRequest &&
-		Object.keys(finalRequest).length > 0 &&
-		finalRequest._user_ref
-	) {
-		if (finalRequest?._user_ref?._id) {
-			const userId = finalRequest._user_ref._id
-
-			const [user_info, flat_share_profile] = await Promise.all([
-				await UserInfoService.get(userId),
-				await FlatShareProfileService.get(userId),
-			])
-
-			finalRequest = {
-				...finalRequest,
-				user_info,
-				flat_share_profile,
-			}
-		} else {
-			console.log('User reference not found in finalRequest document')
-			finalRequest = null
-		}
+	if (finalRequest && finalRequest._user_ref && finalRequest._user_ref._id) {
+		const userId = finalRequest._user_ref._id
+		const user_info = await UserInfoService.get(userId)
+		finalRequest = { ...finalRequest, user_info }
+	} else {
+		console.log('User reference not found in finalRequest document')
+		finalRequest = null
 	}
-
-	const finalDiscussions = discussionsData.filter(
-		(disc: any) =>
-			disc.type === 'comment' && disc?._request_ref?.uuid === request_id,
-	)
 
 	// console.log(finalDiscussions)
 	// TODO: set an error page to redirect them home
@@ -129,7 +107,7 @@ export default async function page({
 				>
 					<ApartmentDetails
 						request={JSON.stringify(finalRequest)}
-						discussions={JSON.stringify(finalDiscussions)}
+						discussions={JSON.stringify(messages)}
 					/>
 				</Flex>
 			</Flex>
