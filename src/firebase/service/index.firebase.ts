@@ -11,7 +11,6 @@ import {
 	serverTimestamp,
 	setDoc,
 	updateDoc,
-	where,
 } from 'firebase/firestore'
 import {
 	deleteObject,
@@ -79,8 +78,6 @@ export default class SherutaDB {
 		try {
 			const collectionRef = collection(db, collection_name)
 			let q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
-
-			// q = this.applyQueryFilters(q, queryObj)
 
 			const querySnapshot = await getDocs(q)
 			const documents = await Promise.all(
@@ -190,6 +187,7 @@ export const DBCollectionName = {
 	flatShareProfile: 'flat_share_profiles',
 	flatShareRequests: 'requests',
 
+	discussions: 'discussions',
 	messages: 'messages',
 	conversations: 'conversations',
 	inspections: 'inspections',

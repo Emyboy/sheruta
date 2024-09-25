@@ -2,11 +2,15 @@
 
 import { useAuthContext } from '@/context/auth.context'
 import { db } from '@/firebase'
+import DiscussionService from '@/firebase/service/discussions/discussions.firebase'
+import {
+	DiscussionDTO,
+	DiscussionData,
+} from '@/firebase/service/discussions/discussions.types'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
-import { HostRequestData } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import { revalidatePathOnClient } from '@/utils/actions'
 import { convertTimestampToTime } from '@/utils/index.utils'
@@ -28,32 +32,6 @@ import { DocumentReference, Timestamp, doc } from 'firebase/firestore'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { BiCommentX, BiRepost, BiSend } from 'react-icons/bi'
-import { v4 as generateUId } from 'uuid'
-
-interface DiscussionDTO {
-	uuid: string | undefined
-	_request_ref: DocumentReference | undefined
-	_sender_ref: DocumentReference | undefined
-	_receiver_ref?: DocumentReference | undefined
-	reply_to?: string | undefined
-	nest_level: number
-	message: string
-	timestamp: Timestamp
-	type: string
-}
-
-interface DiscussionData {
-	id: string
-	uuid: string
-	_request_ref: HostRequestData
-	_sender_ref: any
-	_receiver_ref?: any
-	reply_to?: string
-	nest_level: number
-	message: string
-	timestamp: Timestamp
-	type: string
-}
 
 const NoDiscussion = () => {
 	const circleBgColor = useColorModeValue('#e4faa85c', '#e4faa814')
@@ -88,23 +66,20 @@ const DiscussionComponent = ({
 	discussions,
 	hostId,
 }: {
-	requestId: string | undefined
+	requestId: string
 	discussions: DiscussionData[]
 	hostId: string
 }) => {
-	const [requestRef, setRequestRef] = useState<DocumentReference | undefined>(
-		undefined,
-	)
+	const router = useRouter()
 
 	const {
 		authState: { flat_share_profile, user },
 	} = useAuthContext()
 	const pathname = usePathname()
-	const router = useRouter()
+	const { showToast } = useCommon()
 
 	const [message, setMessage] = useState<string>('')
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const { showToast } = useCommon()
 	const [isReplying, setIsReplying] = useState<boolean>(false)
 	const [commentId, setCommentId] = useState<string | undefined>(undefined)
 	const [userHandle, setUserHandle] = useState<string | undefined>(undefined)
@@ -113,41 +88,33 @@ const DiscussionComponent = ({
 		undefined,
 	)
 
-	const [formData, setFormData] = useState<DiscussionDTO>({
-		uuid: generateUId(),
-		_request_ref: requestRef,
-		_sender_ref: undefined,
-		message: '',
-		timestamp: Timestamp.now(),
-		nest_level: 1,
-		type: 'comment',
-	})
-
-	//set senderRef and requestRef
-	useEffect(() => {
-		if (requestId && typeof flat_share_profile?._user_ref !== 'undefined') {
-			const docRef = doc(db, DBCollectionName.flatShareRequests, requestId)
-			setRequestRef(docRef)
-			setFormData((prev) => ({
-				...prev,
-				_request_ref: docRef,
-				_sender_ref: flat_share_profile?._user_ref,
-			}))
-		}
-	}, [requestId, flat_share_profile])
-
 	const handleNewComment = async () => {
 		try {
 			setIsLoading(true)
 
-			if (message?.trim() === '') {
-				return
-			}
+			if (!flat_share_profile || !user)
+				return showToast({
+					message: 'Please log in to discuss about the apartment',
+					status: 'error',
+				})
 
-			const finalFormData = {
-				...formData,
-				message,
+			if (message?.trim() === '') return
+
+			const _request_ref = doc(
+				db,
+				DBCollectionName.flatShareRequests,
+				requestId,
+			)
+
+			const finalFormData: DiscussionDTO = {
+				uuid: crypto.randomUUID(),
+				request_id: requestId,
+				type: 'comment',
+				_sender_ref: flat_share_profile._user_ref,
+				timestamp: Timestamp.now(),
 				nest_level: nestLevel,
+				_request_ref,
+				message,
 			}
 
 			if (isReplying && commentId) {
@@ -156,11 +123,7 @@ const DiscussionComponent = ({
 			}
 
 			await Promise.all([
-				SherutaDB.create({
-					collection_name: DBCollectionName.messages,
-					data: finalFormData,
-					document_id: finalFormData.uuid as string,
-				}),
+				DiscussionService.sendMessage(finalFormData),
 				NotificationsService.create({
 					collection_name: DBCollectionName.notifications,
 					data: {
@@ -189,8 +152,8 @@ const DiscussionComponent = ({
 					status: 'success',
 				})
 			}, 1000)
-			// router.push(pathname + '?tab=Discussion')
-			revalidatePathOnClient(pathname)
+			router.push(pathname + '?tab=Discussion')
+			// revalidatePathOnClient(pathname)
 			setIsReplying(false)
 			setMessage('')
 		} catch (err: any) {
@@ -460,7 +423,6 @@ const CommentComponent = ({
 
 const ReplyComponent = ({
 	reply,
-
 	setUserHandle,
 	setNestLevel,
 	setReceiverRef,
@@ -468,7 +430,6 @@ const ReplyComponent = ({
 	setCommentId,
 }: {
 	reply: DiscussionData
-
 	setUserHandle: (prev: string) => void
 	setNestLevel: (arg: number) => void
 	setReceiverRef: (arg: any) => void
@@ -480,19 +441,9 @@ const ReplyComponent = ({
 	const userName =
 		reply?._sender_ref?.first_name + ' ' + reply?._sender_ref?.last_name
 
-	const [marginLeft, setMarginLeft] = useState<string>('50px')
-
-	useEffect(() => {
-		if (reply.nest_level === 3) {
-			setMarginLeft('100px')
-		} else {
-			setMarginLeft('50px')
-		}
-	}, [reply])
-
 	return (
 		<>
-			<Box ml={marginLeft}>
+			<Box ml={reply.nest_level < 3 ? `${reply.nest_level * 25}px` : '100px'}>
 				<Flex flexDirection={'column'}>
 					<Flex gap={'10px'}>
 						<Avatar
