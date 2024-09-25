@@ -68,7 +68,7 @@ export const UpdateProfilePopup = () => {
 					state: profile.state,
 					area: profile.area,
 					_user_ref: profile._user_ref,
-					document_id: profile.document_id
+					document_id: profile.document_id,
 				}
 
 				setService(profileData.service_type)

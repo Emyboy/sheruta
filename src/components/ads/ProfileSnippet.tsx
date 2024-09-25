@@ -26,9 +26,9 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 	const [snippetData, setSnippetData] = useState<Record<string, any>>({})
 	const { authState } = useAuthContext()
 
-	// console.log('PROFILE SNIPPET 1:....................', authState.user)
+
 	useEffect(() => {
-		// console.log('PROFILE SNIPPET 2:....................', authState.user)
+		
 		const fetchData = async () => {
 			let locationValue: any = null
 
@@ -104,12 +104,11 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 		service_type: string
 	}
 
-	console.log(typeof userProfiles)
+
 
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
-	console.log(typeof parsedUserProfile)
-	// console.log('pasrsed profile...............................................',parsedUserProfile)
-
+	
+	return null
 	return (
 		<>
 			{parsedUserProfile.length > 0 ? (
