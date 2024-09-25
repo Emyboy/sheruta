@@ -124,7 +124,7 @@ export default function ProfilePictureSelector({
 						data: { avatar_url: downloadURL },
 						document_id: user?._id,
 					})
-					await saveProfileDocs({ avatar_url: downloadURL }, user?._id )
+					await saveProfileDocs({ avatar_url: downloadURL }, user?._id)
 
 					await getAuthDependencies()
 					setLoading(false)

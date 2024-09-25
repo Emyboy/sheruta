@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import {
 	Popover,
@@ -27,24 +27,19 @@ interface Props {
 }
 
 export function MoreButton({ userId, moreButtonList }: Props) {
+	const [profileOwner, setProfileOwner] = useState(false)
 
-	const [profileOwner, setProfileOwner] = useState(false);
+	const { authState } = useAuthContext()
 
-	const { authState } = useAuthContext();
-	
-	useEffect(()=>{
-		
-		const {user} = authState;
+	useEffect(() => {
+		const { user } = authState
 		const currentUser = user?._id
-    const viewedProfileId = userId;
+		const viewedProfileId = userId
 
-	if(viewedProfileId === currentUser){
-		setProfileOwner(true)
-	}
-	},[userId, authState ])
-
-	
-
+		if (viewedProfileId === currentUser) {
+			setProfileOwner(true)
+		}
+	}, [userId, authState])
 
 	return (
 		<Flex mr="10px">
@@ -82,21 +77,23 @@ export function MoreButton({ userId, moreButtonList }: Props) {
 				<PopoverContent color={'dark'} bg={'dark'} width={'100%'} padding={4}>
 					<PopoverBody p={0} zIndex={1000}>
 						<VStack spacing={1} align="flex-start">
-						{!profileOwner && (<Button
-								variant="ghost"
-								leftIcon={<BiShare />}
-								bgColor="none"
-								width="100%"
-								display="flex"
-								alignItems="center"
-								padding={0}
-								borderRadius="sm"
-								_hover={{ color: 'brand_dark' }}
-							>
-								<Text width={'100%'} textAlign={'left'}>
-									Share
-								</Text>
-							</Button>)}
+							{!profileOwner && (
+								<Button
+									variant="ghost"
+									leftIcon={<BiShare />}
+									bgColor="none"
+									width="100%"
+									display="flex"
+									alignItems="center"
+									padding={0}
+									borderRadius="sm"
+									_hover={{ color: 'brand_dark' }}
+								>
+									<Text width={'100%'} textAlign={'left'}>
+										Share
+									</Text>
+								</Button>
+							)}
 							{profileOwner && (
 								<>
 									<Button

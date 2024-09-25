@@ -13,12 +13,8 @@ import {
 import UserService from '@/firebase/service/user/user.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
-
-
-export const ImageSelector = ()=>{
-
-   
-    const {
+export const ImageSelector = () => {
+	const {
 		authState: { user },
 		getAuthDependencies,
 	} = useAuthContext()
@@ -139,15 +135,12 @@ export const ImageSelector = ()=>{
 		if (selectedImage) {
 			return uploadImage()
 		}
-
-		
 	}
 
-    return (
+	return (
 		<>
 			{showCropper && (
 				<>
-					
 					<Flex
 						flexDir={'column'}
 						justifyContent={'center'}
@@ -211,27 +204,23 @@ export const ImageSelector = ()=>{
 						as={'h1'}
 						fontSize={'xl'}
 						className={'animate__animated animate__fadeInUp animate__faster'}
-					>
-						
-					</Text>
-					
+					></Text>
+
 					<Flex justifyContent={'center'}>
 						<Flex
 							cursor={'pointer'}
 							htmlFor="file-selector"
 							as={'label'}
 							bg={'brand'}
-							h={'170px'}
-							w={'170px'}
+							h={'130px'}
+							w={'130px'}
 							rounded={'full'}
 							mt={5}
-                            mb={3}
+							mb={3}
 							p={1}
 							alignItems={'center'}
 							justifyContent={'center'}
 							color={'text_muted'}
-
-
 						>
 							{croppedImage || user?.avatar_url ? (
 								<div
@@ -242,24 +231,22 @@ export const ImageSelector = ()=>{
 										width: '100%',
 										height: '100%',
 										borderRadius: '50%',
-                                     
 									}}
 								/>
 							) : (
 								<BiCamera size={50} />
 							)}
 						</Flex>
-                        <input
+						<input
 							type="file"
 							id="file-selector"
 							accept="image/*"
 							onChange={handleFileSelect}
 							style={{ display: 'none' }}
-                            justify-content={'center'}
+							justify-content={'center'}
 						/>
-                       
 					</Flex>
-                    <Text
+					{/* <Text
 						textAlign={'center'}
 						color={'dark_lighter'}
 						className={'animate__animated animate__fadeInUp'}
@@ -267,7 +254,7 @@ export const ImageSelector = ()=>{
 					>
 						{`Update display picture`}
 					</Text>
-                   
+                    */}
 					{/* <Button onClick={update} isLoading={loading}>
 						{user?.avatar_url ? 'Next' : 'Upload'}
 					</Button> */}

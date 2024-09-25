@@ -12,17 +12,14 @@ interface Props {
 	data: any
 	flatshareInfos: any
 	user_id: string
-
 }
 
 export default async function UserProfilePage({
 	data,
 	flatshareInfos,
 	user_id,
-	
 }: Props) {
 	const userProfile = JSON.parse(flatshareInfos)
-
 
 	return (
 		<Flex flexDir={'column'}>
@@ -33,7 +30,7 @@ export default async function UserProfilePage({
 				<ProfileAboutMe userProfile={userProfile} />
 			</MainSection>
 			<PersonalInfo userProfile={userProfile} />
-			<UpdateProfilePopup/>
+			<UpdateProfilePopup />
 			<MainSection heading="My Postings" borderBottom={0}>
 				{/* <EachRequest request={request} />
 				<EachRequest />

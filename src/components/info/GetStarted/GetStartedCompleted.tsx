@@ -22,7 +22,6 @@ export default function GetStartedCompleted({ done }: { done: () => void }) {
 		authState: { user },
 	} = useAuthContext()
 
-
 	useEffect(() => {
 		if (typeof window !== undefined) {
 			setHeight(window.innerHeight)
