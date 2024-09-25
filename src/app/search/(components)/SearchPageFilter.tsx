@@ -136,6 +136,7 @@ export default function SearchPageFilter({}: Props) {
 	return (
 		<Flex
 			flexDir={'column'}
+			overflowY={'scroll'}
 			pr={DEFAULT_PADDING}
 			py={DEFAULT_PADDING}
 			gap={{ base: '24px', md: '48px' }}

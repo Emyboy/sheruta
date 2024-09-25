@@ -2,8 +2,8 @@ import MainContainer from '@/components/layout/MainContainer'
 import MainHeader from '@/components/layout/MainHeader'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import SearchApartmentService from '@/firebase/service/search/search.firebase'
 import { Flex } from '@chakra-ui/react'
 import SearchPageFilter from './(components)/SearchPageFilter'
 import SearchPage from './search-page'
@@ -15,11 +15,10 @@ type Props = {
 }
 
 export default async function page({ searchParams }: Props) {
-	const requests: HostRequestDataDetails[] = await SherutaDB.getAll({
-		collection_name: DBCollectionName.flatShareRequests,
-		_limit: 30,
-		queryObj: searchParams,
-	})
+	const requests: HostRequestDataDetails[] =
+		await SearchApartmentService.searchApartment({
+			queryObj: searchParams,
+		})
 
 	return (
 		<Flex justifyContent={'center'}>
