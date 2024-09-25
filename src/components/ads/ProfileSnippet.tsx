@@ -101,6 +101,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 		_id: string
 		budget: number
 		payment_plan: string
+		service_type: string
 	}
 
 	console.log(typeof userProfiles)
@@ -167,7 +168,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 													rounded="md"
 													textTransform="capitalize"
 												>
-													{`House share`}
+													{item.service_type}
 												</Badge>
 												<Badge
 													colorScheme={item.seeking ? 'orange' : 'teal'}

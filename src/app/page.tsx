@@ -6,7 +6,7 @@ import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import { collection, getDocs, doc } from 'firebase/firestore'
-import { getAllProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import { getAllProfileDocs, getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
 import { db } from '@/firebase'
 import { promise } from 'zod'
 
@@ -24,7 +24,7 @@ export default async function page() {
 			_limit: 30,
 		}),
 
-		getAllProfileDocs(),
+		getAllProfileSnippetDocs(),
 	])
 
 	// console.log(

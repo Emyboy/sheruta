@@ -29,6 +29,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
 
 type Props = {
 	locations: string
