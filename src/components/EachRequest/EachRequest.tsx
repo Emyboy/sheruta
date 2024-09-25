@@ -33,7 +33,7 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -660,7 +660,7 @@ const EachRequestMedia = ({
 					h={'full'}
 				>
 					{allMedias.map((media, i) => (
-						<>
+						<React.Fragment key={i}>
 							{media.type === 'video' ? (
 								<Flex
 									position={'relative'}
@@ -682,7 +682,6 @@ const EachRequestMedia = ({
 								</Flex>
 							) : (
 								<Box
-									key={i}
 									position={'relative'}
 									overflow={'hidden'}
 									cursor={'pointer'}
@@ -697,7 +696,7 @@ const EachRequestMedia = ({
 									/>
 								</Box>
 							)}
-						</>
+						</React.Fragment>
 					))}
 				</Flex>
 			</Flex>

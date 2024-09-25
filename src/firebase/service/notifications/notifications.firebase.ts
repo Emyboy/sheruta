@@ -21,7 +21,7 @@ export const NotificationsBodyMessage: Record<
 	reservation: 'reserved your apartment listing',
 	rescheduled: 'rescheduled your inspection',
 	call: 'tried to call you',
-	inspection: 'booked an inspection with you',
+	inspection: 'scheduled an inspection with you',
 	message: 'sent you a message',
 	comment: 'commented on your apartment listing',
 	comment_reply: 'replied your comment',

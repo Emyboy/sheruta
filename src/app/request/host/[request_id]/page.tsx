@@ -32,7 +32,6 @@ export default async function page({
 	])
 
 	let finalRequest: DocumentData | null = requestData
-	const discussions: any[] = discussionsData
 
 	if (
 		finalRequest &&
@@ -58,7 +57,7 @@ export default async function page({
 		}
 	}
 
-	const finalDiscussions = discussions.filter(
+	const finalDiscussions = discussionsData.filter(
 		(disc: any) =>
 			disc.type === 'comment' && disc?._request_ref?.uuid === request_id,
 	)

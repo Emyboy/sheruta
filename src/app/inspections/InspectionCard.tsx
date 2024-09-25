@@ -408,7 +408,7 @@ const VideoCallModal = ({
 
 			localStorage.removeItem(`lastReminder_${id}`)
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			showToast({
 				message: 'Error rescheduling inspection',
 				status: 'error',
@@ -1009,7 +1009,7 @@ const ResheduleInspectionModal = ({
 
 			localStorage.removeItem(`lastReminder_${id}`)
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			showToast({
 				message: 'Error rescheduling inspection',
 				status: 'error',
