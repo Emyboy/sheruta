@@ -189,7 +189,7 @@ export default function UploadMedia({
 
 			localStorage.removeItem('host_space_form')
 			toast({ status: 'success', title: 'You have successfully added a space' })
-			router.push('/')
+			router.push(`/request/host/${uuid}`)
 		} catch (e) {
 			await Promise.all(mediaRefPaths.map((url) => SherutaDB.deleteMedia(url)))
 			if (e instanceof ZodError) {

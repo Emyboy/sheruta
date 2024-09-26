@@ -201,7 +201,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				title: 'You have successfully updated your space',
 			})
 
-			router.push('/')
+			router.push(`/request/host/${data.uuid}`)
 		} catch (e) {
 			console.log('Unknown error', e)
 			toast({ title: 'Error updating your details', status: 'error' })

@@ -1,23 +1,23 @@
-import { getAuth } from 'firebase/auth'
-import SherutaDB, { DBCollectionName } from '../index.firebase'
-import { DocumentData, doc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase'
-import ConversationsService from '../conversations/conversations.firebase'
-import { DirectMessageDTO } from './messages.types'
 import { hasEmptyValue } from '@/utils/index.utils'
+import { DocumentData, doc, getDoc, serverTimestamp } from 'firebase/firestore'
+import ConversationsService from '../conversations/conversations.firebase'
+import SherutaDB, { DBCollectionName } from '../index.firebase'
+import { DirectMessageDTO } from './messages.types'
 
 export default class MessagesService {
-	static async sendDM(req: {
+	static async sendDM({
+		message,
+		conversation_id,
+		recipient_id,
+		user_id,
+	}: {
 		message: string
 		conversation_id: string
 		recipient_id: string
 		user_id: string
 	}) {
-		const { message, conversation_id, recipient_id, user_id } = req
 		try {
-			if (hasEmptyValue(req)) {
-				return Promise.reject('no or invalid data')
-			}
 			let _user = await getDoc(doc(db, DBCollectionName.users, user_id))
 			let _conversation = await getDoc(
 				doc(db, DBCollectionName.conversations, conversation_id),

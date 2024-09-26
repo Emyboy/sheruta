@@ -1,8 +1,8 @@
+import { resolveDocumentReferences } from '@/utils/index.utils'
 import {
 	collection,
 	deleteDoc,
 	doc,
-	DocumentReference,
 	getDoc,
 	getDocs,
 	limit,
@@ -11,7 +11,6 @@ import {
 	serverTimestamp,
 	setDoc,
 	updateDoc,
-	where,
 } from 'firebase/firestore'
 import {
 	deleteObject,
@@ -23,7 +22,7 @@ import {
 import moment from 'moment'
 import { db } from '..'
 
-export interface createDTO {
+export interface CreateDTO {
 	collection_name: string
 	data: object
 	document_id: string
@@ -36,119 +35,64 @@ export default class SherutaDB {
 		deleteDate: moment().add(2, 'months').toDate(),
 	}
 
-	static async create(data: createDTO): Promise<any> {
-		console.log('SENDING TO DB::', data)
-		await setDoc(doc(db, data.collection_name, data.document_id), {
-			...this.defaults,
-			...data.data,
-		})
-		let result = await getDoc(
-			doc(db, data.collection_name, data.document_id as string),
-		)
-		return result.data()
+	static async create(data: CreateDTO): Promise<any> {
+		try {
+			console.log('SENDING TO DB::', data)
+			await setDoc(doc(db, data.collection_name, data.document_id), {
+				...this.defaults,
+				...data.data,
+			})
+			const result = await getDoc(
+				doc(db, data.collection_name, data.document_id),
+			)
+			return result.data()
+		} catch (error) {
+			console.error('Error creating document:', error)
+			throw new Error('Failed to create document')
+		}
 	}
 
-	static async update(data: createDTO) {
-		console.log('UPDATING DB::', data)
-		const ref = doc(db, data.collection_name, data.document_id)
-		await updateDoc(ref, {
-			...data.data,
-			updatedAt: serverTimestamp(),
-		})
-
-		const docSnap = await getDoc(ref)
-		return docSnap.data()
+	static async update(data: CreateDTO): Promise<any> {
+		try {
+			console.log('UPDATING DB::', data)
+			const ref = doc(db, data.collection_name, data.document_id)
+			await updateDoc(ref, {
+				...data.data,
+				updatedAt: serverTimestamp(),
+			})
+			const docSnap = await getDoc(ref)
+			return docSnap.data()
+		} catch (error) {
+			console.error('Error updating document:', error)
+			throw new Error('Failed to update document')
+		}
 	}
 
 	static async getAll({
 		collection_name,
 		_limit = 20,
-		queryObj = {},
 	}: {
 		collection_name: string
 		_limit?: number
-		queryObj?: {
-			budget?: string
-			service?: string
-			location?: string
-			state?: string
-			payment_type?: string
-		}
 	}): Promise<any> {
-		const collectionRef = collection(db, collection_name)
+		try {
+			const collectionRef = collection(db, collection_name)
+			let q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
 
-		let q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
-		if (queryObj.budget) {
-			const budgetRanges = queryObj.budget
-				.split(',')
-				.map((range) => range.split('-').map(Number))
-				.sort((a, b) => a[0] - b[0])
-
-			q = query(
-				q,
-				where('budget', '>=', budgetRanges[0][0]),
-				where('budget', '<=', budgetRanges[budgetRanges.length - 1][1]),
+			const querySnapshot = await getDocs(q)
+			const documents = await Promise.all(
+				querySnapshot.docs.map(async (doc) => {
+					const docData = { ...doc.data() }
+					const resolvedData = await resolveDocumentReferences(docData)
+					return { id: doc.id, ...resolvedData, ref: doc.ref }
+				}),
 			)
+
+			return documents
+		} catch (error) {
+			console.error('Error fetching documents:', error)
+			throw new Error('Failed to fetch documents')
 		}
-
-		if (queryObj.payment_type) {
-			const paymentTypes = queryObj.payment_type.split(',')
-
-			q = query(q, where('payment_type', 'in', paymentTypes))
-		}
-
-		if (queryObj.service) {
-			const serviceRefs = queryObj.service
-				.split(',')
-				.map((service) => doc(db, `/services/${service}`))
-
-			q = query(q, where('_service_ref', 'in', serviceRefs))
-		}
-
-		if (queryObj.location) {
-			const locationRefs = queryObj.location
-				.split(',')
-				.map((location) => doc(db, `/location_keywords/${location}`))
-
-			q = query(q, where('_location_keyword_ref', 'in', locationRefs))
-		}
-
-		if (queryObj.state) {
-			const stateRefs = queryObj.state
-				.split(',')
-				.map((state) => doc(db, `/states/${state}`))
-
-			q = query(q, where('_state_ref', 'in', stateRefs))
-		}
-
-		const querySnapshot = await getDocs(q)
-
-		const documents = await Promise.all(
-			querySnapshot.docs.map(async (doc) => {
-				const docData = { ...doc.data() }
-
-				const refFields = Object.entries(docData).filter(
-					([_, value]) => value instanceof DocumentReference,
-				)
-
-				const resolvedRefs = await Promise.all(
-					refFields.map(async ([key, ref]) => {
-						const docSnap = await getDoc(ref as DocumentReference)
-						if (docSnap.exists()) {
-							return { [key]: { ...docSnap.data(), id: docSnap.id } }
-						} else {
-							return { [key]: null }
-						}
-					}),
-				)
-
-				Object.assign(docData, ...resolvedRefs)
-
-				return { id: doc.id, ...docData, ref: doc.ref }
-			}),
-		)
-
-		return await Promise.all(documents)
 	}
 
 	static async get({
@@ -157,29 +101,21 @@ export default class SherutaDB {
 	}: {
 		document_id: string
 		collection_name: string
-	}) {
-		const docRef = doc(db, collection_name, document_id)
-		const docSnap = await getDoc(docRef)
+	}): Promise<any> {
+		try {
+			const docRef = doc(db, collection_name, document_id)
+			const docSnap = await getDoc(docRef)
 
-		if (docSnap.exists()) {
-			const docData = { ...docSnap.data() }
-
-			const refFields = Object.entries(docData).filter(
-				([key, value]) => value instanceof DocumentReference,
-			)
-
-			const resolvedRefs = await Promise.all(
-				refFields.map(async ([key, ref]) => {
-					const resolvedDoc = await getDoc(ref)
-					return { [key]: resolvedDoc.data() }
-				}),
-			)
-
-			Object.assign(docData, ...resolvedRefs)
-
-			return { id: docSnap.id, ...docData, ref: docSnap.ref }
-		} else {
-			return null
+			if (docSnap.exists()) {
+				const docData = { ...docSnap.data() }
+				const resolvedData = await resolveDocumentReferences(docData)
+				return { id: docSnap.id, ...resolvedData, ref: docSnap.ref }
+			} else {
+				return null
+			}
+		} catch (error) {
+			console.error('Error fetching document:', error)
+			throw new Error('Failed to fetch document')
 		}
 	}
 
@@ -193,9 +129,10 @@ export default class SherutaDB {
 		try {
 			const docRef = doc(db, collection_name, document_id)
 			await deleteDoc(docRef)
-			return Promise.resolve(true)
+			return true
 		} catch (error) {
-			return Promise.reject(error)
+			console.error('Error deleting document:', error)
+			throw new Error('Failed to delete document')
 		}
 	}
 
@@ -205,37 +142,38 @@ export default class SherutaDB {
 	}: {
 		data: string
 		storageUrl: string
-	}) {
-		const storage = getStorage()
-		const storageRef = ref(storage, storageUrl)
-
-		const snapshot = await uploadString(storageRef, data, 'data_url')
-		return snapshot
+	}): Promise<any> {
+		try {
+			const storage = getStorage()
+			const storageRef = ref(storage, storageUrl)
+			const snapshot = await uploadString(storageRef, data, 'data_url')
+			return snapshot
+		} catch (error) {
+			console.error('Error uploading media:', error)
+			throw new Error('Failed to upload media')
+		}
 	}
 
-	static async getMediaUrl(url: string) {
-		const storage = getStorage()
-		const storageRef = ref(storage, url)
-
+	static async getMediaUrl(url: string): Promise<string | null> {
 		try {
-			const url = await getDownloadURL(storageRef)
-
-			return url
+			const storage = getStorage()
+			const storageRef = ref(storage, url)
+			return await getDownloadURL(storageRef)
 		} catch (error) {
-			console.log(error)
+			console.error('Error fetching media URL:', error)
 			return null
 		}
 	}
 
-	static async deleteMedia(url: string) {
-		const storage = getStorage()
-		const storageRef = ref(storage, url)
-
+	static async deleteMedia(url: string): Promise<boolean> {
 		try {
+			const storage = getStorage()
+			const storageRef = ref(storage, url)
 			await deleteObject(storageRef)
-			return Promise.resolve(true)
+			return true
 		} catch (error) {
-			return Promise.reject(error)
+			console.error('Error deleting media:', error)
+			throw new Error('Failed to delete media')
 		}
 	}
 }
@@ -246,14 +184,16 @@ export const DBCollectionName = {
 	userSecrets: 'user_secrets',
 	userSettings: 'user_settings',
 
-	bookmarks: 'bookmarks',
 	flatShareProfile: 'flat_share_profiles',
 	flatShareRequests: 'requests',
 
+	discussions: 'discussions',
 	messages: 'messages',
 	conversations: 'conversations',
 	inspections: 'inspections',
 	notifications: 'notifications',
+	bookmarks: 'bookmarks',
+	reservations: 'reservations',
 
 	// options
 	propertyTypes: 'property_types',
