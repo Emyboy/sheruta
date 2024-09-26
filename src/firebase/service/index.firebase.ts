@@ -183,6 +183,8 @@ export const DBCollectionName = {
 	userInfos: 'user_infos',
 	userSecrets: 'user_secrets',
 	userSettings: 'user_settings',
+	userProfile: 'user_profile',
+	userProfileSnippet: 'user_profile_snippet',
 
 	flatShareProfile: 'flat_share_profiles',
 	flatShareRequests: 'requests',
