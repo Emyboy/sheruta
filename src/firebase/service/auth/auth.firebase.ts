@@ -50,7 +50,7 @@ export default class AuthService {
 				last_seen: serverTimestamp() as any,
 				providerId: data.providerId as 'google',
 			}
- 
+
 			await SherutaDB.create({
 				collection_name: DBCollectionName.users,
 				document_id: data.uid,

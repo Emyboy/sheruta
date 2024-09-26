@@ -33,10 +33,12 @@ import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 import { DocumentData } from 'firebase/firestore'
 
-interface Props { }
+interface Props {}
 
 export default function AuthPopup(props: Props) {
-	const { authState: { user, auth_loading } } = useAuthContext()
+	const {
+		authState: { user, auth_loading },
+	} = useAuthContext()
 	const { appState, setAppState } = useAppContext()
 	const { show_login } = appState
 
@@ -290,10 +292,14 @@ const AuthForm: React.FC<{
 		}))
 	}
 
-	const handleSignUp = async (data: { email: string, password: string, firstName: string, lastName: string }): Promise<DocumentData | undefined> => {
+	const handleSignUp = async (data: {
+		email: string
+		password: string
+		firstName: string
+		lastName: string
+	}): Promise<DocumentData | undefined> => {
 		try {
-
-			setIsLoading(true);
+			setIsLoading(true)
 
 			const { email, password, firstName, lastName } = data
 
@@ -314,8 +320,7 @@ const AuthForm: React.FC<{
 				photoURL: user.photoURL,
 			})
 
-			return theUser;
-
+			return theUser
 		} catch (err: any) {
 			throw Error(err)
 		} finally {
@@ -323,10 +328,12 @@ const AuthForm: React.FC<{
 		}
 	}
 
-	const handleLogin = async (data: { email: string, password: string }): Promise<DocumentData | undefined> => {
+	const handleLogin = async (data: {
+		email: string
+		password: string
+	}): Promise<DocumentData | undefined> => {
 		try {
-
-			setIsLoading(true);
+			setIsLoading(true)
 
 			const { email, password } = data
 
@@ -339,7 +346,7 @@ const AuthForm: React.FC<{
 			const user = userCredential.user
 
 			const theUser = await AuthService.loginUser({
-				displayName: user?.displayName || "" ,
+				displayName: user?.displayName || '',
 				email: user.email as string,
 				providerId: 'email',
 				uid: user.uid as string,
@@ -347,10 +354,9 @@ const AuthForm: React.FC<{
 				photoURL: user.photoURL,
 			})
 
-			return theUser;
-
+			return theUser
 		} catch (err: any) {
-			throw Error(err);
+			throw Error(err)
 		} finally {
 			setIsLoading(false)
 		}
@@ -376,10 +382,12 @@ const AuthForm: React.FC<{
 					message: `Account created successfully!`,
 					status: 'success',
 				})
-
 			} else {
-				const theUser = await handleLogin({ email: formData.email, password: formData.password });
-				
+				const theUser = await handleLogin({
+					email: formData.email,
+					password: formData.password,
+				})
+
 				setAuthState({ ...(theUser as any), auth_loading: false })
 
 				return showToast({
@@ -387,7 +395,6 @@ const AuthForm: React.FC<{
 					status: 'success',
 				})
 			}
-
 		} catch (err: any) {
 			console.log(err)
 			if (err.message.includes('invalid-credential')) {
@@ -400,14 +407,14 @@ const AuthForm: React.FC<{
 					message: 'Email already exists. Please try signing in.',
 					status: 'error',
 				})
-			} else if (err.message.includes('too-many-requests')){
+			} else if (err.message.includes('too-many-requests')) {
 				showToast({
 					message: `Too many failed login attempts. Please reset your password and try again.`,
 					status: 'error',
 				})
-			}else{
+			} else {
 				showToast({
-					message: `An error occurred while ${(isSignUp) ? "signing up" : "signing in"}. Please try again later.`,
+					message: `An error occurred while ${isSignUp ? 'signing up' : 'signing in'}. Please try again later.`,
 					status: 'error',
 				})
 			}

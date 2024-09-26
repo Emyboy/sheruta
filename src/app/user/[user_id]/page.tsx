@@ -28,6 +28,7 @@ import { promise } from 'zod'
 
 import { MoreButton } from '@/components/atoms/MoreButton'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import AuthService from '@/firebase/service/auth/auth.firebase'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -37,24 +38,40 @@ export default async function page(props: any) {
 
 	async function getUserData() {
 		try {
-			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
-			if (!userDoc.exists()) return { user: null }
 
-			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
+			const userDoc = await AuthService.getUser(user_id);
 
-			// console.log(formattedUserDoc)
+			if (!userDoc) return { user: null }
 
 			return {
-				user: formattedUserDoc
-					? {
-							first_name: formattedUserDoc.first_name,
-							last_name: formattedUserDoc.last_name,
-							email: formattedUserDoc.email,
-							avatar_url: formattedUserDoc.avatar_url,
-							id: formattedUserDoc._id,
-						}
-					: null,
+				user: {
+                    first_name: userDoc.first_name,
+                    last_name: userDoc.last_name,
+                    email: userDoc.email,
+                    avatar_url: userDoc.avatar_url,
+                    id: userDoc._id,
+                }
 			}
+
+
+			// const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
+			// if (!userDoc.exists()) return { user: null }
+
+			// const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
+
+			// // console.log(formattedUserDoc)
+
+			// return {
+			// 	user: formattedUserDoc
+			// 		? {
+			// 				first_name: formattedUserDoc.first_name,
+			// 				last_name: formattedUserDoc.last_name,
+			// 				email: formattedUserDoc.email,
+			// 				avatar_url: formattedUserDoc.avatar_url,
+			// 				id: formattedUserDoc._id,
+			// 			}
+			// 		: null,
+			// }
 		} catch (error) {
 			console.error('Error getting user:', error)
 			throw new Error('Failed to get user')
