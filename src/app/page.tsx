@@ -7,25 +7,19 @@ import HomePage from './(home-page)/home-page'
 
 export const revalidate = CACHE_TTL?.SHORT
 
-export default async function page() {
-	const [locations, requests, userProfiles] = await Promise.all([
-		SherutaDB.getAll({
-			collection_name: DBCollectionName.locationKeyWords,
-			_limit: 10,
-		}),
-
+export default async function page({
+	searchParams,
+}: {
+	searchParams: Record<string, string>
+}) {
+	const [requests, userProfiles] = await Promise.all([
 		SherutaDB.getAll({
 			collection_name: DBCollectionName.flatShareRequests,
 			_limit: 30,
 		}),
-
-		getAllProfileSnippetDocs(),
+		getAllProfileSnippetDocs(searchParams),
 	])
 
-	// console.log(
-	// 	'This it the user profile for 202:,.......................',
-	// 	userProfiles,
-	// )
 	const finalRequests = await Promise.all(
 		requests
 			?.filter((request: HostRequestDataDetails) => request?._user_ref?._id)
@@ -42,8 +36,6 @@ export default async function page() {
 
 	return (
 		<HomePage
-			locations={locations ? JSON.stringify(locations) : '[]'}
-			states={[]}
 			requests={finalRequests ? JSON.stringify(finalRequests) : '[]'}
 			userProfiles={userProfiles ? JSON.stringify(userProfiles) : '[]'}
 		/>

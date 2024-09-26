@@ -13,7 +13,6 @@ import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { StateData } from '@/firebase/service/options/states/states.types'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { resolveArrayOfReferences } from '@/utils/index.utils'
@@ -31,18 +30,11 @@ import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
 
 type Props = {
-	locations: string
-	states: StateData[]
 	requests: string
 	userProfiles: any
 }
 
-export default function HomePage({
-	locations,
-	states,
-	requests,
-	userProfiles,
-}: Props) {
+export default function HomePage({ requests, userProfiles }: Props) {
 	const [flatShareRequests, setFlatShareRequests] = useState<any[]>(
 		requests ? JSON.parse(requests) : [],
 	)
@@ -175,7 +167,7 @@ export default function HomePage({
 						<MainLeftNav />
 					</Flex>
 					<Flex flexDir={'column'}>
-						<HomeTabs locations={JSON.parse(locations)} states={states} />
+						<HomeTabs />
 						<JoinTheCommunity />
 						<ProfileSnippet userProfiles={userProfiles} />
 

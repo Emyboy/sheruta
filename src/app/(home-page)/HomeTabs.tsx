@@ -1,32 +1,19 @@
 'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
-import { StateData } from '@/firebase/service/options/states/states.types'
+import { homeTabSearch } from '@/constants'
 import useDrag from '@/hooks/useDrag'
 import { Box } from '@chakra-ui/react'
 import Link from 'next/link'
 import React from 'react'
 import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu'
 
-type Props = {
-	locations: LocationKeywordData[]
-	states: StateData[]
-}
 type scrollVisibilityApiType = React.ContextType<typeof VisibilityContext>
 
 const elemPrefix = 'test'
 const getId = (index: number) => `${elemPrefix}${index}`
 
-export default function HomeTabs({ locations, states }: Props) {
-	const getItems = () =>
-		locations.map((location, index) => ({
-			id: getId(index),
-			name: location.name,
-			slug: location.slug,
-		}))
-
-	const [items] = React.useState(getItems)
-
+export default function HomeTabs() {
 	const { dragStart, dragStop, dragMove, dragging } = useDrag()
 	const handleDrag =
 		({ scrollContainer }: scrollVisibilityApiType) =>
@@ -53,9 +40,9 @@ export default function HomeTabs({ locations, states }: Props) {
 				onMouseUp={() => dragStop}
 				onMouseMove={handleDrag}
 			>
-				{items.map(({ id, name, slug }) => (
+				{homeTabSearch.map(({ id, ref, title }) => (
 					<Box ml={DEFAULT_PADDING} key={id}>
-						<EachTab label={name} slug={slug} />
+						<EachTab label={title} slug={id} params={ref} />
 					</Box>
 				))}
 			</ScrollMenu>
@@ -78,9 +65,17 @@ function onWheel(apiObj: scrollVisibilityApiType, ev: React.WheelEvent): void {
 	}
 }
 
-const EachTab = ({ label, slug }: { label: string; slug: string }) => {
+const EachTab = ({
+	label,
+	slug,
+	params,
+}: {
+	label: string
+	slug: string
+	params: string
+}) => {
 	return (
-		<Link href={`/search?location=${slug}`}>
+		<Link href={`?${params}=${slug}`}>
 			<Box
 				userSelect={'none'}
 				rounded={'xl'}
@@ -94,7 +89,6 @@ const EachTab = ({ label, slug }: { label: string; slug: string }) => {
 				style={{ textWrap: 'nowrap' }}
 			>
 				{label}
-				{/* <Text>{label}</Text> */}
 			</Box>
 		</Link>
 	)

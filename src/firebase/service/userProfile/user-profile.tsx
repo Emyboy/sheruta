@@ -8,6 +8,8 @@ import {
 	serverTimestamp,
 	DocumentData,
 	deleteDoc,
+	where,
+	query,
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
@@ -90,14 +92,41 @@ export const deleteProfile = async (user_id: string): Promise<void> => {
 	}
 }
 
-export const getAllProfileSnippetDocs = async (): Promise<
-	any[] | undefined
-> => {
+export const getAllProfileSnippetDocs = async (searchParams: {
+	work_industry?: string
+	gender_preference?: string
+	employment_status?: string
+	age_preference?: string
+}): Promise<any[] | undefined> => {
 	try {
 		const _limit: number = 10
-		const profileDataSnapshot = await getDocs(
-			collection(db, DBCollectionName.userProfile),
-		)
+		let q
+
+		if (searchParams.age_preference) {
+			q = query(
+				collection(db, DBCollectionName.userProfile),
+				where('age_preference', '==', searchParams.age_preference),
+			)
+		} else if (searchParams.employment_status) {
+			q = query(
+				collection(db, DBCollectionName.userProfile),
+				where('employment_status', '==', searchParams.employment_status),
+			)
+		} else if (searchParams.gender_preference) {
+			q = query(
+				collection(db, DBCollectionName.userProfile),
+				where('gender_preference', '==', searchParams.gender_preference),
+			)
+		} else if (searchParams.work_industry) {
+			q = query(
+				collection(db, DBCollectionName.userProfile),
+				where('work_industry', '==', searchParams.work_industry),
+			)
+		} else {
+			q = collection(db, DBCollectionName.userProfile)
+		}
+
+		const profileDataSnapshot = await getDocs(q)
 
 		const profileDataArray: any[] = []
 		profileDataSnapshot.forEach(async (doc) => {

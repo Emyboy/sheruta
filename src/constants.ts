@@ -29,15 +29,46 @@ export const CACHE_TTL = {
 }
 
 export const homeTabSearch = [
-	'Tech space',
-	'Corps member',
-	'Females only',
-	'Employed',
-	'25-29 years',
-	'Both genders',
-	'Healthcare space',
-	'Legal space',
-	'Employed',
+	{
+		ref: 'work_industry',
+		id: 'tech space',
+		title: 'Tech Space',
+	},
+	{
+		ref: 'gender_preference',
+		id: 'Females Only',
+		title: 'Females Only',
+	},
+	{
+		ref: 'gender_preference',
+		id: 'Both genders',
+		title: 'Both Genders',
+	},
+	{
+		ref: 'employment_status',
+		title: 'Employed',
+		id: 'employed',
+	},
+	{
+		ref: 'employment_status',
+		title: 'Corps Member',
+		id: 'corps member',
+	},
+	{
+		ref: 'age_preference',
+		id: '25-29 years',
+		title: '25-29 years',
+	},
+	{
+		ref: 'work_industry',
+		id: 'healthcare space',
+		title: 'Healthcare Space',
+	},
+	{
+		ref: 'work_industry',
+		id: 'legal space',
+		title: 'Legal Space',
+	},
 ]
 
 export const industries = [
