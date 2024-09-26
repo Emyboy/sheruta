@@ -35,6 +35,7 @@ export const homeTabSearch = [
 	'Healthcare space',
 	'Legal space',
 	'Employed',
+	'Males only'
 ]
 
 export const industries = [
