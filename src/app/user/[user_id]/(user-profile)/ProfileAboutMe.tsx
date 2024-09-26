@@ -1,5 +1,3 @@
-'use client'
-
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Badge, Flex, Text } from '@chakra-ui/react'
 import React, { useState } from 'react'
@@ -19,7 +17,7 @@ export default function ProfileAboutMe({ userProfile }: Props) {
 
 	let userInterests: Interest[] = userProfile.flatShareProfile?.interests
 
-	const userBio: string | null = userProfile.flatshareProfile?.bio || null
+	const userBio: string | null = userProfile.flatShareProfile?.bio || null
 
 	return (
 		<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>

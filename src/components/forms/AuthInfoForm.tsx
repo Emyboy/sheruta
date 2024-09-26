@@ -1,4 +1,12 @@
-import { Button, Flex, Input, Text, Textarea, VStack } from '@chakra-ui/react'
+import {
+	Button,
+	Flex,
+	Input,
+	Text,
+	Textarea,
+	VStack,
+	Select,
+} from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import CurrencyInput from 'react-currency-input-field'
@@ -6,6 +14,7 @@ import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
@@ -18,6 +27,13 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 		user_info?.primary_phone_number || '',
 	)
 	const [budget, setBudget] = useState(flat_share_profile?.budget || 0)
+
+	const [bio, setBio] = useState(flat_share_profile?.bio || '')
+
+	const [payment_plan, setPaymentPlan] = useState(
+		flat_share_profile?.payment_plan || '',
+	)
+
 	const [isLoading, setIsLoading] = useState(false)
 
 	const update = async (e: any) => {
@@ -35,8 +51,22 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 				document_id: user._id,
 			})
 
+			await saveProfileDocs(
+				{
+					first_name,
+					last_name,
+					primary_phone_number,
+					budget,
+					bio,
+					payment_plan,
+					document_id: user?._id,
+					_user_ref: `/users/${user?._id}`,
+				},
+				user?._id,
+			)
+
 			await FlatShareProfileService.update({
-				data: { budget },
+				data: { budget, bio, payment_plan },
 				document_id: user?._id,
 			})
 
@@ -139,6 +169,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								{flat_share_profile?.seeking ? 'Budget' : 'Rent'}
 							</Text>
 							<CurrencyInput
+								required
 								style={{
 									padding: 8,
 									paddingLeft: 19,
@@ -154,6 +185,50 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								defaultValue={budget}
 								decimalsLimit={2}
 								onValueChange={(value) => setBudget(parseInt(value as string))}
+							/>
+						</Flex>
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={2}
+						>
+							<Text color={'text_muted'} fontSize={'sm'}>
+								Payment plan
+							</Text>
+							<Select
+								placeholder="Select option"
+								bg="dark"
+								required
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+									setPaymentPlan(e.target.value)
+								}
+								value={payment_plan}
+							>
+								<option value="Weekly">Weekly</option>
+								<option value="Monthly">Monthly</option>
+								<option value="Bi-annually">Bi-annually</option>
+								<option value="Quaterly">Quaterly</option>
+								<option value="Annually">Annually</option>
+							</Select>
+						</Flex>
+					</Flex>
+					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
+						<Flex
+							justifyContent={'flex-start'}
+							flexDir={'column'}
+							w="full"
+							gap={2}
+						>
+							<Text color={'text_muted'} fontSize={'sm'}>
+								{`Let us know why you're here`}
+							</Text>
+							<Textarea
+								placeholder="Ex: Searching for a vacant space in Lekki, go through my profile"
+								onChange={(e) => {
+									setBio(e.target.value)
+								}}
+								value={bio}
 							/>
 						</Flex>
 					</Flex>

@@ -23,6 +23,7 @@ import {
 	FlatShareProfileData,
 	FlatShareProfileDataDTO,
 } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import CurrencyInput from 'react-currency-input-field'
 import Link from 'next/link'
 
 type Props = {
@@ -48,11 +49,11 @@ export default function PersonalInfo({ userProfile }: Props) {
 	const socials: Socials = userProfile.flatShareProfile.socials
 	const habits: Habits[] = userProfile.flatShareProfile.habits
 
-	const instagramUrl = `https://instagram.com/${_userFlatshareProfile?.instagram}`
-	const facebookUrl = `https://facebook.com/${_userFlatshareProfile?.facebook}`
-	const twitterUrl = `https://x.com/${_userFlatshareProfile?.twitter}`
-	const linkedinUrl = `https://linkedin.com/in/${_userFlatshareProfile?.linkedin}`
-	const tiktokUrl = `https://tiktok.com/@${_userFlatshareProfile?.tiktok}`
+	const instagramUrl = `https://instagram.com/${socials?.instagram}`
+	const facebookUrl = `https://facebook.com/${socials?.facebook}`
+	const twitterUrl = `https://x.com/${socials?.twitter}`
+	const linkedinUrl = `https://linkedin.com/in/${socials?.linkedin}`
+	const tiktokUrl = `https://tiktok.com/@${socials?.tiktok}`
 
 	// const handleInstagramClick = () => {
 	// 	window.open(
@@ -90,7 +91,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 					<EachPersonalInfo
 						Icon={BiMapPin}
 						heading="Preferred Location"
-						subHeading={userProfile.flatShareProfile.area}
+						subHeading={`${userProfile.flatShareProfile?.area}, ${userProfile.flatShareProfile?.state.name}`}
 					/>
 					<EachPersonalInfo
 						Icon={BiMoney}
@@ -110,16 +111,21 @@ export default function PersonalInfo({ userProfile }: Props) {
 					<EachPersonalInfo
 						Icon={BiSolidGroup}
 						heading="Gender Preference"
-						subHeading="To be fixed"
+						subHeading={_userFlatshareProfile?.gender_preference}
 					/>
 					<EachPersonalInfo
 						Icon={BiSolidIdCard}
 						heading="Employment Status"
 						subHeading={_userFlatshareProfile?.employment_status}
 					/>
+					<EachPersonalInfo
+						Icon={BiSolidGroup}
+						heading="Age Preference"
+						subHeading={_userFlatshareProfile?.age_preference}
+					/>
 				</Flex>
 			</MainSection>
-			<MainSection heading="Unique Habits">
+			<MainSection heading="My unique Habits">
 				<Flex flexWrap={'wrap'}>
 					{habits.map((item, index) => {
 						return (

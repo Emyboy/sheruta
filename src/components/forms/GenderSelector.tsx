@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { BiSolidCheckCircle } from 'react-icons/bi'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { useAuthContext } from '@/context/auth.context'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export default function GenderSelect({ done }: { done?: () => void }) {
 	const {
@@ -22,6 +23,7 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 				data: { gender },
 				document_id: user?._id,
 			})
+			await saveProfileDocs({ gender }, user?._id)
 			await getAuthDependencies()
 			setIsLoading(false)
 			if (done) {
