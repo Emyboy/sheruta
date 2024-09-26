@@ -26,7 +26,7 @@ export interface AuthState {
 	flat_share_profile: null | FlatShareProfileData
 	auth_loading?: boolean
 }
-
+ 
 interface AuthContextProps {
 	authState: AuthState
 	setAuthState: (state: Partial<AuthState>) => void

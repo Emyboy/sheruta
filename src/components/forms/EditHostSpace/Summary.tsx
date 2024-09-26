@@ -55,7 +55,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	const { isLoaded } = useJsApiLoader({
 		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
 		libraries,
-	});
+	})
 
 	const [loading, setLoading] = useState(false)
 
@@ -84,11 +84,11 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 
@@ -716,9 +716,12 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 						</Flex>
 					</Flex>
 
-					{formData.area && (
-						(!isLoaded) ? <Text width={"full"} textAlign={"center"}>Loading google maps</Text> :
-
+					{formData.area &&
+						(!isLoaded ? (
+							<Text width={'full'} textAlign={'center'}>
+								Loading google maps
+							</Text>
+						) : (
 							<FormControl mt={1}>
 								<FormLabel htmlFor="address">
 									Choose a more descriptive location in {formData.area}?
@@ -739,7 +742,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 									/>
 								</Autocomplete>
 							</FormControl>
-					)}
+						))}
 				</VStack>
 				<br />
 				<Button bgColor={'brand'} color={'white'} type={'submit'}>
