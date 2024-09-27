@@ -27,6 +27,7 @@ import {
 	createUserWithEmailAndPassword,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
+	sendEmailVerification
 } from 'firebase/auth'
 import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'

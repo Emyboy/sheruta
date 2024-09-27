@@ -185,7 +185,12 @@ const BookmarkList = () => {
 
 	return (
 		<VStack p={6} spacing={4} align="start">
-			<Heading as="h3" mb={4} textAlign={["center", "start"]} size={{ base: 'lg', md: 'xl' }}>
+			<Heading
+				as="h3"
+				mb={4}
+				textAlign={['center', 'start']}
+				size={{ base: 'lg', md: 'xl' }}
+			>
 				My Bookmarks
 			</Heading>
 
@@ -278,10 +283,14 @@ const NoBookmarks = () => {
 export default BookmarkList
 
 const UserProfile = ({ profileData }: { profileData: ProfileDTO }) => {
+	const {
+		authState: { user },
+	} = useAuthContext()
 
-	const { authState: { user } } = useAuthContext()
-
-	const { bookmarkId, toggleSaveProfile } = useHandleBookmark(profileData._id, user?._id as string)
+	const { bookmarkId, toggleSaveProfile } = useHandleBookmark(
+		profileData._id,
+		user?._id as string,
+	)
 
 	return (
 		<>
@@ -357,8 +366,16 @@ const UserProfile = ({ profileData }: { profileData: ProfileDTO }) => {
 						</Link>
 						<Divider />
 						<Flex justify="space-between" align="center" mb={2}>
-							<Button colorScheme="lueb" color="text_muted" onClick={async () => await toggleSaveProfile()}>
-								{bookmarkId ? <BiSolidBookmark style={{ fontSize: '1.5em' }} /> : <BiBookmark style={{ fontSize: '1.5em' }} />}
+							<Button
+								colorScheme="lueb"
+								color="text_muted"
+								onClick={async () => await toggleSaveProfile()}
+							>
+								{bookmarkId ? (
+									<BiSolidBookmark style={{ fontSize: '1.5em' }} />
+								) : (
+									<BiBookmark style={{ fontSize: '1.5em' }} />
+								)}
 							</Button>
 							<Box mr={2} color="text_muted">
 								{`Budget: ${profileData?.flat_share_profile?.budget}/month`}

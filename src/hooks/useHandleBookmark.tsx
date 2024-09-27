@@ -32,14 +32,13 @@ export default function useHandleBookmark(
 				message: 'Login to save an apartment',
 				status: 'error',
 			})
- 
+
 		setBookmarkId(bookmarkId ? null : uuid)
 
 		setIsBookmarkLoading(true)
 		try {
 			if (!bookmarkId) {
-				
-				const objectRef = doc(db, DBCollectionName.flatShareRequests, object_id);
+				const objectRef = doc(db, DBCollectionName.flatShareRequests, object_id)
 
 				await Promise.all([
 					BookmarkService.createBookmark({
@@ -79,7 +78,7 @@ export default function useHandleBookmark(
 				})
 
 				setBookmarkId(null)
-				
+
 				showToast({
 					message: 'Successfully removed apartment from bookmarks',
 					status: 'success',
@@ -92,7 +91,7 @@ export default function useHandleBookmark(
 				message: 'error saving this apartment',
 				status: 'error',
 			})
-		}finally {
+		} finally {
 			await fetchBookmarks(authState.user?._id as string)
 		}
 
@@ -108,20 +107,19 @@ export default function useHandleBookmark(
 				status: 'error',
 			})
 
-		if(object_id === recipient_id) {
+		if (object_id === recipient_id) {
 			return showToast({
 				message: 'You are not allowed to save your own profile',
 				status: 'error',
 			})
 		}
- 
+
 		setBookmarkId(bookmarkId ? null : uuid)
 
 		setIsBookmarkLoading(true)
 		try {
 			if (!bookmarkId) {
-
-				const objectRef = doc(db, DBCollectionName.users, object_id);
+				const objectRef = doc(db, DBCollectionName.users, object_id)
 
 				await Promise.all([
 					BookmarkService.createBookmark({
@@ -191,5 +189,10 @@ export default function useHandleBookmark(
 		setBookmarkId(findBookmark?.id || null)
 	}, [authState.user, bookmarks.length])
 
-	return { toggleSaveApartment, toggleSaveProfile, bookmarkId, isBookmarkLoading }
+	return {
+		toggleSaveApartment,
+		toggleSaveProfile,
+		bookmarkId,
+		isBookmarkLoading,
+	}
 }

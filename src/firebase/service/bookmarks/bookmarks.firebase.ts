@@ -10,9 +10,8 @@ import {
 } from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { BookmarkData, BookmarkDataDetails } from './bookmarks.types'
- 
-export default class BookmarkService extends SherutaDB {
 
+export default class BookmarkService extends SherutaDB {
 	static async createBookmark(data: BookmarkData): Promise<void> {
 		await this.create({
 			collection_name: DBCollectionName.bookmarks,

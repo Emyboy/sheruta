@@ -33,12 +33,12 @@ export const BookmarkDTO = z.object({
 export type BookmarkData = z.infer<typeof BookmarkDTO>
 
 interface ProfileDTO {
-    _id: string,
-    avatar_url: string,
-    first_name: string,
-    last_name: string,
-	_user_ref: DocumentReference,
-    flat_share_profile: FlatShareProfileData
+	_id: string
+	avatar_url: string
+	first_name: string
+	last_name: string
+	_user_ref: DocumentReference
+	flat_share_profile: FlatShareProfileData
 }
 
 export type BookmarkDataDetails = Omit<BookmarkData, '_user_ref'> & {

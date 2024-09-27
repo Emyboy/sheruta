@@ -1,7 +1,10 @@
 'use client'
 
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import { BookmarkDataDetails, BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
+import {
+	BookmarkDataDetails,
+	BookmarkType,
+} from '@/firebase/service/bookmarks/bookmarks.types'
 import {
 	createContext,
 	ReactNode,
@@ -47,7 +50,10 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 			const resolvedBookmarks = await Promise.all(
 				userBookmarks.map(async (bookmark) => {
 					try {
-						if (bookmark.object_type === BookmarkType.profiles && bookmark._object_ref?.id) {
+						if (
+							bookmark.object_type === BookmarkType.profiles &&
+							bookmark._object_ref?.id
+						) {
 							const profileId = bookmark._object_ref.id
 							const flatShareProfile =
 								await FlatShareProfileService.get(profileId)
@@ -65,21 +71,17 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 									},
 								},
 							}
-						}else{
-							return bookmark;
+						} else {
+							return bookmark
 						}
 					} catch (error) {
-						console.error(
-							`Error resolving bookmark ID: ${bookmark.id}`,
-							error,
-						)
+						console.error(`Error resolving bookmark ID: ${bookmark.id}`, error)
 						return bookmark
 					}
 				}),
 			)
 
 			setBookmarks(resolvedBookmarks.filter(Boolean) as BookmarkDataDetails[])
-
 		} catch (error) {
 			console.error('Error fetching bookmarks:', error)
 		} finally {
