@@ -5,6 +5,8 @@ import ProfileAboutMe from './ProfileAboutMe'
 import ProfileHero from './ProfileHero'
 import PersonalInfo from './personal-info/PersonalInfo'
 import { UpdateProfilePopup } from './promoteProfileModal/updateProfileSnippet'
+// import EachRequest from '@/components/EachRequest/EachRequest'
+// import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 
 interface Props {
 	data: any

@@ -53,10 +53,6 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 	// 	const fetchData = async () => {
 	// 		let locationValue: any = null
 
-	// 		try {
-	// 			const locationKeywordDocRef = authState.flat_share_profile
-	// 				?.location_keyword as DocumentReference
-
 	// 			const docSnapshot = await getDoc(locationKeywordDocRef)
 
 	// 			if (docSnapshot.exists()) {
@@ -102,7 +98,6 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
 
-	// return null
 	return (
 		<>
 			{parsedUserProfile.length > 0 ? (

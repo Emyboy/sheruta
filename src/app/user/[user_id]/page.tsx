@@ -1,10 +1,13 @@
 import MainBackHeader from '@/components/atoms/MainBackHeader'
+import { MoreButton } from '@/components/atoms/MoreButton'
 import MainContainer from '@/components/layout/MainContainer'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
+import { db } from '@/firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { Box, Flex } from '@chakra-ui/react'
 import {
 	collection,
@@ -18,10 +21,6 @@ import {
 } from 'firebase/firestore'
 import UserProfilePage from './(user-profile)/UserProfilePage'
 
-import { MoreButton } from '@/components/atoms/MoreButton'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-
 export const revalidate = CACHE_TTL.LONG
 
 export default async function page(props: any) {
@@ -30,6 +29,22 @@ export default async function page(props: any) {
 
 	async function getUserData() {
 		try {
+			// const userDoc = await AuthService.getUser(user_id)
+
+			// if (!userDoc) return { user: null }
+
+			// console.log(userDoc)
+
+			// return {
+			// 	user: {
+			// 		first_name: userDoc.user.first_name,
+			// 		last_name: userDoc.user.last_name,
+			// 		email: userDoc.user.email,
+			// 		avatar_url: userDoc.user.avatar_url,
+			// 		id: userDoc.user._id,
+			// 	},
+			// }
+
 			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
 			if (!userDoc.exists()) return { user: null }
 
@@ -255,7 +270,7 @@ export default async function page(props: any) {
 
 	const userId = user.user?.id
 
-	// const profileData: createDTO = {
+	// const profileData: CreateDTO = {
 	// 	collection_name: DBCollectionName.userProfile,
 	// 	data: userProfiles,
 	// 	document_id: user_id,

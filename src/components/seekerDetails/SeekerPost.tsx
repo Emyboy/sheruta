@@ -54,6 +54,7 @@ import {
 import { v4 as generateUId } from 'uuid'
 import { doc } from 'firebase/firestore'
 import { db } from '@/firebase'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 
 const SeekerPost = ({
 	requestData,
@@ -78,8 +79,7 @@ const SeekerPost = ({
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)
 
-	const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
-	const [bookmarkId, setBookmarkId] = useState<string | null>(null)
+	const {toggleSaveApartment, isBookmarkLoading, bookmarkId} = useHandleBookmark(requestId as string, authState.user?._id as string)
 
 	useEffect(() => {
 		if (
@@ -133,89 +133,6 @@ const SeekerPost = ({
 		}
 	}
 
-	const updateBookmark = async () => {
-		try {
-			if (!(authState.user && authState.user?._id)) {
-				return showToast({
-					message: 'Please login to perform this action',
-					status: 'info',
-				})
-			}
-
-			setIsLoading(true)
-
-			//check if user has saved this bookmark already, then unsave it
-			if (isBookmarked && bookmarkId) {
-				await BookmarkService.deleteBookmark({
-					user_id: authState.user._id,
-					document_id: bookmarkId,
-				})
-
-				setIsBookmarked(false)
-				setBookmarkId(null)
-				setIsLoading(false)
-				return showToast({
-					message: 'Bookmark removed successfully',
-					status: 'success',
-				})
-			}
-
-			const uuid = crypto.randomUUID()
-
-			await BookmarkService.createBookmark({
-				uuid,
-				object_type: BookmarkType.requests,
-				request_id: postData?.id as string,
-				_user_ref: authState.flat_share_profile?._user_ref,
-			})
-
-			setBookmarkId(uuid)
-			setIsLoading(false)
-			setIsBookmarked(true)
-			return showToast({
-				message: 'Bookmark added successfully',
-				status: 'success',
-			})
-		} catch (err) {
-			showToast({
-				message: 'Failed to update bookmark',
-				status: 'error',
-			})
-		}
-	}
-
-	useEffect(() => {
-		const isBookmarked = async (): Promise<void> => {
-			try {
-				if (!(authState.user && authState.user._id)) {
-					setIsBookmarked(false)
-					return
-				}
-
-				const myBookmarks = (await BookmarkService.getUserBookmarks(
-					authState.user._id,
-				)) as BookmarkDataDetails[]
-
-				// Find the bookmark by request_id
-				const theBookmark = myBookmarks.find(
-					(bookmark) => bookmark._object_ref?.uuid === requestId,
-				)
-
-				// Set bookmarkId if a bookmark is found
-				if (theBookmark) {
-					setBookmarkId(theBookmark.id)
-					setIsBookmarked(true)
-				} else {
-					setIsBookmarked(false)
-				}
-			} catch (err: any) {
-				console.error('Error checking if request is bookmarked:', err)
-				setIsBookmarked(false)
-			}
-		}
-
-		isBookmarked()
-	}, [authState, requestId])
 
 	return (
 		<>
@@ -333,8 +250,8 @@ const SeekerPost = ({
 									</PopoverContent>
 								</Popover>
 								<IconButton
-									onClick={() => updateBookmark()}
-									disabled={isLoading}
+									onClick={async() => await toggleSaveApartment()}
+									disabled={isBookmarkLoading}
 									_hover={{
 										color: 'brand',
 										bg: 'none',
@@ -342,11 +259,11 @@ const SeekerPost = ({
 											color: 'brand',
 										},
 									}}
-									isLoading={isLoading}
+									isLoading={isBookmarkLoading}
 									colorScheme={colorMode === 'dark' ? '' : 'gray'}
 									fontSize="24px"
 									aria-label="Bookmark"
-									icon={isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
+									icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 								/>
 							</HStack>
 						</Flex>
