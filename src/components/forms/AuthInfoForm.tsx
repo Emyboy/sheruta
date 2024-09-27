@@ -15,6 +15,7 @@ import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import { PaymentPlan } from '@/firebase/service/request/request.types'
 
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
@@ -31,7 +32,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 	const [bio, setBio] = useState(flat_share_profile?.bio || '')
 
 	const [payment_plan, setPaymentPlan] = useState(
-		flat_share_profile?.payment_plan || '',
+		flat_share_profile?.payment_type || '',
 	)
 
 	const [isLoading, setIsLoading] = useState(false)
@@ -66,7 +67,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 			)
 
 			await FlatShareProfileService.update({
-				data: { budget, bio, payment_plan },
+				data: { budget, bio, payment_type: (payment_plan as PaymentPlan)  },
 				document_id: user?._id,
 			})
 

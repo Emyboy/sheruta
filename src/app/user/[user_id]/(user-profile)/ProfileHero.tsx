@@ -6,21 +6,25 @@ import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { UserInfo } from '@/firebase/service/user-info/user-info.types'
 import { handleCall } from '@/utils/index.utils'
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
+import { Box, Button, Flex, IconButton, Text } from '@chakra-ui/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
+	BiBookmark,
 	BiBriefcase,
 	BiGroup,
 	BiMessageRoundedDetail,
 	BiSolidBadgeCheck,
+	BiSolidBookmark,
 	BiSolidLocationPlus,
 	BiStore,
 } from 'react-icons/bi'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import { createDTO } from '@/firebase/service/index.firebase'
+import { CreateDTO } from '@/firebase/service/index.firebase'
 import { use, useEffect } from 'react'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { useBookmarkContext } from '@/context/bookmarks.context'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 
 type Props = {
 	data: any
@@ -33,9 +37,12 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 	const _user: AuthUser = data.user
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
-	const { authState } = useAuthContext()
+	const { authState: { user } } = useAuthContext()
 
-	// const profileData: createDTO = {
+	const { bookmarkId, isBookmarkLoading, toggleSaveProfile } =
+		useHandleBookmark(user_id, user?._id as string)
+
+	// const profileData: CreateDTO = {
 	// 	collection_name: DBCollectionName.userProfile,
 	// 	data: userProfile,
 	// 	document_id: user_id,
@@ -166,6 +173,7 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 							<BiMessageRoundedDetail size={25} />
 						</Button>
 					</Link>
+					<IconButton icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />} aria-label='Bookmark this profile' onClick={async() => await toggleSaveProfile()} />
 				</Flex>
 			</Flex>
 		</Flex>

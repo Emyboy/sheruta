@@ -38,40 +38,40 @@ export default async function page(props: any) {
 
 	async function getUserData() {
 		try {
+			// const userDoc = await AuthService.getUser(user_id)
 
-			const userDoc = await AuthService.getUser(user_id);
+			// if (!userDoc) return { user: null }
 
-			if (!userDoc) return { user: null }
-
-			return {
-				user: {
-                    first_name: userDoc.first_name,
-                    last_name: userDoc.last_name,
-                    email: userDoc.email,
-                    avatar_url: userDoc.avatar_url,
-                    id: userDoc._id,
-                }
-			}
-
-
-			// const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
-			// if (!userDoc.exists()) return { user: null }
-
-			// const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
-
-			// // console.log(formattedUserDoc)
+			// console.log(userDoc)
 
 			// return {
-			// 	user: formattedUserDoc
-			// 		? {
-			// 				first_name: formattedUserDoc.first_name,
-			// 				last_name: formattedUserDoc.last_name,
-			// 				email: formattedUserDoc.email,
-			// 				avatar_url: formattedUserDoc.avatar_url,
-			// 				id: formattedUserDoc._id,
-			// 			}
-			// 		: null,
+			// 	user: {
+			// 		first_name: userDoc.user.first_name,
+			// 		last_name: userDoc.user.last_name,
+			// 		email: userDoc.user.email,
+			// 		avatar_url: userDoc.user.avatar_url,
+			// 		id: userDoc.user._id,
+			// 	},
 			// }
+
+			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
+			if (!userDoc.exists()) return { user: null }
+
+			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
+
+			// console.log(formattedUserDoc)
+
+			return {
+				user: formattedUserDoc
+					? {
+							first_name: formattedUserDoc.first_name,
+							last_name: formattedUserDoc.last_name,
+							email: formattedUserDoc.email,
+							avatar_url: formattedUserDoc.avatar_url,
+							id: formattedUserDoc._id,
+						}
+					: null,
+			}
 		} catch (error) {
 			console.error('Error getting user:', error)
 			throw new Error('Failed to get user')
@@ -279,7 +279,7 @@ export default async function page(props: any) {
 
 	const userId = user.user?.id
 
-	// const profileData: createDTO = {
+	// const profileData: CreateDTO = {
 	// 	collection_name: DBCollectionName.userProfile,
 	// 	data: userProfiles,
 	// 	document_id: user_id,

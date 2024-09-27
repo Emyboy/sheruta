@@ -212,7 +212,7 @@ export async function resolveDocumentReferences(docData: any): Promise<any> {
 		refFields.map(async ([key, ref]) => {
 			const resolvedDoc = await getDoc(ref as any)
 			const resolvedData = await resolveDocumentReferences(resolvedDoc.data())
-			return { [key]: resolvedData }
+			return { [key]: { ...resolvedData, id: resolvedDoc.id } }
 		}),
 	)
 
