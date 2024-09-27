@@ -3,7 +3,6 @@
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
 import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
-import Spinner from '@/components/atoms/Spinner'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainPageBody from '@/components/layout/MainPageBody'
@@ -14,11 +13,12 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { StateData } from '@/firebase/service/options/states/states.types'
-import { Box, Flex, Text } from '@chakra-ui/react'
-import ProfileSnippet from '@/components/ads/ProfileSnippet'
+import { Box, Flex, Text, Spinner } from '@chakra-ui/react'
 import {
 	collection,
 	DocumentData,
+	DocumentReference,
+	getDoc,
 	getDocs,
 	limit,
 	orderBy,
@@ -29,21 +29,16 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { resolveArrayOfReferences } from '@/utils/index.utils'
 
 type Props = {
 	locations: string
 	states: StateData[]
 	requests: string
-	userProfiles: any
 }
 
-export default function HomePage({
-	locations,
-	states,
-	requests,
-	userProfiles,
-}: Props) {
+export default function HomePage({ locations, states, requests }: Props) {
 	const [flatShareRequests, setFlatShareRequests] = useState<any[]>(
 		requests ? JSON.parse(requests) : [],
 	)
@@ -66,6 +61,7 @@ export default function HomePage({
 						request.user_info?.hide_profile ? null : { ...request },
 					),
 				)
+
 				const filteredRequests = updatedRequests.filter(Boolean)
 				setProcessedRequests(filteredRequests as HostRequestDataDetails[])
 			}
@@ -89,15 +85,45 @@ export default function HomePage({
 			if (querySnapshot.empty) {
 				setHasMore(false)
 			} else {
+				// Extract new requests from the querySnapshot
 				const newRequests = querySnapshot.docs.map((doc) => ({
 					id: doc.id,
 					...doc.data(),
-				}))
+				})) as HostRequestDataDetails[]
 
+				// Resolve any document references in the new requests
+				const resolvedRequests = await resolveArrayOfReferences(newRequests)
+
+				// Further resolve user information and filter out hidden profiles
+				const resolvedNewRequests = await Promise.all(
+					resolvedRequests
+						?.filter(
+							(request: HostRequestDataDetails) => request?._user_ref?._id,
+						)
+						.map(async (request: HostRequestDataDetails) => {
+							const userId = request._user_ref._id
+							const user_info = await UserInfoService.get(userId)
+
+							// Only include requests where the user profile is not hidden
+							if (!user_info?.hide_profile) {
+								return {
+									...request,
+									user_info,
+								}
+							}
+
+							// Return null if the user profile is hidden
+							return null
+						}),
+					// Filter out any null results from hidden profiles
+				).then((results) => results.filter((request) => request !== null))
+
+				// Update state with filtered new requests (removing duplicates)
 				setFlatShareRequests((prevRequests) => {
 					const existingIds = new Set(prevRequests.map((request) => request.id))
 
-					const filteredNewRequests = newRequests.filter(
+					// Filter out new requests that already exist in previous requests
+					const filteredNewRequests = resolvedNewRequests.filter(
 						(request) => !existingIds.has(request.id),
 					)
 
@@ -148,8 +174,6 @@ export default function HomePage({
 					<Flex flexDir={'column'}>
 						<HomeTabs locations={JSON.parse(locations)} states={states} />
 						<JoinTheCommunity />
-						<ProfileSnippet userProfiles={userProfiles} />
-
 						<Flex flexDirection={'column'} gap={0}>
 							{processedRequests.map((request: any, index: number) => (
 								<Box
@@ -165,9 +189,10 @@ export default function HomePage({
 							))}
 
 							{isLoading && processedRequests.length > 0 && (
-								<Flex justify="center" mt="3">
-									<Spinner />
-								</Flex>
+								<Box textAlign="center" mt="4" width="100%">
+									<Spinner size="xl" />
+									<Text mt="4">Loading more posts...</Text>
+								</Box>
 							)}
 
 							{!processedRequests.length &&

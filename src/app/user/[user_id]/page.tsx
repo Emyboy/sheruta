@@ -21,7 +21,7 @@ import {
 	where,
 	setDoc,
 } from 'firebase/firestore'
-import { createDTO } from '@/firebase/service/index.firebase'
+// import { createDTO } from '@/firebase/service/index.firebase'
 import SherutaDB from '@/firebase/service/index.firebase'
 
 import { promise } from 'zod'

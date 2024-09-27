@@ -26,6 +26,7 @@ import React, { useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { ZodError } from 'zod'
 import { HostSpaceFormProps } from '.'
+import { revalidatePathOnClient } from '@/utils/actions'
 
 export default function UploadMedia({
 	formData,
@@ -163,9 +164,6 @@ export default function UploadMedia({
 			const { category, service, state, area, property, ...cleanedFormData } =
 				formData
 
-			const { _id, first_name, last_name, avatar_url } = user
-			const { primary_phone_number, is_verified } = user_info
-
 			let data: HostRequestData = {
 				...cleanedFormData,
 				imagesRefPaths: newMediaRefPaths,
@@ -177,14 +175,6 @@ export default function UploadMedia({
 				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
 				_user_ref: flat_share_profile?._user_ref,
-				// flat_share_profile: {
-				// 	is_verified,
-				// 	primary_phone_number,
-				// 	_id,
-				// 	first_name,
-				// 	last_name,
-				// 	avatar_url,
-				// },
 			}
 
 			createHostRequestDTO.parse(data)
@@ -195,9 +185,11 @@ export default function UploadMedia({
 				document_id: uuid,
 			})
 
+			revalidatePathOnClient()
+
 			localStorage.removeItem('host_space_form')
 			toast({ status: 'success', title: 'You have successfully added a space' })
-			router.push('/')
+			router.push(`/request/host/${uuid}`)
 		} catch (e) {
 			await Promise.all(mediaRefPaths.map((url) => SherutaDB.deleteMedia(url)))
 			if (e instanceof ZodError) {

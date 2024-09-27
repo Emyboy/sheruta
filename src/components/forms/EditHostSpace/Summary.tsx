@@ -22,13 +22,16 @@ import {
 	useToast,
 	VStack,
 } from '@chakra-ui/react'
-import { Autocomplete, LoadScript } from '@react-google-maps/api'
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api'
 import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
 import { useAuthContext } from '@/context/auth.context'
+
+const GOOGLE_PLACES_API_KEY: string | undefined =
+	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
 interface LocationObject {
 	formatted_address?: string
@@ -48,6 +51,11 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	const {
 		authState: { flat_share_profile },
 	} = useAuthContext()
+
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
+		libraries,
+	})
 
 	const [loading, setLoading] = useState(false)
 
@@ -193,7 +201,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				title: 'You have successfully updated your space',
 			})
 
-			router.push('/')
+			router.push(`/request/host/${data.uuid}`)
 		} catch (e) {
 			console.log('Unknown error', e)
 			toast({ title: 'Error updating your details', status: 'error' })
@@ -708,14 +716,13 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 						</Flex>
 					</Flex>
 
-					{formData.area && (
-						<LoadScript
-							googleMapsApiKey={
-								process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY as string
-							}
-							libraries={libraries}
-						>
-							<FormControl mt={'-1.5rem'}>
+					{formData.area &&
+						(!isLoaded ? (
+							<Text width={'full'} textAlign={'center'}>
+								Loading google maps
+							</Text>
+						) : (
+							<FormControl mt={1}>
 								<FormLabel htmlFor="address">
 									Choose a more descriptive location in {formData.area}?
 								</FormLabel>
@@ -735,8 +742,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 									/>
 								</Autocomplete>
 							</FormControl>
-						</LoadScript>
-					)}
+						))}
 				</VStack>
 				<br />
 				<Button bgColor={'brand'} color={'white'} type={'submit'}>

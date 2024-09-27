@@ -56,7 +56,7 @@ export default function HostSpace() {
 		description: '',
 		service_charge: 0,
 		budget: 0,
-		payment_type: 'monthly',
+		payment_type: PaymentPlan.monthly,
 		bathrooms: 0,
 		toilets: 0,
 		living_rooms: 0,

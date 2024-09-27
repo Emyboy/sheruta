@@ -1,10 +1,20 @@
+'use client'
+
+import CloseIcon from '@/assets/svg/close-icon-dark'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import useCommon from '@/hooks/useCommon'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification } from '@/utils/actions'
-import { handleCall } from '@/utils/index.utils'
+import {
+	getTimeDifferenceInHours,
+	handleCall,
+	timeAgo,
+	truncateText,
+} from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -22,11 +32,10 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
-import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
-	BiBarChart,
+	BiBookmark,
 	BiDotsHorizontalRounded,
 	BiLocationPlus,
 	BiMessageRoundedDetail,
@@ -34,8 +43,10 @@ import {
 	BiPhone,
 	BiPlayCircle,
 	BiShare,
+	BiSolidBookmark,
 	BiTrash,
 } from 'react-icons/bi'
+import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
 
@@ -43,9 +54,33 @@ type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
+	const { showToast } = useCommon()
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
+
+	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
+		useHandleBookmark(request.id || request.uuid, request._user_ref._id)
+
+	const canInteract = !(
+		request.availability_status === 'reserved' &&
+		authState.user?._id !== request.reserved_by
+	)
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+
+	const deletePost = async (): Promise<void> => {
+		try {
+			await handleDeletePost({
+				requestId: request.id || request.uuid,
+				userId: request._user_ref._id,
+			})
+		} catch (err) {
+			showToast({
+				message: 'This post was not deleted',
+				status: 'error',
+			})
+		}
+	}
+
 	return (
 		<Box
 			position={'relative'}
@@ -66,10 +101,11 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request._user_ref._id}`}
+						href={canInteract ? `/user/${request._user_ref._id}` : ''}
 						style={{ textDecoration: 'none' }}
 						onClick={async () =>
-							await createNotification({
+							(canInteract || authState.user?._id !== request._user_ref._id) &&
+							(await createNotification({
 								is_read: false,
 								message: NotificationsBodyMessage.profile_view,
 								recipient_id: request._user_ref._id,
@@ -82,7 +118,8 @@ export default function EachRequest({ request }: Props) {
 											id: authState.user._id,
 										}
 									: null,
-							})
+								action_url: `/user/${request._user_ref._id}`,
+							}))
 						}
 					>
 						<Avatar
@@ -97,38 +134,52 @@ export default function EachRequest({ request }: Props) {
 					</Link>
 					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Link
-								href={`/user/${request._user_ref._id}`}
-								style={{ textDecoration: 'none' }}
-								onClick={async () =>
-									await createNotification({
-										is_read: false,
-										message: NotificationsBodyMessage.profile_view,
-										recipient_id: request._user_ref._id,
-										type: 'profile_view',
-										sender_details: authState.user
-											? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
-											: null,
-									})
-								}
-							>
-								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
-									<Text
-										textTransform={'capitalize'}
-										fontSize={{ base: 'base', md: 'lg' }}
-									>
-										{request._user_ref.last_name} {request._user_ref.first_name}
-									</Text>
-									{request.user_info.is_verified && (
-										<LuBadgeCheck fill="#00bc73" />
-									)}
-								</Flex>
-							</Link>
+							{canInteract ? (
+								<Link
+									href={`/user/${request._user_ref._id}`}
+									style={{ textDecoration: 'none' }}
+									onClick={async () =>
+										authState.user?._id !== request._user_ref._id &&
+										(await createNotification({
+											is_read: false,
+											message: NotificationsBodyMessage.profile_view,
+											recipient_id: request._user_ref._id,
+											type: 'profile_view',
+											sender_details: authState.user
+												? {
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
+												: null,
+											action_url: `/user/${request._user_ref._id}`,
+										}))
+									}
+								>
+									<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+										<Text
+											textTransform={'capitalize'}
+											fontSize={{ base: 'base', md: 'lg' }}
+										>
+											{request._user_ref.last_name}{' '}
+											{request._user_ref.first_name}
+										</Text>
+										{request.user_info?.is_verified && (
+											<LuBadgeCheck fill="#00bc73" />
+										)}
+									</Flex>
+								</Link>
+							) : (
+								<Text
+									textTransform={'capitalize'}
+									fontSize={{ base: 'base', md: 'lg' }}
+									fontWeight={600}
+								>
+									Reserved
+								</Text>
+							)}
+
 							<Popover>
 								<PopoverTrigger>
 									<Button
@@ -170,7 +221,7 @@ export default function EachRequest({ request }: Props) {
 												bgColor="none"
 												onClick={() =>
 													copyShareUrl(
-														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`,
 														request.seeking
 															? 'Looking for apartment'
 															: 'New apartment',
@@ -209,7 +260,7 @@ export default function EachRequest({ request }: Props) {
 														}}
 														onClick={() => {
 															router.push(
-																`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
+																`request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}/edit`,
 															)
 														}}
 														width="100%"
@@ -230,12 +281,7 @@ export default function EachRequest({ request }: Props) {
 														_active={{
 															bgColor: 'none',
 														}}
-														onClick={async () =>
-															await handleDeletePost({
-																requestId: request.id,
-																userId: request._user_ref._id,
-															})
-														}
+														onClick={async () => await deletePost()}
 														width="100%"
 														display="flex"
 														alignItems="center"
@@ -259,19 +305,16 @@ export default function EachRequest({ request }: Props) {
 							</Popover>
 						</Flex>
 						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
-							{formatDistanceToNow(
-								new Date(
-									request.updatedAt.seconds * 1000 +
-										request.updatedAt.nanoseconds / 1000000,
-								),
-								{ addSuffix: true },
-							)}
+							{request.availability_status === 'reserved'
+								? `Checkback in
+									${getTimeDifferenceInHours(request.reservation_expiry)} hours`
+								: timeAgo(request.updatedAt)}
 						</Text>
 					</Flex>
 				</Flex>
 
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex flexDirection={'column'}>
@@ -286,7 +329,6 @@ export default function EachRequest({ request }: Props) {
 								<BiLocationPlus size={'16px'} />
 							</Box>
 							<Truncate
-								//@ts-ignore
 								text={request._location_keyword_ref.name}
 								max={70}
 								showReadMore={false}
@@ -296,11 +338,16 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
 						<Flex gap={DEFAULT_PADDING}>
+							{typeof request?.seeking !== 'undefined' && request.seeking ? (
+								<Badge colorScheme={'orange'} textTransform="capitalize">
+									Seeker
+								</Badge>
+							) : null}
 							<Badge
 								colorScheme="green"
 								rounded="md"
@@ -349,6 +396,10 @@ export default function EachRequest({ request }: Props) {
 						{!request.user_info?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
+									isDisabled={
+										!canInteract ||
+										authState.user?._id === request._user_ref._id
+									}
 									px={0}
 									bg="none"
 									color="text_muted"
@@ -366,9 +417,9 @@ export default function EachRequest({ request }: Props) {
 										sm: 'lg',
 										base: 'base',
 									}}
-									onClick={async () => {
-										if (authState.user?._id === request._user_ref._id) return
-										await handleCall({
+									onClick={async () =>
+										canInteract &&
+										(await handleCall({
 											number: request.user_info.primary_phone_number,
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
@@ -379,20 +430,24 @@ export default function EachRequest({ request }: Props) {
 														id: authState.user._id,
 													}
 												: null,
-										})
-									}}
+										}))
+									}
 								>
-									<BiPhone /> 35
+									<BiPhone />
 								</Button>
 							</MainTooltip>
 						) : null}
 
 						<MainTooltip label="Ask questions" placement="top">
 							<Link
-								href={`/messsages/${request._user_ref._id}`}
+								href={canInteract ? `/messsages/${request._user_ref._id}` : ''}
 								style={{ textDecoration: 'none' }}
 							>
 								<Button
+									isDisabled={
+										!canInteract ||
+										authState.user?._id === request._user_ref._id
+									}
 									px={0}
 									bg="none"
 									color="text_muted"
@@ -416,12 +471,15 @@ export default function EachRequest({ request }: Props) {
 										base: 'base',
 									}}
 								>
-									<BiMessageRoundedDetail /> 35
+									<BiMessageRoundedDetail />
 								</Button>
 							</Link>
 						</MainTooltip>
-						<MainTooltip label="Engagements" placement="top">
+						<MainTooltip label="Bookmark" placement="top">
 							<Button
+								onClick={toggleSaveApartment}
+								isLoading={isBookmarkLoading}
+								isDisabled={isBookmarkLoading}
 								px={0}
 								bg="none"
 								color="text_muted"
@@ -444,7 +502,7 @@ export default function EachRequest({ request }: Props) {
 									base: 'base',
 								}}
 							>
-								<BiBarChart /> 135
+								{bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 							</Button>
 						</MainTooltip>
 					</Flex>
@@ -477,14 +535,23 @@ const EachRequestMedia = ({
 	images: string[]
 	video?: string | null
 }) => {
-	const [clicked, setClicked] = useState(false)
-	const [url, setUrl] = useState<string>('')
-	const [type, setType] = useState<'video' | 'img'>('img')
+	const allMedias: {
+		url: string
+		type: string
+	}[] = video
+		? [
+				{ url: video, type: 'video' },
+				...images.map((url) => ({ url, type: 'img' })),
+			]
+		: images.map((url) => ({ url, type: 'img' }))
 
-	const handleClick = (url: string, type: 'video' | 'img') => {
-		setType(type)
-		setUrl(url)
-		setClicked(true)
+	const [clicked, setClicked] = useState(false)
+	const [activeIdx, setActiveIdx] = useState<number>(0)
+
+	const handleClick = (idx: number) => {
+		if (!clicked) setClicked(true)
+
+		setActiveIdx(idx)
 	}
 
 	const close = () => setClicked(false)
@@ -503,13 +570,48 @@ const EachRequestMedia = ({
 					alignItems={'center'}
 					justifyContent={'center'}
 					cursor={'pointer'}
-					onClick={close}
-					p={'32px'}
 				>
-					{type === 'img' ? (
-						<Box overflow={'hidden'} rounded="md" bg="dark" w={'60%'} h={'60%'}>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						onClick={close}
+						zIndex={1001}
+					>
+						<CloseIcon />
+					</Box>
+					{activeIdx < allMedias.length - 1 && (
+						<Box
+							position={'absolute'}
+							right={'30%'}
+							top={'50%'}
+							transform={'translateY(-50%)'}
+							color={'white'}
+							fontSize={'48px'}
+							zIndex={1001}
+							onClick={() => setActiveIdx((prev) => prev + 1)}
+						>
+							<FaChevronCircleRight />
+						</Box>
+					)}
+					{activeIdx > 0 && (
+						<Box
+							position={'absolute'}
+							left={'30%'}
+							top={'50%'}
+							transform={'translateY(-50%)'}
+							color={'white'}
+							fontSize={'48px'}
+							zIndex={1001}
+							onClick={() => setActiveIdx((prev) => prev - 1)}
+						>
+							<FaChevronCircleLeft />
+						</Box>
+					)}
+					{allMedias[activeIdx].type === 'img' ? (
+						<Box overflow={'hidden'} rounded="md" w={'70%'} h={'70%'}>
 							<Image
-								src={url}
+								src={allMedias[activeIdx].url}
 								alt="shared space"
 								width={'full'}
 								height={'full'}
@@ -523,7 +625,6 @@ const EachRequestMedia = ({
 							zIndex={50}
 							overflow={'hidden'}
 							rounded="md"
-							bg="dark"
 							maxH={'60%'}
 							maxW={'700px'}
 							minH={'500px'}
@@ -533,7 +634,11 @@ const EachRequestMedia = ({
 							alignItems={'center'}
 							justifyContent={'center'}
 						>
-							<iframe src={url} width={'100%'} height={'100%'} />
+							<iframe
+								src={allMedias[activeIdx].url}
+								width={'100%'}
+								height={'100%'}
+							/>
 						</Flex>
 					)}
 				</Flex>
@@ -554,38 +659,44 @@ const EachRequestMedia = ({
 					flexWrap={'wrap'}
 					h={'full'}
 				>
-					{video && (
-						<Flex
-							position={'relative'}
-							overflow={'hidden'}
-							cursor={'pointer'}
-							rounded="md"
-							alignItems={'center'}
-							justifyContent={'center'}
-							onClick={() => handleClick(video, 'video')}
-						>
-							<video src={video} width={'100%'} height={'100%'} />
-							<Box pos="absolute" zIndex={0}>
-								<BiPlayCircle size={'80px'} fill="#00bc73" cursor={'pointer'} />
-							</Box>
-						</Flex>
-					)}
-					{images.map((imgUrl, i) => (
-						<Box
-							key={i}
-							position={'relative'}
-							overflow={'hidden'}
-							cursor={'pointer'}
-							rounded="md"
-							bg="dark"
-							onClick={() => handleClick(imgUrl, 'img')}
-						>
-							<Image
-								src={imgUrl}
-								alt="image of the shared space"
-								position={'relative'}
-							/>
-						</Box>
+					{allMedias.map((media, i) => (
+						<React.Fragment key={i}>
+							{media.type === 'video' ? (
+								<Flex
+									position={'relative'}
+									overflow={'hidden'}
+									cursor={'pointer'}
+									rounded="md"
+									alignItems={'center'}
+									justifyContent={'center'}
+									onClick={() => handleClick(i)}
+								>
+									<video src={media.url} width={'100%'} height={'100%'} />
+									<Box pos="absolute" zIndex={0}>
+										<BiPlayCircle
+											size={'80px'}
+											fill="#00bc73"
+											cursor={'pointer'}
+										/>
+									</Box>
+								</Flex>
+							) : (
+								<Box
+									position={'relative'}
+									overflow={'hidden'}
+									cursor={'pointer'}
+									rounded="md"
+									bg="dark"
+									onClick={() => handleClick(i)}
+								>
+									<Image
+										src={media.url}
+										alt="image of the shared space"
+										position={'relative'}
+									/>
+								</Box>
+							)}
+						</React.Fragment>
 					))}
 				</Flex>
 			</Flex>
@@ -604,12 +715,9 @@ const Truncate = ({
 }) => {
 	const maxChars = max || 200
 
-	const truncatedText =
-		text.length > maxChars ? text.substring(0, maxChars) + '... ' : text
-
 	return (
 		<Text>
-			{truncatedText}
+			{truncateText(text, maxChars)}
 			{text.length > maxChars && showReadMore && (
 				<Text _hover={{ textDecoration: 'underline' }} as="span" color="brand">
 					Read more..

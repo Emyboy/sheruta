@@ -408,7 +408,7 @@ const VideoCallModal = ({
 
 			localStorage.removeItem(`lastReminder_${id}`)
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			showToast({
 				message: 'Error rescheduling inspection',
 				status: 'error',
@@ -728,6 +728,7 @@ const CancelBookingModal = ({
 										first_name: user.first_name,
 										last_name: user.last_name,
 									},
+									action_url: '/inspections',
 								},
 							}),
 						]
@@ -753,6 +754,7 @@ const CancelBookingModal = ({
 										first_name: user.first_name,
 										last_name: user.last_name,
 									},
+									action_url: '/inspections',
 								},
 							}),
 						]
@@ -993,6 +995,7 @@ const ResheduleInspectionModal = ({
 							first_name: user.first_name,
 							last_name: user.last_name,
 						},
+						action_url: '/inspections',
 					},
 				}),
 			])
@@ -1006,7 +1009,7 @@ const ResheduleInspectionModal = ({
 
 			localStorage.removeItem(`lastReminder_${id}`)
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			showToast({
 				message: 'Error rescheduling inspection',
 				status: 'error',

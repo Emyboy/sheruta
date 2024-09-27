@@ -3,6 +3,7 @@ import {
 	collection,
 	doc,
 	getDocs,
+	orderBy,
 	query,
 	serverTimestamp,
 	setDoc,
@@ -17,14 +18,16 @@ export const NotificationsBodyMessage: Record<
 	NotificationsType['type'],
 	string
 > = {
-	rescheduled: 'Your inspection has been rescheduled by',
-	missed_call: 'You have a missed call from',
-	call: 'You have a call attempt from',
-	inspection: 'You have an upcoming inspection with',
-	message: 'You have a new message from',
-	comment: 'You have a comment from',
-	profile_view: 'A user viewed your profile',
-	cancelled: 'Your Inspection has been cancelled by',
+	reservation: 'reserved your apartment listing',
+	rescheduled: 'rescheduled your inspection',
+	call: 'tried to call you',
+	inspection: 'scheduled an inspection with you',
+	message: 'sent you a message',
+	comment: 'commented on your apartment listing',
+	comment_reply: 'replied your comment',
+	profile_view: 'viewed your profile',
+	cancelled: 'cancelled your inspection',
+	bookmark: 'saved your apartment listing',
 }
 
 export default class NotificationsService {

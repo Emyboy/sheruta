@@ -6,44 +6,25 @@ import { NotificationsType } from '@/firebase/service/notifications/notification
 import { timeAgo } from '@/utils/index.utils'
 import { Avatar, Button, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 type Props = {}
-
-const routes = (data: {
-	type: NotificationsType['type']
-	userid?: string
-	url?: string
-}) => {
-	const options = {
-		rescheduled: 'inspections',
-		cancelled: 'inspections',
-		inspection: 'inspections',
-		comment: '',
-		message: 'messages' + data.userid,
-		call: '',
-		missed_call: '',
-		profile_view: '',
-	}
-
-	return options[data.type]
-}
 
 const ButtonText: Record<NotificationsType['type'], string> = {
 	rescheduled: 'Inspect Now',
 	cancelled: 'View',
 	inspection: 'Inspect Now',
 	comment: 'View',
-	message: 'View',
+	message: 'Reply',
 	call: 'Call Back',
-	missed_call: 'Call Back',
+	comment_reply: 'Reply',
 	profile_view: 'View',
+	bookmark: 'Message',
+	reservation: 'Message',
 }
 
 export default function NotificationsPage({}: Props) {
 	const { notifications, updateNotification, readAllNotifications } =
 		useNotificationContext()
-	const { push } = useRouter()
 
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING} p={DEFAULT_PADDING}>
@@ -131,7 +112,6 @@ export default function NotificationsPage({}: Props) {
 								}}
 							/>
 							<Text fontWeight={400} fontSize={{ base: 'base', md: 'lg' }}>
-								{notification.message}{' '}
 								{notification.sender_details ? (
 									<Link href={`/user/${notification.sender_details.id}`}>
 										<Text
@@ -153,14 +133,10 @@ export default function NotificationsPage({}: Props) {
 									>
 										Unknown
 									</Text>
-								)}
+								)}{' '}
+								{notification.message}
 							</Text>
-							<Link
-								href={routes({
-									type: notification.type,
-									userid: notification?.sender_details?.id,
-								})}
-							>
+							<Link href={notification.action_url || ''}>
 								<Button
 									fontSize={{ base: 'sm', md: 'base' }}
 									fontWeight={400}

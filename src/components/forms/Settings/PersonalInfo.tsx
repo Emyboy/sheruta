@@ -2,6 +2,8 @@
 
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import SherutaDB from '@/firebase/service/index.firebase'
+import { PaymentPlan } from '@/firebase/service/request/request.types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import UserService from '@/firebase/service/user/user.firebase'
 import useCommon from '@/hooks/useCommon'
@@ -19,8 +21,10 @@ import {
 	Alert,
 	AlertIcon,
 	useColorMode,
+	Avatar,
 } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
+import { BiCamera } from 'react-icons/bi'
 
 const PersonalInfoForm = () => {
 	const [formData, setFormData] = useState<{
@@ -56,12 +60,15 @@ const PersonalInfoForm = () => {
 				religion: flat_share_profile?.religion || '',
 				gender: user_info?.gender || 'male',
 			})
+			setAvatarUrl(user?.avatar_url)
 		}
 	}, [user, user_info, flat_share_profile])
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+	const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -75,10 +82,21 @@ const PersonalInfoForm = () => {
 		}))
 	}
 
+	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (file) {
+			setAvatarFile(file)
+			const reader = new FileReader()
+			reader.onloadend = () => setAvatarUrl(reader.result as string)
+			reader.readAsDataURL(file)
+		}
+	}
+
 	const handleSubmit = async (e: React.FormEvent): Promise<any> => {
 		try {
 			e.preventDefault()
 			setIsLoading(true)
+
 			if (
 				!(
 					user &&
@@ -89,28 +107,69 @@ const PersonalInfoForm = () => {
 					flat_share_profile?._user_id
 				)
 			) {
+				setIsLoading(false)
 				return showToast({
 					message: 'Please refresh this page and sign in again',
 					status: 'error',
 				})
 			}
 
+			let downloadURL: string | undefined = user?.avatar_url
+
+			if (avatarFile) {
+				if (user?.avatar_url) {
+					await SherutaDB.deleteMedia(user.avatar_url)
+				}
+
+				const uploadAvatar = new Promise<string | undefined>(
+					(resolve, reject) => {
+						const reader = new FileReader()
+						reader.readAsDataURL(avatarFile)
+						reader.onload = async () => {
+							if (reader.result) {
+								try {
+									const storageUrl = `images/profiles/${user?._id}/${avatarFile.name}`
+
+									await SherutaDB.uploadMedia({
+										data: reader.result as string,
+										storageUrl,
+									})
+
+									const url = await SherutaDB.getMediaUrl(storageUrl)
+									resolve(url || '')
+								} catch (error) {
+									console.error('Error uploading avatar:', error)
+									reject(undefined)
+								}
+							} else {
+								reject(undefined)
+							}
+						}
+						reader.onerror = () => reject(undefined)
+					},
+				)
+
+				downloadURL = await uploadAvatar
+				setAvatarUrl(downloadURL || '')
+			}
+
 			await Promise.all([
-				await UserInfoService.update({
+				UserInfoService.update({
 					data: {
 						primary_phone_number: formData.phone,
 						gender: formData.gender,
 					},
 					document_id: user_info._user_id,
 				}),
-				await UserService.update({
+				UserService.update({
 					data: {
 						first_name: formData.firstName,
 						last_name: formData.lastName,
+						avatar_url: downloadURL,
 					},
 					document_id: user._id,
 				}),
-				await FlatShareProfileService.update({
+				FlatShareProfileService.update({
 					data: {
 						bio: formData.bio,
 						religion: formData.religion,
@@ -118,6 +177,7 @@ const PersonalInfoForm = () => {
 					document_id: flat_share_profile?._user_id,
 				}),
 			])
+
 			setIsLoading(false)
 
 			showToast({
@@ -151,6 +211,47 @@ const PersonalInfoForm = () => {
 			</Alert>
 			<form onSubmit={handleSubmit}>
 				<VStack spacing={4} align="stretch">
+					<Flex justifyContent={'center'}>
+						<Flex
+							cursor={'pointer'}
+							htmlFor="file-selector"
+							as={'label'}
+							bg={'brand'}
+							h={'170px'}
+							w={'170px'}
+							rounded={'full'}
+							p={1}
+							alignItems={'center'}
+							justifyContent={'center'}
+							color={'text_muted'}
+						>
+							{avatarUrl || user?.avatar_url ? (
+								<div
+									style={{
+										backgroundImage: `url(${avatarUrl || user?.avatar_url})`,
+										backgroundSize: 'cover',
+										backgroundPosition: 'center',
+										width: '100%',
+										height: '100%',
+										borderRadius: '50%',
+									}}
+								/>
+							) : (
+								<BiCamera size={50} />
+							)}
+						</Flex>
+						<input
+							type="file"
+							id="file-selector"
+							accept="image/*"
+							onChange={handleAvatarChange}
+							style={{ display: 'none' }}
+						/>
+					</Flex>
+					<FormLabel mt={3} width="100%" textAlign={'center'}>
+						Update your avatar
+					</FormLabel>
+
 					<Flex gap={4}>
 						<FormControl
 							id="firstName"

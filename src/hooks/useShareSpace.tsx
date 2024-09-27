@@ -55,7 +55,6 @@ export default function useShareSpace() {
 			setIsLoading(true)
 
 			if (authState.user?._id === userId && requestId) {
-				// await deletePost(requestId)
 				await SherutaDB.delete({
 					collection_name: DBCollectionName.flatShareRequests,
 					document_id: requestId,
@@ -84,5 +83,5 @@ export default function useShareSpace() {
 		}
 	}
 
-	return { copyShareUrl, handleDeletePost, isLoading }
+	return { copyShareUrl, handleDeletePost, isLoading, setIsLoading }
 }
