@@ -1,5 +1,4 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { useAuthContext } from '@/context/auth.context'
 import {
 	Badge,
 	Box,
@@ -13,8 +12,6 @@ import {
 	Stack,
 	Text,
 } from '@chakra-ui/react'
-import { DocumentReference, getDoc } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
 import { BiBookmark } from 'react-icons/bi'
 
 type Props = {
@@ -43,59 +40,10 @@ interface UserProfile {
 	budget: number
 	payment_plan: string
 	service_type: string
+	_user_ref: any
 }
 
 const ProfileSnippet = ({ userProfiles }: Props) => {
-	// const [snippetData, setSnippetData] = useState<Record<string, any>>({})
-	// const { authState } = useAuthContext()
-
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 		let locationValue: any = null
-
-	// 			const docSnapshot = await getDoc(locationKeywordDocRef)
-
-	// 			if (docSnapshot.exists()) {
-	// 				locationValue = docSnapshot.data()
-	// 			} else {
-	// 				console.log('Location keyword document does not exist.')
-	// 			}
-	// 		} catch (error) {
-	// 			console.error('Error fetching Location keyword document:', error)
-	// 		}
-
-	// 		let stateValue: any = null
-
-	// 		try {
-	// 			const stateDocRef = authState.flat_share_profile
-	// 				?.state as DocumentReference
-
-	// 			const docSnapshot = await getDoc(stateDocRef)
-
-	// 			if (docSnapshot.exists()) {
-	// 				stateValue = docSnapshot.data()
-	// 			} else {
-	// 				console.log('state document does not exist.')
-	// 			}
-	// 		} catch (error) {
-	// 			console.error('Error fetching state document ref:', error)
-	// 		}
-
-	// 		const profileSnippetData = {
-	// 			firstName: authState.user?.first_name,
-	// 			lastName: authState.user?.last_name,
-	// 			bio: authState.flat_share_profile?.bio,
-	// 			state: stateValue ? stateValue.name : null,
-	// 			area: locationValue ? locationValue.name : null,
-	// 			seeking: authState.flat_share_profile?.seeking,
-	// 			budget: authState.flat_share_profile?.budget,
-	// 		}
-
-	// 		setSnippetData(profileSnippetData)
-	// 	}
-	// 	fetchData()
-	// }, [authState])
-
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
 
 	return (

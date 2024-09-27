@@ -37,7 +37,9 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 	const _user: AuthUser = data.user
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
-	const { authState: { user } } = useAuthContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
 	const { bookmarkId, isBookmarkLoading, toggleSaveProfile } =
 		useHandleBookmark(user_id, user?._id as string)
@@ -173,7 +175,11 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 							<BiMessageRoundedDetail size={25} />
 						</Button>
 					</Link>
-					<IconButton icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />} aria-label='Bookmark this profile' onClick={async() => await toggleSaveProfile()} />
+					<IconButton
+						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
+						aria-label="Bookmark this profile"
+						onClick={async () => await toggleSaveProfile()}
+					/>
 				</Flex>
 			</Flex>
 		</Flex>

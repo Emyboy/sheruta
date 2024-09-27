@@ -79,7 +79,8 @@ const SeekerPost = ({
 
 	const [isPostAdmin, setIsPostAdmin] = useState<boolean>(false)
 
-	const {toggleSaveApartment, isBookmarkLoading, bookmarkId} = useHandleBookmark(requestId as string, authState.user?._id as string)
+	const { toggleSaveApartment, isBookmarkLoading, bookmarkId } =
+		useHandleBookmark(requestId as string, authState.user?._id as string)
 
 	useEffect(() => {
 		if (
@@ -132,7 +133,6 @@ const SeekerPost = ({
 			setIsLoading(false)
 		}
 	}
-
 
 	return (
 		<>
@@ -250,7 +250,7 @@ const SeekerPost = ({
 									</PopoverContent>
 								</Popover>
 								<IconButton
-									onClick={async() => await toggleSaveApartment()}
+									onClick={async () => await toggleSaveApartment()}
 									disabled={isBookmarkLoading}
 									_hover={{
 										color: 'brand',

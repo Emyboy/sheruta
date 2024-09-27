@@ -67,7 +67,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 			)
 
 			await FlatShareProfileService.update({
-				data: { budget, bio, payment_type: (payment_plan as PaymentPlan)  },
+				data: { budget, bio, payment_type: payment_plan as PaymentPlan },
 				document_id: user?._id,
 			})
 
