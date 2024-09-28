@@ -44,6 +44,7 @@ export default class AuthService {
 					data.displayName.split(' ')[1].toLocaleLowerCase().trim() ||
 					data.displayName.toLowerCase().trim(),
 				email: data.email,
+				email_verified: false,
 				// phone_number: data.phoneNumber,
 				account_status: 'active',
 				avatar_url: data.photoURL,

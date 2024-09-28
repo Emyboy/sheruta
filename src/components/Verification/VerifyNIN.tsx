@@ -96,6 +96,7 @@ const UpdateNameForm = ({
 					email: user?.email as string,
 					providerId: user?.providerId as string,
 					avatar_url: user?.avatar_url as string,
+					email_verified: user?.email_verified || false
 				},
 				user_info,
 				user_settings,

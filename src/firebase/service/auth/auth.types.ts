@@ -17,6 +17,7 @@ export type AuthUserDTO = {
 	first_name: string
 	last_name: string
 	email: string
+	email_verified: boolean
 	providerId: 'google' | 'facebook'
 	avatar_url: string | null
 	account_status: 'active' | 'suspended'
@@ -28,6 +29,7 @@ export interface AuthUser {
 	first_name: string
 	last_name: string
 	email: string
+	email_verified: boolean
 	providerId: string
 	avatar_url: string
 	last_seen: Timestamp

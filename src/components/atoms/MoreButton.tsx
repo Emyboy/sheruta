@@ -37,7 +37,6 @@ export function MoreButton({ userId, moreButtonList }: Props) {
 	const { bookmarkId, isBookmarkLoading, toggleSaveProfile } =
 		useHandleBookmark(userId, authState.user?._id as string)
 
-
 	useEffect(() => {
 		const { user } = authState
 		const currentUser = user?._id
@@ -118,10 +117,7 @@ export function MoreButton({ userId, moreButtonList }: Props) {
 											Save
 										</Text>
 									</Button>
-
 								</>
-
-
 							)}
 							{profileOwner && (
 								<>
