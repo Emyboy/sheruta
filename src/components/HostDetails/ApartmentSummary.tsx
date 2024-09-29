@@ -92,6 +92,8 @@ export default function ApartmentSummary({
 
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
+	const pathname = usePathname()
+	const { showToast } = useCommon()
 
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
@@ -113,6 +115,28 @@ export default function ApartmentSummary({
 			authState.user?._id !== request.reserved_by) ||
 		authState.user?._id === request._user_ref._id
 	)
+
+	const [loading, setLoading] = useState(false)
+	const cancelReservation = async () => {
+		setLoading(true)
+		try {
+			await ReservationService.deleteReservedListing({
+				request_id: request.id,
+				doc_id: authState.user?._id as string,
+			})
+			revalidatePathOnClient(pathname)
+			showToast({
+				message: 'You have successfully cancelled your reservation',
+				status: 'success',
+			})
+		} catch (err) {
+			showToast({
+				message: 'Error cancelling reservation, Try again later',
+				status: 'error',
+			})
+		}
+		setLoading(false)
+	}
 
 	return (
 		<>
@@ -179,17 +203,26 @@ export default function ApartmentSummary({
 					</Flex>
 					<Button
 						rounded={DEFAULT_PADDING}
+						isLoading={loading}
 						paddingX={{ base: '28px', md: '38px' }}
 						h={{ base: '48px', md: '52px' }}
 						paddingY={{ base: '12px', md: DEFAULT_PADDING }}
-						bgColor={'black'}
+						bgColor={
+							request.reserved_by === authState.user?._id ? 'red' : 'black'
+						}
 						_light={{ color: 'white' }}
-						onClick={openReserveApartmentModal}
+						onClick={
+							request.reserved_by === authState.user?._id
+								? cancelReservation
+								: openReserveApartmentModal
+						}
 						fontSize={{ base: 'sm', md: 'base' }}
 						isDisabled={!canInteract}
 					>
 						{request.availability_status === 'reserved'
-							? 'Apartment Reserved'
+							? request.reserved_by === authState.user?._id
+								? 'Cancel Reservation'
+								: 'Apartment Reserved'
 							: 'Reserve Apartment'}
 					</Button>
 				</Flex>
@@ -1097,10 +1130,24 @@ const ReserveApartmentModal = ({
 		setLoading(true)
 
 		try {
-			const uuid = crypto.randomUUID()
+			const hasPreviousReservation: boolean =
+				await ReservationService.getPreviousReservation({
+					user_id: authState.user._id,
+				})
+
+			if (hasPreviousReservation) {
+				setLoading(false)
+				setShowCreditInfo(false)
+				closeModal()
+
+				return showToast({
+					message: 'You can only reserve one apartment at a time.',
+					status: 'error',
+				})
+			}
 
 			const data: ReservationType = {
-				uuid,
+				uuid: authState.user._id,
 				startTime: Timestamp.fromDate(new Date()),
 				endTime: Timestamp.fromDate(new Date(Date.now() + 48 * 60 * 60 * 1000)),
 				reserved_by: authState.user._id,

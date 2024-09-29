@@ -583,11 +583,11 @@ const EachRequestMedia = ({
 					{activeIdx < allMedias.length - 1 && (
 						<Box
 							position={'absolute'}
-							right={'30%'}
+							right={'5%'}
 							top={'50%'}
 							transform={'translateY(-50%)'}
 							color={'white'}
-							fontSize={'48px'}
+							fontSize={{ base: '24px', md: '48px' }}
 							zIndex={1001}
 							onClick={() => setActiveIdx((prev) => prev + 1)}
 						>
@@ -597,11 +597,11 @@ const EachRequestMedia = ({
 					{activeIdx > 0 && (
 						<Box
 							position={'absolute'}
-							left={'30%'}
+							left={'5%'}
 							top={'50%'}
 							transform={'translateY(-50%)'}
 							color={'white'}
-							fontSize={'48px'}
+							fontSize={{ base: '24px', md: '48px' }}
 							zIndex={1001}
 							onClick={() => setActiveIdx((prev) => prev - 1)}
 						>
