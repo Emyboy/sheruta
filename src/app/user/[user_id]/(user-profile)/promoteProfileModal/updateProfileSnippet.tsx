@@ -29,7 +29,12 @@ import React, { useEffect, useState } from 'react'
 import { ImageSelector } from './imageSelector'
 import { useOptionsContext } from '@/context/options.context'
 
-export const UpdateProfilePopup = () => {
+interface Props{
+	profileOwnerId: string;
+}
+
+
+export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 	const { colorMode } = useColorMode()
 
 	const {
@@ -41,6 +46,7 @@ export const UpdateProfilePopup = () => {
 		optionsState: { services },
 	} = useOptionsContext()
 
+
 	const [isOpen, setIsOpen] = useState(false)
 
 	const onOpen = () => setIsOpen(true)
@@ -50,6 +56,17 @@ export const UpdateProfilePopup = () => {
 	const [userId, setUserId] = useState<string>('')
 	const [_service, setService] = useState<string>('')
 	const [_profileData, setProfileData] = useState({})
+	const [profileOwner, setProfileOwner] = useState(false)
+
+	useEffect(() => {
+		
+		const currentUser = user?._id
+		const viewedProfileId = profileOwnerId
+
+		if (viewedProfileId === currentUser) {
+			setProfileOwner(true)
+		}
+	}, [userId])
 
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -116,7 +133,7 @@ export const UpdateProfilePopup = () => {
 
 	return (
 		<>
-			<Button onClick={onOpen}>Promote profile on feeds</Button>
+			{profileOwner && <Button onClick={onOpen}>Promote profile on feeds</Button>}
 
 			<Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />

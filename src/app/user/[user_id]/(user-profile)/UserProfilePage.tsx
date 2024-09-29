@@ -30,7 +30,7 @@ export default async function UserProfilePage({
 				<ProfileAboutMe userProfile={userProfile} />
 			</MainSection>
 			<PersonalInfo userProfile={userProfile} />
-			<UpdateProfilePopup />
+			<UpdateProfilePopup profileOwnerId={user_id}/>
 			<MainSection heading="My Postings" borderBottom={0}>
 				{/* <EachRequest request={request} />
 				<EachRequest />

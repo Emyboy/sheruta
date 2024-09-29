@@ -16,10 +16,13 @@ import {
 	BiShare,
 	BiPencil,
 	BiTrash,
+	BiSolidBookmark,
+	BiBookmark,
 } from 'react-icons/bi'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { useEffect, useState } from 'react'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 
 interface Props {
 	userId: any
@@ -30,6 +33,9 @@ export function MoreButton({ userId, moreButtonList }: Props) {
 	const [profileOwner, setProfileOwner] = useState(false)
 
 	const { authState } = useAuthContext()
+
+	const { bookmarkId, isBookmarkLoading, toggleSaveProfile } =
+		useHandleBookmark(userId, authState.user?._id as string)
 
 	useEffect(() => {
 		const { user } = authState
@@ -78,21 +84,40 @@ export function MoreButton({ userId, moreButtonList }: Props) {
 					<PopoverBody p={0} zIndex={1000}>
 						<VStack spacing={1} align="flex-start">
 							{!profileOwner && (
-								<Button
-									variant="ghost"
-									leftIcon={<BiShare />}
-									bgColor="none"
-									width="100%"
-									display="flex"
-									alignItems="center"
-									padding={0}
-									borderRadius="sm"
-									_hover={{ color: 'brand_dark' }}
-								>
-									<Text width={'100%'} textAlign={'left'}>
-										Share
-									</Text>
-								</Button>
+								<>
+									<Button
+										variant="ghost"
+										leftIcon={<BiShare />}
+										bgColor="none"
+										width="100%"
+										display="flex"
+										alignItems="center"
+										padding={0}
+										borderRadius="sm"
+										_hover={{ color: 'brand_dark' }}
+									>
+										<Text width={'100%'} textAlign={'left'}>
+											Share
+										</Text>
+									</Button>
+
+									<Button
+										variant="ghost"
+										leftIcon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
+										bgColor="none"
+										width="100%"
+										display="flex"
+										alignItems="center"
+										padding={0}
+										borderRadius="sm"
+										_hover={{ color: 'brand_dark' }}
+										onClick={async () => await toggleSaveProfile()}
+									>
+										<Text width={'100%'} textAlign={'left'}>
+											Save
+										</Text>
+									</Button>
+								</>
 							)}
 							{profileOwner && (
 								<>

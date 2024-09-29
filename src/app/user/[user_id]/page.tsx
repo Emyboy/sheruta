@@ -21,13 +21,14 @@ import {
 	where,
 	setDoc,
 } from 'firebase/firestore'
-// import { createDTO } from '@/firebase/service/index.firebase'
+import { CreateDTO } from '@/firebase/service/index.firebase'
 import SherutaDB from '@/firebase/service/index.firebase'
 
 import { promise } from 'zod'
 
 import { MoreButton } from '@/components/atoms/MoreButton'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import AuthService from '@/firebase/service/auth/auth.firebase'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -37,6 +38,22 @@ export default async function page(props: any) {
 
 	async function getUserData() {
 		try {
+			// const userDoc = await AuthService.getUser(user_id)
+
+			// if (!userDoc) return { user: null }
+
+			// console.log(userDoc)
+
+			// return {
+			// 	user: {
+			// 		first_name: userDoc.user.first_name,
+			// 		last_name: userDoc.user.last_name,
+			// 		email: userDoc.user.email,
+			// 		avatar_url: userDoc.user.avatar_url,
+			// 		id: userDoc.user._id,
+			// 	},
+			// }
+
 			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
 			if (!userDoc.exists()) return { user: null }
 
@@ -262,7 +279,9 @@ export default async function page(props: any) {
 
 	const userId = user.user?.id
 
-	// const profileData: createDTO = {
+	
+
+	// const profileData: CreateDTO = {
 	// 	collection_name: DBCollectionName.userProfile,
 	// 	data: userProfiles,
 	// 	document_id: user_id,

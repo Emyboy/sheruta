@@ -14,6 +14,7 @@ import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { Box, Flex, Text, Spinner } from '@chakra-ui/react'
+import ProfileSnippet from '@/components/ads/ProfileSnippet'
 import {
 	collection,
 	DocumentData,
@@ -31,6 +32,7 @@ import HomeTabs from './HomeTabs'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { resolveArrayOfReferences } from '@/utils/index.utils'
+import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
 
 type Props = {
 	locations: string

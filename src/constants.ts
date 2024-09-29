@@ -1,6 +1,7 @@
 export const creditTable = {
 	CONVERSATION: 200,
 	VERIFICATION: 500,
+	RESERVATION: 0,
 	GROUP_MESSAGE: 50,
 	PERSONAL_INFO_VIEW: 500,
 	CALLS: 100,
@@ -35,7 +36,7 @@ export const homeTabSearch = [
 	'Healthcare space',
 	'Legal space',
 	'Employed',
-	'Males only'
+	'Males only',
 ]
 
 export const industries = [

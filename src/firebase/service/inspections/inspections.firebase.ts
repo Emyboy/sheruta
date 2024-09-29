@@ -13,7 +13,7 @@ import {
 	where,
 } from 'firebase/firestore'
 import moment from 'moment'
-import { createDTO, DBCollectionName } from '../index.firebase'
+import { CreateDTO, DBCollectionName } from '../index.firebase'
 
 export default class InspectionServices {
 	static defaults = {
@@ -22,7 +22,7 @@ export default class InspectionServices {
 		deleteDate: moment().add(2, 'months').toDate(),
 	}
 
-	static async create(data: createDTO): Promise<any> {
+	static async create(data: CreateDTO): Promise<any> {
 		await setDoc(doc(db, data.collection_name, data.document_id), {
 			...this.defaults,
 			...data.data,
@@ -55,7 +55,7 @@ export default class InspectionServices {
 		}))
 	}
 
-	static async update(data: createDTO) {
+	static async update(data: CreateDTO) {
 		const ref = doc(db, data.collection_name, data.document_id)
 		await updateDoc(ref, {
 			...data.data,
