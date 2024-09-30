@@ -36,7 +36,7 @@ import { DocumentData } from 'firebase/firestore'
 
 interface Props {}
 
-const PUBLIC_URL = process.env.NEXT_PUBLIC_URL 
+const PUBLIC_URL = process.env.NEXT_PUBLIC_URL
 
 export default function AuthPopup(props: Props) {
 	const {
@@ -317,7 +317,7 @@ const AuthForm: React.FC<{
 			//redirecting to the homepage will trigger the onboarding process
 			await sendEmailVerification(user, {
 				url: `${PUBLIC_URL}`,
-			});
+			})
 
 			const theUser = await AuthService.loginUser({
 				displayName: `${firstName} ${lastName}`,
@@ -404,7 +404,7 @@ const AuthForm: React.FC<{
 				})
 			}
 		} catch (err: any) {
-			console.log(err)
+			console.error(err)
 			if (err.message.includes('invalid-credential')) {
 				showToast({
 					message: 'Invalid email or password.',
