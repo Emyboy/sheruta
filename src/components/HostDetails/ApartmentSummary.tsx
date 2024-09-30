@@ -10,7 +10,6 @@ import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
 import {
@@ -28,6 +27,7 @@ import {
 } from '@/firebase/service/reservations/reservations.types'
 import useCommon from '@/hooks/useCommon'
 import useHandleBookmark from '@/hooks/useHandleBookmark'
+import usePayment from '@/hooks/usePayment'
 import useShareSpace from '@/hooks/useShareSpace'
 import {
 	createNotification,
@@ -60,7 +60,7 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -92,6 +92,8 @@ export default function ApartmentSummary({
 
 	const { authState } = useAuthContext()
 	const { colorMode } = useColorMode()
+	const pathname = usePathname()
+	const { showToast } = useCommon()
 
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
@@ -114,8 +116,30 @@ export default function ApartmentSummary({
 		authState.user?._id === request._user_ref._id
 	)
 
+	const [loading, setLoading] = useState(false)
+	const cancelReservation = async () => {
+		setLoading(true)
+		try {
+			await ReservationService.deleteReservedListing({
+				request_id: request.id,
+				doc_id: authState.user?._id as string,
+			})
+			revalidatePathOnClient(pathname)
+			showToast({
+				message: 'You have successfully cancelled your reservation',
+				status: 'success',
+			})
+		} catch (err) {
+			showToast({
+				message: 'Error cancelling reservation, Try again later',
+				status: 'error',
+			})
+		}
+		setLoading(false)
+	}
+
 	return (
-		<>
+		<React.Fragment>
 			<ReserveApartmentModal
 				closeModal={closeReserveApartmentModal}
 				showBookApartmentModal={showReserveApartmentModal}
@@ -179,17 +203,26 @@ export default function ApartmentSummary({
 					</Flex>
 					<Button
 						rounded={DEFAULT_PADDING}
+						isLoading={loading}
 						paddingX={{ base: '28px', md: '38px' }}
 						h={{ base: '48px', md: '52px' }}
 						paddingY={{ base: '12px', md: DEFAULT_PADDING }}
-						bgColor={'black'}
+						bgColor={
+							request.reserved_by === authState.user?._id ? 'red' : 'black'
+						}
 						_light={{ color: 'white' }}
-						onClick={openReserveApartmentModal}
+						onClick={
+							request.reserved_by === authState.user?._id
+								? cancelReservation
+								: openReserveApartmentModal
+						}
 						fontSize={{ base: 'sm', md: 'base' }}
 						isDisabled={!canInteract}
 					>
 						{request.availability_status === 'reserved'
-							? 'Apartment Reserved'
+							? request.reserved_by === authState.user?._id
+								? 'Cancel Reservation'
+								: 'Apartment Reserved'
 							: 'Reserve Apartment'}
 					</Button>
 				</Flex>
@@ -1055,7 +1088,7 @@ export default function ApartmentSummary({
 						/>
 					)}
 			</Flex>
-		</>
+		</React.Fragment>
 	)
 }
 
@@ -1073,6 +1106,7 @@ const ReserveApartmentModal = ({
 	const { authState } = useAuthContext()
 	const { showToast } = useCommon()
 	const pathname = usePathname()
+	const [_, paymentActions] = usePayment()
 
 	const [loading, setLoading] = useState<boolean>(false)
 	const [showCreditInfo, setShowCreditInfo] = useState<boolean>(false)
@@ -1097,10 +1131,24 @@ const ReserveApartmentModal = ({
 		setLoading(true)
 
 		try {
-			const uuid = crypto.randomUUID()
+			const hasPreviousReservation: boolean =
+				await ReservationService.getPreviousReservation({
+					user_id: authState.user._id,
+				})
+
+			if (hasPreviousReservation) {
+				setLoading(false)
+				setShowCreditInfo(false)
+				closeModal()
+
+				return showToast({
+					message: 'You can only reserve one apartment at a time.',
+					status: 'error',
+				})
+			}
 
 			const data: ReservationType = {
-				uuid,
+				uuid: authState.user._id,
 				startTime: Timestamp.fromDate(new Date()),
 				endTime: Timestamp.fromDate(new Date(Date.now() + 48 * 60 * 60 * 1000)),
 				reserved_by: authState.user._id,
@@ -1111,10 +1159,9 @@ const ReserveApartmentModal = ({
 
 			await Promise.all([
 				ReservationService.reserveListing(data),
-				FlatShareProfileService.decrementCredit({
-					collection_name: DBCollectionName.flatShareProfile,
-					document_id: authState.user._id,
-					newCredit: creditTable.RESERVATION,
+				paymentActions.decrementCredit({
+					amount: creditTable.RESERVATION,
+					user_id: authState.user._id,
 				}),
 				NotificationsService.create({
 					collection_name: DBCollectionName.notifications,
@@ -1371,6 +1418,8 @@ const BookInspectionModal = ({
 	const { authState } = useAuthContext()
 	const { showToast } = useCommon()
 	const router = useRouter()
+	const [_, paymentActions] = usePayment()
+
 	const [inspectionData, setInspectionData] = useState({
 		inspection_date: undefined,
 		inspection_time: undefined,
@@ -1467,10 +1516,9 @@ const BookInspectionModal = ({
 					data,
 					document_id: uuid,
 				}),
-				FlatShareProfileService.decrementCredit({
-					collection_name: DBCollectionName.flatShareProfile,
-					document_id: authState.user._id,
-					newCredit:
+				paymentActions.decrementCredit({
+					user_id: authState.user._id,
+					amount:
 						inspectionData.inspection_type === 'virtual'
 							? creditTable.VIRTUAL_INSPECTION
 							: 0,

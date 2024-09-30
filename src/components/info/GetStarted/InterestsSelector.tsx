@@ -9,6 +9,7 @@ import { useAuthContext } from '@/context/auth.context'
 import DotsLoading from '@/components/info/GetStarted/DotsLoading'
 import { getDoc } from 'firebase/firestore'
 import { useOptionsContext } from '@/context/options.context'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export default function InterestsSelector({ done }: { done?: () => void }) {
 	const {
@@ -70,6 +71,10 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 				data: { interests: selectedHabits.map((val) => val._ref) },
 				document_id: user?._id,
 			})
+			await saveProfileDocs(
+				{ interests: selectedHabits.map((val) => val._ref) },
+				user?._id,
+			)
 			await getAuthDependencies()
 			setLoading(false)
 			if (done) {
@@ -90,14 +95,14 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 				fontSize={'3xl'}
 				className={'animate__animated animate__fadeInUp animate__faster'}
 			>
-				{`Pick what interests you?`}
+				{`What are your Interests ?`}
 			</Text>
 			<Text
 				textAlign={'center'}
 				color={'dark_lighter'}
 				className={'animate__animated animate__fadeInUp'}
 			>
-				{`Help our matching algorithm find the best match`}
+				{`Select traits you want prospects to have`}
 			</Text>
 			{fetching && (
 				<>

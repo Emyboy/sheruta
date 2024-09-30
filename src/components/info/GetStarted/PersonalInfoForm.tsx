@@ -16,6 +16,7 @@ import { industries } from '@/constants'
 import useCommon from '@/hooks/useCommon'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { useAuthContext } from '@/context/auth.context'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 type Props = {
 	done?: () => void
@@ -38,6 +39,14 @@ export default function PersonalInfoForm({ done }: Props) {
 		flat_share_profile?.work_industry || '',
 	)
 	const [religion, setReligion] = useState(flat_share_profile?.religion || '')
+	const [gender_preference, setGenderPreference] = useState(
+		flat_share_profile?.gender_preference || '',
+	)
+
+	const [age_preference, setAgePreference] = useState(
+		flat_share_profile?.age_preference || '',
+	)
+
 	const [tiktok, setTiktok] = useState(flat_share_profile?.tiktok || '')
 	const [facebook, setFacebook] = useState(flat_share_profile?.facebook || '')
 	const [instagram, setInstagram] = useState(
@@ -62,8 +71,27 @@ export default function PersonalInfoForm({ done }: Props) {
 					instagram,
 					twitter,
 					linkedin,
+					gender_preference,
+					age_preference,
 				},
 			})
+			await saveProfileDocs(
+				{
+					occupation,
+					employment_status,
+					work_industry,
+					religion,
+					tiktok,
+					facebook,
+					instagram,
+					twitter,
+					linkedin,
+					gender_preference,
+					age_preference,
+					is_verified: false,
+				},
+				user?._id as string,
+			)
 			if (user) {
 				await FlatShareProfileService.update({
 					data: {
@@ -135,7 +163,7 @@ export default function PersonalInfoForm({ done }: Props) {
 									required
 									borderColor={'border_color'}
 									_dark={{ borderColor: 'dark_light' }}
-									placeholder="Ex. Jane"
+									placeholder="Ex. Banker"
 									onChange={(e) => setOccupation(e.target.value)}
 								/>
 							</Flex>
@@ -206,6 +234,52 @@ export default function PersonalInfoForm({ done }: Props) {
 									<option value="christian">Christian</option>
 									<option value="muslim">Muslim</option>
 									<option value="others">Others</option>
+								</Select>
+							</Flex>
+						</Flex>
+						<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
+							<Flex
+								justifyContent={'flex-start'}
+								flexDir={'column'}
+								w="full"
+								gap={2}
+							>
+								<Text color={'text_muted'} fontSize={'sm'}>
+									Gender preference
+								</Text>
+								<Select
+									placeholder="Select option"
+									bg="dark"
+									required
+									onChange={(e) => setGenderPreference(e.target.value)}
+									value={gender_preference}
+								>
+									<option value="Males only">Male only</option>
+									<option value="Females only">Female only</option>
+									<option value="Both genders">Both genders</option>
+								</Select>
+							</Flex>
+							<Flex
+								justifyContent={'flex-start'}
+								flexDir={'column'}
+								w="full"
+								gap={2}
+							>
+								<Text color={'text_muted'} fontSize={'sm'}>
+									Age preference
+								</Text>
+								<Select
+									placeholder="Select option"
+									bg="dark"
+									required
+									onChange={(e) => setAgePreference(e.target.value)}
+									value={age_preference}
+								>
+									<option value="18 - 23 yrs">18 - 23 yrs</option>
+									<option value="24 - 29 yrs">25 - 29 yrs</option>
+									<option value="30 - 35 yrs">30 - 35 yrs</option>
+									<option value="Above 35 yrs">Above 35 yrs</option>
+									<option value="Any age">Any age</option>
 								</Select>
 							</Flex>
 						</Flex>
@@ -326,7 +400,6 @@ export default function PersonalInfoForm({ done }: Props) {
 									Linkedin URL
 								</Text>
 								<Input
-									required
 									borderColor={'border_color'}
 									_dark={{ borderColor: 'dark_light' }}
 									placeholder="Ex. https://www.linkedin.com/in/xyz"

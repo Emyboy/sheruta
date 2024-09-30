@@ -27,7 +27,6 @@ const FlatShareProfileDataSchema = z.object({
 	verified: z.boolean(),
 	gender_preference: z.string().nullable().optional(),
 	age_preference: z.string().nullable().optional(),
-	bio: z.string().optional(),
 	payment_type: z.enum([
 		'monthly',
 		'annually',
@@ -35,6 +34,9 @@ const FlatShareProfileDataSchema = z.object({
 		'quarterly',
 		'weekly',
 	]),
+	bio: z.string().nullable(),
+	payment_plan: z.string().nullable(),
+	// bio: z.string().optional(),
 	// socials: z.object({
 	// 	twitter: z.string().optional(),
 	// 	facebook: z.string().optional(),
@@ -92,6 +94,6 @@ export const flatShareProfileDefaults = {
 	done_kyc: false,
 	gender_preference: null,
 	age_preference: null,
-	bio: '',
-	payment_type: PaymentPlan.weekly,
+	bio: null,
+	payment_plan: null,
 }

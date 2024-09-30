@@ -15,7 +15,7 @@ export default function SearchPage({ requests }: { requests: string }) {
 			<ListOfFilters length={flatShareRequests.length} />
 			{flatShareRequests.length ? (
 				flatShareRequests.map((request, i) => (
-					<Flex key={i} padding={DEFAULT_PADDING}>
+					<Flex key={i} mt={'-20px'} padding={DEFAULT_PADDING}>
 						<EachRequest request={request} />
 					</Flex>
 				))

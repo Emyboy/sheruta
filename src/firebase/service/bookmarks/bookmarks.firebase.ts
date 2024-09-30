@@ -12,21 +12,14 @@ import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { BookmarkData, BookmarkDataDetails } from './bookmarks.types'
 
 export default class BookmarkService extends SherutaDB {
-	static async createBookmark({
-		request_id,
-		object_type,
-		_user_ref,
-		uuid,
-	}: BookmarkData): Promise<void> {
-		const _object_ref = doc(db, DBCollectionName.flatShareRequests, request_id)
-
+	static async createBookmark(data: BookmarkData): Promise<void> {
 		await this.create({
 			collection_name: DBCollectionName.bookmarks,
-			document_id: uuid,
+			document_id: data.uuid,
 			data: {
-				object_type,
-				_user_ref,
-				_object_ref,
+				_user_ref: data._user_ref,
+				_object_ref: data._object_ref,
+				object_type: data.object_type,
 			},
 		})
 	}

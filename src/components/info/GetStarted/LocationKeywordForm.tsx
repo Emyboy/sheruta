@@ -14,6 +14,7 @@ import {
 import React, { FormEvent, useEffect, useState } from 'react'
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 
 export default function LocationKeywordForm({ done }: { done: () => void }) {
 	const toast = useToast()
@@ -45,6 +46,10 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 					},
 					document_id: user._id,
 				})
+				await saveProfileDocs(
+					{ location_keyword: keyword._ref, state: theState._ref },
+					user._id,
+				)
 				await getAuthDependencies()
 				setIsLoading(false)
 				if (done) {

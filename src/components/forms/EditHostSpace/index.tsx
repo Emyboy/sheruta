@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
 import Summary from './Summary'
-import UploadMedia from './UploadMedia'
+// import UploadMedia from './UploadMedia'
 
 export type HostSpaceFormProps = {
 	next: () => void
@@ -116,12 +116,12 @@ export default function EditHostSpace({ data }: { data: string }) {
 			setFormData={setHostSpaceData}
 		/>,
 
-		<UploadMedia
-			key={1}
-			next={next}
-			formData={hostSpaceData}
-			setFormData={setHostSpaceData}
-		/>,
+		// <UploadMedia
+		// 	key={1}
+		// 	next={next}
+		// 	formData={hostSpaceData}
+		// 	setFormData={setHostSpaceData}
+		// />,
 	]
 
 	const allStepNames = (): string[] => ['Edit Apartment Details', 'Edit Media']

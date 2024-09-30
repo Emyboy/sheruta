@@ -3,31 +3,56 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Button, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { TbCircleLetterX } from 'react-icons/tb'
 
 export default function ListOfFilters({ length }: { length: number }) {
 	const searchParams = useSearchParams()
-	const { replace } = useRouter()
-	const pathname = usePathname()
 
-	const [filters, setFilters] = useState<string[]>([])
+	const [filters, setFilters] = useState<{ name: string; value: string }[]>([])
 
 	useEffect(() => {
 		if (searchParams.toString()) {
 			const rawQueries = searchParams
 				.toString()
 				.split('&')
-				.map((query) => query.split('=')[1])
-				.map((query) => query.split('%2C'))
+				.map((query) => {
+					const [name, value] = query.split('=')
+					const values = value.split('%2C').map((val) => ({ name, value: val }))
+					return values
+				})
 				.flat()
 
 			setFilters(rawQueries)
 		} else {
 			setFilters([])
 		}
-	}, [searchParams.toString()])
+	}, [searchParams])
+
+	// const handleRemoveSearchOptions = ({
+	// 	name,
+	// 	value,
+	// }: {
+	// 	name: string
+	// 	value: string
+	// }) => {
+	// 	const params = new URLSearchParams(searchParams)
+
+	// 	const prevNameQuery = params.get(name)
+
+	// 	if (prevNameQuery) {
+	// 		const queries = prevNameQuery.split(',').filter((item) => item !== value)
+
+	// 		if (queries.length > 0) {
+	// 			params.set(name, queries.join(','))
+	// 		} else {
+	// 			params.delete(name)
+	// 		}
+	// 	}
+
+	// 	replace(`${pathname}?${params.toString()}`)
+	// }
 
 	return (
 		<Flex
@@ -56,8 +81,11 @@ export default function ListOfFilters({ length }: { length: number }) {
 						color={'text_muted'}
 						overflow={'hidden'}
 					>
-						{filter}
-						{/* <TbCircleLetterX size={'16px'} /> */}
+						{filter.value}
+						{/* <TbCircleLetterX
+							size={'16px'}
+							// onClick={() => handleRemoveSearchOptions(filter)}
+						/> */}
 					</Button>
 				))}
 			</Flex>
@@ -85,7 +113,6 @@ export default function ListOfFilters({ length }: { length: number }) {
 						bgColor={'transparent'}
 						p={0}
 						_hover={{ bgColor: 'transparent' }}
-						onClick={() => replace(pathname)}
 					>
 						Clear Filters
 						<TbCircleLetterX size={'16px'} />

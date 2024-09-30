@@ -4,6 +4,10 @@ import React, { useState } from 'react'
 import { BiSolidCheckCircle } from 'react-icons/bi'
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import {
+	saveProfileDocs,
+	updateProfileDocs,
+} from '@/firebase/service/userProfile/user-profile'
 
 export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 	const {
@@ -24,6 +28,7 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 				data: { seeking: seeking as any },
 				document_id: user?._id,
 			})
+			await saveProfileDocs({ seeking: seeking as any }, user?._id)
 			await getAuthDependencies()
 			setIsLoading(false)
 			if (done) {

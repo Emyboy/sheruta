@@ -1,32 +1,23 @@
 'use client'
+
+import CloseIcon from '@/assets/svg/close-icon-dark'
+import CreditInfo from '@/components/info/CreditInfo/CreditInfo'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
-import { StateData } from '@/firebase/service/options/states/states.types'
+import { creditTable, homeTabSearch } from '@/constants'
+import { useAuthContext } from '@/context/auth.context'
 import useDrag from '@/hooks/useDrag'
-import { Box } from '@chakra-ui/react'
+import usePayment from '@/hooks/usePayment'
+import { Box, Modal, ModalContent, ModalOverlay } from '@chakra-ui/react'
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu'
 
-type Props = {
-	locations: LocationKeywordData[]
-	states: StateData[]
-}
 type scrollVisibilityApiType = React.ContextType<typeof VisibilityContext>
 
 const elemPrefix = 'test'
 const getId = (index: number) => `${elemPrefix}${index}`
 
-export default function HomeTabs({ locations, states }: Props) {
-	const getItems = () =>
-		locations.map((location, index) => ({
-			id: getId(index),
-			name: location.name,
-			slug: location.slug,
-		}))
-
-	const [items] = React.useState(getItems)
-
+export default function HomeTabs() {
 	const { dragStart, dragStop, dragMove, dragging } = useDrag()
 	const handleDrag =
 		({ scrollContainer }: scrollVisibilityApiType) =>
@@ -36,6 +27,10 @@ export default function HomeTabs({ locations, states }: Props) {
 					scrollContainer.current.scrollLeft += posDiff
 				}
 			})
+
+	const { authState } = useAuthContext()
+
+	if (!authState.user) return null
 
 	return (
 		<Box
@@ -53,9 +48,9 @@ export default function HomeTabs({ locations, states }: Props) {
 				onMouseUp={() => dragStop}
 				onMouseMove={handleDrag}
 			>
-				{items.map(({ id, name, slug }) => (
+				{homeTabSearch.map(({ id, ref, title }) => (
 					<Box ml={DEFAULT_PADDING} key={id}>
-						<EachTab label={name} slug={slug} />
+						<EachTab label={title} slug={id} params={ref} />
 					</Box>
 				))}
 			</ScrollMenu>
@@ -78,10 +73,68 @@ function onWheel(apiObj: scrollVisibilityApiType, ev: React.WheelEvent): void {
 	}
 }
 
-const EachTab = ({ label, slug }: { label: string; slug: string }) => {
+const EachTab = ({
+	label,
+	slug,
+	params,
+}: {
+	label: string
+	slug: string
+	params: string
+}) => {
+	const [open, setOpen] = useState(false)
+	const { authState } = useAuthContext()
+	const [_, paymentActions] = usePayment()
+
 	return (
-		<Link href={`/search?location=${slug}`}>
+		<>
+			<Modal isOpen={open} onClose={() => setOpen(false)} size={'xl'}>
+				<ModalOverlay />
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						cursor={'pointer'}
+						onClick={() => setOpen(false)}
+					>
+						<CloseIcon />
+					</Box>
+					<Link href={`?${params}=${slug}`}>
+						<CreditInfo
+							credit={creditTable.FLAT_SHARE_PROFILE_SEARCH}
+							onUse={async () => {
+								await paymentActions.decrementCredit({
+									amount: creditTable.FLAT_SHARE_PROFILE_SEARCH,
+									user_id: authState.user?._id as string,
+								})
+
+								setOpen(false)
+							}}
+						/>
+					</Link>
+				</ModalContent>
+			</Modal>
 			<Box
+				onClick={() => setOpen(true)}
+				cursor={'pointer'}
 				userSelect={'none'}
 				rounded={'xl'}
 				border={'1px'}
@@ -94,8 +147,7 @@ const EachTab = ({ label, slug }: { label: string; slug: string }) => {
 				style={{ textWrap: 'nowrap' }}
 			>
 				{label}
-				{/* <Text>{label}</Text> */}
 			</Box>
-		</Link>
+		</>
 	)
 }

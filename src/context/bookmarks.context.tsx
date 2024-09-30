@@ -1,8 +1,10 @@
 'use client'
 
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import { BookmarkDataDetails } from '@/firebase/service/bookmarks/bookmarks.types'
-import useCommon from '@/hooks/useCommon'
+import {
+	BookmarkDataDetails,
+	BookmarkType,
+} from '@/firebase/service/bookmarks/bookmarks.types'
 import {
 	createContext,
 	ReactNode,
@@ -11,6 +13,8 @@ import {
 	useState,
 } from 'react'
 import { useAuthContext } from './auth.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { resolveSingleObjectReferences } from '@/utils/index.utils'
 
 interface BookmarksContextType {
 	bookmarks: BookmarkDataDetails[]
@@ -31,13 +35,50 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 	const [bookmarks, setBookmarks] = useState<BookmarkDataDetails[]>([])
 	const [bookmarkLoading, setBookmarkLoading] = useState(false)
 
-	const fetchBookmarks = async (id: string) => {
+	const fetchBookmarks = async (userId: string) => {
 		setBookmarkLoading(true)
-
 		try {
-			const res = await BookmarkService.getUserBookmarks(id)
+			const userBookmarks = (await BookmarkService.getUserBookmarks(
+				userId,
+			)) as BookmarkDataDetails[]
 
-			setBookmarks(res)
+			if (!userBookmarks || userBookmarks.length === 0) return setBookmarks([])
+
+			const resolvedBookmarks = await Promise.all(
+				userBookmarks.map(async (bookmark) => {
+					try {
+						if (
+							bookmark.object_type === BookmarkType.profiles &&
+							bookmark._object_ref?.id
+						) {
+							const profileId = bookmark._object_ref.id
+							const flatShareProfile =
+								await FlatShareProfileService.get(profileId)
+							const resolvedRefs = flatShareProfile
+								? await resolveSingleObjectReferences(flatShareProfile)
+								: {}
+
+							return {
+								...bookmark,
+								_object_ref: {
+									...bookmark._object_ref,
+									flat_share_profile: {
+										...flatShareProfile,
+										...resolvedRefs,
+									},
+								},
+							}
+						} else {
+							return bookmark
+						}
+					} catch (error) {
+						console.error(`Error resolving bookmark ID: ${bookmark.id}`, error)
+						return bookmark
+					}
+				}),
+			)
+
+			setBookmarks(resolvedBookmarks.filter(Boolean) as BookmarkDataDetails[])
 		} catch (error) {
 			console.error('Error fetching bookmarks:', error)
 		} finally {
@@ -49,7 +90,7 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 		if (!user?._id) return
 
 		fetchBookmarks(user._id)
-	}, [user?._id])
+	}, [, user?._id])
 
 	return (
 		<BookmarkContext.Provider
