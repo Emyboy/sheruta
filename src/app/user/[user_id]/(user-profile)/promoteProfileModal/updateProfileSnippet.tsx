@@ -56,7 +56,8 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 	const [userId, setUserId] = useState<string>('')
 	const [_service, setService] = useState<string>('')
 	const [_profileData, setProfileData] = useState({})
-	const [profileOwner, setProfileOwner] = useState(false)
+	const [profileOwner, setProfileOwner] = useState(false);
+	const [blurModal, setBlurModal] = useState<boolean>(false);
 
 	useEffect(() => {
 		
@@ -66,7 +67,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 		if (viewedProfileId === currentUser) {
 			setProfileOwner(true)
 		}
-	}, [userId])
+	}, [user, profileOwnerId])
 
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -89,21 +90,22 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 				}
 
 				setService(profileData.service_type)
+				setBio(profile.bio)
 				setProfileData(profileData)
 			} else {
 				console.log('Profile not found or could not be loaded.')
 			}
 		}
 
-		if (isOpen) {
+		if (userId) {
 			fetchProfile()
 		}
-	}, [isOpen])
+	}, [userId])
 
 	useEffect(() => {
 		setUserId(user?._id || '')
-		setBio(flat_share_profile?.bio || '')
-		console.log('Service.....................', _service)
+		// setBio(flat_share_profile?.bio || '')
+		console.log('Bio.....................', bio)
 	}, [isOpen])
 
 	const update = async (e: any) => {
@@ -128,15 +130,19 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 
 	const createProfileSnippetAd = async () => {
 		await saveProfileSnippetDocs(_profileData, userId)
-		console.log('successfull........................', _profileData, userId)
+		
 	}
 
 	return (
 		<>
 			{profileOwner && <Button onClick={onOpen}>Promote profile on feeds</Button>}
+			
 
 			<Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose}>
-				<ModalOverlay />
+				<ModalOverlay
+				backdropFilter="blur(100px)" // Adjust the value for more or less blur
+				bg="rgba(0, 0, 0, 0.5)" 
+				/>
 				<ModalContent
 					background={colorMode === 'dark' ? 'dark' : 'accent_lighter'}
 				>
@@ -149,7 +155,12 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 						fontWeight={'400'}
 					>{`Update Profile`}</Text>
 					<ModalCloseButton />
-					<ImageSelector />
+					<ImageSelector onShowCropper={setBlurModal}/>
+					
+					<ModalBody
+					style={{ visibility: !blurModal ? "visible" : "hidden" }}
+					 
+					>
 					<Flex
 						flexDirection={'column'}
 						justifyContent={'center'}
@@ -198,11 +209,6 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 								))}
 						</Select>
 					</Flex>
-					<ModalBody>
-						<Text
-							className={'animate__animated animate__fadeInUp'}
-							textAlign={'center'}
-						></Text>
 					</ModalBody>
 
 					<ModalFooter>
@@ -216,6 +222,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 							mr={5}
 							onClick={update}
 							isLoading={isLoading}
+							style={{ visibility: !blurModal ? "visible" : "hidden" }}
 						>
 							Promote
 						</Button>

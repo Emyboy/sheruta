@@ -312,7 +312,7 @@ export default async function page(props: any) {
 							<UserProfilePage
 								data={user}
 								flatshareInfos={flatshareInfos}
-								user_id={user_id}
+								user_id={userId}
 								// profileInfo={userProfiles}
 							/>
 						) : (
