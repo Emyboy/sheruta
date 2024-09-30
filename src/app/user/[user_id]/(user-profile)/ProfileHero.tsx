@@ -5,6 +5,7 @@ import { useAuthContext } from '@/context/auth.context'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { UserInfo } from '@/firebase/service/user-info/user-info.types'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 import { handleCall } from '@/utils/index.utils'
 import { Box, Button, Flex, IconButton, Text } from '@chakra-ui/react'
 import Image from 'next/image'
@@ -19,12 +20,6 @@ import {
 	BiSolidLocationPlus,
 	BiStore,
 } from 'react-icons/bi'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import { CreateDTO } from '@/firebase/service/index.firebase'
-import { use, useEffect } from 'react'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { useBookmarkContext } from '@/context/bookmarks.context'
-import useHandleBookmark from '@/hooks/useHandleBookmark'
 
 type Props = {
 	data: any
@@ -41,25 +36,10 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 		authState: { user },
 	} = useAuthContext()
 
-	const { bookmarkId, isBookmarkLoading, toggleSaveProfile } =
-		useHandleBookmark(user_id, user?._id as string)
-
-	// const profileData: CreateDTO = {
-	// 	collection_name: DBCollectionName.userProfile,
-	// 	data: userProfile,
-	// 	document_id: user_id,
-	// }
-
-	// const sendProfile = ()=>{
-
-	// 	useEffect(()=>{
-
-	// 		saveProfileDocs(profileInfo, user_id)
-
-	// 	},[profileData, user_id] )
-	// 	console.log('done.....................')
-	// }
-	// sendProfile()
+	const { bookmarkId, toggleSaveProfile } = useHandleBookmark(
+		user_id,
+		user?._id as string,
+	)
 
 	const _userInfo: UserInfo = userProfile.userInfo
 
@@ -152,21 +132,21 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 
 				<Flex gap={DEFAULT_PADDING}>
 					<Button
-					// onClick={async () => {
-					// 	if (authState.user?._id === user_id) return
-					// 	await handleCall({
-					// 		number: _userInfo.primary_phone_number,
-					// 		recipient_id: user_id,
-					// 		sender_details: authState.user
-					// 			? {
-					// 					avatar_url: authState.user.avatar_url,
-					// 					first_name: authState.user.first_name,
-					// 					last_name: authState.user.last_name,
-					// 					id: authState.user._id,
-					// 				}
-					// 			: null,
-					// 	})
-					// }}
+						onClick={async () =>
+							user?._id !== user_id &&
+							(await handleCall({
+								number: _userInfo.primary_phone_number,
+								recipient_id: user_id,
+								sender_details: user
+									? {
+											avatar_url: user.avatar_url,
+											first_name: user.first_name,
+											last_name: user.last_name,
+											id: user._id,
+										}
+									: null,
+							}))
+						}
 					>
 						Call Me
 					</Button>
@@ -175,6 +155,7 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 							<BiMessageRoundedDetail size={25} />
 						</Button>
 					</Link>
+					AD
 					<IconButton
 						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 						aria-label="Bookmark this profile"

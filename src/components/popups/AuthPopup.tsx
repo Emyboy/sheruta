@@ -27,6 +27,7 @@ import {
 	createUserWithEmailAndPassword,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
+	sendEmailVerification,
 } from 'firebase/auth'
 import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
@@ -34,6 +35,8 @@ import useCommon from '@/hooks/useCommon'
 import { DocumentData } from 'firebase/firestore'
 
 interface Props {}
+
+const PUBLIC_URL = process.env.NEXT_PUBLIC_URL 
 
 export default function AuthPopup(props: Props) {
 	const {
@@ -310,6 +313,11 @@ const AuthForm: React.FC<{
 			)
 
 			const user = userCredential.user
+
+			//redirecting to the homepage will trigger the onboarding process
+			await sendEmailVerification(user, {
+				url: `${PUBLIC_URL}`,
+			});
 
 			const theUser = await AuthService.loginUser({
 				displayName: `${firstName} ${lastName}`,
