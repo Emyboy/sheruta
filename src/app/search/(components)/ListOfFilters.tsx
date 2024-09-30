@@ -3,14 +3,12 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Button, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { TbCircleLetterX } from 'react-icons/tb'
 
 export default function ListOfFilters({ length }: { length: number }) {
 	const searchParams = useSearchParams()
-	const { replace } = useRouter()
-	const pathname = usePathname()
 
 	const [filters, setFilters] = useState<{ name: string; value: string }[]>([])
 
@@ -115,7 +113,6 @@ export default function ListOfFilters({ length }: { length: number }) {
 						bgColor={'transparent'}
 						p={0}
 						_hover={{ bgColor: 'transparent' }}
-						onClick={() => replace(pathname)}
 					>
 						Clear Filters
 						<TbCircleLetterX size={'16px'} />

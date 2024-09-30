@@ -37,7 +37,7 @@ export const saveProfileDocs = async (
 ): Promise<void> => {
 	try {
 		const docRef = doc(db, DBCollectionName.userProfile, user_id)
-		const docSnap = await getDoc(docRef)
+		// const docSnap = await getDoc(docRef)
 
 		await setDoc(
 			docRef,
@@ -123,7 +123,7 @@ export const getAllProfileSnippetDocs = async (searchParams: {
 				where('work_industry', '==', searchParams.work_industry),
 			)
 		} else {
-			q = collection(db, DBCollectionName.userProfile)
+			q = collection(db, DBCollectionName.userProfileSnippet)
 		}
 
 		const profileDataSnapshot = await getDocs(q)

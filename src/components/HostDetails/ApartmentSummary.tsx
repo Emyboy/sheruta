@@ -10,7 +10,6 @@ import VirtualInspectionIcon from '@/assets/svg/virtual-inspection-icon'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import InspectionServices from '@/firebase/service/inspections/inspections.firebase'
 import {
@@ -28,6 +27,7 @@ import {
 } from '@/firebase/service/reservations/reservations.types'
 import useCommon from '@/hooks/useCommon'
 import useHandleBookmark from '@/hooks/useHandleBookmark'
+import usePayment from '@/hooks/usePayment'
 import useShareSpace from '@/hooks/useShareSpace'
 import {
 	createNotification,
@@ -60,7 +60,7 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -139,7 +139,7 @@ export default function ApartmentSummary({
 	}
 
 	return (
-		<>
+		<React.Fragment>
 			<ReserveApartmentModal
 				closeModal={closeReserveApartmentModal}
 				showBookApartmentModal={showReserveApartmentModal}
@@ -1088,7 +1088,7 @@ export default function ApartmentSummary({
 						/>
 					)}
 			</Flex>
-		</>
+		</React.Fragment>
 	)
 }
 
@@ -1106,6 +1106,7 @@ const ReserveApartmentModal = ({
 	const { authState } = useAuthContext()
 	const { showToast } = useCommon()
 	const pathname = usePathname()
+	const [_, paymentActions] = usePayment()
 
 	const [loading, setLoading] = useState<boolean>(false)
 	const [showCreditInfo, setShowCreditInfo] = useState<boolean>(false)
@@ -1158,10 +1159,9 @@ const ReserveApartmentModal = ({
 
 			await Promise.all([
 				ReservationService.reserveListing(data),
-				FlatShareProfileService.decrementCredit({
-					collection_name: DBCollectionName.flatShareProfile,
-					document_id: authState.user._id,
-					newCredit: creditTable.RESERVATION,
+				paymentActions.decrementCredit({
+					amount: creditTable.RESERVATION,
+					user_id: authState.user._id,
 				}),
 				NotificationsService.create({
 					collection_name: DBCollectionName.notifications,
@@ -1418,6 +1418,8 @@ const BookInspectionModal = ({
 	const { authState } = useAuthContext()
 	const { showToast } = useCommon()
 	const router = useRouter()
+	const [_, paymentActions] = usePayment()
+
 	const [inspectionData, setInspectionData] = useState({
 		inspection_date: undefined,
 		inspection_time: undefined,
@@ -1514,10 +1516,9 @@ const BookInspectionModal = ({
 					data,
 					document_id: uuid,
 				}),
-				FlatShareProfileService.decrementCredit({
-					collection_name: DBCollectionName.flatShareProfile,
-					document_id: authState.user._id,
-					newCredit:
+				paymentActions.decrementCredit({
+					user_id: authState.user._id,
+					amount:
 						inspectionData.inspection_type === 'virtual'
 							? creditTable.VIRTUAL_INSPECTION
 							: 0,
