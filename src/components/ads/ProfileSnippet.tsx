@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 import { BiBookmark } from 'react-icons/bi'
 import { TbCircleLetterX } from 'react-icons/tb'
+import { UpdateProfilePopup } from '@/app/user/[user_id]/(user-profile)/promoteProfileModal/updateProfileSnippet'
 
 type Props = {
 	userProfiles: any
@@ -174,10 +175,12 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 					)
 				})
 			) : (
-				<Box>
-					<Text w={'100%'} textAlign={'center'} fontWeight={600} my={4}>
-						No profiles found
-					</Text>
+				<Box
+				display={'flex'}
+				justifyContent={'center'}
+				mb={4}
+				>
+					<UpdateProfilePopup/>
 				</Box>
 			)}
 
