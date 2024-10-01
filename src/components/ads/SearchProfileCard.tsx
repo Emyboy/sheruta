@@ -1,4 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
+import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
+import { createNotification } from '@/utils/actions'
 import {
 	Badge,
 	Box,
@@ -31,7 +34,10 @@ export default function SearchProfileCard({
 }: {
 	profile: UserProfile
 }) {
+	const { authState } = useAuthContext()
+
 	if (!profile.done_kyc) return null
+
 	return (
 		<Flex m={4} w={'100%'}>
 			<Card
@@ -53,6 +59,24 @@ export default function SearchProfileCard({
 					<Link
 						href={`/user/${profile._user_id}`}
 						style={{ textDecoration: 'none' }}
+						onClick={async () =>
+							authState.user?._id !== profile._user_id &&
+							(await createNotification({
+								is_read: false,
+								message: NotificationsBodyMessage.profile_view,
+								recipient_id: profile._user_id,
+								type: 'profile_view',
+								sender_details: authState.user
+									? {
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
+									: null,
+								action_url: `/user/${profile._user_id}`,
+							}))
+						}
 					>
 						<CardBody mb={0} border="none">
 							<Flex justify="space-between" align="center" mb={3}>

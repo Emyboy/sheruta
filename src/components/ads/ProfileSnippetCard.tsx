@@ -1,4 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
+import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
+import { createNotification } from '@/utils/actions'
 import {
 	Badge,
 	Box,
@@ -29,6 +32,8 @@ interface UserProfile {
 }
 
 export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
+	const { authState } = useAuthContext()
+
 	return (
 		<Flex m={4}>
 			<Card
@@ -47,8 +52,26 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 
 				<Stack w={'100%'}>
 					<Link
-						href={`/user/${item?.document_id}`}
+						href={`/user/${item.document_id}`}
 						style={{ textDecoration: 'none' }}
+						onClick={async () =>
+							authState.user?._id !== item.document_id &&
+							(await createNotification({
+								is_read: false,
+								message: NotificationsBodyMessage.profile_view,
+								recipient_id: item.document_id,
+								type: 'profile_view',
+								sender_details: authState.user
+									? {
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
+									: null,
+								action_url: `/user/${item.document_id}`,
+							}))
+						}
 					>
 						<CardBody mb={0} border="none">
 							<Flex justify="space-between" align="center" mb={3}>
