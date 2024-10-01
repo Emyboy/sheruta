@@ -51,21 +51,24 @@ export default function GetStarted() {
 	}
 
 	if (!user.email_verified) {
-		return <Flex
-			bg={'dark_light'}
-			_dark={{ bg: 'dark' }}
-			position={'fixed'}
-			top={0}
-			bottom={0}
-			left={0}
-			right={0}
-			zIndex={500}
-			flexDir={'column'}
-			justifyContent={'center'}
-			alignItems={'center'}
-			overflowY={'auto'}
-		><EmailVerification /></Flex>
-
+		return (
+			<Flex
+				bg={'dark_light'}
+				_dark={{ bg: 'dark' }}
+				position={'fixed'}
+				top={0}
+				bottom={0}
+				left={0}
+				right={0}
+				zIndex={500}
+				flexDir={'column'}
+				justifyContent={'center'}
+				alignItems={'center'}
+				overflowY={'auto'}
+			>
+				<EmailVerification />
+			</Flex>
+		)
 	}
 
 	if (

@@ -17,11 +17,11 @@ interface QueryObj {
 	location?: string
 	state?: string
 	payment_type?: string
-	type?: 'flatmates' | 'apartment'
+	apartment?: string
 }
 
 export default class SearchApartmentService {
-	static async searchApartment({
+	static async searchQuery({
 		_limit = 20,
 		queryObj = {},
 	}: {
@@ -29,7 +29,13 @@ export default class SearchApartmentService {
 		queryObj?: QueryObj
 	}) {
 		try {
-			const collectionRef = collection(db, DBCollectionName.flatShareRequests)
+			const collectionRef = collection(
+				db,
+				queryObj.apartment === 'show-flatmates'
+					? DBCollectionName.flatShareProfile
+					: DBCollectionName.flatShareRequests,
+			)
+
 			let q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
 
 			q = this.applyQueryFilters(q, queryObj)

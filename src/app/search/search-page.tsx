@@ -1,14 +1,24 @@
 'use client'
 
+import SearchProfileCard, {
+	UserProfile,
+} from '@/components/ads/SearchProfileCard'
+import EachRequest from '@/components/EachRequest/EachRequest'
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import { Flex } from '@chakra-ui/react'
 import ListOfFilters from './(components)/ListOfFilters'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import EachRequest from '@/components/EachRequest/EachRequest'
 import NoApartment from './(components)/NoApartment'
 
-export default function SearchPage({ requests }: { requests: string }) {
-	const flatShareRequests: HostRequestDataDetails[] = JSON.parse(requests) || []
+export default function SearchPage({
+	type,
+	requests,
+}: {
+	type: string
+	requests: string
+}) {
+	const flatShareRequests: HostRequestDataDetails[] | UserProfile[] =
+		JSON.parse(requests) || []
 
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING}>
@@ -16,7 +26,11 @@ export default function SearchPage({ requests }: { requests: string }) {
 			{flatShareRequests.length ? (
 				flatShareRequests.map((request, i) => (
 					<Flex key={i} mt={'-20px'} padding={DEFAULT_PADDING}>
-						<EachRequest request={request} />
+						{type === 'apartment' ? (
+							<EachRequest request={request as HostRequestDataDetails} />
+						) : (
+							<SearchProfileCard profile={request as UserProfile} />
+						)}
 					</Flex>
 				))
 			) : (

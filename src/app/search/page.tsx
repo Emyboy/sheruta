@@ -16,7 +16,7 @@ type Props = {
 
 export default async function page({ searchParams }: Props) {
 	const requests: HostRequestDataDetails[] =
-		await SearchApartmentService.searchApartment({
+		await SearchApartmentService.searchQuery({
 			queryObj: searchParams,
 		})
 
@@ -27,7 +27,14 @@ export default async function page({ searchParams }: Props) {
 					<Flex flexDirection={'column'} w="full">
 						<SearchPageFilter />
 					</Flex>
-					<SearchPage requests={JSON.stringify(requests)} />
+					<SearchPage
+						type={
+							searchParams?.apartment === 'show-flatmates'
+								? 'flatmates'
+								: 'apartment'
+						}
+						requests={JSON.stringify(requests)}
+					/>
 				</ThreeColumnLayout>
 				<MobileNavFooter />
 			</MainContainer>
