@@ -19,7 +19,7 @@ export interface RequestData {
 	_property_type_ref: DocumentReference
 	_user_ref: DocumentReference
 
-	payment_type: PaymentPlan
+	payment_type: PaymentType
 
 	bedrooms: null | number
 	bathrooms: null | number
@@ -50,7 +50,7 @@ export interface LocationObject {
 	[key: string]: any
 }
 
-export enum PaymentPlan {
+export enum PaymentType {
 	monthly = 'monthly',
 	annually = 'annually',
 	quarterly = 'quarterly',
@@ -202,7 +202,7 @@ export type HostRequestDataDetails = Omit<
 	| '_user_ref'
 > & {
 	id: string
-	_location_keyword_ref: { slug: string; name: string }
+	_location_keyword_ref: { slug: string; name: string; id: string }
 	_service_ref: { title: string; about: string; slug: string }
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
@@ -229,7 +229,7 @@ export type SeekerRequestDataDetails = Omit<
 	'_location_keyword_ref' | '_state_ref' | '_service_ref' | '_user_ref'
 > & {
 	id: string
-	_location_keyword_ref: { slug: string }
+	_location_keyword_ref: { slug: string; id: string }
 	_service_ref: { title: string; about: string; slug: string }
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string }

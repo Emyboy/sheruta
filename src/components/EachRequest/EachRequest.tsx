@@ -33,7 +33,7 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -49,6 +49,8 @@ import {
 import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
+import useAnalytics from '@/hooks/useAnalytics'
+import { AnalyticsDataDetails } from '@/firebase/service/analytics/analytics.types'
 
 type Props = { request: HostRequestDataDetails }
 
@@ -65,7 +67,27 @@ export default function EachRequest({ request }: Props) {
 		request.availability_status === 'reserved' &&
 		authState.user?._id !== request.reserved_by
 	)
+
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+
+	const [analyticsData, setAnalyticsData] = useState<
+		AnalyticsDataDetails | undefined
+	>(undefined)
+
+	const { addAnalyticsData, getAnalyticsData } = useAnalytics()
+
+	useEffect(() => {
+		const fetchAnalyticsData = async () => {
+			try {
+				const data = await getAnalyticsData(request._location_keyword_ref.id)
+				setAnalyticsData(data)
+			} catch (error) {
+				console.error('Error fetching analytics data:', error)
+			}
+		}
+
+		fetchAnalyticsData()
+	}, [])
 
 	const deletePost = async (): Promise<void> => {
 		try {
@@ -389,7 +411,7 @@ export default function EachRequest({ request }: Props) {
 				)}
 				<Flex
 					alignItems={{ base: 'start', sm: 'center' }}
-					flexDir={{ base: 'column', sm: 'row' }}
+					flexDir={'row'}
 					justifyContent={'space-between'}
 				>
 					<Flex gap={DEFAULT_PADDING}>
@@ -417,63 +439,91 @@ export default function EachRequest({ request }: Props) {
 										sm: 'lg',
 										base: 'base',
 									}}
-									onClick={async () =>
-										canInteract &&
-										(await handleCall({
-											number: request.user_info.primary_phone_number,
-											recipient_id: request._user_ref._id,
-											sender_details: authState.user
-												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
-												: null,
-										}))
-									}
+									onClick={async () => {
+										if (canInteract) {
+											try {
+												// Handle the call
+												await handleCall({
+													number: request.user_info.primary_phone_number,
+													recipient_id: request._user_ref._id,
+													sender_details: authState.user
+														? {
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+																id: authState.user._id,
+															}
+														: null,
+												})
+												await addAnalyticsData(
+													'calls',
+													request._location_keyword_ref.id,
+												)
+											} catch (error) {
+												console.error(
+													'Error during call or analytics update:',
+													error,
+												)
+											}
+										}
+									}}
 								>
-									<BiPhone />
+									<BiPhone /> {analyticsData?.calls || 0}
 								</Button>
 							</MainTooltip>
 						) : null}
 
 						<MainTooltip label="Ask questions" placement="top">
-							<Link
-								href={canInteract ? `/messsages/${request._user_ref._id}` : ''}
-								style={{ textDecoration: 'none' }}
-							>
-								<Button
-									isDisabled={
-										!canInteract ||
-										authState.user?._id === request._user_ref._id
+							<Button
+								isDisabled={
+									!canInteract || authState.user?._id === request._user_ref._id
+								}
+								onClick={async () => {
+									if (canInteract) {
+										try {
+											// Handle the redirect
+											const res = await addAnalyticsData(
+												'messages',
+												request._location_keyword_ref.id,
+											)
+
+											if (res)
+												window.location.assign(
+													`/messsages/${request._user_ref._id}`,
+												)
+										} catch (error) {
+											console.error(
+												'Error during messaging or analytics update:',
+												error,
+											)
+										}
 									}
-									px={0}
-									bg="none"
-									color="text_muted"
-									display={'flex'}
-									gap={1}
-									fontWeight={'light'}
-									_hover={{
+								}}
+								px={0}
+								bg="none"
+								color="text_muted"
+								display={'flex'}
+								gap={1}
+								fontWeight={'light'}
+								_hover={{
+									color: 'brand',
+									bg: 'none',
+									textDecoration: 'none',
+									_dark: {
 										color: 'brand',
-										bg: 'none',
-										textDecoration: 'none',
-										_dark: {
-											color: 'brand',
-										},
-									}}
-									_dark={{
-										color: 'dark_lighter',
-									}}
-									fontSize={{
-										md: 'xl',
-										sm: 'lg',
-										base: 'base',
-									}}
-								>
-									<BiMessageRoundedDetail />
-								</Button>
-							</Link>
+									},
+								}}
+								_dark={{
+									color: 'dark_lighter',
+								}}
+								fontSize={{
+									md: 'xl',
+									sm: 'lg',
+									base: 'base',
+								}}
+							>
+								<BiMessageRoundedDetail /> {analyticsData?.messages || 0}
+							</Button>
 						</MainTooltip>
 						<MainTooltip label="Bookmark" placement="top">
 							<Button
@@ -510,7 +560,8 @@ export default function EachRequest({ request }: Props) {
 						_dark={{
 							color: 'dark_lighter',
 						}}
-						alignItems={'center'}
+						alignSelf="center"
+						alignItems="center"
 					>
 						<Text fontSize={{ base: 'base', md: 'lg' }} fontWeight={'bold'}>
 							₦{request.budget.toLocaleString()}

@@ -52,7 +52,7 @@ export default function GetStartedCompleted({ done }: { done: () => void }) {
 					fontSize={'3xl'}
 					className={'animate__animated animate__fadeInUp animate__faster'}
 				>
-					{`Congratulation 🎉`}
+					{`Congratulations 🎉`}
 				</Text>
 				<Text
 					textAlign={'center'}

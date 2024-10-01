@@ -3,7 +3,7 @@
 import { industries } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { PaymentPlan } from '@/firebase/service/request/request.types'
+import { PaymentType } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import {
 	Box,
@@ -32,7 +32,7 @@ const FlatShareProfileForm = () => {
 		linkedin: string
 		facebook: string
 		instagram: string
-		payment_type: PaymentPlan
+		payment_type: PaymentType
 	}>({
 		budget: 0,
 		occupation: '',
@@ -43,7 +43,7 @@ const FlatShareProfileForm = () => {
 		linkedin: '',
 		facebook: '',
 		instagram: '',
-		payment_type: PaymentPlan.weekly,
+		payment_type: PaymentType.weekly,
 	})
 
 	const {
@@ -66,8 +66,8 @@ const FlatShareProfileForm = () => {
 				facebook: flat_share_profile.facebook || '',
 				instagram: flat_share_profile.instagram || '',
 				payment_type:
-					(flat_share_profile?.payment_type as PaymentPlan) ||
-					PaymentPlan.weekly,
+					(flat_share_profile?.payment_type as PaymentType) ||
+					PaymentType.weekly,
 			})
 			return
 		}

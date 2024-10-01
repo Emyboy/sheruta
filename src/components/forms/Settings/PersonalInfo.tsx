@@ -3,7 +3,7 @@
 import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import SherutaDB from '@/firebase/service/index.firebase'
-import { PaymentPlan } from '@/firebase/service/request/request.types'
+import { PaymentType } from '@/firebase/service/request/request.types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import UserService from '@/firebase/service/user/user.firebase'
 import useCommon from '@/hooks/useCommon'
