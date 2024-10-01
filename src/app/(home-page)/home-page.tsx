@@ -2,6 +2,7 @@
 
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
+import ProfileSnippet from '@/components/ads/ProfileSnippet'
 import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
@@ -12,41 +13,28 @@ import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { StateData } from '@/firebase/service/options/states/states.types'
-import { Box, Flex, Text, Spinner } from '@chakra-ui/react'
-import ProfileSnippet from '@/components/ads/ProfileSnippet'
+import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { resolveArrayOfReferences } from '@/utils/index.utils'
+import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
 import {
 	collection,
 	DocumentData,
-	DocumentReference,
-	getDoc,
 	getDocs,
 	limit,
 	orderBy,
 	query,
 	startAfter,
 } from 'firebase/firestore'
-
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { resolveArrayOfReferences } from '@/utils/index.utils'
-import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
 
 type Props = {
-	locations: string
-	states: StateData[]
 	requests: string
 	userProfiles: any
 }
 
-export default function HomePage({
-	locations,
-	states,
-	requests,
-	userProfiles,
-}: Props) {
+export default function HomePage({ requests, userProfiles }: Props) {
 	const [flatShareRequests, setFlatShareRequests] = useState<any[]>(
 		requests ? JSON.parse(requests) : [],
 	)
@@ -179,7 +167,7 @@ export default function HomePage({
 						<MainLeftNav />
 					</Flex>
 					<Flex flexDir={'column'}>
-						<HomeTabs locations={JSON.parse(locations)} states={states} />
+						<HomeTabs />
 						<JoinTheCommunity />
 						<ProfileSnippet userProfiles={userProfiles} />
 

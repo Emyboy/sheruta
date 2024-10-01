@@ -1,15 +1,14 @@
+import MainBackHeader from '@/components/atoms/MainBackHeader'
+import { MoreButton } from '@/components/atoms/MoreButton'
 import MainContainer from '@/components/layout/MainContainer'
 import MainHeader from '@/components/layout/MainHeader'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Flex, Box } from '@chakra-ui/react'
-import UserProfilePage from './(user-profile)/UserProfilePage'
-
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { Box, Flex } from '@chakra-ui/react'
 import {
 	collection,
 	doc,
@@ -19,16 +18,8 @@ import {
 	getDocs,
 	query,
 	where,
-	setDoc,
 } from 'firebase/firestore'
-import { CreateDTO } from '@/firebase/service/index.firebase'
-import SherutaDB from '@/firebase/service/index.firebase'
-
-import { promise } from 'zod'
-
-import { MoreButton } from '@/components/atoms/MoreButton'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import AuthService from '@/firebase/service/auth/auth.firebase'
+import UserProfilePage from './(user-profile)/UserProfilePage'
 
 export const revalidate = CACHE_TTL.LONG
 

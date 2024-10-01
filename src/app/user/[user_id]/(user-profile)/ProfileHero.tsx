@@ -41,6 +41,9 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 		authState: { user },
 	} = useAuthContext()
 
+	const { bookmarkId, isBookmarkLoading, toggleSaveProfile } =
+		useHandleBookmark(user_id, user?._id as string)
+
 	// const profileData: CreateDTO = {
 	// 	collection_name: DBCollectionName.userProfile,
 	// 	data: userProfile,
@@ -172,6 +175,11 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 							<BiMessageRoundedDetail size={25} />
 						</Button>
 					</Link>
+					<IconButton
+						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
+						aria-label="Bookmark this profile"
+						onClick={async () => await toggleSaveProfile()}
+					/>
 				</Flex>
 			</Flex>
 		</Flex>

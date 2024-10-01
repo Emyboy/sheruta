@@ -2,16 +2,16 @@
 
 import { useAuthContext } from '@/context/auth.context'
 import { useBookmarkContext } from '@/context/bookmarks.context'
+import { db } from '@/firebase'
 import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
 import { BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
+import { doc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import useCommon from './useCommon'
-import { doc } from 'firebase/firestore'
-import { db } from '@/firebase'
 
 export default function useHandleBookmark(
 	object_id: string,

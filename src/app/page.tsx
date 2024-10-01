@@ -1,39 +1,25 @@
-import React from 'react'
-import HomePage from './(home-page)/home-page'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { CACHE_TTL } from '@/constants'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import { collection, getDocs, doc } from 'firebase/firestore'
-import {
-	getAllProfileDocs,
-	getAllProfileSnippetDocs,
-} from '@/firebase/service/userProfile/user-profile'
-import { db } from '@/firebase'
-import { promise } from 'zod'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
+import HomePage from './(home-page)/home-page'
 
 export const revalidate = CACHE_TTL?.SHORT
 
-export default async function page() {
-	const [locations, requests, userProfiles] = await Promise.all([
-		SherutaDB.getAll({
-			collection_name: DBCollectionName.locationKeyWords,
-			_limit: 10,
-		}),
-
+export default async function page({
+	searchParams,
+}: {
+	searchParams: Record<string, string>
+}) {
+	const [requests, userProfiles] = await Promise.all([
 		SherutaDB.getAll({
 			collection_name: DBCollectionName.flatShareRequests,
 			_limit: 30,
 		}),
-
-		getAllProfileSnippetDocs(),
+		getAllProfileSnippetDocs(searchParams),
 	])
 
-	// console.log(
-	// 	'This it the user profile for 202:,.......................',
-	// 	userProfiles,
-	// )
 	const finalRequests = await Promise.all(
 		requests
 			?.filter((request: HostRequestDataDetails) => request?._user_ref?._id)
@@ -50,8 +36,6 @@ export default async function page() {
 
 	return (
 		<HomePage
-			locations={locations ? JSON.stringify(locations) : '[]'}
-			states={[]}
 			requests={finalRequests ? JSON.stringify(finalRequests) : '[]'}
 			userProfiles={userProfiles ? JSON.stringify(userProfiles) : '[]'}
 		/>

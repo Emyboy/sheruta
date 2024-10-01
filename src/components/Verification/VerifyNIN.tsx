@@ -1,33 +1,33 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { creditTable } from '@/constants'
+import { useAuthContext } from '@/context/auth.context'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import UserService from '@/firebase/service/user/user.firebase'
+import useCommon from '@/hooks/useCommon'
+import usePayment from '@/hooks/usePayment'
 import {
+	Alert,
+	AlertIcon,
 	Box,
 	Button,
 	FormControl,
+	FormErrorMessage,
 	FormLabel,
 	Input,
-	FormErrorMessage,
-	VStack,
 	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
 	ModalBody,
 	ModalCloseButton,
-	Alert,
-	AlertIcon,
+	ModalContent,
+	ModalHeader,
+	ModalOverlay,
 	useColorModeValue,
+	VStack,
 } from '@chakra-ui/react'
 import axios from 'axios'
-import useCommon from '@/hooks/useCommon'
-import { useAuthContext } from '@/context/auth.context'
-import { NINResponseDTO } from '../types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import usePayment from '@/hooks/usePayment'
-import { creditTable } from '@/constants'
-import UserService from '@/firebase/service/user/user.firebase'
 import { Timestamp } from 'firebase/firestore'
+import React, { useEffect, useState } from 'react'
+import { NINResponseDTO } from '../types'
 
 const doesGenderMatch = (NINGender: string, dbGender: string): boolean => {
 	if (NINGender === 'm' && dbGender === 'male') {
@@ -305,7 +305,7 @@ const VerifyNIN = ({
 	}
 
 	return (
-		<>
+		<React.Fragment>
 			<Modal isOpen={isOpen} onClose={onClose} isCentered>
 				<ModalOverlay />
 				<ModalContent bgColor={modalBg}>
@@ -364,7 +364,7 @@ const VerifyNIN = ({
 					</ModalBody>
 				</ModalContent>
 			</Modal>
-		</>
+		</React.Fragment>
 	)
 }
 
