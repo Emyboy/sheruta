@@ -71,11 +71,11 @@ export const UpdateProfilePopup = () => {
 			first_name: user.first_name,
 			last_name: user.last_name,
 			seeking: flat_share_profile.seeking,
-			payment_plan: flat_share_profile.payment_plan || null,
+			payment_plan: flat_share_profile.payment_type || null,
 			budget: flat_share_profile.budget,
 			avatar_url: user.avatar_url,
 			state: flat_share_profile.state,
-			area: flat_share_profile.location_keyword,
+			location_keyword: flat_share_profile.location_keyword,
 			_user_ref: flat_share_profile._user_ref,
 			document_id: flat_share_profile._user_id,
 			promotion_expiry_date: Timestamp.fromDate(
