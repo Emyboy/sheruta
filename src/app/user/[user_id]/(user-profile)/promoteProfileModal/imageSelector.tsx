@@ -123,7 +123,7 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 			},
 			async () => {
 				getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-					console.log('File available at................................', downloadURL)
+					console.log('DownloadURL', downloadURL)
 					await UserService.update({
 						data: { avatar_url: downloadURL },
 						document_id: user?._id,
