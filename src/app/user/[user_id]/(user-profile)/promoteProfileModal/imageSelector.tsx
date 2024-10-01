@@ -123,7 +123,7 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 			},
 			async () => {
 				getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-					console.log('File available at', downloadURL)
+					console.log('File available at................................', downloadURL)
 					await UserService.update({
 						data: { avatar_url: downloadURL },
 						document_id: user?._id,
@@ -131,9 +131,7 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 					await saveProfileDocs({ avatar_url: downloadURL }, user?._id)
 					await getAuthDependencies()
 					setLoading(false)
-					// if (done) {
-					// 	done()
-					// }
+					setShowCropper(false)
 				})
 			},
 		)
@@ -144,6 +142,7 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 			return uploadImage()
 		}
 	}
+
 
 	return (
 		<>
@@ -178,7 +177,7 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 								<Cropper
 									ref={cropperRef}
 									src={selectedImage}
-									// onChange={handleCropComplete}
+									onChange={handleCropComplete}
 									stencilComponent={CircleStencil}
 									stencilProps={{
 										aspectRatio: 9 / 16,
@@ -193,7 +192,7 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 							}}
 											bottom={10}
 							>
-								<Button onClick={onCrop} isLoading={loading}>
+								<Button onClick={update} isLoading={loading}>
 									Crop
 								</Button>
 							</Center>
@@ -257,15 +256,6 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 							justify-content={'center'}
 						/>
 					</Flex>
-					{/* <Text
-						textAlign={'center'}
-						color={'dark_lighter'}
-						className={'animate__animated animate__fadeInUp'}
-                        justifyContent={'center'}
-					>
-						{`Update display picture`}
-					</Text>
-                    */}
 					{/* <Button onClick={update} isLoading={loading}>
 						{user?.avatar_url ? 'Next' : 'Upload'}
 					</Button> */}

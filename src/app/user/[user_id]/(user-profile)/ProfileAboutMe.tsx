@@ -14,11 +14,8 @@ export default function ProfileAboutMe({ userProfile }: Props) {
 	type Interest = {
 		title: string
 	}
-
 	let userInterests: Interest[] = userProfile.flatShareProfile?.interests
-
 	const userBio: string | null = userProfile.flatShareProfile?.bio || null
-
 	return (
 		<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 			<Text>

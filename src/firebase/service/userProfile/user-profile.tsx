@@ -59,7 +59,7 @@ export const updateProfileDocs = async (
 			updatedAt: serverTimestamp(),
 		})
 		const data = docSnap
-		console.log(data)
+		// console.log(data)
 	} catch (error) {
 		console.log(error)
 	}
@@ -72,7 +72,7 @@ export const getProfile = async (
 		const docRef = doc(db, DBCollectionName.userProfile, user_id)
 		const docSnap = await getDoc(docRef)
 		const data = docSnap.data()
-		console.log('data:', data)
+		// console.log('data:', data)
 		return data
 	} catch (error) {
 		console.log(error)

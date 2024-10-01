@@ -153,6 +153,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 						fontSize={'xl'}
 						className={'animate__animated animate__fadeInUp animate__faster'}
 						fontWeight={'400'}
+						style={{ visibility: !blurModal ? "visible" : "hidden" }}
 					>{`Update Profile`}</Text>
 					<ModalCloseButton />
 					<ImageSelector onShowCropper={setBlurModal}/>
