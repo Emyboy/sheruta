@@ -70,23 +70,25 @@ export default function EachRequest({ request }: Props) {
 
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 
-	const [analyticsData, setAnalyticsData] = useState<AnalyticsDataDetails | undefined>(undefined)
+	const [analyticsData, setAnalyticsData] = useState<
+		AnalyticsDataDetails | undefined
+	>(undefined)
 
-	const {addAnalyticsData, getAnalyticsData} = useAnalytics()
+	const { addAnalyticsData, getAnalyticsData } = useAnalytics()
 
 	useEffect(() => {
 		const fetchAnalyticsData = async () => {
-            try {
-                const data = await getAnalyticsData(request._location_keyword_ref.id)
-                setAnalyticsData(data)
-            } catch (error) {
-                console.error("Error fetching analytics data:", error);
-            }
-        };
+			try {
+				const data = await getAnalyticsData(request._location_keyword_ref.id)
+				setAnalyticsData(data)
+			} catch (error) {
+				console.error('Error fetching analytics data:', error)
+			}
+		}
 
-        fetchAnalyticsData();
+		fetchAnalyticsData()
 	}, [])
-	
+
 	const deletePost = async (): Promise<void> => {
 		try {
 			await handleDeletePost({
@@ -409,7 +411,7 @@ export default function EachRequest({ request }: Props) {
 				)}
 				<Flex
 					alignItems={{ base: 'start', sm: 'center' }}
-					flexDir={"row"}
+					flexDir={'row'}
 					justifyContent={'space-between'}
 				>
 					<Flex gap={DEFAULT_PADDING}>
@@ -452,62 +454,76 @@ export default function EachRequest({ request }: Props) {
 																id: authState.user._id,
 															}
 														: null,
-												});
-												await addAnalyticsData("calls", request._location_keyword_ref.id);
+												})
+												await addAnalyticsData(
+													'calls',
+													request._location_keyword_ref.id,
+												)
 											} catch (error) {
-												console.error("Error during call or analytics update:", error);
+												console.error(
+													'Error during call or analytics update:',
+													error,
+												)
 											}
 										}
 									}}
-								> 
+								>
 									<BiPhone /> {analyticsData?.calls || 0}
 								</Button>
 							</MainTooltip>
 						) : null}
 
 						<MainTooltip label="Ask questions" placement="top">
-								<Button
-									isDisabled={
-										!canInteract ||
-										authState.user?._id === request._user_ref._id
-									}
-									onClick={async() =>{
-										if (canInteract) {
-											try {
-												// Handle the redirect
-												const res = await addAnalyticsData("messages", request._location_keyword_ref.id);
+							<Button
+								isDisabled={
+									!canInteract || authState.user?._id === request._user_ref._id
+								}
+								onClick={async () => {
+									if (canInteract) {
+										try {
+											// Handle the redirect
+											const res = await addAnalyticsData(
+												'messages',
+												request._location_keyword_ref.id,
+											)
 
-												if(res) window.location.assign(`/messsages/${request._user_ref._id}`)
-											} catch (error) {
-												console.error("Error during messaging or analytics update:", error);
-											}
+											if (res)
+												window.location.assign(
+													`/messsages/${request._user_ref._id}`,
+												)
+										} catch (error) {
+											console.error(
+												'Error during messaging or analytics update:',
+												error,
+											)
 										}
-									}}
-									px={0}
-									bg="none"
-									color="text_muted"
-									display={'flex'}
-									gap={1}
-									fontWeight={'light'}
-									_hover={{
+									}
+								}}
+								px={0}
+								bg="none"
+								color="text_muted"
+								display={'flex'}
+								gap={1}
+								fontWeight={'light'}
+								_hover={{
+									color: 'brand',
+									bg: 'none',
+									textDecoration: 'none',
+									_dark: {
 										color: 'brand',
-										bg: 'none',
-										textDecoration: 'none',
-										_dark: {
-											color: 'brand',
-										},
-									}}
-									_dark={{
-										color: 'dark_lighter',
-									}}
-									fontSize={{
-										md: 'xl',
-										sm: 'lg',
-										base: 'base',
-									}}
-								>
-									<BiMessageRoundedDetail /> {analyticsData?.messages || 0}
-								</Button>
+									},
+								}}
+								_dark={{
+									color: 'dark_lighter',
+								}}
+								fontSize={{
+									md: 'xl',
+									sm: 'lg',
+									base: 'base',
+								}}
+							>
+								<BiMessageRoundedDetail /> {analyticsData?.messages || 0}
+							</Button>
 						</MainTooltip>
 						<MainTooltip label="Bookmark" placement="top">
 							<Button

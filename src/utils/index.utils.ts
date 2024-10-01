@@ -157,7 +157,7 @@ export function convertTimestampToTime(timestamp: {
 
 	return `${hours}:${formattedMinutes}${ampm}`
 }
- 
+
 export const handleCall = async (data: {
 	number: string | null
 	recipient_id: string

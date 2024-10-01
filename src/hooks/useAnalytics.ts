@@ -9,10 +9,14 @@ import { AnalyticsDataDetails } from '@/firebase/service/analytics/analytics.typ
 export default function useAnalytics() {
 	const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false)
 
-	const { authState: { user } } = useAuthContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
 
-	const addAnalyticsData = async (type: 'posts' | 'calls' | 'messages',
-		location_keyword_id: string): Promise<DocumentData | undefined> => {
+	const addAnalyticsData = async (
+		type: 'posts' | 'calls' | 'messages',
+		location_keyword_id: string,
+	): Promise<DocumentData | undefined> => {
 		try {
 			if (!user) return undefined
 
@@ -32,44 +36,44 @@ export default function useAnalytics() {
 					location_keyword_id,
 					uuid: crypto.randomUUID(),
 				})
-
 			}
 		} catch (err) {
 			console.log(err)
 		}
 	}
 
-	const getTrendingLocations = async (): Promise<AnalyticsDataDetails[] | null> => {
+	const getTrendingLocations = async (): Promise<
+		AnalyticsDataDetails[] | null
+	> => {
 		try {
-			setIsAnalyticsLoading(true);
+			setIsAnalyticsLoading(true)
 
 			//Fetch all analytics
-			const counters = await AnalyticsService.getAllData();
+			const counters = await AnalyticsService.getAllData()
 
 			if (!counters) {
-				return null;
+				return null
 			}
 
 			// Process the counters and accumulate totals
 			const processedCounters = counters.map((counter) => {
-				const { calls = 0, messages = 0, posts = 0 } = counter; // Destructure and provide default values
-				const total = calls + messages + posts; // Accumulate the total
+				const { calls = 0, messages = 0, posts = 0 } = counter // Destructure and provide default values
+				const total = calls + messages + posts // Accumulate the total
 
-				return { ...counter, total }; // Add the total to the counter object
-			});
+				return { ...counter, total } // Add the total to the counter object
+			})
 
 			// Sort the counters based on the total (descending order)
-			const sortedCounters = processedCounters.sort((a, b) => b.total - a.total);
+			const sortedCounters = processedCounters.sort((a, b) => b.total - a.total)
 
-			return sortedCounters;
+			return sortedCounters
 		} catch (err) {
-			console.error("Error fetching trending locations:", err);
-			return null;
+			console.error('Error fetching trending locations:', err)
+			return null
 		} finally {
-			setIsAnalyticsLoading(false);
+			setIsAnalyticsLoading(false)
 		}
-	};
-
+	}
 
 	const getAnalyticsData = async (location_keyword_id: string) => {
 		try {

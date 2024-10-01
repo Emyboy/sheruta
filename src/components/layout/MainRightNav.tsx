@@ -7,24 +7,25 @@ import { FaFireFlameCurved } from 'react-icons/fa6'
 
 type Props = {}
 
-export default function MainRightNav({ }: Props) {
-
-	const { getTrendingLocations, isAnalyticsLoading } = useAnalytics();
-	const [trendingLocations, setTrendingLocations] = useState<AnalyticsDataDetails[] | null>(null);
+export default function MainRightNav({}: Props) {
+	const { getTrendingLocations, isAnalyticsLoading } = useAnalytics()
+	const [trendingLocations, setTrendingLocations] = useState<
+		AnalyticsDataDetails[] | null
+	>(null)
 
 	useEffect(() => {
 		const fetchTrendingLocations = async () => {
 			try {
 				console.log('sese')
-				const locations = await getTrendingLocations();
-				setTrendingLocations(locations);
+				const locations = await getTrendingLocations()
+				setTrendingLocations(locations)
 			} catch (error) {
-				console.error("Error fetching trending locations:", error);
+				console.error('Error fetching trending locations:', error)
 			}
-		};
+		}
 
-		fetchTrendingLocations();
-	}, []);
+		fetchTrendingLocations()
+	}, [])
 
 	return (
 		<Flex
@@ -54,29 +55,48 @@ export default function MainRightNav({ }: Props) {
 					</Text>
 					<Divider bg="dark_light" />
 				</Flex>
-				{
-					isAnalyticsLoading ? (
-						<Flex justifyContent={'center'} py={DEFAULT_PADDING}>
-							<Text fontSize={'lg'} color="text_muted">Loading...</Text>
-						</Flex>
-					) : (
-						trendingLocations?.map((data: any, index) => (
-							<EachLocation key={index} location={data._location_keyword_ref.name} state={data._location_keyword_ref._state_ref.name} total={data.total} />
-						))
-					)
-				}
+				{isAnalyticsLoading ? (
+					<Flex justifyContent={'center'} py={DEFAULT_PADDING}>
+						<Text fontSize={'lg'} color="text_muted">
+							Loading...
+						</Text>
+					</Flex>
+				) : (
+					trendingLocations?.map((data: any, index) => (
+						<EachLocation
+							key={index}
+							location={data._location_keyword_ref.name}
+							state={data._location_keyword_ref._state_ref.name}
+							total={data.total}
+						/>
+					))
+				)}
 			</Flex>
 		</Flex>
 	)
 }
 
-const EachLocation = ({ location, state, total }: { location: string, total: number, state: string }) => {
+const EachLocation = ({
+	location,
+	state,
+	total,
+}: {
+	location: string
+	total: number
+	state: string
+}) => {
 	return (
-		<Flex alignItems={'flex-end'} gap={DEFAULT_PADDING} py={2} cursor={'pointer'}>
+		<Flex
+			alignItems={'flex-end'}
+			gap={DEFAULT_PADDING}
+			py={2}
+			cursor={'pointer'}
+		>
 			<Flex flexDirection={'column'} maxW={'80%'}>
 				<Text fontSize="md">{location + ', ' + state + ` state`}</Text>
 				<Text isTruncated fontSize={'sm'} color="text_muted">
-					This location has <Icon color="orange.500" as={FaFireFlameCurved} /> {(total === 1) ? total+' hit' : total+' hits'}
+					This location has <Icon color="orange.500" as={FaFireFlameCurved} />{' '}
+					{total === 1 ? total + ' hit' : total + ' hits'}
 				</Text>
 			</Flex>
 		</Flex>

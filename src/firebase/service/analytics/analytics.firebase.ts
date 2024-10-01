@@ -47,7 +47,6 @@ export default class AnalyticsService extends SherutaDB {
 		posts?: number
 		location_keyword_id: string
 	}): Promise<DocumentData | undefined> {
-
 		//get data by location_keyword
 		const initialCounts = await this.getDataByLocationKeyword(
 			data.location_keyword_id,
@@ -55,7 +54,10 @@ export default class AnalyticsService extends SherutaDB {
 
 		if (!initialCounts) return undefined
 
-        const locRef = doc(db, `/location_keywords/${initialCounts._location_keyword_ref.id}`)
+		const locRef = doc(
+			db,
+			`/location_keywords/${initialCounts._location_keyword_ref.id}`,
+		)
 
 		const newData = {
 			calls: data?.calls
@@ -67,7 +69,7 @@ export default class AnalyticsService extends SherutaDB {
 			posts: data?.posts
 				? initialCounts.posts + data.posts
 				: initialCounts.posts,
-			_location_keyword_ref: locRef
+			_location_keyword_ref: locRef,
 		}
 
 		return await this.update({
@@ -99,7 +101,7 @@ export default class AnalyticsService extends SherutaDB {
 	static async getDataByLocationKeyword(
 		location_keyword_id: string,
 	): Promise<AnalyticsDataDetails | undefined> {
-        console.log(location_keyword_id)
+		console.log(location_keyword_id)
 
 		const collectionRef = collection(db, DBCollectionName.analytics)
 		const locRef = doc(db, `/location_keywords/${location_keyword_id}`)

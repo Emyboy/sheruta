@@ -22,7 +22,7 @@ import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
-	PaymentPlan,
+	PaymentType,
 	SeekerRequestData,
 	LocationObject,
 } from '@/firebase/service/request/request.types'
@@ -79,7 +79,7 @@ interface budgetLimits {
 	weekly: number
 }
 
-const budgetLimits: Record<PaymentPlan, number> = {
+const budgetLimits: Record<PaymentType, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
@@ -211,7 +211,7 @@ const CreateSeekerForm: React.FC = () => {
 			paymentType: string,
 			budgetValue: number,
 		) => {
-			const budgetLimit = budgetLimits[paymentType as PaymentPlan]
+			const budgetLimit = budgetLimits[paymentType as PaymentType]
 			setIsBudgetInvalid(budgetValue < budgetLimit)
 		}
 
@@ -230,7 +230,7 @@ const CreateSeekerForm: React.FC = () => {
 
 			case 'payment_type':
 				const budget = formData.budget as number
-				if (value) updateBudgetInvalidState(value as PaymentPlan, budget)
+				if (value) updateBudgetInvalidState(value as PaymentType, budget)
 				break
 
 			case 'stateId':
