@@ -468,7 +468,8 @@ export default function EachRequest({ request }: Props) {
 										}
 									}}
 								>
-									<BiPhone /> {analyticsData?.calls || 0}
+									<BiPhone /> 
+									{/* { analyticsData?.calls || 0} */}
 								</Button>
 							</MainTooltip>
 						) : null}
@@ -522,7 +523,8 @@ export default function EachRequest({ request }: Props) {
 									base: 'base',
 								}}
 							>
-								<BiMessageRoundedDetail /> {analyticsData?.messages || 0}
+								<BiMessageRoundedDetail /> 
+								{/* {analyticsData?.messages || 0} */}
 							</Button>
 						</MainTooltip>
 						<MainTooltip label="Bookmark" placement="top">

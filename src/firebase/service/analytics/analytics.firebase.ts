@@ -101,7 +101,7 @@ export default class AnalyticsService extends SherutaDB {
 	static async getDataByLocationKeyword(
 		location_keyword_id: string,
 	): Promise<AnalyticsDataDetails | undefined> {
-		console.log(location_keyword_id)
+		// console.log("Getting Analytics Location For:", location_keyword_id)
 
 		const collectionRef = collection(db, DBCollectionName.analytics)
 		const locRef = doc(db, `/location_keywords/${location_keyword_id}`)

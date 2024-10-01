@@ -33,6 +33,7 @@ import { z, ZodError } from 'zod'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as generateUId } from 'uuid'
+import useAnalytics from '@/hooks/useAnalytics'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
@@ -154,6 +155,7 @@ const CreateSeekerForm: React.FC = () => {
 	const [locations, setLocations] = useState<any[]>([])
 
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+	const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null)
 
 	const getLocations = (stateId: string): string[] => {
 		return location_keywords.filter((item) => item._state_id === stateId)
@@ -176,6 +178,8 @@ const CreateSeekerForm: React.FC = () => {
 		[],
 	)
 
+	const { addAnalyticsData } = useAnalytics()
+
 	const handlePlaceChanged = useCallback(() => {
 		if (autocomplete) {
 			const place = autocomplete.getPlace()
@@ -183,11 +187,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
+						location: {
+							lat: place.geometry.location?.lat() ?? 0,
+							lng: place.geometry.location?.lng() ?? 0,
+						},
+					}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -244,9 +248,10 @@ const CreateSeekerForm: React.FC = () => {
 
 			case 'locationKeywordId':
 				if (value) {
-					const { _ref, name } =
+					const { _ref, name, id } =
 						location_keywords.find((data) => data.id === value) ?? {}
 					setSelectedLocation(name)
+					setSelectedLocationId(id)
 					updateOptionsRef('_location_keyword_ref', _ref)
 				}
 				break
@@ -288,11 +293,13 @@ const CreateSeekerForm: React.FC = () => {
 			}
 
 			setIsLoading(true)
+
 			if (!flat_share_profile?._user_id || !user?._id)
 				return showToast({
 					message: 'Please log in to make a request',
 					status: 'error',
 				})
+
 			//create new form data object by retrieving the global form data and options ref
 			const finalFormData = {
 				...formData,
@@ -313,6 +320,9 @@ const CreateSeekerForm: React.FC = () => {
 					message: 'Your request has been posted successfully',
 					status: 'success',
 				})
+
+				//add analytics
+				await addAnalyticsData("posts", (selectedLocationId as string))
 
 				setTimeout(() => {
 					window.location.assign('/')
