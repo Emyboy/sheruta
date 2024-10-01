@@ -22,28 +22,17 @@ type Props = {
 }
 
 interface UserProfile {
-	collection_name: string
-	twitter: string
-	employment_status: string
 	state: any
-	phone_number: string
-	linkedin: string
-	work_industry: string
-	instagram: string
 	seeking: boolean
 	document_id: string
-	religion: string
 	avatar_url: string
 	first_name: string
 	last_name: string
-	email: string
-	area: any
 	bio: string
-	_id: string
 	budget: number
 	payment_plan: string
+	location_keyword: any
 	service_type: string
-	_user_ref: any
 }
 
 const ProfileSnippet = ({ userProfiles }: Props) => {
@@ -78,6 +67,8 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 					const ProfileSnippetBio = item?.bio
 					const maxBioLength = 84
 
+					console.log(item)
+
 					return (
 						<Flex m={4} key={index}>
 							<Card
@@ -90,7 +81,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 									objectFit="cover"
 									maxW={{ base: '100%', sm: '200px' }}
 									w="600px"
-									src={`${item.avatar_url}`}
+									src={item.avatar_url || '/assets/avatar.webp'}
 									alt="Profile Image"
 								/>
 
@@ -123,7 +114,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 												align="center"
 											>
 												<Text color="text_muted" fontWeight="700">
-													{`Preferred area: ${item.area.name}, ${item.state.name}`}{' '}
+													{`Preferred area: ${item.location_keyword.name}, ${item.state.name}`}{' '}
 												</Text>
 												{/* <Badge
 													colorScheme="green"
