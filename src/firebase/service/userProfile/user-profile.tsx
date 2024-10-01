@@ -132,6 +132,7 @@ export const getAllProfileSnippetDocs = async (searchParams: {
 		profileDataSnapshot.forEach(async (doc) => {
 			const docData = { ...doc.data() }
 			const resolvedData = await resolveDocumentReferences(docData)
+			console.log(resolvedData)
 			profileDataArray.push({ id: doc.id, ...resolvedData, ref: doc.ref })
 		})
 

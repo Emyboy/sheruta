@@ -33,6 +33,7 @@ interface UserProfile {
 	budget: number
 	payment_plan: string
 	location_keyword: any
+	area: any
 	service_type: string
 }
 

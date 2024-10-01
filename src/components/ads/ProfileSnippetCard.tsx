@@ -29,6 +29,7 @@ interface UserProfile {
 	payment_plan: string
 	location_keyword: any
 	service_type: string
+	area: any
 }
 
 export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
@@ -97,7 +98,7 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 								align="center"
 							>
 								<Text color="text_muted" fontWeight="700">
-									{`Preferred area: ${item.location_keyword.name}, ${item.state.name}`}{' '}
+									{`Preferred area: ${item.area ? item.area.name : item.location_keyword.name}, ${item.state.name}`}{' '}
 								</Text>
 								{/* <Badge
 													colorScheme="green"
