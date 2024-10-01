@@ -26,7 +26,7 @@ interface UserProfile {
 	last_name: string
 	bio: string
 	budget: number
-	payment_plan: string
+	payment_type: string
 	location_keyword: any
 	service_type: string
 	area: any
@@ -143,7 +143,7 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 							<BiBookmark style={{ fontSize: '1.5em' }} />
 						</Button>
 						<Box mr={2} color="text_muted">
-							{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_plan ? item?.payment_plan : ''}`}{' '}
+							{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_type || ''}`}{' '}
 						</Box>
 					</Flex>
 				</Stack>

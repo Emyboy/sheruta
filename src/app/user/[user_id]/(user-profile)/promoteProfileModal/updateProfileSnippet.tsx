@@ -71,7 +71,7 @@ export const UpdateProfilePopup = () => {
 			first_name: user.first_name,
 			last_name: user.last_name,
 			seeking: flat_share_profile.seeking,
-			payment_plan: flat_share_profile.payment_type || null,
+			payment_type: flat_share_profile.payment_type || null,
 			budget: flat_share_profile.budget,
 			avatar_url: user.avatar_url,
 			state: flat_share_profile.state,

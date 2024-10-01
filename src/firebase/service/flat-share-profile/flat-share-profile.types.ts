@@ -35,7 +35,6 @@ const FlatShareProfileDataSchema = z.object({
 		'weekly',
 	]),
 	bio: z.string().nullable(),
-	payment_plan: z.string().nullable(),
 	// bio: z.string().optional(),
 	// socials: z.object({
 	// 	twitter: z.string().optional(),
@@ -95,5 +94,5 @@ export const flatShareProfileDefaults = {
 	gender_preference: null,
 	age_preference: null,
 	bio: null,
-	payment_plan: null,
+	payment_type: null,
 }

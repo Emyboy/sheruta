@@ -183,7 +183,7 @@ export default async function page(props: any) {
 							gender_preference: formattedFlatShareProfile.gender_preference,
 							age_preference: formattedFlatShareProfile.age_preference,
 							bio: formattedFlatShareProfile.bio,
-							payment_plan: formattedFlatShareProfile.payment_plan,
+							payment_type: formattedFlatShareProfile.payment_type,
 							socials: {
 								twitter: formattedFlatShareProfile.twitter,
 								tiktok: formattedFlatShareProfile.tiktok,
@@ -245,7 +245,7 @@ export default async function page(props: any) {
 	// 	gender_preference: flatshareInfosParsed.flatShareProfile.gender_preference,
 	// 	age_preference: flatshareInfosParsed.flatShareProfile.age_preference,
 	// 	bio: flatshareInfosParsed.flatShareProfile.bio,
-	// 	payment_plan: flatshareInfosParsed.flatShareProfile.payment_plan || null,
+	// 	payment_type: flatshareInfosParsed.flatShareProfile.payment_type || null,
 
 	// 	twitter: flatshareInfosParsed.flatShareProfile.socials.twitter,
 	// 	tiktok: flatshareInfosParsed.flatShareProfile.socials.tiktok,

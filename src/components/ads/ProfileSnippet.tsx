@@ -31,7 +31,7 @@ interface UserProfile {
 	last_name: string
 	bio: string
 	budget: number
-	payment_plan: string
+	payment_type: string
 	location_keyword: any
 	area: any
 	service_type: string
