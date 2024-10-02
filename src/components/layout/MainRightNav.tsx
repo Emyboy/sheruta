@@ -16,15 +16,15 @@ export default function MainRightNav({}: Props) {
 	useEffect(() => {
 		const fetchTrendingLocations = async () => {
 			try {
-				const locations = await getTrendingLocations();
-		
-				const limitedLocations = locations?.slice(0, 7) || []; 
-		
-				setTrendingLocations(limitedLocations);
+				const locations = await getTrendingLocations()
+
+				const limitedLocations = locations?.slice(0, 7) || []
+
+				setTrendingLocations(limitedLocations)
 			} catch (error) {
-				console.error('Error fetching trending locations:', error);
+				console.error('Error fetching trending locations:', error)
 			}
-		};
+		}
 
 		fetchTrendingLocations()
 	}, [])
@@ -83,7 +83,7 @@ const EachLocation = ({
 	location,
 	state,
 	total,
-	image
+	image,
 }: {
 	location: string
 	total: number
@@ -91,18 +91,13 @@ const EachLocation = ({
 	image?: string
 }) => {
 	return (
-		<Flex
-			alignItems={'center'}
-			gap={DEFAULT_PADDING}
-			py={2}
-			cursor={'pointer'}
-		>
+		<Flex alignItems={'center'} gap={DEFAULT_PADDING} py={2} cursor={'pointer'}>
 			<Image src={image} alt="location" width={35} rounded={'md'} />
 			<Flex flexDirection={'column'} maxW={'80%'}>
 				<Text fontSize="md">{location + ', ' + state + ` state`}</Text>
 				<Text isTruncated fontSize={'sm'} color="text_muted">
-					This location has <Icon color="orange.500" as={FaFireFlameCurved} />{' '}
-					{total === 1 ? total + ' hit' : total + ' hits'}
+					This location has {' '}
+					{total === 1 ? total + ' hit' : total + ' hits'}{' '}<Icon color="orange.500" as={FaFireFlameCurved} />
 				</Text>
 			</Flex>
 		</Flex>
