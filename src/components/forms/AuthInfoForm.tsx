@@ -61,7 +61,8 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 					bio,
 					payment_type,
 					document_id: user?._id,
-					_user_ref: `/users/${user?._id}`,
+					// _user_ref: `/users/${user?._id}`, // this ended up setting the value as string in user_profile collection rather than reference
+					_user_ref: flat_share_profile?._user_ref,
 				},
 				user?._id,
 			)

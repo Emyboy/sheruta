@@ -23,7 +23,7 @@ export default class FlatShareProfileService {
 	}) {
 		try {
 			let userInfo = await getDoc(doc(db, DBCollectionName.userInfos, _user_id))
-			let data: Partial<FlatShareProfileData> = {
+			let data: FlatShareProfileData = {
 				...flatShareProfileDefaults,
 				_user_info_ref: userInfo.ref,
 				_user_id,

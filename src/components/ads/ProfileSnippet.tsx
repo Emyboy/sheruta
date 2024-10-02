@@ -26,15 +26,16 @@ interface UserProfile {
 	state: any
 	seeking: boolean
 	document_id: string
-	avatar_url: string
-	first_name: string
-	last_name: string
 	bio: string
 	budget: number
 	payment_type: string
 	location_keyword: any
-	area: any
 	service_type: string
+	_user_ref: {
+		avatar_url: string
+		last_name: string
+		first_name: string
+	}
 }
 
 const ProfileSnippet = ({ userProfiles }: Props) => {

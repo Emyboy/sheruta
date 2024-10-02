@@ -22,15 +22,16 @@ interface UserProfile {
 	state: any
 	seeking: boolean
 	document_id: string
-	avatar_url: string
-	first_name: string
-	last_name: string
 	bio: string
 	budget: number
 	payment_type: string
 	location_keyword: any
 	service_type: string
-	area: any
+	_user_ref: {
+		avatar_url: string
+		last_name: string
+		first_name: string
+	}
 }
 
 export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
@@ -49,7 +50,7 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 					objectFit="cover"
 					maxW={{ base: '100%', sm: '200px' }}
 					w="600px"
-					src={item.avatar_url || '/assets/avatar.webp'}
+					src={item._user_ref.avatar_url || '/assets/avatar.webp'}
 					alt="Profile Image"
 				/>
 
@@ -78,7 +79,7 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 					>
 						<CardBody mb={0} border="none">
 							<Flex justify="space-between" align="center" mb={3}>
-								<Text>{`${item?.first_name} ${item.last_name}`}</Text>
+								<Text>{`${item._user_ref.first_name} ${item._user_ref.last_name}`}</Text>
 								{!params.toString() && (
 									<Badge color="text_color" background="border_color">
 										Promoted
@@ -102,21 +103,8 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 								align="center"
 							>
 								<Text color="text_muted" fontWeight="700">
-									{`Preferred area: ${item.area ? item.area.name : item.location_keyword.name}, ${item.state.name}`}{' '}
+									{`Preferred area: ${item.location_keyword.name}, ${item.state.name}`}{' '}
 								</Text>
-								{/* <Badge
-													colorScheme="green"
-													rounded="md"
-													textTransform="capitalize"
-												>
-													{item.service_type}
-												</Badge>
-												<Badge
-													colorScheme={item.seeking ? 'orange' : 'teal'}
-													textTransform="capitalize"
-												>
-													{item?.seeking ? 'Seeker' : 'I have a space'}
-												</Badge> */}
 							</Flex>
 							<Flex
 								style={{ fontSize: '10px' }}
@@ -142,7 +130,7 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 						</CardBody>
 					</Link>
 					<Divider />
-					<Flex justify="space-between" align="center" mb={2}>
+					<Flex gap={2} mt={'auto'} align="center" mb={2}>
 						<Button colorScheme="lueb" color="text_muted">
 							<BiBookmark style={{ fontSize: '1.5em' }} />
 						</Button>

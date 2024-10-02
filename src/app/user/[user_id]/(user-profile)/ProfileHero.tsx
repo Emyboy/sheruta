@@ -155,7 +155,6 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 							<BiMessageRoundedDetail size={25} />
 						</Button>
 					</Link>
-					AD
 					<IconButton
 						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 						aria-label="Bookmark this profile"
