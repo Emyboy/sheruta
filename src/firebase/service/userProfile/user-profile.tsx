@@ -1,19 +1,19 @@
-import {
-	collection,
-	getDocs,
-	doc,
-	setDoc,
-	getDoc,
-	updateDoc,
-	serverTimestamp,
-	DocumentData,
-	deleteDoc,
-	where,
-	query,
-} from 'firebase/firestore'
 import { db } from '@/firebase'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { resolveDocumentReferences } from '@/utils/index.utils'
+import {
+	DocumentData,
+	collection,
+	deleteDoc,
+	doc,
+	getDoc,
+	getDocs,
+	query,
+	serverTimestamp,
+	setDoc,
+	updateDoc,
+	where,
+} from 'firebase/firestore'
 
 export const getAllProfileDocs = async (): Promise<any[] | undefined> => {
 	try {
@@ -132,6 +132,7 @@ export const getAllProfileSnippetDocs = async (searchParams: {
 		profileDataSnapshot.forEach(async (doc) => {
 			const docData = { ...doc.data() }
 			const resolvedData = await resolveDocumentReferences(docData)
+
 			profileDataArray.push({ id: doc.id, ...resolvedData, ref: doc.ref })
 		})
 

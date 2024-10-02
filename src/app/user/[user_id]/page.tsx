@@ -29,28 +29,10 @@ export default async function page(props: any) {
 
 	async function getUserData() {
 		try {
-			// const userDoc = await AuthService.getUser(user_id)
-
-			// if (!userDoc) return { user: null }
-
-			// console.log(userDoc)
-
-			// return {
-			// 	user: {
-			// 		first_name: userDoc.user.first_name,
-			// 		last_name: userDoc.user.last_name,
-			// 		email: userDoc.user.email,
-			// 		avatar_url: userDoc.user.avatar_url,
-			// 		id: userDoc.user._id,
-			// 	},
-			// }
-
 			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
 			if (!userDoc.exists()) return { user: null }
 
 			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
-
-			// console.log(formattedUserDoc)
 
 			return {
 				user: formattedUserDoc
@@ -183,7 +165,7 @@ export default async function page(props: any) {
 							gender_preference: formattedFlatShareProfile.gender_preference,
 							age_preference: formattedFlatShareProfile.age_preference,
 							bio: formattedFlatShareProfile.bio,
-							payment_plan: formattedFlatShareProfile.payment_plan,
+							payment_type: formattedFlatShareProfile.payment_type,
 							socials: {
 								twitter: formattedFlatShareProfile.twitter,
 								tiktok: formattedFlatShareProfile.tiktok,
@@ -211,72 +193,18 @@ export default async function page(props: any) {
 
 			const plainUser = JSON.stringify(user)
 
-			// const plainUser = user
-
 			return plainUser
 		} catch (error) {
 			console.error('Error fetching document:', error)
 		}
 	}
 
-	// const flatshareInfos = await getUserProfile()
-	// const user = await getUserData()
-
 	const [user, flatshareInfos] = await Promise.all([
 		getUserData(),
 		getUserProfile(),
 	])
 
-	// const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
-
-	// const userProfiles = {
-	// 	first_name: user.user?.first_name,
-	// 	last_name: user.user?.last_name,
-	// 	email: user.user?.email,
-	// 	avatar_url: user.user?.avatar_url,
-	// 	id: user.user?.id,
-	// 	occupation: flatshareInfosParsed.flatShareProfile.occupation,
-	// 	budget: flatshareInfosParsed.flatShareProfile.budget,
-	// 	interests: flatshareInfosParsed.flatShareProfile.interests,
-	// 	area: flatshareInfosParsed.flatShareProfile.area,
-	// 	habits: flatshareInfosParsed.flatShareProfile.habits,
-	// 	work_industry: flatshareInfosParsed.flatShareProfile.work_industry,
-	// 	credits: flatshareInfosParsed.flatShareProfile.credits,
-	// 	gender_preference: flatshareInfosParsed.flatShareProfile.gender_preference,
-	// 	age_preference: flatshareInfosParsed.flatShareProfile.age_preference,
-	// 	bio: flatshareInfosParsed.flatShareProfile.bio,
-	// 	payment_plan: flatshareInfosParsed.flatShareProfile.payment_plan || null,
-
-	// 	twitter: flatshareInfosParsed.flatShareProfile.socials.twitter,
-	// 	tiktok: flatshareInfosParsed.flatShareProfile.socials.tiktok,
-	// 	facebook: flatshareInfosParsed.flatShareProfile.socials.facebook,
-	// 	linkedin: flatshareInfosParsed.flatShareProfile.socials.linkedin,
-	// 	instagram: flatshareInfosParsed.flatShareProfile.socials.instagram,
-
-	// 	state: flatshareInfosParsed.flatShareProfile.state.name,
-	// 	seeking: flatshareInfosParsed.flatShareProfile.seeking,
-	// 	employment_status: flatshareInfosParsed.flatShareProfile.employment_status,
-	// 	religion: flatshareInfosParsed.flatShareProfile.religion,
-	// 	done_kyc: flatshareInfosParsed.flatShareProfile.done_kyc,
-
-	// 	whatsapp: flatshareInfosParsed.userInfo.whatsapp,
-	// 	phone_number: flatshareInfosParsed.userInfo.phone_number,
-	// 	gender: flatshareInfosParsed.userInfo.gender,
-	// 	is_verified: flatshareInfosParsed.userInfo.is_verified,
-	// 	profilePromo: false,
-	// 	document_id: user_id,
-	// 	_user_ref: `/users/${user_id}`,
-	// }
-
 	const userId = user.user?.id
-
-	// const profileData: CreateDTO = {
-	// 	collection_name: DBCollectionName.userProfile,
-	// 	data: userProfiles,
-	// 	document_id: user_id,
-	// }
-
-	// await saveProfileDocs(profileData, user_id)
 
 	return (
 		<Flex justifyContent={'center'}>

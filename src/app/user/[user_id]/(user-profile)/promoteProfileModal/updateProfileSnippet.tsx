@@ -75,7 +75,7 @@ export const UpdateProfilePopup = () => {
 			budget: flat_share_profile.budget,
 			avatar_url: user.avatar_url,
 			state: flat_share_profile.state,
-			area: flat_share_profile.location_keyword,
+			location_keyword: flat_share_profile.location_keyword,
 			_user_ref: flat_share_profile._user_ref,
 			document_id: flat_share_profile._user_id,
 			promotion_expiry_date: Timestamp.fromDate(

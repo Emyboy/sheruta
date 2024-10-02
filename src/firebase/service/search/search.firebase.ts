@@ -5,6 +5,7 @@ import {
 	doc,
 	getDocs,
 	limit,
+	or,
 	orderBy,
 	query,
 	where,
@@ -17,11 +18,11 @@ interface QueryObj {
 	location?: string
 	state?: string
 	payment_type?: string
-	type?: 'flatmates' | 'apartment'
+	apartment?: string
 }
 
 export default class SearchApartmentService {
-	static async searchApartment({
+	static async searchQuery({
 		_limit = 20,
 		queryObj = {},
 	}: {
@@ -29,14 +30,32 @@ export default class SearchApartmentService {
 		queryObj?: QueryObj
 	}) {
 		try {
-			const collectionRef = collection(db, DBCollectionName.flatShareRequests)
-			let q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
+			const collectionRef = collection(
+				db,
+				queryObj.apartment === 'show-flatmates'
+					? DBCollectionName.flatShareProfile
+					: DBCollectionName.flatShareRequests,
+			)
+
+			let q
+
+			if (queryObj.apartment === 'show-flatmates') {
+				q = query(
+					collectionRef,
+					orderBy('updatedAt', 'desc'),
+					where('done_kyc', '==', true),
+					limit(_limit),
+				)
+			} else {
+				q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
+			}
 
 			q = this.applyQueryFilters(q, queryObj)
 
 			const querySnapshot = await getDocs(q)
 			const documents = await Promise.all(
 				querySnapshot.docs.map(async (doc) => {
+					// @ts-ignore
 					const docData = { ...doc.data() }
 					const resolvedData = await resolveDocumentReferences(docData)
 					return { id: doc.id, ...resolvedData, ref: doc.ref }
@@ -80,14 +99,26 @@ export default class SearchApartmentService {
 			const locationRefs = queryObj.location
 				.split(',')
 				.map((location) => doc(db, `/location_keywords/${location}`))
-			q = query(q, where('_location_keyword_ref', 'in', locationRefs))
+			q = query(
+				q,
+				or(
+					where('location_keyword', 'in', locationRefs),
+					where('_location_keyword_ref', 'in', locationRefs),
+				),
+			)
 		}
 
 		if (queryObj.state) {
 			const stateRefs = queryObj.state
 				.split(',')
 				.map((state) => doc(db, `/states/${state}`))
-			q = query(q, where('_state_ref', 'in', stateRefs))
+			q = query(
+				q,
+				or(
+					where('state', 'in', stateRefs),
+					where('_state_ref', 'in', stateRefs),
+				),
+			)
 		}
 
 		return q
