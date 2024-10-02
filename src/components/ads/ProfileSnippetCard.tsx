@@ -19,13 +19,13 @@ import { useSearchParams } from 'next/navigation'
 import { BiBookmark } from 'react-icons/bi'
 
 interface UserProfile {
-	state: any
+	state: { name: string }
 	seeking: boolean
 	document_id: string
 	bio: string
 	budget: number
 	payment_type: string
-	location_keyword: any
+	location_keyword: { name: string }
 	service_type: string
 	_user_ref: {
 		avatar_url: string

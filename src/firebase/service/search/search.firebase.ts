@@ -5,6 +5,7 @@ import {
 	doc,
 	getDocs,
 	limit,
+	or,
 	orderBy,
 	query,
 	where,
@@ -36,7 +37,18 @@ export default class SearchApartmentService {
 					: DBCollectionName.flatShareRequests,
 			)
 
-			let q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
+			let q
+
+			if (queryObj.apartment === 'show-flatmates') {
+				q = query(
+					collectionRef,
+					orderBy('updatedAt', 'desc'),
+					where('done_kyc', '==', true),
+					limit(_limit),
+				)
+			} else {
+				q = query(collectionRef, orderBy('updatedAt', 'desc'), limit(_limit))
+			}
 
 			q = this.applyQueryFilters(q, queryObj)
 
@@ -86,14 +98,26 @@ export default class SearchApartmentService {
 			const locationRefs = queryObj.location
 				.split(',')
 				.map((location) => doc(db, `/location_keywords/${location}`))
-			q = query(q, where('_location_keyword_ref', 'in', locationRefs))
+			q = query(
+				q,
+				or(
+					where('location_keyword', 'in', locationRefs),
+					where('_location_keyword_ref', 'in', locationRefs),
+				),
+			)
 		}
 
 		if (queryObj.state) {
 			const stateRefs = queryObj.state
 				.split(',')
 				.map((state) => doc(db, `/states/${state}`))
-			q = query(q, where('_state_ref', 'in', stateRefs))
+			q = query(
+				q,
+				or(
+					where('state', 'in', stateRefs),
+					where('_state_ref', 'in', stateRefs),
+				),
+			)
 		}
 
 		return q

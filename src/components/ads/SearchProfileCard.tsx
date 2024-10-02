@@ -18,15 +18,20 @@ import {
 import { BiBookmark } from 'react-icons/bi'
 
 export interface UserProfile {
-	state: any
 	_user_id: string
+	state: { name: string }
 	seeking: boolean
+	document_id: string
 	bio: string
 	budget: number
 	payment_type: string
-	_user_ref: any
-	location_keyword: any
-	done_kyc: boolean
+	location_keyword: { name: string }
+	service_type: string
+	_user_ref: {
+		avatar_url: string
+		last_name: string
+		first_name: string
+	}
 }
 
 export default function SearchProfileCard({
@@ -35,8 +40,6 @@ export default function SearchProfileCard({
 	profile: UserProfile
 }) {
 	const { authState } = useAuthContext()
-
-	if (!profile.done_kyc) return null
 
 	return (
 		<Flex m={4} w={'100%'}>
@@ -101,19 +104,6 @@ export default function SearchProfileCard({
 								<Text color="text_muted" fontWeight="700">
 									{`Preferred area: ${profile.location_keyword.name}, ${profile.state.name}`}{' '}
 								</Text>
-								{/* <Badge
-													colorScheme="green"
-													rounded="md"
-													textTransform="capitalize"
-												>
-													{profile.service_type}
-												</Badge>
-												<Badge
-													colorScheme={profile.seeking ? 'orange' : 'teal'}
-													textTransform="capitalize"
-												>
-													{profile?.seeking ? 'Seeker' : 'I have a space'}
-												</Badge> */}
 							</Flex>
 							<Flex
 								style={{ fontSize: '10px' }}
@@ -139,8 +129,8 @@ export default function SearchProfileCard({
 						</CardBody>
 					</Link>
 					<Divider />
-					<Flex gap={1} align="center" mt={'auto'} mb={2}>
-						<Button colorScheme="lueb" color="text_muted">
+					<Flex align="center" mt={'auto'} mb={2}>
+						<Button colorScheme="lueb" p={0} color="text_muted">
 							<BiBookmark style={{ fontSize: '1.5em' }} />
 						</Button>
 						<Box pr={1} color="text_muted">
