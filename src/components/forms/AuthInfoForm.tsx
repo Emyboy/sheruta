@@ -15,7 +15,7 @@ import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import { PaymentPlan } from '@/firebase/service/request/request.types'
+import { PaymentType } from '@/firebase/service/request/request.types'
 
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
@@ -68,7 +68,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 			)
 
 			await FlatShareProfileService.update({
-				data: { budget, bio, payment_type: payment_type as PaymentPlan },
+				data: { budget, bio, payment_type: payment_type as PaymentType },
 				document_id: user?._id,
 			})
 

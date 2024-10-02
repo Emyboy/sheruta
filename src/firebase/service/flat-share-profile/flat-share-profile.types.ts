@@ -1,6 +1,6 @@
 import { DocumentReference } from 'firebase/firestore'
 import { z } from 'zod'
-import { PaymentPlan } from '../request/request.types'
+import { PaymentType } from '../request/request.types'
 
 // Define the Zod schema for FlatShareProfileData
 const FlatShareProfileDataSchema = z.object({
@@ -64,7 +64,7 @@ export type UpdateFlatShareProfileDataDTO = {
 	bio?: string
 	gender_preference?: string
 	age_preference?: string
-	payment_type?: PaymentPlan
+	payment_type?: PaymentType | null
 	// socials: object
 }
 

@@ -46,15 +46,9 @@ import {
 } from 'react-icons/bi'
 import SuperJSON from 'superjson'
 import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
-import BookmarkService from '@/firebase/service/bookmarks/bookmarks.firebase'
-import {
-	BookmarkDataDetails,
-	BookmarkType,
-} from '@/firebase/service/bookmarks/bookmarks.types'
-import { v4 as generateUId } from 'uuid'
-import { doc } from 'firebase/firestore'
-import { db } from '@/firebase'
+
 import useHandleBookmark from '@/hooks/useHandleBookmark'
+import useAnalytics from '@/hooks/useAnalytics'
 
 const SeekerPost = ({
 	requestData,
@@ -81,6 +75,8 @@ const SeekerPost = ({
 
 	const { toggleSaveApartment, isBookmarkLoading, bookmarkId } =
 		useHandleBookmark(requestId as string, authState.user?._id as string)
+
+	const { addAnalyticsData } = useAnalytics()
 
 	useEffect(() => {
 		if (
@@ -137,7 +133,7 @@ const SeekerPost = ({
 	return (
 		<>
 			{typeof postData !== 'undefined' &&
-			Object.values(postData || {}).length ? (
+				Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -324,13 +320,17 @@ const SeekerPost = ({
 														recipient_id: postData._user_ref._id,
 														sender_details: authState.user
 															? {
-																	avatar_url: authState.user.avatar_url,
-																	first_name: authState.user.first_name,
-																	last_name: authState.user.last_name,
-																	id: authState.user._id,
-																}
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+																id: authState.user._id,
+															}
 															: null,
 													})
+													await addAnalyticsData(
+														'calls',
+														postData._location_keyword_ref.id,
+													)
 												}}
 											/>
 										</Tooltip>
@@ -348,7 +348,13 @@ const SeekerPost = ({
 											border="none"
 											fontSize="24px"
 											icon={<BiEnvelope />}
-											onClick={() => handleDM(postData._user_ref._id)}
+											onClick={async () => {
+												handleDM(postData._user_ref._id)
+												await addAnalyticsData(
+													'messages',
+													postData._location_keyword_ref.id,
+												)
+											}}
 										/>
 									</Tooltip>
 								</Box>
@@ -450,11 +456,11 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 									recipient_id: postData._user_ref._id,
 									sender_details: authState.user
 										? {
-												avatar_url: authState.user.avatar_url,
-												first_name: authState.user.first_name,
-												last_name: authState.user.last_name,
-												id: authState.user._id,
-											}
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
 										: null,
 								})
 							}}

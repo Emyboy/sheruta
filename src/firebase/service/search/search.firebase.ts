@@ -55,6 +55,7 @@ export default class SearchApartmentService {
 			const querySnapshot = await getDocs(q)
 			const documents = await Promise.all(
 				querySnapshot.docs.map(async (doc) => {
+					// @ts-ignore
 					const docData = { ...doc.data() }
 					const resolvedData = await resolveDocumentReferences(docData)
 					return { id: doc.id, ...resolvedData, ref: doc.ref }
