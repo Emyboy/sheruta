@@ -155,7 +155,9 @@ const CreateSeekerForm: React.FC = () => {
 	const [locations, setLocations] = useState<any[]>([])
 
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
-	const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null)
+	const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+		null,
+	)
 
 	const getLocations = (stateId: string): string[] => {
 		return location_keywords.filter((item) => item._state_id === stateId)
@@ -187,11 +189,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -322,7 +324,7 @@ const CreateSeekerForm: React.FC = () => {
 				})
 
 				//add analytics
-				await addAnalyticsData("posts", (selectedLocationId as string))
+				await addAnalyticsData('posts', selectedLocationId as string)
 
 				setTimeout(() => {
 					window.location.assign('/')

@@ -140,9 +140,9 @@ export default function UploadMedia({
 
 			const videoUploadPromise = formData.video_url
 				? SherutaDB.uploadMedia({
-					data: formData.video_url,
-					storageUrl: `videos/requests/${userId}/${uuid}/video_0`,
-				})
+						data: formData.video_url,
+						storageUrl: `videos/requests/${userId}/${uuid}/video_0`,
+					})
 				: null
 
 			const promises = videoUploadPromise
@@ -196,10 +196,11 @@ export default function UploadMedia({
 			toast({ status: 'success', title: 'You have successfully added a space' })
 
 			if (data._location_keyword_ref) {
-				
-				const locationKeywordData = await convertRefToData(data._location_keyword_ref) as LocationKeywordData;
+				const locationKeywordData = (await convertRefToData(
+					data._location_keyword_ref,
+				)) as LocationKeywordData
 				//add analytics
-				await addAnalyticsData("posts", locationKeywordData.id as string)
+				await addAnalyticsData('posts', locationKeywordData.id as string)
 			}
 
 			router.push(`/request/host/${uuid}`)

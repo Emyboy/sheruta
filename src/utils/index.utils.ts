@@ -3,7 +3,12 @@ import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
 import { formatDuration, intervalToDuration } from 'date-fns'
-import { DocumentData, DocumentReference, getDoc, Timestamp } from 'firebase/firestore'
+import {
+	DocumentData,
+	DocumentReference,
+	getDoc,
+	Timestamp,
+} from 'firebase/firestore'
 
 export const truncateText = (text: string, maxChars?: number) =>
 	text.length > (maxChars || 50)
@@ -223,15 +228,16 @@ export async function resolveDocumentReferences(docData: any): Promise<any> {
 	return docData
 }
 
-
-export const convertRefToData = async (docRef: DocumentReference): Promise<DocumentData | undefined> => {
+export const convertRefToData = async (
+	docRef: DocumentReference,
+): Promise<DocumentData | undefined> => {
 	try {
 		const docSnap = await getDoc(docRef)
 
 		if (docSnap.exists()) {
 			return { id: docSnap.id, ...docSnap.data() }
 		}
-		
+
 		return undefined
 	} catch (err) {
 		console.log(err)
