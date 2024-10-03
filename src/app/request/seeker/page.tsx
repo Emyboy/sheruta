@@ -53,7 +53,7 @@ export default function Page({}: Props) {
 										<AlertIcon />
 										<span>
 											{
-												'Have a vacant space? Increase occupancy rate by posting visuals. '
+												'Have a vacant space? Increase occupancy by posting visuals. '
 											}
 											<NextLink href={'/request/host'}>
 												<Text as="u">Click here</Text>

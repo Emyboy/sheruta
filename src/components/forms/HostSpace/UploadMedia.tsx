@@ -27,6 +27,9 @@ import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { ZodError } from 'zod'
 import { HostSpaceFormProps } from '.'
 import { revalidatePathOnClient } from '@/utils/actions'
+import { convertRefToData } from '@/utils/index.utils'
+import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
+import useAnalytics from '@/hooks/useAnalytics'
 
 export default function UploadMedia({
 	formData,
@@ -42,6 +45,8 @@ export default function UploadMedia({
 	const [length, setLength] = useState(4)
 
 	const [mediaRefPaths, setMediaRefPaths] = useState<string[]>([])
+
+	const { addAnalyticsData } = useAnalytics()
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -189,7 +194,16 @@ export default function UploadMedia({
 
 			localStorage.removeItem('host_space_form')
 			toast({ status: 'success', title: 'You have successfully added a space' })
-			router.push('/')
+
+			if (data._location_keyword_ref) {
+				const locationKeywordData = (await convertRefToData(
+					data._location_keyword_ref,
+				)) as LocationKeywordData
+				//add analytics
+				await addAnalyticsData('posts', locationKeywordData.id as string)
+			}
+
+			router.push(`/request/host/${uuid}`)
 		} catch (e) {
 			await Promise.all(mediaRefPaths.map((url) => SherutaDB.deleteMedia(url)))
 			if (e instanceof ZodError) {

@@ -5,15 +5,18 @@ import { useAuthContext } from '@/context/auth.context'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { UserInfo } from '@/firebase/service/user-info/user-info.types'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 import { handleCall } from '@/utils/index.utils'
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
+import { Box, Button, Flex, IconButton, Text } from '@chakra-ui/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
+	BiBookmark,
 	BiBriefcase,
 	BiGroup,
 	BiMessageRoundedDetail,
 	BiSolidBadgeCheck,
+	BiSolidBookmark,
 	BiSolidLocationPlus,
 	BiStore,
 } from 'react-icons/bi'
@@ -22,13 +25,21 @@ type Props = {
 	data: any
 	userProfile: any
 	user_id: string
+	// profileInfo: any
 }
 
 export default function ProfileHero({ data, userProfile, user_id }: Props) {
 	const _user: AuthUser = data.user
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
-	const { authState } = useAuthContext()
+	const {
+		authState: { user },
+	} = useAuthContext()
+
+	const { bookmarkId, toggleSaveProfile } = useHandleBookmark(
+		user_id,
+		user?._id as string,
+	)
 
 	const _userInfo: UserInfo = userProfile.userInfo
 
@@ -73,7 +84,14 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 				justifyContent={'flex-end'}
 			>
 				<Flex maxW={'90%'} alignItems={'center'} gap={1}>
-					<Text isTruncated fontSize={'x-large'} textTransform={'capitalize'}>
+					<Text
+						isTruncated
+						fontSize={{
+							md: 'large',
+							base: 'small',
+						}}
+						textTransform={'capitalize'}
+					>
 						{_user?.first_name} {_user?.last_name}
 					</Text>
 					{_userInfo?.is_verified ? (
@@ -108,35 +126,40 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 				>
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>
-						{`${userProfile.flatShareProfile?.area} Nigeria`}
+						{`${userProfile.flatShareProfile?.state.name}, Nigeria`}
 					</Text>
 				</Flex>
 
 				<Flex gap={DEFAULT_PADDING}>
 					<Button
-						onClick={async () => {
-							if (authState.user?._id === user_id) return
-							await handleCall({
+						onClick={async () =>
+							user?._id !== user_id &&
+							(await handleCall({
 								number: _userInfo.primary_phone_number,
 								recipient_id: user_id,
-								sender_details: authState.user
+								sender_details: user
 									? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
+											avatar_url: user.avatar_url,
+											first_name: user.first_name,
+											last_name: user.last_name,
+											id: user._id,
 										}
 									: null,
-							})
-						}}
+							}))
+						}
 					>
 						Call Me
 					</Button>
-					<Link href={`/messages/${_user._id}`}>
+					<Link href={`/messages/${user_id}`}>
 						<Button>
 							<BiMessageRoundedDetail size={25} />
 						</Button>
 					</Link>
+					<IconButton
+						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
+						aria-label="Bookmark this profile"
+						onClick={async () => await toggleSaveProfile()}
+					/>
 				</Flex>
 			</Flex>
 		</Flex>

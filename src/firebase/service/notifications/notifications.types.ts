@@ -11,6 +11,8 @@ export const NotificationsDTO = z.object({
 		'rescheduled',
 		'profile_view',
 		'cancelled',
+		'bookmark',
+		'reservation',
 	]),
 	message: z.string(),
 	sender_details: z

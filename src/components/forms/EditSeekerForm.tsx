@@ -22,12 +22,16 @@ import {
 	Timestamp,
 } from 'firebase/firestore'
 import Link from 'next/link'
-import { LoadScript, Autocomplete } from '@react-google-maps/api'
+import {
+	LoadScript,
+	Autocomplete,
+	useJsApiLoader,
+} from '@react-google-maps/api'
 import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
-	PaymentPlan,
+	PaymentType,
 	RequestData,
 	SeekerRequestData,
 	LocationObject,
@@ -47,7 +51,7 @@ import { LocationKeywordData } from '@/firebase/service/options/location-keyword
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-const budgetLimits: Record<PaymentPlan, number> = {
+const budgetLimits: Record<PaymentType, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
@@ -94,7 +98,11 @@ const EditSeekerForm: React.FC<{
 
 	const { colorMode } = useColorMode()
 	const { showToast } = useCommon()
-	const router = useRouter()
+
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
+		libraries,
+	})
 
 	const {
 		authState: { flat_share_profile },
@@ -130,7 +138,7 @@ const EditSeekerForm: React.FC<{
 		budget: parsedRequestData?.budget,
 		google_location_object: parsedRequestData?.google_location_object,
 		google_location_text: parsedRequestData?.google_location_text,
-		payment_type: parsedRequestData?.payment_type as PaymentPlan,
+		payment_type: parsedRequestData?.payment_type as PaymentType,
 		seeking: true,
 	})
 
@@ -206,7 +214,7 @@ const EditSeekerForm: React.FC<{
 			paymentType: string,
 			budgetValue: number,
 		) => {
-			const budgetLimit = budgetLimits[paymentType as PaymentPlan]
+			const budgetLimit = budgetLimits[paymentType as PaymentType]
 			setIsBudgetInvalid(budgetValue < budgetLimit)
 		}
 
@@ -224,7 +232,7 @@ const EditSeekerForm: React.FC<{
 
 			case 'payment_type':
 				const budget = formData?.budget as number
-				if (value) updateBudgetInvalidState(value as PaymentPlan, budget)
+				if (value) updateBudgetInvalidState(value as PaymentType, budget)
 				break
 
 			case 'stateId':
@@ -394,30 +402,16 @@ const EditSeekerForm: React.FC<{
 				</FormControl>
 			</Flex>
 
-			{selectedLocation && (
-				<FormControl isRequired mb={4}>
-					<FormLabel requiredIndicator={null} htmlFor="address">
-						Where in {selectedLocation}
-					</FormLabel>
-					{typeof window !== 'undefined' && !window.google ? (
-						<LoadScript
-							googleMapsApiKey={GOOGLE_PLACES_API_KEY as string}
-							libraries={libraries}
-						>
-							<Autocomplete
-								onLoad={handleLoad}
-								onPlaceChanged={handlePlaceChanged}
-							>
-								<Input
-									id="address"
-									type="text"
-									placeholder="Select..."
-									value={googleLocationText}
-									onChange={(e) => setGoogleLocationText(e.target.value)}
-								/>
-							</Autocomplete>
-						</LoadScript>
-					) : (
+			{selectedLocation &&
+				(!isLoaded ? (
+					<Text width={'full'} textAlign={'center'}>
+						Loading google maps
+					</Text>
+				) : (
+					<FormControl isRequired mb={4}>
+						<FormLabel requiredIndicator={null} htmlFor="address">
+							Where in {selectedLocation}
+						</FormLabel>
 						<Autocomplete
 							onLoad={handleLoad}
 							onPlaceChanged={handlePlaceChanged}
@@ -430,9 +424,8 @@ const EditSeekerForm: React.FC<{
 								onChange={(e) => setGoogleLocationText(e.target.value)}
 							/>
 						</Autocomplete>
-					)}
-				</FormControl>
-			)}
+					</FormControl>
+				))}
 
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired flex="1">

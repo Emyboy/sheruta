@@ -18,9 +18,7 @@ import {
 	AlertIcon,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
-import {
-	BiLogoGoogle,
-} from 'react-icons/bi'
+import { BiLogoGoogle } from 'react-icons/bi'
 import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs'
 import MainModal from '../atoms/MainModal'
 import { useAuthContext } from '@/context/auth.context'
@@ -29,16 +27,21 @@ import {
 	createUserWithEmailAndPassword,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
+	sendEmailVerification,
 } from 'firebase/auth'
 import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
+import { DocumentData } from 'firebase/firestore'
 
-interface Props { }
+interface Props {}
+
+const PUBLIC_URL = process.env.NEXT_PUBLIC_URL
 
 export default function AuthPopup(props: Props) {
-	const { authState } = useAuthContext()
-	const { user, auth_loading } = authState
+	const {
+		authState: { user, auth_loading },
+	} = useAuthContext()
 	const { appState, setAppState } = useAppContext()
 	const { show_login } = appState
 
@@ -58,9 +61,18 @@ export default function AuthPopup(props: Props) {
 				<Flex minH={'200px'} justifyContent={'center'} alignItems={'center'}>
 					<Spinner size="lg" />
 				</Flex>
-			) : (isPasswordReset) ? <PasswordResetForm setIsPasswordReset={setIsPasswordReset} setIsSignUp={setIsSignUp} /> :
-				<AuthForm isSignUp={isSignUp} setIsSignUp={setIsSignUp} setIsPasswordReset={setIsPasswordReset} />
-			}
+			) : isPasswordReset ? (
+				<PasswordResetForm
+					setIsPasswordReset={setIsPasswordReset}
+					setIsSignUp={setIsSignUp}
+				/>
+			) : (
+				<AuthForm
+					isSignUp={isSignUp}
+					setIsSignUp={setIsSignUp}
+					setIsPasswordReset={setIsPasswordReset}
+				/>
+			)}
 		</MainModal>
 	)
 }
@@ -106,7 +118,13 @@ const EachSocial = ({
 	)
 }
 
-const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordReset: (arg: boolean) => void, setIsSignUp: (arg: boolean) => void }) => {
+const PasswordResetForm = ({
+	setIsPasswordReset,
+	setIsSignUp,
+}: {
+	setIsPasswordReset: (arg: boolean) => void
+	setIsSignUp: (arg: boolean) => void
+}) => {
 	const [email, setEmail] = useState('')
 	// const [message, setMessage] = useState('')
 	// const [error, setError] = useState('')
@@ -117,7 +135,6 @@ const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordR
 	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setEmail(e.target.value)
 	}
-
 
 	const handlePasswordReset = async (e: React.FormEvent) => {
 		e.preventDefault()
@@ -149,7 +166,8 @@ const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordR
 			</Center>
 			<Alert mb={5} status="info" variant="subtle">
 				<AlertIcon />
-				Enter the email address linked to your account and click on the reset password button
+				Enter the email address linked to your account and click on the reset
+				password button
 			</Alert>
 			<VStack spacing={4} width="100%">
 				<FormControl>
@@ -165,28 +183,28 @@ const PasswordResetForm = ({ setIsPasswordReset, setIsSignUp }: { setIsPasswordR
 
 				<Button
 					type="submit"
-					bgColor={"brand"}
+					bgColor={'brand'}
 					width="full"
 					isLoading={isSubmitting}
 				>
 					Reset Password
 				</Button>
 
-				<Box width={"full"} textAlign={"center"}>
+				<Box width={'full'} textAlign={'center'}>
 					<Text
 						cursor={'pointer'}
 						textDecoration="underline"
 						onClick={() => {
-							setIsSignUp(false),
-								setIsPasswordReset(false)
+							setIsSignUp(false), setIsPasswordReset(false)
 						}}
-					>Have you remembered your password?</Text>
+					>
+						Have you remembered your password?
+					</Text>
 				</Box>
 			</VStack>
 		</form>
 	)
 }
-
 
 const AuthForm: React.FC<{
 	isSignUp: boolean
@@ -213,6 +231,8 @@ const AuthForm: React.FC<{
 		firstName: '',
 		lastName: '',
 	})
+
+	const { setAuthState } = useAuthContext()
 
 	const { showToast } = useCommon()
 
@@ -275,6 +295,81 @@ const AuthForm: React.FC<{
 		}))
 	}
 
+	const handleSignUp = async (data: {
+		email: string
+		password: string
+		firstName: string
+		lastName: string
+	}): Promise<DocumentData | undefined> => {
+		try {
+			setIsLoading(true)
+
+			const { email, password, firstName, lastName } = data
+
+			const userCredential = await createUserWithEmailAndPassword(
+				auth,
+				email,
+				password,
+			)
+
+			const user = userCredential.user
+
+			//redirecting to the homepage will trigger the onboarding process
+			await sendEmailVerification(user, {
+				url: `${PUBLIC_URL}`,
+			})
+
+			const theUser = await AuthService.loginUser({
+				displayName: `${firstName} ${lastName}`,
+				email: user.email as string,
+				providerId: 'email',
+				uid: user.uid as string,
+				phoneNumber: user.phoneNumber,
+				photoURL: user.photoURL,
+			})
+
+			return theUser
+		} catch (err: any) {
+			throw Error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	const handleLogin = async (data: {
+		email: string
+		password: string
+	}): Promise<DocumentData | undefined> => {
+		try {
+			setIsLoading(true)
+
+			const { email, password } = data
+
+			const userCredential = await signInWithEmailAndPassword(
+				auth,
+				email,
+				password,
+			)
+
+			const user = userCredential.user
+
+			const theUser = await AuthService.loginUser({
+				displayName: user?.displayName || '',
+				email: user.email as string,
+				providerId: 'email',
+				uid: user.uid as string,
+				phoneNumber: user.phoneNumber,
+				photoURL: user.photoURL,
+			})
+
+			return theUser
+		} catch (err: any) {
+			throw Error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		try {
 			setIsLoading(true)
@@ -286,48 +381,48 @@ const AuthForm: React.FC<{
 				return
 			}
 
-			const { email, password, firstName, lastName } = formData
-
 			if (isSignUp) {
-				const userCredential = await createUserWithEmailAndPassword(
-					auth,
-					email,
-					password,
-				)
+				const theUser = await handleSignUp(formData)
 
-				const user = userCredential.user
+				setAuthState({ ...(theUser as any), auth_loading: false })
 
-				await AuthService.loginUser({
-					displayName: `${firstName} ${lastName}`,
-					email: user.email as string,
-					providerId: 'email',
-					uid: user.uid as string,
-					phoneNumber: user.phoneNumber,
-					photoURL: user.photoURL,
+				return showToast({
+					message: `Account created successfully!`,
+					status: 'success',
 				})
 			} else {
-				await signInWithEmailAndPassword(auth, email, password)
-			}
-
-			return showToast({
-				message: `${isSignUp ? 'Account created successfully!' : 'You have logged in successfully!'}`,
-				status: 'success',
-			})
-		} catch (err: any) {
-			console.log(err)
-			if (err.message.includes('email-already-in-use')) {
-				showToast({
-					message: 'Email already exists. Please try signing in.',
-					status: 'error',
+				const theUser = await handleLogin({
+					email: formData.email,
+					password: formData.password,
 				})
-			} else if (err.message.includes('invalid-credential')) {
+
+				setAuthState({ ...(theUser as any), auth_loading: false })
+
+				return showToast({
+					message: 'You have logged in successfully!',
+					status: 'success',
+				})
+			}
+		} catch (err: any) {
+			console.error(err)
+			if (err.message.includes('invalid-credential')) {
 				showToast({
 					message: 'Invalid email or password.',
 					status: 'error',
 				})
+			} else if (err.message.includes('email-already-in-use')) {
+				showToast({
+					message: 'Email already exists. Please try signing in.',
+					status: 'error',
+				})
+			} else if (err.message.includes('too-many-requests')) {
+				showToast({
+					message: `Too many failed login attempts. Please reset your password and try again.`,
+					status: 'error',
+				})
 			} else {
 				showToast({
-					message: `An error occurred while ${isSignUp ? 'signing up' : 'logging in'}. Please try again later.`,
+					message: `An error occurred while ${isSignUp ? 'signing up' : 'signing in'}. Please try again later.`,
 					status: 'error',
 				})
 			}
@@ -426,14 +521,17 @@ const AuthForm: React.FC<{
 							{isSignUp ? 'Sign Up' : 'Login'}
 						</Button>
 
-						{!isSignUp ?
-							<Box mt={2} width={"full"} textAlign={"center"}>
+						{!isSignUp ? (
+							<Box mt={2} width={'full'} textAlign={'center'}>
 								<Text
 									cursor={'pointer'}
 									textDecoration="underline"
 									onClick={() => setIsPasswordReset(true)}
-								>Forgot password?</Text>
-							</Box> : null}
+								>
+									Forgot password?
+								</Text>
+							</Box>
+						) : null}
 
 						<Box color="gray.500" mt={2}>
 							{isSignUp ? (

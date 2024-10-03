@@ -13,7 +13,7 @@ type Props = {
 }
 
 export default function CreditInfo({ credit, onUse }: Props) {
-	const { authState } = useAuthContext()
+	const { authState, setAuthState } = useAuthContext()
 	const [ready, setReady] = useState(false)
 
 	if (

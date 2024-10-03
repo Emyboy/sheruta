@@ -6,7 +6,7 @@ import { useOptionsContext } from '@/context/options.context'
 import {
 	AvailabilityStatus,
 	HostRequestDataDetails,
-	PaymentPlan,
+	PaymentType,
 } from '@/firebase/service/request/request.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { DocumentReference, Timestamp } from '@firebase/firestore'
@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
 import Summary from './Summary'
-import UploadMedia from './UploadMedia'
+// import UploadMedia from './UploadMedia'
 
 export type HostSpaceFormProps = {
 	next: () => void
@@ -27,7 +27,7 @@ export type FormDataType = {
 	description: string
 	service_charge: number | null
 	budget: number
-	payment_type: PaymentPlan
+	payment_type: PaymentType
 	bathrooms: number | null
 	toilets: number | null
 	living_rooms: number | null
@@ -69,7 +69,7 @@ export default function EditHostSpace({ data }: { data: string }) {
 		description: request.description || '',
 		service_charge: request.service_charge || 0,
 		budget: request.budget || 0,
-		payment_type: (request.payment_type as PaymentPlan) || PaymentPlan.monthly,
+		payment_type: (request.payment_type as PaymentType) || PaymentType.monthly,
 		bathrooms: request.bathrooms || 0,
 		toilets: request.toilets || 0,
 		living_rooms: request.living_rooms || 0,
@@ -116,12 +116,12 @@ export default function EditHostSpace({ data }: { data: string }) {
 			setFormData={setHostSpaceData}
 		/>,
 
-		<UploadMedia
-			key={1}
-			next={next}
-			formData={hostSpaceData}
-			setFormData={setHostSpaceData}
-		/>,
+		// <UploadMedia
+		// 	key={1}
+		// 	next={next}
+		// 	formData={hostSpaceData}
+		// 	setFormData={setHostSpaceData}
+		// />,
 	]
 
 	const allStepNames = (): string[] => ['Edit Apartment Details', 'Edit Media']

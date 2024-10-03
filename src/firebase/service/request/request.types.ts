@@ -1,5 +1,6 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
+
 export interface RequestData {
 	title?: string
 	description?: string
@@ -18,7 +19,7 @@ export interface RequestData {
 	_property_type_ref: DocumentReference
 	_user_ref: DocumentReference
 
-	payment_type: PaymentPlan
+	payment_type: PaymentType
 
 	bedrooms: null | number
 	bathrooms: null | number
@@ -49,7 +50,7 @@ export interface LocationObject {
 	[key: string]: any
 }
 
-export enum PaymentPlan {
+export enum PaymentType {
 	monthly = 'monthly',
 	annually = 'annually',
 	quarterly = 'quarterly',
@@ -134,6 +135,9 @@ export const createHostRequestDTO = z.object({
 	imagesRefPaths: z.array(z.string()),
 	videoRefPath: z.string().nullable(),
 
+	reserved_by: z.string().optional(),
+	reservation_expiry: z.instanceof(Timestamp).optional(),
+
 	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })
@@ -198,7 +202,12 @@ export type HostRequestDataDetails = Omit<
 	| '_user_ref'
 > & {
 	id: string
-	_location_keyword_ref: { slug: string }
+	_location_keyword_ref: {
+		slug: string
+		name: string
+		id: string
+		image_url: string
+	}
 	_service_ref: { title: string; about: string; slug: string }
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
@@ -217,6 +226,7 @@ export type HostRequestDataDetails = Omit<
 		hide_phone: boolean
 		gender: string
 	}
+	ref: DocumentReference
 }
 
 export type SeekerRequestDataDetails = Omit<
@@ -224,7 +234,7 @@ export type SeekerRequestDataDetails = Omit<
 	'_location_keyword_ref' | '_state_ref' | '_service_ref' | '_user_ref'
 > & {
 	id: string
-	_location_keyword_ref: { slug: string }
+	_location_keyword_ref: { slug: string; id: string }
 	_service_ref: { title: string; about: string; slug: string }
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string }
@@ -243,4 +253,5 @@ export type SeekerRequestDataDetails = Omit<
 		is_verified: boolean
 		gender: string
 	}
+	ref: DocumentReference
 }

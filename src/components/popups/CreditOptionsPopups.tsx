@@ -14,7 +14,7 @@ import {
 	Text,
 } from '@chakra-ui/react'
 import { usePaystackPayment } from 'next-paystack'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HookConfig } from 'react-paystack/dist/types'
 
 type Props = {}
@@ -89,7 +89,7 @@ export const CreditOptions = () => {
 	}, [credit])
 
 	return (
-		<>
+		<React.Fragment>
 			<Flex as="form" flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={1} flexDirection={'column'} mb={DEFAULT_PADDING}>
 					<Text fontSize={'x-large'} color="text_muted" fontWeight={'bold'}>
@@ -122,7 +122,7 @@ export const CreditOptions = () => {
 					/>
 				</Flex>
 			</Flex>
-		</>
+		</React.Fragment>
 	)
 }
 

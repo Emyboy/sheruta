@@ -1,3 +1,13 @@
+import { db } from '@/firebase'
+import { resolveDocumentReferences } from '@/utils/index.utils'
+import {
+	collection,
+	doc,
+	getDocs,
+	orderBy,
+	query,
+	where,
+} from 'firebase/firestore'
 import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { BookmarkData, BookmarkDataDetails } from './bookmarks.types'
 
@@ -29,7 +39,6 @@ export default class BookmarkService extends SherutaDB {
 		user_id: string
 		document_id: string
 	}): Promise<boolean> {
-		//check if bookmark belongs to user
 		const bookmark = await this.getSingleBookmark(data.document_id)
 
 		if (bookmark?._user_ref._id !== data.user_id) {
@@ -45,29 +54,27 @@ export default class BookmarkService extends SherutaDB {
 	static async getUserBookmarks(
 		user_id: string,
 	): Promise<BookmarkDataDetails[]> {
-		const bookmarks = await this.getAll({
-			collection_name: DBCollectionName.bookmarks,
-			_limit: 10,
-		})
+		const collectionRef = collection(db, DBCollectionName.bookmarks)
 
-		// Filter bookmarks based on _user_ref matching the given user_id
-		const userBookmarks = await Promise.all(
-			bookmarks.map(async (bookmark: BookmarkDataDetails) => {
-				// Ensure _user_ref exists before performing operations
-				if (
-					bookmark._object_ref &&
-					bookmark._user_ref &&
-					bookmark._user_ref._id === user_id
-				) {
-					return bookmark
-				}
-				return null
-			}),
+		const userRef = doc(db, `/users/${user_id}`)
+
+		let q = query(
+			collectionRef,
+			orderBy('createdAt', 'desc'),
+			where('_user_ref', '==', userRef),
 		)
 
-		// Filter out any null values
-		return userBookmarks.filter(
-			(bookmark) => bookmark !== null,
-		) as BookmarkDataDetails[]
+		const querySnapshot = await getDocs(q)
+
+		const documents = querySnapshot.docs.map(async (doc) => {
+			const docData = { ...doc.data() }
+
+			// Resolve top-level and nested DocumentReference objects
+			const resolvedData = await resolveDocumentReferences(docData)
+
+			return { id: doc.id, ...resolvedData } as BookmarkDataDetails
+		})
+
+		return await Promise.all(documents)
 	}
 }

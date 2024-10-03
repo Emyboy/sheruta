@@ -1,12 +1,20 @@
 'use client'
 
+import CloseIcon from '@/assets/svg/close-icon-dark'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import useCommon from '@/hooks/useCommon'
+import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
 import { createNotification } from '@/utils/actions'
-import { handleCall, truncateText, timeAgo } from '@/utils/index.utils'
+import {
+	getTimeDifferenceInHours,
+	handleCall,
+	timeAgo,
+	truncateText,
+} from '@/utils/index.utils'
 import { Link } from '@chakra-ui/next-js'
 import {
 	Avatar,
@@ -24,9 +32,8 @@ import {
 	useColorMode,
 	VStack,
 } from '@chakra-ui/react'
-import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
 	BiBookmark,
 	BiDotsHorizontalRounded,
@@ -39,79 +46,55 @@ import {
 	BiSolidBookmark,
 	BiTrash,
 } from 'react-icons/bi'
+import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa'
 import { LuBadgeCheck } from 'react-icons/lu'
 import MainTooltip from '../atoms/MainTooltip'
-import useCommon from '@/hooks/useCommon'
-import { BookmarkType } from '@/firebase/service/bookmarks/bookmarks.types'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { doc } from 'firebase/firestore'
-import { db } from '@/firebase'
-import { useBookmarkContext } from '@/context/bookmarks.context'
+import useAnalytics from '@/hooks/useAnalytics'
+import { AnalyticsDataDetails } from '@/firebase/service/analytics/analytics.types'
 
 type Props = { request: HostRequestDataDetails }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
 	const { showToast } = useCommon()
-	const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
-	const [bookmarkId, setBookmarkId] = useState<string | null>(null)
 	const { colorMode } = useColorMode()
 	const { authState } = useAuthContext()
-	const { copyShareUrl, handleDeletePost, isLoading, setIsLoading } =
-		useShareSpace()
 
-	const {
-		updateBookmark,
-		getBookmarkStatusAndId,
-		bookmarkLoading,
-		deleteBookmark,
-	} = useBookmarkContext()
+	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
+		useHandleBookmark(request.id || request.uuid, request._user_ref._id)
 
-	const handleBookmarkUpdate = async () => {
-		try {
-			if (isBookmarked && bookmarkId) {
-				await deleteBookmark(bookmarkId)
-				setIsBookmarked(false)
-				setBookmarkId(null)
-				return
+	const canInteract = !(
+		request.availability_status === 'reserved' &&
+		authState.user?._id !== request.reserved_by
+	)
+
+	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+
+	const [analyticsData, setAnalyticsData] = useState<
+		AnalyticsDataDetails | undefined
+	>(undefined)
+
+	const { addAnalyticsData, getAnalyticsData } = useAnalytics()
+
+	useEffect(() => {
+		const fetchAnalyticsData = async () => {
+			try {
+				const data = await getAnalyticsData(request._location_keyword_ref.id)
+				setAnalyticsData(data)
+			} catch (error) {
+				console.error('Error fetching analytics data:', error)
 			}
-			const objectType = BookmarkType.requests
-			const objectRef = doc(
-				db,
-				DBCollectionName.flatShareRequests,
-				request.id as string,
-			)
-
-			await updateBookmark({
-				objectType,
-				objectRef,
-			})
-
-			return
-		} catch (err) {
-			showToast({
-				message: 'Failed to update bookmark',
-				status: 'error',
-			})
 		}
-	}
+
+		fetchAnalyticsData()
+	}, [])
 
 	const deletePost = async (): Promise<void> => {
 		try {
-			if (isBookmarked && bookmarkId) {
-				await Promise.all([
-					handleDeletePost({
-						requestId: request.id,
-						userId: request._user_ref._id,
-					}),
-					deleteBookmark(bookmarkId),
-				])
-			} else {
-				await handleDeletePost({
-					requestId: request.id,
-					userId: request._user_ref._id,
-				})
-			}
+			await handleDeletePost({
+				requestId: request.id || request.uuid,
+				userId: request._user_ref._id,
+			})
 		} catch (err) {
 			showToast({
 				message: 'This post was not deleted',
@@ -119,21 +102,6 @@ export default function EachRequest({ request }: Props) {
 			})
 		}
 	}
-	useEffect(() => {
-		const checkBookmark = async (): Promise<void> => {
-			try {
-				const { isBookmarked, bookmarkId } = await getBookmarkStatusAndId(
-					request.id,
-				)
-				setIsBookmarked(isBookmarked)
-				setBookmarkId(bookmarkId)
-			} catch (err: any) {
-				console.error('Error checking if request is bookmarked:', err)
-			}
-		}
-
-		checkBookmark()
-	}, [request?.id, getBookmarkStatusAndId])
 
 	return (
 		<Box
@@ -155,10 +123,11 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={`/user/${request._user_ref._id}`}
+						href={canInteract ? `/user/${request._user_ref._id}` : ''}
 						style={{ textDecoration: 'none' }}
 						onClick={async () =>
-							await createNotification({
+							(canInteract || authState.user?._id !== request._user_ref._id) &&
+							(await createNotification({
 								is_read: false,
 								message: NotificationsBodyMessage.profile_view,
 								recipient_id: request._user_ref._id,
@@ -172,7 +141,7 @@ export default function EachRequest({ request }: Props) {
 										}
 									: null,
 								action_url: `/user/${request._user_ref._id}`,
-							})
+							}))
 						}
 					>
 						<Avatar
@@ -187,39 +156,52 @@ export default function EachRequest({ request }: Props) {
 					</Link>
 					<Flex flexDirection={'column'} justifyContent={'flex-start'} flex={1}>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Link
-								href={`/user/${request._user_ref._id}`}
-								style={{ textDecoration: 'none' }}
-								onClick={async () =>
-									await createNotification({
-										is_read: false,
-										message: NotificationsBodyMessage.profile_view,
-										recipient_id: request._user_ref._id,
-										type: 'profile_view',
-										sender_details: authState.user
-											? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
-											: null,
-										action_url: `/user/${request._user_ref._id}`,
-									})
-								}
-							>
-								<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
-									<Text
-										textTransform={'capitalize'}
-										fontSize={{ base: 'base', md: 'lg' }}
-									>
-										{request._user_ref.last_name} {request._user_ref.first_name}
-									</Text>
-									{request.user_info?.is_verified && (
-										<LuBadgeCheck fill="#00bc73" />
-									)}
-								</Flex>
-							</Link>
+							{canInteract ? (
+								<Link
+									href={`/user/${request._user_ref._id}`}
+									style={{ textDecoration: 'none' }}
+									onClick={async () =>
+										authState.user?._id !== request._user_ref._id &&
+										(await createNotification({
+											is_read: false,
+											message: NotificationsBodyMessage.profile_view,
+											recipient_id: request._user_ref._id,
+											type: 'profile_view',
+											sender_details: authState.user
+												? {
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
+												: null,
+											action_url: `/user/${request._user_ref._id}`,
+										}))
+									}
+								>
+									<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
+										<Text
+											textTransform={'capitalize'}
+											fontSize={{ base: 'base', md: 'lg' }}
+										>
+											{request._user_ref.last_name}{' '}
+											{request._user_ref.first_name}
+										</Text>
+										{request.user_info?.is_verified && (
+											<LuBadgeCheck fill="#00bc73" />
+										)}
+									</Flex>
+								</Link>
+							) : (
+								<Text
+									textTransform={'capitalize'}
+									fontSize={{ base: 'base', md: 'lg' }}
+									fontWeight={600}
+								>
+									Reserved
+								</Text>
+							)}
+
 							<Popover>
 								<PopoverTrigger>
 									<Button
@@ -261,7 +243,7 @@ export default function EachRequest({ request }: Props) {
 												bgColor="none"
 												onClick={() =>
 													copyShareUrl(
-														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`,
 														request.seeking
 															? 'Looking for apartment'
 															: 'New apartment',
@@ -300,7 +282,7 @@ export default function EachRequest({ request }: Props) {
 														}}
 														onClick={() => {
 															router.push(
-																`request/${request.seeking ? 'seeker' : 'host'}/${request.id}/edit`,
+																`request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}/edit`,
 															)
 														}}
 														width="100%"
@@ -345,13 +327,16 @@ export default function EachRequest({ request }: Props) {
 							</Popover>
 						</Flex>
 						<Text color="text_muted" mt={'-8px'} fontSize={'sm'}>
-							{timeAgo(request.updatedAt)}
+							{request.availability_status === 'reserved'
+								? `Checkback in
+									${getTimeDifferenceInHours(request.reservation_expiry)} hours`
+								: timeAgo(request.updatedAt)}
 						</Text>
 					</Flex>
 				</Flex>
 
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex flexDirection={'column'}>
@@ -366,7 +351,6 @@ export default function EachRequest({ request }: Props) {
 								<BiLocationPlus size={'16px'} />
 							</Box>
 							<Truncate
-								//@ts-ignore
 								text={request._location_keyword_ref.name}
 								max={70}
 								showReadMore={false}
@@ -376,7 +360,7 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
@@ -427,13 +411,17 @@ export default function EachRequest({ request }: Props) {
 				)}
 				<Flex
 					alignItems={{ base: 'start', sm: 'center' }}
-					flexDir={{ base: 'column', sm: 'row' }}
+					flexDir={'row'}
 					justifyContent={'space-between'}
 				>
 					<Flex gap={DEFAULT_PADDING}>
 						{!request.user_info?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
+									isDisabled={
+										!canInteract ||
+										authState.user?._id === request._user_ref._id
+									}
 									px={0}
 									bg="none"
 									color="text_muted"
@@ -452,64 +440,98 @@ export default function EachRequest({ request }: Props) {
 										base: 'base',
 									}}
 									onClick={async () => {
-										if (authState.user?._id === request._user_ref._id) return
-										await handleCall({
-											number: request.user_info.primary_phone_number,
-											recipient_id: request._user_ref._id,
-											sender_details: authState.user
-												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
-												: null,
-										})
+										if (canInteract) {
+											try {
+												// Handle the call
+												await handleCall({
+													number: request.user_info.primary_phone_number,
+													recipient_id: request._user_ref._id,
+													sender_details: authState.user
+														? {
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+																id: authState.user._id,
+															}
+														: null,
+												})
+												await addAnalyticsData(
+													'calls',
+													request._location_keyword_ref.id,
+												)
+											} catch (error) {
+												console.error(
+													'Error during call or analytics update:',
+													error,
+												)
+											}
+										}
 									}}
 								>
 									<BiPhone />
+									{/* { analyticsData?.calls || 0} */}
 								</Button>
 							</MainTooltip>
 						) : null}
 
 						<MainTooltip label="Ask questions" placement="top">
-							<Link
-								href={`/messsages/${request._user_ref._id}`}
-								style={{ textDecoration: 'none' }}
-							>
-								<Button
-									px={0}
-									bg="none"
-									color="text_muted"
-									display={'flex'}
-									gap={1}
-									fontWeight={'light'}
-									_hover={{
+							<Button
+								isDisabled={
+									!canInteract || authState.user?._id === request._user_ref._id
+								}
+								onClick={async () => {
+									if (canInteract) {
+										try {
+											// Handle the redirect
+											const res = await addAnalyticsData(
+												'messages',
+												request._location_keyword_ref.id,
+											)
+
+											if (res)
+												window.location.assign(
+													`/messages/${request._user_ref._id}`,
+												)
+										} catch (error) {
+											console.error(
+												'Error during messaging or analytics update:',
+												error,
+											)
+										}
+									}
+								}}
+								px={0}
+								bg="none"
+								color="text_muted"
+								display={'flex'}
+								gap={1}
+								fontWeight={'light'}
+								_hover={{
+									color: 'brand',
+									bg: 'none',
+									textDecoration: 'none',
+									_dark: {
 										color: 'brand',
-										bg: 'none',
-										textDecoration: 'none',
-										_dark: {
-											color: 'brand',
-										},
-									}}
-									_dark={{
-										color: 'dark_lighter',
-									}}
-									fontSize={{
-										md: 'xl',
-										sm: 'lg',
-										base: 'base',
-									}}
-								>
-									<BiMessageRoundedDetail />
-								</Button>
-							</Link>
+									},
+								}}
+								_dark={{
+									color: 'dark_lighter',
+								}}
+								fontSize={{
+									md: 'xl',
+									sm: 'lg',
+									base: 'base',
+								}}
+							>
+								<BiMessageRoundedDetail />
+								{/* {analyticsData?.messages || 0} */}
+							</Button>
 						</MainTooltip>
 						<MainTooltip label="Bookmark" placement="top">
 							<Button
-								onClick={() => handleBookmarkUpdate()}
-								isLoading={bookmarkLoading}
-								disabled={bookmarkLoading}
+								onClick={toggleSaveApartment}
+								isLoading={isBookmarkLoading}
+								isDisabled={isBookmarkLoading}
 								px={0}
 								bg="none"
 								color="text_muted"
@@ -532,7 +554,7 @@ export default function EachRequest({ request }: Props) {
 									base: 'base',
 								}}
 							>
-								{isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
+								{bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 							</Button>
 						</MainTooltip>
 					</Flex>
@@ -540,7 +562,8 @@ export default function EachRequest({ request }: Props) {
 						_dark={{
 							color: 'dark_lighter',
 						}}
-						alignItems={'center'}
+						alignSelf="center"
+						alignItems="center"
 					>
 						<Text fontSize={{ base: 'base', md: 'lg' }} fontWeight={'bold'}>
 							₦{request.budget.toLocaleString()}
@@ -565,14 +588,23 @@ const EachRequestMedia = ({
 	images: string[]
 	video?: string | null
 }) => {
-	const [clicked, setClicked] = useState(false)
-	const [url, setUrl] = useState<string>('')
-	const [type, setType] = useState<'video' | 'img'>('img')
+	const allMedias: {
+		url: string
+		type: string
+	}[] = video
+		? [
+				{ url: video, type: 'video' },
+				...images.map((url) => ({ url, type: 'img' })),
+			]
+		: images.map((url) => ({ url, type: 'img' }))
 
-	const handleClick = (url: string, type: 'video' | 'img') => {
-		setType(type)
-		setUrl(url)
-		setClicked(true)
+	const [clicked, setClicked] = useState(false)
+	const [activeIdx, setActiveIdx] = useState<number>(0)
+
+	const handleClick = (idx: number) => {
+		if (!clicked) setClicked(true)
+
+		setActiveIdx(idx)
 	}
 
 	const close = () => setClicked(false)
@@ -591,13 +623,48 @@ const EachRequestMedia = ({
 					alignItems={'center'}
 					justifyContent={'center'}
 					cursor={'pointer'}
-					onClick={close}
-					p={'32px'}
 				>
-					{type === 'img' ? (
-						<Box overflow={'hidden'} rounded="md" bg="dark" w={'60%'} h={'60%'}>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						onClick={close}
+						zIndex={1001}
+					>
+						<CloseIcon />
+					</Box>
+					{activeIdx < allMedias.length - 1 && (
+						<Box
+							position={'absolute'}
+							right={'5%'}
+							top={'50%'}
+							transform={'translateY(-50%)'}
+							color={'white'}
+							fontSize={{ base: '24px', md: '48px' }}
+							zIndex={1001}
+							onClick={() => setActiveIdx((prev) => prev + 1)}
+						>
+							<FaChevronCircleRight />
+						</Box>
+					)}
+					{activeIdx > 0 && (
+						<Box
+							position={'absolute'}
+							left={'5%'}
+							top={'50%'}
+							transform={'translateY(-50%)'}
+							color={'white'}
+							fontSize={{ base: '24px', md: '48px' }}
+							zIndex={1001}
+							onClick={() => setActiveIdx((prev) => prev - 1)}
+						>
+							<FaChevronCircleLeft />
+						</Box>
+					)}
+					{allMedias[activeIdx].type === 'img' ? (
+						<Box overflow={'hidden'} rounded="md" w={'70%'} h={'70%'}>
 							<Image
-								src={url}
+								src={allMedias[activeIdx].url}
 								alt="shared space"
 								width={'full'}
 								height={'full'}
@@ -611,7 +678,6 @@ const EachRequestMedia = ({
 							zIndex={50}
 							overflow={'hidden'}
 							rounded="md"
-							bg="dark"
 							maxH={'60%'}
 							maxW={'700px'}
 							minH={'500px'}
@@ -621,7 +687,11 @@ const EachRequestMedia = ({
 							alignItems={'center'}
 							justifyContent={'center'}
 						>
-							<iframe src={url} width={'100%'} height={'100%'} />
+							<iframe
+								src={allMedias[activeIdx].url}
+								width={'100%'}
+								height={'100%'}
+							/>
 						</Flex>
 					)}
 				</Flex>
@@ -642,38 +712,44 @@ const EachRequestMedia = ({
 					flexWrap={'wrap'}
 					h={'full'}
 				>
-					{video && (
-						<Flex
-							position={'relative'}
-							overflow={'hidden'}
-							cursor={'pointer'}
-							rounded="md"
-							alignItems={'center'}
-							justifyContent={'center'}
-							onClick={() => handleClick(video, 'video')}
-						>
-							<video src={video} width={'100%'} height={'100%'} />
-							<Box pos="absolute" zIndex={0}>
-								<BiPlayCircle size={'80px'} fill="#00bc73" cursor={'pointer'} />
-							</Box>
-						</Flex>
-					)}
-					{images.map((imgUrl, i) => (
-						<Box
-							key={i}
-							position={'relative'}
-							overflow={'hidden'}
-							cursor={'pointer'}
-							rounded="md"
-							bg="dark"
-							onClick={() => handleClick(imgUrl, 'img')}
-						>
-							<Image
-								src={imgUrl}
-								alt="image of the shared space"
-								position={'relative'}
-							/>
-						</Box>
+					{allMedias.map((media, i) => (
+						<React.Fragment key={i}>
+							{media.type === 'video' ? (
+								<Flex
+									position={'relative'}
+									overflow={'hidden'}
+									cursor={'pointer'}
+									rounded="md"
+									alignItems={'center'}
+									justifyContent={'center'}
+									onClick={() => handleClick(i)}
+								>
+									<video src={media.url} width={'100%'} height={'100%'} />
+									<Box pos="absolute" zIndex={0}>
+										<BiPlayCircle
+											size={'80px'}
+											fill="#00bc73"
+											cursor={'pointer'}
+										/>
+									</Box>
+								</Flex>
+							) : (
+								<Box
+									position={'relative'}
+									overflow={'hidden'}
+									cursor={'pointer'}
+									rounded="md"
+									bg="dark"
+									onClick={() => handleClick(i)}
+								>
+									<Image
+										src={media.url}
+										alt="image of the shared space"
+										position={'relative'}
+									/>
+								</Box>
+							)}
+						</React.Fragment>
 					))}
 				</Flex>
 			</Flex>

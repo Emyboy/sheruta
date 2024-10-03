@@ -1,14 +1,14 @@
+import MainBackHeader from '@/components/atoms/MainBackHeader'
+import { MoreButton } from '@/components/atoms/MoreButton'
 import MainContainer from '@/components/layout/MainContainer'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Flex } from '@chakra-ui/react'
-import UserProfilePage from './(user-profile)/UserProfilePage'
-
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { Box, Flex } from '@chakra-ui/react'
 import {
 	collection,
 	doc,
@@ -19,6 +19,7 @@ import {
 	query,
 	where,
 } from 'firebase/firestore'
+import UserProfilePage from './(user-profile)/UserProfilePage'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -29,10 +30,9 @@ export default async function page(props: any) {
 	async function getUserData() {
 		try {
 			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
+			if (!userDoc.exists()) return { user: null }
 
 			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
-
-			// console.log('Basic user profile:...............',formattedUserDoc)
 
 			return {
 				user: formattedUserDoc
@@ -41,16 +41,15 @@ export default async function page(props: any) {
 							last_name: formattedUserDoc.last_name,
 							email: formattedUserDoc.email,
 							avatar_url: formattedUserDoc.avatar_url,
+							id: formattedUserDoc._id,
 						}
 					: null,
 			}
 		} catch (error) {
-			console.error('Error getting user profile:', error)
-			throw new Error('Failed to get user profile')
+			console.error('Error getting user:', error)
+			throw new Error('Failed to get user')
 		}
 	}
-
-	const user = await getUserData()
 
 	async function getUserProfile() {
 		try {
@@ -77,9 +76,6 @@ export default async function page(props: any) {
 				? userInfoDocs.docs[0].data()
 				: null
 
-			// console.log('FS profile:...............',formattedFlatShareProfile)
-			// console.log('User info:...............',formattedUserInfoDoc)
-
 			let interestsData: any = []
 
 			try {
@@ -98,7 +94,7 @@ export default async function page(props: any) {
 						.filter((data) => data !== null)
 				}
 			} catch (error) {
-				console.error('Error fetching document:', error)
+				console.error('Error fetching interests:', error)
 			}
 
 			let habitsData: any = []
@@ -118,7 +114,7 @@ export default async function page(props: any) {
 						.filter((data) => data !== null)
 				}
 			} catch (error) {
-				console.error('Error fetching document:', error)
+				console.error('Error fetching habits:', error)
 			}
 
 			let locationValue: any = null
@@ -135,7 +131,24 @@ export default async function page(props: any) {
 					console.log('Location keyword document does not exist.')
 				}
 			} catch (error) {
-				console.error('Error fetching document:', error)
+				console.error('Error fetching Location keyword document:', error)
+			}
+
+			let stateValue: any = null
+
+			try {
+				const stateDocRef =
+					formattedFlatShareProfile?.state as DocumentReference
+
+				const docSnapshot = await getDoc(stateDocRef)
+
+				if (docSnapshot.exists()) {
+					stateValue = docSnapshot.data()
+				} else {
+					console.log('state document does not exist.')
+				}
+			} catch (error) {
+				console.error('Error fetching state document ref:', error)
 			}
 
 			const user = {
@@ -149,6 +162,10 @@ export default async function page(props: any) {
 							habits: habitsData,
 							work_industry: formattedFlatShareProfile.work_industry,
 							credits: formattedFlatShareProfile.credits,
+							gender_preference: formattedFlatShareProfile.gender_preference,
+							age_preference: formattedFlatShareProfile.age_preference,
+							bio: formattedFlatShareProfile.bio,
+							payment_type: formattedFlatShareProfile.payment_type,
 							socials: {
 								twitter: formattedFlatShareProfile.twitter,
 								tiktok: formattedFlatShareProfile.tiktok,
@@ -156,6 +173,7 @@ export default async function page(props: any) {
 								linkedin: formattedFlatShareProfile.linkedin,
 								instagram: formattedFlatShareProfile.instagram,
 							},
+							state: stateValue,
 							seeking: formattedFlatShareProfile.seeking,
 							employment_status: formattedFlatShareProfile.employment_status,
 							religion: formattedFlatShareProfile.religion,
@@ -168,7 +186,6 @@ export default async function page(props: any) {
 							whatsapp: formattedUserInfoDoc.whatsapp_phone_number,
 							phone_number: formattedUserInfoDoc.primary_phone_number,
 							gender: formattedUserInfoDoc.gender,
-							bio: formattedUserInfoDoc.bio,
 							is_verified: formattedUserInfoDoc.is_verified,
 						}
 					: null,
@@ -182,7 +199,12 @@ export default async function page(props: any) {
 		}
 	}
 
-	const otherInfos = await getUserProfile()
+	const [user, flatshareInfos] = await Promise.all([
+		getUserData(),
+		getUserProfile(),
+	])
+
+	const userId = user.user?.id
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -191,15 +213,29 @@ export default async function page(props: any) {
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-					{user ? (
-						<UserProfilePage
-							data={user}
-							userId={otherInfos}
-							user_id={user_id}
-						/>
-					) : (
-						<PageNotFound />
-					)}
+
+					<Flex flexDirection={'column'} w="full">
+						<Box my={3}>
+							<Flex alignContent={'center'}>
+								<MainBackHeader />
+								<MoreButton
+									userId={userId}
+									moreButtonList={[{ label: 'share' }, { label: 'promote' }]}
+								/>
+							</Flex>
+						</Box>
+
+						{user ? (
+							<UserProfilePage
+								data={user}
+								flatshareInfos={flatshareInfos}
+								user_id={user_id}
+								// profileInfo={userProfiles}
+							/>
+						) : (
+							<PageNotFound />
+						)}
+					</Flex>
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

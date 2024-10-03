@@ -3,7 +3,7 @@
 import { useAppContext } from '@/context/app.context'
 import {
 	AvailabilityStatus,
-	PaymentPlan,
+	PaymentType,
 } from '@/firebase/service/request/request.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { DocumentReference } from '@firebase/firestore'
@@ -23,7 +23,7 @@ export type FormDataType = {
 	description: string
 	service_charge: number | null
 	budget: number
-	payment_type: PaymentPlan
+	payment_type: PaymentType
 	bathrooms: number | null
 	toilets: number | null
 	living_rooms: number | null
@@ -56,7 +56,7 @@ export default function HostSpace() {
 		description: '',
 		service_charge: 0,
 		budget: 0,
-		payment_type: PaymentPlan.monthly,
+		payment_type: PaymentType.monthly,
 		bathrooms: 0,
 		toilets: 0,
 		living_rooms: 0,
