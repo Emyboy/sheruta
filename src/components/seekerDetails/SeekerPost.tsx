@@ -133,7 +133,7 @@ const SeekerPost = ({
 	return (
 		<>
 			{typeof postData !== 'undefined' &&
-				Object.values(postData || {}).length ? (
+			Object.values(postData || {}).length ? (
 				<>
 					<Box>
 						<Flex alignItems="center" justifyContent="space-between">
@@ -320,11 +320,11 @@ const SeekerPost = ({
 														recipient_id: postData._user_ref._id,
 														sender_details: authState.user
 															? {
-																avatar_url: authState.user.avatar_url,
-																first_name: authState.user.first_name,
-																last_name: authState.user.last_name,
-																id: authState.user._id,
-															}
+																	avatar_url: authState.user.avatar_url,
+																	first_name: authState.user.first_name,
+																	last_name: authState.user.last_name,
+																	id: authState.user._id,
+																}
 															: null,
 													})
 													await addAnalyticsData(
@@ -456,11 +456,11 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 									recipient_id: postData._user_ref._id,
 									sender_details: authState.user
 										? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
 										: null,
 								})
 							}}
