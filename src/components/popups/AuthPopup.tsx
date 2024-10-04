@@ -404,7 +404,7 @@ const AuthForm: React.FC<{
 				})
 			}
 		} catch (err: any) {
-			console.log(err)
+			console.error(err)
 			if (err.message.includes('invalid-credential')) {
 				showToast({
 					message: 'Invalid email or password.',

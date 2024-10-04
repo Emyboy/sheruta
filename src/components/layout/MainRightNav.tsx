@@ -1,7 +1,7 @@
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import { AnalyticsDataDetails } from '@/firebase/service/analytics/analytics.types'
 import useAnalytics from '@/hooks/useAnalytics'
-import { Divider, Flex, Icon, Text } from '@chakra-ui/react'
+import { Divider, Flex, Icon, Text, Image } from '@chakra-ui/react'
 import React, { useState, useEffect } from 'react'
 import { FaFireFlameCurved } from 'react-icons/fa6'
 
@@ -16,9 +16,11 @@ export default function MainRightNav({}: Props) {
 	useEffect(() => {
 		const fetchTrendingLocations = async () => {
 			try {
-				console.log('sese')
 				const locations = await getTrendingLocations()
-				setTrendingLocations(locations)
+
+				const limitedLocations = locations?.slice(0, 7) || []
+
+				setTrendingLocations(limitedLocations)
 			} catch (error) {
 				console.error('Error fetching trending locations:', error)
 			}
@@ -68,6 +70,7 @@ export default function MainRightNav({}: Props) {
 							location={data._location_keyword_ref.name}
 							state={data._location_keyword_ref._state_ref.name}
 							total={data.total}
+							image={data._location_keyword_ref?.image_url || undefined}
 						/>
 					))
 				)}
@@ -80,23 +83,21 @@ const EachLocation = ({
 	location,
 	state,
 	total,
+	image,
 }: {
 	location: string
 	total: number
 	state: string
+	image?: string
 }) => {
 	return (
-		<Flex
-			alignItems={'flex-end'}
-			gap={DEFAULT_PADDING}
-			py={2}
-			cursor={'pointer'}
-		>
+		<Flex alignItems={'center'} gap={DEFAULT_PADDING} py={2} cursor={'pointer'}>
+			<Image src={image} alt="location" width={35} rounded={'md'} />
 			<Flex flexDirection={'column'} maxW={'80%'}>
 				<Text fontSize="md">{location + ', ' + state + ` state`}</Text>
 				<Text isTruncated fontSize={'sm'} color="text_muted">
-					This location has <Icon color="orange.500" as={FaFireFlameCurved} />{' '}
-					{total === 1 ? total + ' hit' : total + ' hits'}
+					This location has {total === 1 ? total + ' hit' : total + ' hits'}{' '}
+					<Icon color="orange.500" as={FaFireFlameCurved} />
 				</Text>
 			</Flex>
 		</Flex>

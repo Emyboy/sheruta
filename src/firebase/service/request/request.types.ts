@@ -202,7 +202,12 @@ export type HostRequestDataDetails = Omit<
 	| '_user_ref'
 > & {
 	id: string
-	_location_keyword_ref: { slug: string; name: string; id: string }
+	_location_keyword_ref: {
+		slug: string
+		name: string
+		id: string
+		image_url: string
+	}
 	_service_ref: { title: string; about: string; slug: string }
 	_category_ref: { title: string; slug: string }
 	_property_type_ref: { title: string; slug: string }
