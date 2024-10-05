@@ -6,6 +6,7 @@ import { Flex, Text } from '@chakra-ui/react'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import DiscussionComponent from './DiscussionComponent'
+import VerificationComponent from './VerificationComponent'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -98,7 +99,7 @@ export default function ApartmentDetails({
 					hostId={parsedRequest._user_ref._id}
 				/>
 			)}
-			{activeTab === 'Verification' && <Text>Verification coming soon</Text>}
+			{activeTab === 'Verification' && <VerificationComponent request={parsedRequest} />}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>
 	)
