@@ -16,6 +16,9 @@ import {
 	InputRightElement,
 	Alert,
 	AlertIcon,
+	useToast,
+	PinInput,
+	PinInputField,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { BiLogoGoogle } from 'react-icons/bi'
@@ -33,6 +36,12 @@ import { auth } from '@/firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 import { DocumentData } from 'firebase/firestore'
+import { useMutation } from '@tanstack/react-query'
+import axiosInstance from '@/utils/custom-axios'
+import { AxiosError } from 'axios'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import { signIn } from 'next-auth/react'
 
 interface Props {}
 
@@ -206,313 +215,303 @@ const PasswordResetForm = ({
 	)
 }
 
-const AuthForm: React.FC<{
-	isSignUp: boolean
-	setIsSignUp: (arg: boolean) => void
-	setIsPasswordReset: (arg: boolean) => void
-}> = ({ isSignUp, setIsSignUp, setIsPasswordReset }) => {
-	const [formData, setFormData] = useState<{
-		firstName: string
-		lastName: string
-		email: string
-		password: string
-	}>({
-		firstName: '',
-		lastName: '',
-		email: '',
-		password: '',
+const OTPDialog: React.FC<{
+	email: string
+	onVerificationSuccess: () => void
+	password: string
+}> = ({ email, onVerificationSuccess }) => {
+	const [otp, setOTP] = useState('')
+	const toast = useToast()
+	const { setAppState } = useAppContext()
+
+	const { mutate: verifyOTP, isPending } = useMutation({
+		mutationFn: (data: { token: string }) =>
+			axiosInstance.post(`/auth/verify`, data),
+		onError: (error: any) => {
+			const errorMessage =
+				error.response?.data?.message ||
+				error?.message ||
+				'OTP verification failed'
+			toast({
+				title: 'Error',
+				description: errorMessage,
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			})
+		},
+		onSuccess: () => {
+			toast({
+				title: 'Success',
+				description: 'OTP verified successfully!',
+				status: 'success',
+				duration: 3000,
+				isClosable: true,
+			})
+			signIn('credentials', {
+				email,
+				password: email,
+			})
+			setAppState({ show_login: false })
+		},
 	})
 
-	const { loginWithGoogle } = useAuthContext()
-
-	const [errors, setErrors] = useState({
-		email: '',
-		password: '',
-		firstName: '',
-		lastName: '',
-	})
-
-	const { setAuthState } = useAuthContext()
-
-	const { showToast } = useCommon()
-
-	const [loading, setIsLoading] = useState<boolean>(false)
-	const [showPassword, setShowPassword] = useState(false)
-
-	const handlePasswordVisibility = () => setShowPassword(!showPassword)
-
-	const validateForm = () => {
-		let isValid = true
-		let emailError = ''
-		let passwordError = ''
-		let firstNameError = ''
-		let lastNameError = ''
-
-		if (!formData.email) {
-			emailError = 'Email is required'
-			isValid = false
-		} else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-			emailError = 'Email is invalid'
-			isValid = false
-		}
-
-		if (!formData.password) {
-			passwordError = 'Password is required'
-			isValid = false
-		} else if (formData.password.length < 6) {
-			passwordError = 'Password must be at least 6 characters'
-			isValid = false
-		}
-
-		if (isSignUp) {
-			if (!formData.firstName) {
-				firstNameError = 'First name is required'
-				isValid = false
-			}
-
-			if (!formData.lastName) {
-				lastNameError = 'Last name is required'
-				isValid = false
-			}
-		}
-
-		setErrors({
-			email: emailError,
-			password: passwordError,
-			firstName: firstNameError,
-			lastName: lastNameError,
-		})
-
-		return isValid
-	}
-
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target
-
-		setFormData((prev) => ({
-			...prev,
-			[name]: value,
-		}))
-	}
-
-	const handleSignUp = async (data: {
-		email: string
-		password: string
-		firstName: string
-		lastName: string
-	}): Promise<DocumentData | undefined> => {
-		try {
-			setIsLoading(true)
-
-			const { email, password, firstName, lastName } = data
-
-			const userCredential = await createUserWithEmailAndPassword(
-				auth,
-				email,
-				password,
-			)
-
-			const user = userCredential.user
-
-			//redirecting to the homepage will trigger the onboarding process
-			await sendEmailVerification(user, {
-				url: `${PUBLIC_URL}`,
+	const handleVerify = () => {
+		if (otp.length === 6) {
+			verifyOTP({ token: otp })
+		} else {
+			toast({
+				title: 'Error',
+				description: 'Please enter a valid 6-digit OTP',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
 			})
-
-			const theUser = await AuthService.loginUser({
-				displayName: `${firstName} ${lastName}`,
-				email: user.email as string,
-				providerId: 'email',
-				uid: user.uid as string,
-				phoneNumber: user.phoneNumber,
-				photoURL: user.photoURL,
-			})
-
-			return theUser
-		} catch (err: any) {
-			throw Error(err)
-		} finally {
-			setIsLoading(false)
-		}
-	}
-
-	const handleLogin = async (data: {
-		email: string
-		password: string
-	}): Promise<DocumentData | undefined> => {
-		try {
-			setIsLoading(true)
-
-			const { email, password } = data
-
-			const userCredential = await signInWithEmailAndPassword(
-				auth,
-				email,
-				password,
-			)
-
-			const user = userCredential.user
-
-			const theUser = await AuthService.loginUser({
-				displayName: user?.displayName || '',
-				email: user.email as string,
-				providerId: 'email',
-				uid: user.uid as string,
-				phoneNumber: user.phoneNumber,
-				photoURL: user.photoURL,
-			})
-
-			return theUser
-		} catch (err: any) {
-			throw Error(err)
-		} finally {
-			setIsLoading(false)
-		}
-	}
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		try {
-			setIsLoading(true)
-
-			e.preventDefault()
-
-			if (!validateForm()) {
-				console.log(errors)
-				return
-			}
-
-			if (isSignUp) {
-				const theUser = await handleSignUp(formData)
-
-				setAuthState({ ...(theUser as any), auth_loading: false })
-
-				return showToast({
-					message: `Account created successfully!`,
-					status: 'success',
-				})
-			} else {
-				const theUser = await handleLogin({
-					email: formData.email,
-					password: formData.password,
-				})
-
-				setAuthState({ ...(theUser as any), auth_loading: false })
-
-				return showToast({
-					message: 'You have logged in successfully!',
-					status: 'success',
-				})
-			}
-		} catch (err: any) {
-			console.error(err)
-			if (err.message.includes('invalid-credential')) {
-				showToast({
-					message: 'Invalid email or password.',
-					status: 'error',
-				})
-			} else if (err.message.includes('email-already-in-use')) {
-				showToast({
-					message: 'Email already exists. Please try signing in.',
-					status: 'error',
-				})
-			} else if (err.message.includes('too-many-requests')) {
-				showToast({
-					message: `Too many failed login attempts. Please reset your password and try again.`,
-					status: 'error',
-				})
-			} else {
-				showToast({
-					message: `An error occurred while ${isSignUp ? 'signing up' : 'signing in'}. Please try again later.`,
-					status: 'error',
-				})
-			}
-		} finally {
-			setIsLoading(false)
 		}
 	}
 
 	return (
 		<Box width="100%">
 			<VStack spacing={6} width="100%">
-				<Center mb={DEFAULT_PADDING}>
+				<Center mb={6}>
+					<Text fontSize={'x-large'} fontWeight={'bold'}>
+						Verify OTP
+					</Text>
+				</Center>
+				<Text>
+					An OTP has been sent to your email: {email}. Please enter it below.
+				</Text>
+				<FormControl>
+					<FormLabel>Enter OTP</FormLabel>
+					<HStack justifyContent="center">
+						<PinInput otp value={otp} onChange={setOTP}>
+							<PinInputField />
+							<PinInputField />
+							<PinInputField />
+							<PinInputField />
+							<PinInputField />
+							<PinInputField />
+						</PinInput>
+					</HStack>
+				</FormControl>
+				<Button
+					onClick={handleVerify}
+					isLoading={isPending}
+					bgColor="brand"
+					width="full"
+				>
+					Verify OTP
+				</Button>
+			</VStack>
+		</Box>
+	)
+}
+
+interface SignUpProps {
+	first_name: string
+	last_name: string
+	email: string
+	password: string
+}
+const AuthForm: React.FC<{
+	isSignUp: boolean
+	setIsSignUp: (arg: boolean) => void
+	setIsPasswordReset: (arg: boolean) => void
+}> = ({ isSignUp, setIsSignUp, setIsPasswordReset }) => {
+	const toast = useToast()
+	const [showPassword, setShowPassword] = React.useState(false)
+	const [showOTPDialog, setShowOTPDialog] = useState<boolean>(false)
+
+	const { mutate, isPending } = useMutation({
+		mutationFn: (data: SignUpProps) =>
+			axiosInstance.post(`/auth/register`, data),
+		onError: (error: any) => {
+			const errorMessage =
+				error.response?.data?.message ||
+				error?.message ||
+				'Something went wrong'
+			showToast({
+				message: errorMessage,
+				status: 'error',
+			})
+		},
+		onSuccess: () => {
+			showToast({
+				message: 'Account created successfully!',
+				status: 'success',
+			})
+
+			setShowOTPDialog(true)
+		},
+	})
+
+	const { loginWithGoogle } = useAuthContext()
+	const { setAuthState } = useAuthContext()
+	const { showToast } = useCommon()
+
+	const validationSchema = Yup.object({
+		first_name: Yup.string().when('isSignUp', {
+			is: true,
+			then: (schema) => Yup.string().required('First name is required'),
+		}),
+		last_name: Yup.string().when('isSignUp', {
+			is: true,
+			then: (schema) => Yup.string().required('Last name is required'),
+		}),
+		email: Yup.string().email('Email is invalid').required('Email is required'),
+		password: Yup.string()
+			.min(6, 'Password must be at least 6 characters')
+			.required('Password is required'),
+	})
+
+	const formik = useFormik({
+		initialValues: {
+			first_name: '',
+			last_name: '',
+			email: '',
+			password: '',
+		},
+		validationSchema,
+		onSubmit: async (values: SignUpProps) => {
+			try {
+				if (isSignUp) {
+					mutate(values)
+				} else {
+					await signIn('credentials', {
+						email: values.email,
+						password: values.password,
+						redirect: false,
+					}).then((resp) => {
+						if (resp?.error) {
+							console.log('This is the error', resp?.error)
+							showToast({
+								message: resp?.error || 'Something went wrong',
+								status: 'error',
+							})
+						}
+					})
+				}
+			} catch (error) {
+				console.error(error)
+			}
+		},
+	})
+
+	const handlePasswordVisibility = () => setShowPassword(!showPassword)
+
+	return showOTPDialog ? (
+		<OTPDialog
+			email={formik.values.email}
+			password={formik.values.password}
+			onVerificationSuccess={() => setShowOTPDialog(false)}
+		/>
+	) : (
+		<Box width="100%">
+			<VStack spacing={6} width="100%">
+				<Center mb={6}>
 					<Text fontSize={'x-large'} fontWeight={'bold'}>
 						{isSignUp ? 'Sign Up' : 'Login'}
 					</Text>
 				</Center>
-				<form onSubmit={handleSubmit}>
+
+				<form onSubmit={formik.handleSubmit}>
 					<VStack spacing={2} width={'100%'}>
-						{isSignUp ? (
+						{isSignUp && (
 							<>
-								<FormControl width="100%" isInvalid={!!errors.firstName}>
+								<FormControl
+									width="100%"
+									isInvalid={
+										formik.touched.first_name && !!formik.errors.first_name
+									}
+								>
 									<FormLabel>First Name</FormLabel>
 									<Input
-										name="firstName"
+										name="first_name"
 										size={'lg'}
 										type="text"
-										value={formData.firstName}
-										onChange={handleChange}
+										value={formik.values.first_name}
+										onChange={formik.handleChange}
+										onBlur={formik.handleBlur}
 										placeholder="Enter your first name"
 									/>
-									{errors.firstName && (
-										<FormErrorMessage>{errors.firstName}</FormErrorMessage>
+									{formik.touched.first_name && formik.errors.first_name && (
+										<FormErrorMessage>
+											{formik.errors.first_name}
+										</FormErrorMessage>
 									)}
 								</FormControl>
 
-								<FormControl width="100%" isInvalid={!!errors.lastName}>
+								<FormControl
+									width="100%"
+									isInvalid={
+										formik.touched.last_name && !!formik.errors.last_name
+									}
+								>
 									<FormLabel>Last Name</FormLabel>
 									<Input
-										name="lastName"
+										name="last_name"
 										size={'lg'}
 										type="text"
-										value={formData.lastName}
-										onChange={handleChange}
+										value={formik.values.last_name}
+										onChange={formik.handleChange}
+										onBlur={formik.handleBlur}
 										placeholder="Enter your last name"
 									/>
-									{errors.lastName && (
-										<FormErrorMessage>{errors.lastName}</FormErrorMessage>
+									{formik.touched.last_name && formik.errors.last_name && (
+										<FormErrorMessage>
+											{formik.errors.last_name}
+										</FormErrorMessage>
 									)}
 								</FormControl>
 							</>
-						) : null}
+						)}
 
-						<FormControl width="100%" isInvalid={!!errors.email}>
+						<FormControl
+							width="100%"
+							isInvalid={formik.touched.email && !!formik.errors.email}
+						>
 							<FormLabel>Email</FormLabel>
 							<Input
 								name="email"
 								size={'lg'}
 								type="email"
-								value={formData.email}
-								onChange={handleChange}
+								value={formik.values.email}
+								onChange={formik.handleChange}
+								onBlur={formik.handleBlur}
 								placeholder="Enter your email"
 							/>
-							{errors.email && (
-								<FormErrorMessage>{errors.email}</FormErrorMessage>
+							{formik.touched.email && formik.errors.email && (
+								<FormErrorMessage>{formik.errors.email}</FormErrorMessage>
 							)}
 						</FormControl>
-						<FormControl isInvalid={!!errors.password}>
+
+						<FormControl
+							isInvalid={formik.touched.password && !!formik.errors.password}
+						>
 							<FormLabel>Password</FormLabel>
 							<InputGroup>
 								<Input
 									name="password"
 									type={showPassword ? 'text' : 'password'}
-									value={formData.password}
-									onChange={handleChange}
+									value={formik.values.password}
+									onChange={formik.handleChange}
+									onBlur={formik.handleBlur}
 									placeholder="Enter your password"
 								/>
-								<InputRightElement width="">
+								<InputRightElement>
 									<Button onClick={handlePasswordVisibility}>
 										{showPassword ? <BsEyeSlashFill /> : <BsEyeFill />}
 									</Button>
 								</InputRightElement>
 							</InputGroup>
-							{errors.password && (
-								<FormErrorMessage>{errors.password}</FormErrorMessage>
+							{formik.touched.password && formik.errors.password && (
+								<FormErrorMessage>{formik.errors.password}</FormErrorMessage>
 							)}
 						</FormControl>
 
 						<Button
-							isLoading={loading}
-							disabled={loading}
+							isLoading={formik.isSubmitting || isPending}
+							disabled={isPending}
 							type="submit"
 							bgColor="brand"
 							mt={4}
@@ -521,7 +520,7 @@ const AuthForm: React.FC<{
 							{isSignUp ? 'Sign Up' : 'Login'}
 						</Button>
 
-						{!isSignUp ? (
+						{!isSignUp && (
 							<Box mt={2} width={'full'} textAlign={'center'}>
 								<Text
 									cursor={'pointer'}
@@ -531,7 +530,7 @@ const AuthForm: React.FC<{
 									Forgot password?
 								</Text>
 							</Box>
-						) : null}
+						)}
 
 						<Box color="gray.500" mt={2}>
 							{isSignUp ? (
@@ -557,44 +556,9 @@ const AuthForm: React.FC<{
 			</VStack>
 
 			<HStack justifyContent={'center'} mt={4} spacing={4}>
-				<EachSocial
-					Icon={BiLogoGoogle}
-					label="Sign in with Google"
-					onClick={loginWithGoogle}
-				/>
-				{/* <IconButton
-					width="full"
-					borderColor={'border_color'}
-					_dark={{
-						borderColor: 'dark_light',
-					}}
-					onClick={loginWithGoogle}
-					colorScheme={colorMode === 'dark' ? '' : 'gray'}
-					fontSize={'24px'}
-					aria-label="Options"
-					icon={<BiLogoGoogle />}
-					_hover={{
-						bg: 'dark',
-						color: 'white',
-						_dark: {
-							bg: 'dark_light',
-						},
-					}}
-				/> */}
-
-				{/* <IconButton
-					colorScheme={colorMode === 'dark' ? '' : 'gray'}
-					fontSize={'24px'}
-					aria-label="Options"
-					icon={<BiLogoFacebook />}
-					_hover={{
-						bg: 'dark',
-						color: 'white',
-						_dark: {
-							bg: 'dark_light',
-						},
-					}}
-				/> */}
+				<Button onClick={loginWithGoogle} leftIcon={<BiLogoGoogle />}>
+					Sign in with Google
+				</Button>
 			</HStack>
 		</Box>
 	)

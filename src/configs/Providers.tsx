@@ -9,6 +9,8 @@ import { InspectionsProvider } from '@/context/inspections.context'
 import { NotificationsProvider } from '@/context/notifications.context'
 import { OptionsProvider } from '@/context/options.context'
 import { Box, ChakraProvider, ColorModeScript } from '@chakra-ui/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { SessionProvider } from 'next-auth/react'
 import dynamic from 'next/dynamic'
 import { Next13ProgressBar } from 'next13-progressbar'
 import { theme } from './theme'
@@ -22,41 +24,46 @@ const CreditOptionsPopups = dynamic(
 )
 
 export function Providers({ children }: { children: React.ReactNode }) {
+	const queryClient = new QueryClient()
 	return (
 		<ChakraProvider theme={theme}>
 			<ColorModeScript initialColorMode={theme.config.initialColorMode} />
-			<AppContextProvider>
-				<AuthContextProvider>
-					<OptionsProvider>
-						<InspectionsProvider>
-							<NotificationsProvider>
-								<BookmarksProvider>
-									<Box
-										bg="white"
-										_dark={{
-											bg: 'dark',
-										}}
-										minH={'100vh'}
-										userSelect={'none'}
-									>
-										<GetStarted />
-										<CreditOptionsPopups />
-										<MasterPopup />
-										<AppLoading />
-										<Next13ProgressBar
-											height="4px"
-											color="#00bc73"
-											options={{ showSpinner: false }}
-											showOnShallow
-										/>
-										{children}
-									</Box>
-								</BookmarksProvider>
-							</NotificationsProvider>
-						</InspectionsProvider>
-					</OptionsProvider>
-				</AuthContextProvider>
-			</AppContextProvider>
+			<SessionProvider>
+				<QueryClientProvider client={queryClient}>
+					<AppContextProvider>
+						<AuthContextProvider>
+							<OptionsProvider>
+								<InspectionsProvider>
+									<NotificationsProvider>
+										<BookmarksProvider>
+											<Box
+												bg="white"
+												_dark={{
+													bg: 'dark',
+												}}
+												minH={'100vh'}
+												userSelect={'none'}
+											>
+												<GetStarted />
+												<CreditOptionsPopups />
+												<MasterPopup />
+												<AppLoading />
+												<Next13ProgressBar
+													height="4px"
+													color="#00bc73"
+													options={{ showSpinner: false }}
+													showOnShallow
+												/>
+												{children}
+											</Box>
+										</BookmarksProvider>
+									</NotificationsProvider>
+								</InspectionsProvider>
+							</OptionsProvider>
+						</AuthContextProvider>
+					</AppContextProvider>
+				</QueryClientProvider>
+			</SessionProvider>
 		</ChakraProvider>
 	)
 }
