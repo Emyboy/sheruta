@@ -99,7 +99,9 @@ export default function ApartmentDetails({
 					hostId={parsedRequest._user_ref._id}
 				/>
 			)}
-			{activeTab === 'Verification' && <VerificationComponent request={parsedRequest} />}
+			{activeTab === 'Verification' && (
+				<VerificationComponent request={parsedRequest} />
+			)}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>
 	)

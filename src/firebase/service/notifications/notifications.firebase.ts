@@ -11,7 +11,7 @@ import {
 	where,
 } from 'firebase/firestore'
 import moment from 'moment'
-import { DBCollectionName } from '../index.firebase'
+import SherutaDB, { DBCollectionName } from '../index.firebase'
 import { NotificationsType } from './notifications.types'
 
 export const NotificationsBodyMessage: Record<
@@ -28,6 +28,7 @@ export const NotificationsBodyMessage: Record<
 	profile_view: 'viewed your profile',
 	cancelled: 'cancelled your inspection',
 	bookmark: 'saved your apartment listing',
+	background_check: 'Someone has requested to check your background'
 }
 
 export default class NotificationsService {
@@ -37,17 +38,19 @@ export default class NotificationsService {
 		deleteDate: moment().add(2, 'months').toDate(),
 	}
 
-	static async create({
-		collection_name,
-		data,
-	}: {
-		collection_name: string
-		data: NotificationsType
-	}): Promise<any> {
-		await setDoc(doc(collection(db, collection_name)), {
-			...this.defaults,
-			...data,
+	static async create( data: NotificationsType): Promise<any> {
+
+		const uuid = crypto.randomUUID();
+
+		await SherutaDB.create({
+			collection_name: DBCollectionName.notifications,
+            data,
+            document_id: uuid
 		})
+		// await setDoc(doc(collection(db, collection_name)), {
+		// 	...this.defaults,
+		// 	...data,
+		// })
 	}
 
 	static async fetchNotifications(id: string) {
