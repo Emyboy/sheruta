@@ -79,7 +79,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 					last_name: profile.last_name,
 					service_type: profile.service_type,
 					seeking: profile.seeking,
-					payment_plan: profile.payment_plan,
+					payment_type: profile.payment_type,
 					bio: profile.bio,
 					budget: profile.budget,
 					avatar_url: profile.avatar_url,

@@ -192,7 +192,7 @@ export default async function page(props: any) {
 							gender_preference: formattedFlatShareProfile.gender_preference,
 							age_preference: formattedFlatShareProfile.age_preference,
 							bio: formattedFlatShareProfile.bio,
-							payment_plan: formattedFlatShareProfile.payment_plan,
+							payment_type: formattedFlatShareProfile.payment_type,
 							socials: {
 								twitter: formattedFlatShareProfile.twitter,
 								tiktok: formattedFlatShareProfile.tiktok,

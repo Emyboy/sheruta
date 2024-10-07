@@ -98,7 +98,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 		bio: string
 		_id: string
 		budget: number
-		payment_plan: string
+		payment_type: string
 		service_type: string
 	}
 
@@ -179,7 +179,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 											<BiBookmark style={{ fontSize: '1.5em' }} />
 										</Button>
 										<Box mr={2} color="text_muted">
-											{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_plan ? item?.payment_plan : ''}`}{' '}
+											{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_type ? item?.payment_type : ''}`}{' '}
 										</Box>
 									</Flex>
 								</Stack>

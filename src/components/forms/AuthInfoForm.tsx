@@ -31,7 +31,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 
 	const [bio, setBio] = useState(flat_share_profile?.bio || '')
 
-	const [payment_plan, setPaymentPlan] = useState(
+	const [payment_type, setPaymentType] = useState(
 		flat_share_profile?.payment_type || '',
 	)
 
@@ -59,7 +59,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 					primary_phone_number,
 					budget,
 					bio,
-					payment_plan,
+					payment_type,
 					document_id: user?._id,
 					_user_ref: `/users/${user?._id}`,
 				},
@@ -67,7 +67,7 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 			)
 
 			await FlatShareProfileService.update({
-				data: { budget, bio, payment_type: payment_plan as PaymentPlan },
+				data: { budget, bio, payment_type: payment_type as PaymentPlan },
 				document_id: user?._id,
 			})
 
@@ -202,9 +202,9 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								bg="dark"
 								required
 								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-									setPaymentPlan(e.target.value)
+									setPaymentType(e.target.value)
 								}
-								value={payment_plan}
+								value={payment_type}
 							>
 								<option value="Weekly">Weekly</option>
 								<option value="Monthly">Monthly</option>
