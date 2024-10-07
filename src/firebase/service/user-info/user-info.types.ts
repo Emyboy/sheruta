@@ -1,3 +1,4 @@
+import { NINResponseDTO } from '@/components/types'
 import { DocumentReference } from 'firebase/firestore'
 
 export interface UserInfo {
@@ -13,6 +14,7 @@ export interface UserInfo {
 	nin: string | null
 	hide_profile: boolean
 	hide_phone: boolean
+	nin_data?: NINResponseDTO
 }
 
 export interface UserInfoDTO {
@@ -28,4 +30,6 @@ export interface UserInfoDTO {
 	hide_profile: boolean
 	hide_phone: boolean
 	is_verified: boolean
+	nin_data?: NINResponseDTO
+
 }

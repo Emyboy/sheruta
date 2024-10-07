@@ -47,5 +47,12 @@ export const generateRoomUrl = async (endDate: string) => {
 }
 
 export const createNotification = async (data: NotificationsType) => {
-	await NotificationsService.create(data)
+	await NotificationsService.create({
+		collection_name: DBCollectionName.notifications,
+		data,
+	})
 }
+
+// export const createNotification = async (data: NotificationsType) => {
+// 	await NotificationsService.create(data)
+// }

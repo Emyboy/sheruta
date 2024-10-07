@@ -1,10 +1,12 @@
 import ApartmentDetails from '@/components/HostDetails/ApartmentDetails'
 import MediaCarousel from '@/components/HostDetails/MediaCarousel'
+import { NINResponseDTO } from '@/components/types'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import DiscussionService from '@/firebase/service/discussions/discussions.firebase'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { DocumentData } from 'firebase/firestore'
 import Link from 'next/link'
@@ -30,10 +32,12 @@ export default async function page({
 	])
 
 	let finalRequest: DocumentData | null = requestData
+	let hostNinData: NINResponseDTO | undefined = undefined;
 
 	if (finalRequest && finalRequest._user_ref && finalRequest._user_ref._id) {
 		const userId = finalRequest._user_ref._id
-		const user_info = await UserInfoService.get(userId)
+		const user_info = await UserInfoService.get(userId) as UserInfoDTO
+		hostNinData = user_info?.nin_data
 		finalRequest = { ...finalRequest, user_info }
 	} else {
 		console.log('User reference not found in finalRequest document')
@@ -108,6 +112,7 @@ export default async function page({
 					<ApartmentDetails
 						request={JSON.stringify(finalRequest)}
 						discussions={JSON.stringify(messages)}
+						hostNinData={hostNinData}
 					/>
 				</Flex>
 			</Flex>

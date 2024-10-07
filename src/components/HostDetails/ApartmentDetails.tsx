@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import DiscussionComponent from './DiscussionComponent'
 import VerificationComponent from './VerificationComponent'
+import { NINResponseDTO } from '../types'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -18,9 +19,11 @@ const mini_nav_items = [
 export default function ApartmentDetails({
 	request,
 	discussions,
+	hostNinData,
 }: {
 	request: string
-	discussions: string | undefined
+	discussions: string | undefined,
+	hostNinData: NINResponseDTO | undefined,
 }) {
 	const params = useSearchParams()
 	const [activeTab, setActiveTab] = useState(
@@ -100,7 +103,7 @@ export default function ApartmentDetails({
 				/>
 			)}
 			{activeTab === 'Verification' && (
-				<VerificationComponent request={parsedRequest} />
+				<VerificationComponent request={parsedRequest} hostNinData={hostNinData} />
 			)}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>

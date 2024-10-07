@@ -13,7 +13,7 @@ export const NotificationsDTO = z.object({
 		'cancelled',
 		'bookmark',
 		'reservation',
-		'background_check'
+		'background_check',
 	]),
 	message: z.string(),
 	sender_details: z
