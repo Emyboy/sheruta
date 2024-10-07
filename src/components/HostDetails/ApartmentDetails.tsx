@@ -22,8 +22,8 @@ export default function ApartmentDetails({
 	hostNinData,
 }: {
 	request: string
-	discussions: string | undefined,
-	hostNinData: NINResponseDTO | undefined,
+	discussions: string | undefined
+	hostNinData: NINResponseDTO | undefined
 }) {
 	const params = useSearchParams()
 	const [activeTab, setActiveTab] = useState(
@@ -103,7 +103,10 @@ export default function ApartmentDetails({
 				/>
 			)}
 			{activeTab === 'Verification' && (
-				<VerificationComponent request={parsedRequest} hostNinData={hostNinData} />
+				<VerificationComponent
+					request={parsedRequest}
+					hostNinData={hostNinData}
+				/>
 			)}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>

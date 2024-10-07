@@ -144,7 +144,11 @@ export const createHostRequestDTO = z.object({
 		.record(
 			z.string(),
 			z.object({
-				is_approved: z.union([z.literal('pending'), z.boolean()]),
+				is_approved: z.enum([
+					'yes',
+					'no',
+					'pending',
+				]),
 			}),
 		)
 		.optional(),

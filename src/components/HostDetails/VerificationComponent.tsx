@@ -17,8 +17,14 @@ import {
 	Icon,
 	Text,
 	useColorModeValue,
-	Divider, Image,
-	Table, Tr, Td, Tbody, Heading, VStack,
+	Divider,
+	Image,
+	Table,
+	Tr,
+	Td,
+	Tbody,
+	Heading,
+	VStack,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -35,6 +41,13 @@ import { IconType } from 'react-icons/lib'
 import { NINResponseDTO } from '../types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
+import { AuthUser } from '@/firebase/service/auth/auth.types'
+import AuthService from '@/firebase/service/auth/auth.firebase'
+import UserService from '@/firebase/service/user/user.firebase'
+import { calculateAge, convertRefToData } from '@/utils/index.utils'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { StateData } from '@/firebase/service/options/states/states.types'
 
 type ButtonProps = {
 	active: boolean
@@ -50,6 +63,15 @@ interface AlertBoxProps {
 	message: string
 	button?: ButtonProps
 }
+
+interface UserProfileProps {
+	hostUserInfo: UserInfoDTO | undefined
+	hostNinData: NINResponseDTO | undefined
+	hostUserData: AuthUser | undefined
+	hostFlatShare: FlatShareProfileData | undefined
+	stateData: StateData | undefined
+}
+
 
 const AlertBox: React.FC<AlertBoxProps> = ({
 	icon,
@@ -100,77 +122,104 @@ const AlertBox: React.FC<AlertBoxProps> = ({
 	)
 }
 
-const InfoSection = ({ title, data }: { title: string, data: any }) => (
+const InfoSection = ({ title, data }: { title: string; data: any }) => (
 	<Box p={5} borderWidth={1} borderRadius="lg" w="100%">
-		<Heading size="md" mb={4}>{title}</Heading>
+		<Heading size="md" mb={4}>
+			{title}
+		</Heading>
 		<Table variant="simple">
 			<Tbody>
-				{Object.keys(data).map((key) => (
+				{Object.keys(data).map((key, index) => (
 					<Tr key={key}>
-						<Td ps={0} fontWeight="medium">{key}</Td>
-						<Td>{data[key]}</Td>
+						<Td ps={0} fontWeight="medium" borderBottom={(Object.keys(data).length == index + 1) ? 0 : '1px solid'}>
+							{key}
+						</Td>
+						<Td borderBottom={(Object.keys(data).length == index + 1) ? 0 : '1px solid'}>{data[key]}</Td>
 					</Tr>
 				))}
 			</Tbody>
 		</Table>
 	</Box>
-);
+)
 
-const UserProfile = ({ data }: { data: Record<string, any> }) => {
+const UserProfile = ({
+	hostUserInfo,
+	hostNinData,
+	hostUserData,
+	hostFlatShare,
+	stateData
+}: UserProfileProps) => {
+
+	// Personal Information
 	const personalInfo = {
-		Image: <Image boxSize="50px" src="/path/to/image.jpg" alt="User" />,
-		"Surname": "Doe",
-		"First name": "John",
-		"Middle Name": "Edward",
-		"Gender": "Male",
-		"Age": "30",
-		"Contact Number": "080-xxxx-xxxx",
-		"Govt registered phone number": "080-xxxx-xxxx",
-		"Marital Status": "Single",
-		"Govt Registered Address": "123 Govt. Address",
-		"Religion": "Christianity",
-		"State Of Origin": "Lagos"
-	};
+		Surname: hostNinData?.lastname || 'N/A',
+		'First Name': hostNinData?.firstname || 'N/A',
+		'Middle Name': hostNinData?.middlename || 'N/A',
+		Gender: hostNinData?.gender || 'N/A',
+		Age: hostNinData?.birthdate ? calculateAge(hostNinData.birthdate) : 'N/A',
+		'Contact Number': hostUserInfo?.primary_phone_number || 'N/A',
+		'Govt Registered Phone Number': hostNinData?.phone || 'N/A',
+		'Marital Status': hostNinData?.maritalStatus || 'N/A',
+		'Govt Registered Address': hostNinData?.residence?.address1 || 'N/A',
+		Religion: hostFlatShare?.religion || 'N/A',
+		'State Of Origin': stateData?.name || 'N/A',
+	}
 
+	// Occupation Information
 	const occupation = {
-		"Profession": "Software Engineer",
-		"Employment Status": "Full-Time",
-		"Company name": "Sheruta Ltd",
-		"Work Address": "456 Tech Avenue",
-		"Work Status": "Active"
-	};
+		Profession: hostFlatShare?.occupation || 'N/A',
+		'Employment Status': hostFlatShare?.employment_status || 'N/A',
+		'Company Name': 'Sheruta Ltd',
+		'Work Address': '456 Tech Avenue',
+		'Work Status': 'Active',
+	}
 
+	// Social Media Information with Links
 	const socials = {
-		"Instagram": "@john_doe",
-		"X": "@john_doe",
-		"LinkedIn": "linkedin.com/in/johndoe",
-		"Tiktok": "@johndoe",
-		"Facebook": "facebook.com/johndoe"
-	};
-
+		Instagram: hostFlatShare?.instagram
+			? <Link href={`https://instagram.com/${hostFlatShare.instagram}`}>@{hostFlatShare.instagram}</Link>
+			: 'N/A',
+		X: hostFlatShare?.twitter
+			? <Link href={`https://twitter.com/${hostFlatShare.twitter}`}>@{hostFlatShare.twitter}</Link>
+			: 'N/A',
+		LinkedIn: hostFlatShare?.linkedin
+			? <Link href={`https://linkedin.com/in/${hostFlatShare.linkedin}`}>@{hostFlatShare.linkedin}</Link>
+			: 'N/A',
+		Tiktok: hostFlatShare?.tiktok
+			? <Link href={`https://tiktok.com/@${hostFlatShare.tiktok}`}>@{hostFlatShare.tiktok}</Link>
+			: 'N/A',
+		Facebook: hostFlatShare?.facebook
+			? <Link href={`https://facebook.com/${hostFlatShare.facebook}`}>@{hostFlatShare.facebook}</Link>
+			: 'N/A',
+	}
+//state, town, address
+	// Next of Kin Information
 	const nextOfKin = {
-		"Name of NOK": "Jane Doe",
-		"Relationship with NOK": "Sister",
-		"NOK number": "080-xxxx-xxxx",
-		"NOK Address": "789 Family St"
-	};
+		'Name of NOK': `${hostNinData?.nextOfKin?.lastname || ''} ${hostNinData?.nextOfKin?.firstname || ''}`.trim() || 'N/A',
+		'Relationship with NOK': 'NIL',
+		'NOK Number': 'NIL',
+		'NOK Address': hostNinData?.nextOfKin?.address1 || 'N/A',
+	}
 
 	return (
-		<VStack spacing={6} align="start" w="100%" p={12} overflow={"scroll"}>
+		<VStack spacing={6} align="start" w="100%" p={12} overflow="scroll">
+			<Box textAlign={"center"} w="full">
+				<Image m="auto" alt="user image" src={hostNinData?.photo || hostUserData?.avatar_url} objectFit={"cover"} width={150} height={150} borderRadius="100%" />
+			</Box>
 			<InfoSection title="Personal Information" data={personalInfo} />
 			<InfoSection title="Occupation" data={occupation} />
 			<InfoSection title="Socials" data={socials} />
 			<InfoSection title="Next of Kin" data={nextOfKin} />
 		</VStack>
-	);
-};
+	)
+}
 
 export default function VerificationComponent({
 	request,
-	hostNinData
+	hostNinData,
 }: {
-	request: HostRequestDataDetails,
-	hostNinData: NINResponseDTO | undefined,
+	request: HostRequestDataDetails
+	hostNinData: NINResponseDTO | undefined
 }) {
 	const {
 		authState: { user, user_info, flat_share_profile },
@@ -182,15 +231,39 @@ export default function VerificationComponent({
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
-	const [hostUserInfo, setHostUserInfo] = useState<UserInfoDTO | undefined>(undefined)
+	const [hostUserInfo, setHostUserInfo] = useState<UserInfoDTO | undefined>(
+		undefined,
+	)
+
+	const [hostUserData, setHostUserData] = useState<AuthUser | undefined>(
+		undefined,
+	)
+
+	const [hostFlatShare, setHostFlatShare] = useState<
+		FlatShareProfileData | undefined
+	>(undefined)
+
+	const [stateData, setStateData] = useState<StateData | undefined>(undefined)
 
 	useEffect(() => {
-		const getHostUserInfo = async() => {
-			const userInfo = await UserInfoService.get(request._user_ref._id)
-            setHostUserInfo(userInfo as UserInfoDTO)
+		const getHost = async () => {
+			const [userInfo, userData, userFlatShare,] = await Promise.all([
+				UserInfoService.get(request._user_ref._id),
+				UserService.get(request._user_ref._id),
+				FlatShareProfileService.get(request._user_ref._id)
+			])
+
+			console.log(userInfo, userData)
+
+
+			setStateData(await convertRefToData(userFlatShare?.state) as StateData)
+
+			setHostUserInfo(userInfo as UserInfoDTO)
+			setHostUserData(userData as AuthUser)
+			setHostFlatShare(userFlatShare as FlatShareProfileData)
 		}
 
-		getHostUserInfo()
+		getHost()
 	}, [])
 
 	useEffect(() => {
@@ -218,6 +291,8 @@ export default function VerificationComponent({
 				})
 			}
 
+			//debit before initiation and refund if request is rejected
+
 			const backgroundChecks = request?.background_checks || {}
 
 			if (backgroundChecks?.[user._id]) {
@@ -239,21 +314,21 @@ export default function VerificationComponent({
 				document_id: request.id,
 			})
 
-			await createNotification({
-				is_read: false,
-				message: NotificationsBodyMessage.background_check,
-				recipient_id: request._user_ref._id,
-				type: 'background_check',
-				sender_details: user
-					? {
-						avatar_url: user.avatar_url,
-						first_name: user.first_name,
-						last_name: user.last_name,
-						id: user._id,
-					}
-					: null,
-				action_url: `/user/${request._user_ref._id}`,
-			})
+			// await createNotification({
+			// 	is_read: false,
+			// 	message: NotificationsBodyMessage.background_check,
+			// 	recipient_id: request._user_ref._id,
+			// 	type: 'background_check',
+			// 	sender_details: user
+			// 		? {
+			// 				avatar_url: user.avatar_url,
+			// 				first_name: user.first_name,
+			// 				last_name: user.last_name,
+			// 				id: user._id,
+			// 			}
+			// 		: null,
+			// 	action_url: `/user/${request._user_ref._id}`,
+			// })
 
 			showToast({
 				message: 'Background check request submitted successfully.',
@@ -279,7 +354,10 @@ export default function VerificationComponent({
 	}
 
 	/***Remove this check */
-	if (user_info?.is_verified === false || Object.keys(user_info?.nin_data || {}).length === 0) {
+	if (
+		user_info?.is_verified === false ||
+		Object.keys(user_info?.nin_data || {}).length === 0
+	) {
 		return (
 			<AlertBox
 				icon={BsExclamationTriangle}
@@ -294,7 +372,10 @@ export default function VerificationComponent({
 		)
 	}
 
-	if (request.user_info.is_verified === false || Object.keys(hostNinData || {}).length === 0) {
+	if (
+		request.user_info.is_verified === false ||
+		Object.keys(hostNinData || {}).length === 0
+	) {
 		return (
 			<AlertBox
 				icon={FaQuestion}
@@ -333,7 +414,7 @@ export default function VerificationComponent({
 	}
 
 	//request initiated but not approved
-	if (request?.background_checks?.[user?._id]?.is_approved === false) {
+	if (request?.background_checks?.[user?._id]?.is_approved === 'no') {
 		return (
 			<AlertBox
 				icon={FaSadTear}
@@ -344,6 +425,12 @@ export default function VerificationComponent({
 	}
 
 	return (
-		<UserProfile data={{hostUserInfo, hostNinData}}/>
+		<UserProfile
+			hostUserInfo={hostUserInfo}
+			hostUserData={hostUserData}
+			hostNinData={hostNinData}
+			hostFlatShare={hostFlatShare}
+			stateData={stateData}
+		/>
 	)
 }

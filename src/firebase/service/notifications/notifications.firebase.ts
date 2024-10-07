@@ -28,7 +28,7 @@ export const NotificationsBodyMessage: Record<
 	profile_view: 'viewed your profile',
 	cancelled: 'cancelled your inspection',
 	bookmark: 'saved your apartment listing',
-	background_check: 'Someone has requested to check your background',
+	background_check: 'Someone has requested to check your background', /**RREPLACE SOMEONE WITH USERNAME */
 }
 
 export default class NotificationsService {
@@ -50,7 +50,6 @@ export default class NotificationsService {
 			...data,
 		})
 	}
-
 
 	static async fetchNotifications(id: string) {
 		const collectionRef = collection(db, DBCollectionName.notifications)

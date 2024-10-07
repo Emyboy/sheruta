@@ -31,5 +31,4 @@ export interface UserInfoDTO {
 	hide_phone: boolean
 	is_verified: boolean
 	nin_data?: NINResponseDTO
-
 }

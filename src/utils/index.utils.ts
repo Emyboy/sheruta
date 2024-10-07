@@ -243,3 +243,11 @@ export const convertRefToData = async (
 		console.log(err)
 	}
 }
+
+export const calculateAge = (birthdate?: string) =>
+	birthdate
+		? Math.floor(
+				(new Date().getTime() - new Date(birthdate).getTime()) /
+					(1000 * 60 * 60 * 24 * 365.25),
+			)
+		: null

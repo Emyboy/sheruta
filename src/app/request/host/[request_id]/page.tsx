@@ -32,11 +32,11 @@ export default async function page({
 	])
 
 	let finalRequest: DocumentData | null = requestData
-	let hostNinData: NINResponseDTO | undefined = undefined;
+	let hostNinData: NINResponseDTO | undefined = undefined
 
 	if (finalRequest && finalRequest._user_ref && finalRequest._user_ref._id) {
 		const userId = finalRequest._user_ref._id
-		const user_info = await UserInfoService.get(userId) as UserInfoDTO
+		const user_info = (await UserInfoService.get(userId)) as UserInfoDTO
 		hostNinData = user_info?.nin_data
 		finalRequest = { ...finalRequest, user_info }
 	} else {

@@ -1,4 +1,5 @@
 export interface NINResponseDTO {
+	photo?:string
 	nin: string
 	title: string
 	firstname: string
