@@ -3,7 +3,11 @@ import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
-import HomePage from './(home-page)/home-page'
+import dynamic from 'next/dynamic'
+
+const HomePage = dynamic(() => import('./(home-page)/home-page'), {
+	ssr: false,
+})
 
 export const revalidate = CACHE_TTL?.SHORT
 
