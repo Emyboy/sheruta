@@ -24,8 +24,8 @@ export default function MainIconBtn({
 				position={'relative'}
 				onClick={onClick ? onClick : () => {}}
 				p="0px"
-				h={{ base: '30px', sm: '45px' }}
-				w={{ base: '30px', sm: '45px' }}
+				h={'45px'}
+				w={'45px'}
 				border="1px"
 				borderColor={'border_color'}
 				color={active ? 'white' : 'text_muted'}

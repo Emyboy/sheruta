@@ -1,20 +1,6 @@
-import { DEFAULT_PADDING } from '@/configs/theme'
-import {
-	Badge,
-	Box,
-	Button,
-	Card,
-	CardBody,
-	Divider,
-	Flex,
-	Image,
-	Link,
-	Stack,
-	Text,
-} from '@chakra-ui/react'
+import { Box, Button, Divider, Text } from '@chakra-ui/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
-import { BiBookmark } from 'react-icons/bi'
 import { TbCircleLetterX } from 'react-icons/tb'
 import ProfileSnippetCard from './ProfileSnippetCard'
 
