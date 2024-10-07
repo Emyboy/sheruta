@@ -490,7 +490,7 @@ export default function EachRequest({ request }: Props) {
 
 											if (res)
 												window.location.assign(
-													`/messsages/${request._user_ref._id}`,
+													`/messages/${request._user_ref._id}`,
 												)
 										} catch (error) {
 											console.error(
