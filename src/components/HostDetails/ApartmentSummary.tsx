@@ -208,10 +208,14 @@ export default function ApartmentSummary({
 						h={{ base: '48px', md: '52px' }}
 						paddingY={{ base: '12px', md: DEFAULT_PADDING }}
 						bgColor={
-							request.reserved_by === authState.user?._id ? 'red' : 'black'
+							request.availability_status === 'reserved' &&
+							request.reserved_by === authState.user?._id
+								? 'red'
+								: 'black'
 						}
 						_light={{ color: 'white' }}
 						onClick={
+							request.availability_status === 'reserved' &&
 							request.reserved_by === authState.user?._id
 								? cancelReservation
 								: openReserveApartmentModal
