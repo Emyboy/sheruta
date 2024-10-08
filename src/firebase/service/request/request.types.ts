@@ -144,11 +144,7 @@ export const createHostRequestDTO = z.object({
 		.record(
 			z.string(),
 			z.object({
-				is_approved: z.enum([
-					'yes',
-					'no',
-					'pending',
-				]),
+				is_approved: z.enum(['yes', 'no', 'pending']),
 			}),
 		)
 		.optional(),

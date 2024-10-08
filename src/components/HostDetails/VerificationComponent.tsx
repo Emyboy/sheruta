@@ -17,7 +17,6 @@ import {
 	Icon,
 	Text,
 	useColorModeValue,
-	Divider,
 	Image,
 	Table,
 	Tr,
@@ -29,7 +28,6 @@ import {
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import {
-	BiQuestionMark,
 	BiSolidIdCard,
 	BiSolidLock,
 	BiSolidTimer,
@@ -42,12 +40,13 @@ import { NINResponseDTO } from '../types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
-import AuthService from '@/firebase/service/auth/auth.firebase'
 import UserService from '@/firebase/service/user/user.firebase'
 import { calculateAge, convertRefToData } from '@/utils/index.utils'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { StateData } from '@/firebase/service/options/states/states.types'
+import { HiExternalLink } from 'react-icons/hi'
+import usePayment from '@/hooks/usePayment'
 
 type ButtonProps = {
 	active: boolean
@@ -71,7 +70,6 @@ interface UserProfileProps {
 	hostFlatShare: FlatShareProfileData | undefined
 	stateData: StateData | undefined
 }
-
 
 const AlertBox: React.FC<AlertBoxProps> = ({
 	icon,
@@ -122,34 +120,59 @@ const AlertBox: React.FC<AlertBoxProps> = ({
 	)
 }
 
-const InfoSection = ({ title, data }: { title: string; data: any }) => (
-	<Box p={5} borderWidth={1} borderRadius="lg" w="100%">
-		<Heading size="md" mb={4}>
-			{title}
-		</Heading>
-		<Table variant="simple">
-			<Tbody>
-				{Object.keys(data).map((key, index) => (
-					<Tr key={key}>
-						<Td ps={0} fontWeight="medium" borderBottom={(Object.keys(data).length == index + 1) ? 0 : '1px solid'}>
-							{key}
-						</Td>
-						<Td borderBottom={(Object.keys(data).length == index + 1) ? 0 : '1px solid'}>{data[key]}</Td>
-					</Tr>
-				))}
-			</Tbody>
-		</Table>
-	</Box>
-)
+const InfoSection = ({ title, data }: { title: string; data: any }) => {
+	const borderColor = useColorModeValue('#CBD5E0', '#333333')
+
+	return (
+		<Box
+			p={5}
+			borderWidth={1}
+			borderColor={borderColor}
+			borderRadius="lg"
+			w="100%"
+		>
+			<Heading size="md" mb={4}>
+				{title}
+			</Heading>
+			<Table variant="simple">
+				<Tbody borderColor="gray">
+					{Object.keys(data).map((key, index) => (
+						<Tr key={key}>
+							<Td
+								ps={0}
+								fontWeight="medium"
+								borderBottom={
+									Object.keys(data).length == index + 1
+										? 0
+										: `1px solid ${borderColor}`
+								}
+							>
+								{key}
+							</Td>
+							<Td
+								borderBottom={
+									Object.keys(data).length == index + 1
+										? 0
+										: `1px solid ${borderColor}`
+								}
+							>
+								{data[key]}
+							</Td>
+						</Tr>
+					))}
+				</Tbody>
+			</Table>
+		</Box>
+	)
+}
 
 const UserProfile = ({
 	hostUserInfo,
 	hostNinData,
 	hostUserData,
 	hostFlatShare,
-	stateData
+	stateData,
 }: UserProfileProps) => {
-
 	// Personal Information
 	const personalInfo = {
 		Surname: hostNinData?.lastname || 'N/A',
@@ -176,35 +199,80 @@ const UserProfile = ({
 
 	// Social Media Information with Links
 	const socials = {
-		Instagram: hostFlatShare?.instagram
-			? <Link href={`https://instagram.com/${hostFlatShare.instagram}`}>@{hostFlatShare.instagram}</Link>
-			: 'N/A',
-		X: hostFlatShare?.twitter
-			? <Link href={`https://twitter.com/${hostFlatShare.twitter}`}>@{hostFlatShare.twitter}</Link>
-			: 'N/A',
-		LinkedIn: hostFlatShare?.linkedin
-			? <Link href={`https://linkedin.com/in/${hostFlatShare.linkedin}`}>@{hostFlatShare.linkedin}</Link>
-			: 'N/A',
-		Tiktok: hostFlatShare?.tiktok
-			? <Link href={`https://tiktok.com/@${hostFlatShare.tiktok}`}>@{hostFlatShare.tiktok}</Link>
-			: 'N/A',
-		Facebook: hostFlatShare?.facebook
-			? <Link href={`https://facebook.com/${hostFlatShare.facebook}`}>@{hostFlatShare.facebook}</Link>
-			: 'N/A',
+		Instagram: hostFlatShare?.instagram ? (
+			<Link href={`https://instagram.com/${hostFlatShare.instagram}`}>
+				<Button size={'sm'} colorScheme="teal">
+					View &nbsp;
+					<Icon boxSize={3} as={HiExternalLink} />
+				</Button>
+			</Link>
+		) : (
+			'N/A'
+		),
+		X: hostFlatShare?.twitter ? (
+			<Link href={`https://twitter.com/${hostFlatShare.twitter}`}>
+				<Button size={'sm'} colorScheme="teal">
+					View &nbsp;
+					<Icon boxSize={3} as={HiExternalLink} />
+				</Button>
+			</Link>
+		) : (
+			'N/A'
+		),
+		LinkedIn: hostFlatShare?.linkedin ? (
+			<Link href={`https://linkedin.com/in/${hostFlatShare.linkedin}`}>
+				<Button size={'sm'} colorScheme="teal">
+					View &nbsp;
+					<Icon boxSize={3} as={HiExternalLink} />
+				</Button>
+			</Link>
+		) : (
+			'N/A'
+		),
+		Tiktok: hostFlatShare?.tiktok ? (
+			<Link href={`https://tiktok.com/@${hostFlatShare.tiktok}`}>
+				<Button size={'sm'} colorScheme="teal">
+					View &nbsp;
+					<Icon boxSize={3} as={HiExternalLink} />
+				</Button>
+			</Link>
+		) : (
+			'N/A'
+		),
+		Facebook: hostFlatShare?.facebook ? (
+			<Link href={`https://facebook.com/${hostFlatShare.facebook}`}>
+				<Button size={'sm'} colorScheme="teal">
+					View &nbsp;
+					<Icon boxSize={3} as={HiExternalLink} />
+				</Button>
+			</Link>
+		) : (
+			'N/A'
+		),
 	}
-//state, town, address
+
 	// Next of Kin Information
 	const nextOfKin = {
-		'Name of NOK': `${hostNinData?.nextOfKin?.lastname || ''} ${hostNinData?.nextOfKin?.firstname || ''}`.trim() || 'N/A',
-		'Relationship with NOK': 'NIL',
-		'NOK Number': 'NIL',
-		'NOK Address': hostNinData?.nextOfKin?.address1 || 'N/A',
+		'Name of NOK':
+			`${hostNinData?.nextOfKin?.lastname || ''} ${hostNinData?.nextOfKin?.firstname || ''}`.trim() ||
+			'N/A',
+		'State of NOK': hostNinData?.nextOfKin?.state,
+		'Town of NOK': hostNinData?.nextOfKin?.town,
+		'Address of NOK': hostNinData?.nextOfKin?.address1 || 'N/A',
 	}
 
 	return (
 		<VStack spacing={6} align="start" w="100%" p={12} overflow="scroll">
-			<Box textAlign={"center"} w="full">
-				<Image m="auto" alt="user image" src={hostNinData?.photo || hostUserData?.avatar_url} objectFit={"cover"} width={150} height={150} borderRadius="100%" />
+			<Box textAlign={'center'} w="full">
+				<Image
+					m="auto"
+					alt="user image"
+					src={hostNinData?.photo || hostUserData?.avatar_url}
+					objectFit={'cover'}
+					width={150}
+					height={150}
+					borderRadius="100%"
+				/>
 			</Box>
 			<InfoSection title="Personal Information" data={personalInfo} />
 			<InfoSection title="Occupation" data={occupation} />
@@ -245,18 +313,18 @@ export default function VerificationComponent({
 
 	const [stateData, setStateData] = useState<StateData | undefined>(undefined)
 
+	const [_, paymentActions] = usePayment()
+
+
 	useEffect(() => {
 		const getHost = async () => {
-			const [userInfo, userData, userFlatShare,] = await Promise.all([
+			const [userInfo, userData, userFlatShare] = await Promise.all([
 				UserInfoService.get(request._user_ref._id),
 				UserService.get(request._user_ref._id),
-				FlatShareProfileService.get(request._user_ref._id)
+				FlatShareProfileService.get(request._user_ref._id),
 			])
 
-			console.log(userInfo, userData)
-
-
-			setStateData(await convertRefToData(userFlatShare?.state) as StateData)
+			setStateData((await convertRefToData(userFlatShare?.state)) as StateData)
 
 			setHostUserInfo(userInfo as UserInfoDTO)
 			setHostUserData(userData as AuthUser)
@@ -291,8 +359,6 @@ export default function VerificationComponent({
 				})
 			}
 
-			//debit before initiation and refund if request is rejected
-
 			const backgroundChecks = request?.background_checks || {}
 
 			if (backgroundChecks?.[user._id]) {
@@ -305,6 +371,12 @@ export default function VerificationComponent({
 			backgroundChecks[user._id] = {
 				is_approved: 'pending',
 			}
+
+			//debit before initiation and refund if request is rejected
+			await paymentActions.decrementCredit({
+				amount: creditTable.BACKGROUND_CHECK,
+				user_id: user?._id as string,
+			})
 
 			await SherutaDB.update({
 				collection_name: DBCollectionName.flatShareRequests,
@@ -353,7 +425,6 @@ export default function VerificationComponent({
 		)
 	}
 
-	/***Remove this check */
 	if (
 		user_info?.is_verified === false ||
 		Object.keys(user_info?.nin_data || {}).length === 0
