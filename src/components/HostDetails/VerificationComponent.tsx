@@ -27,11 +27,7 @@ import {
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import {
-	BiSolidIdCard,
-	BiSolidLock,
-	BiSolidTimer,
-} from 'react-icons/bi'
+import { BiSolidIdCard, BiSolidLock, BiSolidTimer } from 'react-icons/bi'
 import { BsExclamationTriangle } from 'react-icons/bs'
 import { FaSadTear } from 'react-icons/fa'
 import { FaQuestion } from 'react-icons/fa6'
@@ -47,6 +43,7 @@ import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-
 import { StateData } from '@/firebase/service/options/states/states.types'
 import { HiExternalLink } from 'react-icons/hi'
 import usePayment from '@/hooks/usePayment'
+import { jsPDF } from 'jspdf'
 
 type ButtonProps = {
 	active: boolean
@@ -98,7 +95,7 @@ const AlertBox: React.FC<AlertBoxProps> = ({
 							button.active &&
 							(button.href ? (
 								<Link href={button.href}>
-									<Button variant="subtle" bgColor="brand">
+									<Button variant="subtle" bgColor="brand" color="#fff">
 										{button.label}
 									</Button>
 								</Link>
@@ -109,6 +106,7 @@ const AlertBox: React.FC<AlertBoxProps> = ({
 									onClick={button.onClick}
 									variant="subtle"
 									bgColor="brand"
+									color="#fff"
 								>
 									{button.label}
 								</Button>
@@ -120,8 +118,25 @@ const AlertBox: React.FC<AlertBoxProps> = ({
 	)
 }
 
+
 const InfoSection = ({ title, data }: { title: string; data: any }) => {
 	const borderColor = useColorModeValue('#CBD5E0', '#333333')
+
+	const handleDownloadPDF = () => {
+		const doc = new jsPDF()
+		doc.setFontSize(18)
+		doc.text(title, 10, 10)
+
+		let y = 20
+		doc.setFontSize(12)
+
+		Object.keys(data).forEach((key) => {
+			doc.text(`${key}: ${data[key]}`, 10, y)
+			y += 10
+		})
+
+		doc.save(`${title}.pdf`)
+	}
 
 	return (
 		<Box
@@ -142,7 +157,7 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 								ps={0}
 								fontWeight="medium"
 								borderBottom={
-									Object.keys(data).length == index + 1
+									Object.keys(data).length === index + 1
 										? 0
 										: `1px solid ${borderColor}`
 								}
@@ -151,7 +166,7 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 							</Td>
 							<Td
 								borderBottom={
-									Object.keys(data).length == index + 1
+									Object.keys(data).length === index + 1
 										? 0
 										: `1px solid ${borderColor}`
 								}
@@ -162,10 +177,12 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 					))}
 				</Tbody>
 			</Table>
+			<Button mt={4} colorScheme="teal" onClick={handleDownloadPDF}>
+				Download PDF
+			</Button>
 		</Box>
 	)
 }
-
 const UserProfile = ({
 	hostUserInfo,
 	hostNinData,
@@ -178,7 +195,7 @@ const UserProfile = ({
 		Surname: hostNinData?.lastname || 'N/A',
 		'First Name': hostNinData?.firstname || 'N/A',
 		'Middle Name': hostNinData?.middlename || 'N/A',
-		Gender: hostNinData?.gender || 'N/A',
+		Gender: (hostNinData?.gender === "m") ? "Male" : "Female",
 		Age: hostNinData?.birthdate ? calculateAge(hostNinData.birthdate) : 'N/A',
 		'Contact Number': hostUserInfo?.primary_phone_number || 'N/A',
 		'Govt Registered Phone Number': hostNinData?.phone || 'N/A',
@@ -314,7 +331,6 @@ export default function VerificationComponent({
 	const [stateData, setStateData] = useState<StateData | undefined>(undefined)
 
 	const [_, paymentActions] = usePayment()
-
 
 	useEffect(() => {
 		const getHost = async () => {
