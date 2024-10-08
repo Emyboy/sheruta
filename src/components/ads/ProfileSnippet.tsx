@@ -26,8 +26,8 @@ interface UserProfile {
 
 const ProfileSnippet = ({ userProfiles }: Props) => {
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
-	const router = useRouter()
 	const params = useSearchParams()
+	const router = useRouter()
 
 	return (
 		<React.Fragment>

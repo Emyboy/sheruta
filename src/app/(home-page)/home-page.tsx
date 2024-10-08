@@ -2,6 +2,7 @@
 
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
+import ProfileSnippet from '@/components/ads/ProfileSnippet'
 import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
@@ -27,7 +28,6 @@ import {
 } from 'firebase/firestore'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-import ProfileSnippet from '@/components/ads/ProfileSnippet'
 
 type Props = {
 	requests: string
