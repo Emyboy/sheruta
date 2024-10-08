@@ -1,3 +1,5 @@
+'use client'
+
 import { NAV_HEIGHT } from '@/configs/theme'
 import { Button, Flex, Text } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'

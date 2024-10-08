@@ -1,4 +1,7 @@
-import { resolveDocumentReferences } from '@/utils/index.utils'
+import {
+	resolveArrayOfReferences,
+	resolveDocumentReferences,
+} from '@/utils/index.utils'
 import {
 	collection,
 	deleteDoc,
@@ -84,6 +87,7 @@ export default class SherutaDB {
 				querySnapshot.docs.map(async (doc) => {
 					const docData = { ...doc.data() }
 					const resolvedData = await resolveDocumentReferences(docData)
+
 					return { id: doc.id, ...resolvedData, ref: doc.ref }
 				}),
 			)
