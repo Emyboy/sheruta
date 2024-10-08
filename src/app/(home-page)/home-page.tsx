@@ -89,36 +89,12 @@ export default function HomePage({ requests, userProfiles }: Props) {
 				// Resolve any document references in the new requests
 				const resolvedRequests = await resolveArrayOfReferences(newRequests)
 
-				// Further resolve user information and filter out hidden profiles
-				const resolvedNewRequests = await Promise.all(
-					resolvedRequests
-						?.filter(
-							(request: HostRequestDataDetails) => request?._user_ref?._id,
-						)
-						.map(async (request: HostRequestDataDetails) => {
-							const userId = request._user_ref._id
-							const user_info = await UserInfoService.get(userId)
-
-							// Only include requests where the user profile is not hidden
-							if (!user_info?.hide_profile) {
-								return {
-									...request,
-									user_info,
-								}
-							}
-
-							// Return null if the user profile is hidden
-							return null
-						}),
-					// Filter out any null results from hidden profiles
-				).then((results) => results.filter((request) => request !== null))
-
 				// Update state with filtered new requests (removing duplicates)
 				setFlatShareRequests((prevRequests) => {
 					const existingIds = new Set(prevRequests.map((request) => request.id))
 
 					// Filter out new requests that already exist in previous requests
-					const filteredNewRequests = resolvedNewRequests.filter(
+					const filteredNewRequests = resolvedRequests.filter(
 						(request) => !existingIds.has(request.id),
 					)
 

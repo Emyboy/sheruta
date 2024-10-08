@@ -280,7 +280,7 @@ export default function ApartmentSummary({
 								>
 									{request._user_ref.last_name} {request._user_ref.first_name}
 								</Text>
-								{request.user_info.is_verified && (
+								{request._user_info_ref?.is_verified && (
 									<LuBadgeCheck fill="#00bc73" />
 								)}
 							</Flex>
@@ -311,7 +311,7 @@ export default function ApartmentSummary({
 									onClick={async () =>
 										canInteract &&
 										(await handleCall({
-											number: request.user_info.primary_phone_number,
+											number: request._user_info_ref.primary_phone_number,
 											recipient_id: request._user_ref._id,
 											sender_details: authState.user
 												? {
@@ -765,9 +765,9 @@ export default function ApartmentSummary({
 							_light={{ bgColor: '#1117171A' }}
 						/>
 						<SimpleGrid columns={[2, null, 3]} spacingY="16px">
-							{request.amenities.map((amenity, i) => (
+							{request.amenities.map((amenity) => (
 								<Flex
-									key={i}
+									key={amenity.id}
 									gap={'10px'}
 									alignItems={'center'}
 									justifyContent={'start'}
@@ -777,7 +777,7 @@ export default function ApartmentSummary({
 										fontWeight={'300'}
 										fontSize={{ base: 'base', md: 'lg' }}
 									>
-										{amenity}
+										{amenity.title}
 									</Text>
 								</Flex>
 							))}
