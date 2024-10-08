@@ -22,23 +22,9 @@ export default async function page({ searchParams }: Props) {
 		getAllProfileSnippetDocs(searchParams || {}),
 	])
 
-	const finalRequests = await Promise.all(
-		requests
-			?.filter((request: HostRequestDataDetails) => request?._user_ref?._id)
-			.map(async (request: HostRequestDataDetails) => {
-				const userId = request._user_ref._id
-				const user_info = await UserInfoService.get(userId)
-
-				return {
-					...request,
-					user_info,
-				}
-			}) || [],
-	)
-
 	return (
 		<HomePage
-			requests={finalRequests ? JSON.stringify(finalRequests) : '[]'}
+			requests={requests ? JSON.stringify(requests) : '[]'}
 			userProfiles={userProfiles ? JSON.stringify(userProfiles) : '[]'}
 		/>
 	)

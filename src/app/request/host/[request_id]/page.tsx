@@ -2,7 +2,6 @@ import ApartmentDetails from '@/components/HostDetails/ApartmentDetails'
 import MediaCarousel from '@/components/HostDetails/MediaCarousel'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import DiscussionService from '@/firebase/service/discussions/discussions.firebase'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { Box, Flex, Text } from '@chakra-ui/react'
@@ -21,7 +20,7 @@ export default async function page({
 }: {
 	params: { request_id: string }
 }) {
-	const [requestData, messages] = await Promise.all([
+	const [requests, messages] = await Promise.all([
 		SherutaDB.get({
 			document_id: request_id,
 			collection_name: DBCollectionName.flatShareRequests,
@@ -29,21 +28,10 @@ export default async function page({
 		DiscussionService.fetchMessages({ request_id }),
 	])
 
-	let finalRequest: DocumentData | null = requestData
-
-	if (finalRequest && finalRequest._user_ref && finalRequest._user_ref._id) {
-		const userId = finalRequest._user_ref._id
-		const user_info = await UserInfoService.get(userId)
-		finalRequest = { ...finalRequest, user_info }
-	} else {
-		console.log('User reference not found in finalRequest document')
-		finalRequest = null
-	}
-
 	// console.log(finalDiscussions)
 	// TODO: set an error page to redirect them home
 
-	if (!finalRequest) redirect('/')
+	if (!requests) redirect('/')
 
 	return (
 		<Flex
@@ -94,8 +82,8 @@ export default async function page({
 					flexFlow={'column'}
 				>
 					<MediaCarousel
-						video={finalRequest.video_url}
-						images={finalRequest.images_urls}
+						video={requests.video_url}
+						images={requests.images_urls}
 					/>
 				</Flex>
 
@@ -106,7 +94,7 @@ export default async function page({
 					flexDir={'column'}
 				>
 					<ApartmentDetails
-						request={JSON.stringify(finalRequest)}
+						request={JSON.stringify(requests)}
 						discussions={JSON.stringify(messages)}
 					/>
 				</Flex>

@@ -83,7 +83,14 @@ export const createHostRequestDTO = z.object({
 	bathrooms: z.number().nullable(),
 	toilets: z.number().nullable(),
 	living_rooms: z.number().nullable(),
-	amenities: z.array(z.string()),
+	amenities: z.array(
+		z.custom<DocumentReference | undefined>(
+			(val) => val instanceof DocumentReference,
+			{
+				message: 'Must be a DocumentReference',
+			},
+		),
+	),
 
 	images_urls: z.array(z.string()).min(4),
 	video_url: z.string().nullable(),
@@ -126,6 +133,12 @@ export const createHostRequestDTO = z.object({
 		},
 	),
 	_user_ref: z.custom<DocumentReference | undefined>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
+	_user_info_ref: z.custom<DocumentReference | undefined>(
 		(val) => val instanceof DocumentReference,
 		{
 			message: 'Must be a DocumentReference',
@@ -175,6 +188,12 @@ export const createSeekerRequestDTO = z.object({
 			message: 'Must be a DocumentReference',
 		},
 	),
+	_user_info_ref: z.custom<DocumentReference | undefined>(
+		(val) => val instanceof DocumentReference,
+		{
+			message: 'Must be a DocumentReference',
+		},
+	),
 	payment_type: z.enum([
 		'monthly',
 		'annually',
@@ -200,6 +219,8 @@ export type HostRequestDataDetails = Omit<
 	| '_category_ref'
 	| '_property_type_ref'
 	| '_user_ref'
+	| 'amenities'
+	| '_user_info_ref'
 > & {
 	id: string
 	_location_keyword_ref: {
@@ -219,7 +240,8 @@ export type HostRequestDataDetails = Omit<
 		_id: string
 		email: string
 	}
-	user_info: {
+	amenities: { title: string; id: string }[]
+	_user_info_ref: {
 		primary_phone_number: string
 		hide_profile: boolean
 		is_verified: boolean
