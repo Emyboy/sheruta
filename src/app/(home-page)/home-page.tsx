@@ -28,6 +28,8 @@ import {
 } from 'firebase/firestore'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import useAuthenticatedAxios from '@/hooks/useAxios'
 
 type Props = {
 	requests: string
@@ -48,6 +50,21 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	const [processedRequests, setProcessedRequests] = useState<
 		HostRequestDataDetails[]
 	>([])
+	const axiosAuth = useAuthenticatedAxios()
+
+	// const { data, isLoading, isError } = useQuery({
+	// 	queryKey: ["testing"],
+	// 	queryFn: () => axiosAuth.get("/users/dependencies"),
+	// 	refetchOnWindowFocus: false,
+	// })
+
+	// const {mutate, isPending} = useMutation({
+	// 	mutationFn: (data) => axiosAuth.post(`/route`, { ...data }),
+	// 	onSuccess:()=>{},
+	// 	onError:(errror)=>{
+	// 		console.log(errror)
+	// 	}
+	// })
 
 	useEffect(() => {
 		const processRequests = async () => {
@@ -67,6 +84,8 @@ export default function HomePage({ requests, userProfiles }: Props) {
 
 	const loadMore = async () => {
 		setIsLoading(true)
+
+		// mutate(data)
 		try {
 			const requestsRef = collection(db, DBCollectionName.flatShareRequests)
 			let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
