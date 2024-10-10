@@ -3,7 +3,6 @@ import {
 	collection,
 	doc,
 	getDocs,
-	orderBy,
 	query,
 	serverTimestamp,
 	setDoc,
@@ -28,6 +27,8 @@ export const NotificationsBodyMessage: Record<
 	profile_view: 'viewed your profile',
 	cancelled: 'cancelled your inspection',
 	bookmark: 'saved your apartment listing',
+	background_check:
+		'Someone has requested to check your background' /**RREPLACE SOMEONE WITH USERNAME */,
 }
 
 export default class NotificationsService {

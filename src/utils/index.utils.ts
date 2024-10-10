@@ -210,14 +210,33 @@ export function getTimeDifferenceInHours(timestamp?: Timestamp) {
 // Helper function to recursively resolve DocumentReference objects
 export async function resolveDocumentReferences(docData: any): Promise<any> {
 	const refFields = Object.entries(docData).filter(
-		([key, value]) => value instanceof DocumentReference,
+		([key, value]) =>
+			value instanceof DocumentReference ||
+			(Array.isArray(value) &&
+				value.some((v) => v instanceof DocumentReference)),
 	)
 
 	const resolvedRefs = await Promise.all(
-		refFields.map(async ([key, ref]) => {
-			const resolvedDoc = await getDoc(ref as any)
-			const resolvedData = await resolveDocumentReferences(resolvedDoc.data())
-			return { [key]: { ...resolvedData, id: resolvedDoc.id } }
+		refFields.map(async ([key, value]) => {
+			if (value instanceof DocumentReference) {
+				const resolvedDoc = await getDoc(value as any)
+				const resolvedData = await resolveDocumentReferences(resolvedDoc.data())
+				return { [key]: { ...resolvedData, id: resolvedDoc.id } }
+			} else if (Array.isArray(value)) {
+				const resolvedArray = await Promise.all(
+					value.map(async (item) => {
+						if (item instanceof DocumentReference) {
+							const resolvedDoc = await getDoc(item)
+							const resolvedData = await resolveDocumentReferences(
+								resolvedDoc.data(),
+							)
+							return { ...resolvedData, id: resolvedDoc.id }
+						}
+						return item
+					}),
+				)
+				return { [key]: resolvedArray }
+			}
 		}),
 	)
 
@@ -243,3 +262,11 @@ export const convertRefToData = async (
 		console.log(err)
 	}
 }
+
+export const calculateAge = (birthdate?: string) =>
+	birthdate
+		? Math.floor(
+				(new Date().getTime() - new Date(birthdate).getTime()) /
+					(1000 * 60 * 60 * 24 * 365.25),
+			)
+		: null
