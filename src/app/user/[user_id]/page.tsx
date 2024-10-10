@@ -1,15 +1,16 @@
+import MainBackHeader from '@/components/atoms/MainBackHeader'
+import { MoreButton } from '@/components/atoms/MoreButton'
 import MainContainer from '@/components/layout/MainContainer'
 import MainHeader from '@/components/layout/MainHeader'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Flex, Box } from '@chakra-ui/react'
 import UserProfilePage from './(user-profile)/UserProfilePage'
 
 import PageNotFound from '@/components/PageNotFound'
 import { CACHE_TTL } from '@/constants'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
+import { Box, Flex } from '@chakra-ui/react'
 import {
 	collection,
 	doc,
@@ -19,16 +20,7 @@ import {
 	getDocs,
 	query,
 	where,
-	setDoc,
 } from 'firebase/firestore'
-import { CreateDTO } from '@/firebase/service/index.firebase'
-import SherutaDB from '@/firebase/service/index.firebase'
-
-import { promise } from 'zod'
-
-import { MoreButton } from '@/components/atoms/MoreButton'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import AuthService from '@/firebase/service/auth/auth.firebase'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -38,28 +30,11 @@ export default async function page(props: any) {
 
 	async function getUserData() {
 		try {
-			// const userDoc = await AuthService.getUser(user_id)
-
-			// if (!userDoc) return { user: null }
-
-			// console.log(userDoc)
-
-			// return {
-			// 	user: {
-			// 		first_name: userDoc.user.first_name,
-			// 		last_name: userDoc.user.last_name,
-			// 		email: userDoc.user.email,
-			// 		avatar_url: userDoc.user.avatar_url,
-			// 		id: userDoc.user._id,
-			// 	},
-			// }
-
 			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
-			if (!userDoc.exists()) return { user: null }
 
 			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
 
-			// console.log(formattedUserDoc)
+			// console.log('Basic user profile:...............',formattedUserDoc)
 
 			return {
 				user: formattedUserDoc
@@ -68,15 +43,16 @@ export default async function page(props: any) {
 							last_name: formattedUserDoc.last_name,
 							email: formattedUserDoc.email,
 							avatar_url: formattedUserDoc.avatar_url,
-							id: formattedUserDoc._id,
 						}
 					: null,
 			}
 		} catch (error) {
-			console.error('Error getting user:', error)
-			throw new Error('Failed to get user')
+			console.error('Error getting user profile:', error)
+			throw new Error('Failed to get user profile')
 		}
 	}
+
+	const user = await getUserData()
 
 	async function getUserProfile() {
 		try {
@@ -103,6 +79,9 @@ export default async function page(props: any) {
 				? userInfoDocs.docs[0].data()
 				: null
 
+			// console.log('FS profile:...............',formattedFlatShareProfile)
+			// console.log('User info:...............',formattedUserInfoDoc)
+
 			let interestsData: any = []
 
 			try {
@@ -121,7 +100,7 @@ export default async function page(props: any) {
 						.filter((data) => data !== null)
 				}
 			} catch (error) {
-				console.error('Error fetching interests:', error)
+				console.error('Error fetching document:', error)
 			}
 
 			let habitsData: any = []
@@ -141,7 +120,7 @@ export default async function page(props: any) {
 						.filter((data) => data !== null)
 				}
 			} catch (error) {
-				console.error('Error fetching habits:', error)
+				console.error('Error fetching document:', error)
 			}
 
 			let locationValue: any = null
@@ -158,7 +137,7 @@ export default async function page(props: any) {
 					console.log('Location keyword document does not exist.')
 				}
 			} catch (error) {
-				console.error('Error fetching Location keyword document:', error)
+				console.error('Error fetching document:', error)
 			}
 
 			let stateValue: any = null
@@ -213,6 +192,7 @@ export default async function page(props: any) {
 							whatsapp: formattedUserInfoDoc.whatsapp_phone_number,
 							phone_number: formattedUserInfoDoc.primary_phone_number,
 							gender: formattedUserInfoDoc.gender,
+							bio: formattedUserInfoDoc.bio,
 							is_verified: formattedUserInfoDoc.is_verified,
 						}
 					: null,
@@ -220,74 +200,13 @@ export default async function page(props: any) {
 
 			const plainUser = JSON.stringify(user)
 
-			// const plainUser = user
-
 			return plainUser
 		} catch (error) {
 			console.error('Error fetching document:', error)
 		}
 	}
 
-	// const flatshareInfos = await getUserProfile()
-	// const user = await getUserData()
-
-	const [user, flatshareInfos] = await Promise.all([
-		getUserData(),
-		getUserProfile(),
-	])
-
-	// const flatshareInfosParsed = flatshareInfos ? JSON.parse(flatshareInfos) : {}
-
-	// const userProfiles = {
-	// 	first_name: user.user?.first_name,
-	// 	last_name: user.user?.last_name,
-	// 	email: user.user?.email,
-	// 	avatar_url: user.user?.avatar_url,
-	// 	id: user.user?.id,
-	// 	occupation: flatshareInfosParsed.flatShareProfile.occupation,
-	// 	budget: flatshareInfosParsed.flatShareProfile.budget,
-	// 	interests: flatshareInfosParsed.flatShareProfile.interests,
-	// 	area: flatshareInfosParsed.flatShareProfile.area,
-	// 	habits: flatshareInfosParsed.flatShareProfile.habits,
-	// 	work_industry: flatshareInfosParsed.flatShareProfile.work_industry,
-	// 	credits: flatshareInfosParsed.flatShareProfile.credits,
-	// 	gender_preference: flatshareInfosParsed.flatShareProfile.gender_preference,
-	// 	age_preference: flatshareInfosParsed.flatShareProfile.age_preference,
-	// 	bio: flatshareInfosParsed.flatShareProfile.bio,
-	// 	payment_plan: flatshareInfosParsed.flatShareProfile.payment_plan || null,
-
-	// 	twitter: flatshareInfosParsed.flatShareProfile.socials.twitter,
-	// 	tiktok: flatshareInfosParsed.flatShareProfile.socials.tiktok,
-	// 	facebook: flatshareInfosParsed.flatShareProfile.socials.facebook,
-	// 	linkedin: flatshareInfosParsed.flatShareProfile.socials.linkedin,
-	// 	instagram: flatshareInfosParsed.flatShareProfile.socials.instagram,
-
-	// 	state: flatshareInfosParsed.flatShareProfile.state.name,
-	// 	seeking: flatshareInfosParsed.flatShareProfile.seeking,
-	// 	employment_status: flatshareInfosParsed.flatShareProfile.employment_status,
-	// 	religion: flatshareInfosParsed.flatShareProfile.religion,
-	// 	done_kyc: flatshareInfosParsed.flatShareProfile.done_kyc,
-
-	// 	whatsapp: flatshareInfosParsed.userInfo.whatsapp,
-	// 	phone_number: flatshareInfosParsed.userInfo.phone_number,
-	// 	gender: flatshareInfosParsed.userInfo.gender,
-	// 	is_verified: flatshareInfosParsed.userInfo.is_verified,
-	// 	profilePromo: false,
-	// 	document_id: user_id,
-	// 	_user_ref: `/users/${user_id}`,
-	// }
-
-	const userId = user.user?.id
-
-	
-
-	// const profileData: CreateDTO = {
-	// 	collection_name: DBCollectionName.userProfile,
-	// 	data: userProfiles,
-	// 	document_id: user_id,
-	// }
-
-	// await saveProfileDocs(profileData, user_id)
+	const otherInfos = await getUserProfile()
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -302,7 +221,7 @@ export default async function page(props: any) {
 							<Flex alignContent={'center'}>
 								<MainBackHeader />
 								<MoreButton
-									userId={userId}
+									userId={user_id}
 									moreButtonList={[{ label: 'share' }, { label: 'promote' }]}
 								/>
 							</Flex>
@@ -311,14 +230,23 @@ export default async function page(props: any) {
 						{user ? (
 							<UserProfilePage
 								data={user}
-								flatshareInfos={flatshareInfos}
-								user_id={userId}
+								flatshareInfos={otherInfos}
+								user_id={user_id}
 								// profileInfo={userProfiles}
 							/>
 						) : (
 							<PageNotFound />
 						)}
 					</Flex>
+					{/* {user ? (
+						<UserProfilePage
+							data={user}
+							userId={otherInfos}
+							user_id={user_id}
+						/>
+					) : (
+						<PageNotFound />
+					)} */}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

@@ -1,10 +1,5 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { Badge, Flex, Text } from '@chakra-ui/react'
-import React, { useState } from 'react'
-import {
-	FlatShareProfileData,
-	flatShareProfileDefaults,
-} from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 
 type Props = {
 	userProfile: any

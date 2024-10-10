@@ -206,4 +206,5 @@ export const DBCollectionName = {
 	interests: 'interests',
 	categories: 'categories',
 	amenities: 'amenities',
+	analytics: 'analytics',
 }

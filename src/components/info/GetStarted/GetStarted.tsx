@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react'
+import { Flex, Box, Text, Link } from '@chakra-ui/react'
 import { useAuthContext } from '@/context/auth.context'
 import GetStartedBeginning from '@/components/info/GetStarted/GetStartedBeginning'
 import GenderSelect from '@/components/forms/GenderSelector'
@@ -12,6 +12,7 @@ import ProfilePictureSelector from '@/components/info/GetStarted/ProfilePictureS
 import PersonalInfoForm from './PersonalInfoForm'
 import LocationKeywordForm from './LocationKeywordForm'
 import GetStartedCompleted from '@/components/info/GetStarted/GetStartedCompleted'
+import EmailVerification from '@/components/Verification/EmailVerification'
 
 export default function GetStarted() {
 	const {
@@ -47,6 +48,27 @@ export default function GetStarted() {
 
 	if (!user) {
 		return null
+	}
+
+	if (!user.email_verified) {
+		return (
+			<Flex
+				bg={'dark_light'}
+				_dark={{ bg: 'dark' }}
+				position={'fixed'}
+				top={0}
+				bottom={0}
+				left={0}
+				right={0}
+				zIndex={500}
+				flexDir={'column'}
+				justifyContent={'center'}
+				alignItems={'center'}
+				overflowY={'auto'}
+			>
+				<EmailVerification />
+			</Flex>
+		)
 	}
 
 	if (

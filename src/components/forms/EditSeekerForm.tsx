@@ -31,7 +31,7 @@ import SherutaDB from '@/firebase/service/index.firebase'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
-	PaymentPlan,
+	PaymentType,
 	RequestData,
 	SeekerRequestData,
 	LocationObject,
@@ -51,7 +51,7 @@ import { LocationKeywordData } from '@/firebase/service/options/location-keyword
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-const budgetLimits: Record<PaymentPlan, number> = {
+const budgetLimits: Record<PaymentType, number> = {
 	weekly: 10000,
 	monthly: 25000,
 	quarterly: 80000,
@@ -138,7 +138,7 @@ const EditSeekerForm: React.FC<{
 		budget: parsedRequestData?.budget,
 		google_location_object: parsedRequestData?.google_location_object,
 		google_location_text: parsedRequestData?.google_location_text,
-		payment_type: parsedRequestData?.payment_type as PaymentPlan,
+		payment_type: parsedRequestData?.payment_type as PaymentType,
 		seeking: true,
 	})
 
@@ -214,7 +214,7 @@ const EditSeekerForm: React.FC<{
 			paymentType: string,
 			budgetValue: number,
 		) => {
-			const budgetLimit = budgetLimits[paymentType as PaymentPlan]
+			const budgetLimit = budgetLimits[paymentType as PaymentType]
 			setIsBudgetInvalid(budgetValue < budgetLimit)
 		}
 
@@ -232,7 +232,7 @@ const EditSeekerForm: React.FC<{
 
 			case 'payment_type':
 				const budget = formData?.budget as number
-				if (value) updateBudgetInvalidState(value as PaymentPlan, budget)
+				if (value) updateBudgetInvalidState(value as PaymentType, budget)
 				break
 
 			case 'stateId':

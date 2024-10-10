@@ -1,34 +1,34 @@
 'use client'
-import {
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	ModalCloseButton,
-	Box,
-	Button,
-	Center,
-	Flex,
-	Text,
-	useColorMode,
-	Textarea,
-	Select,
-} from '@chakra-ui/react'
+
+import CloseIcon from '@/assets/svg/close-icon-dark'
+import CreditInfo from '@/components/info/CreditInfo/CreditInfo'
+import { creditTable } from '@/constants'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import {
 	saveProfileDocs,
-	getProfile,
 	saveProfileSnippetDocs,
 } from '@/firebase/service/userProfile/user-profile'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { useAuthContext } from '@/context/auth.context'
-import React, { useEffect, useState } from 'react'
+import usePayment from '@/hooks/usePayment'
+import {
+	Box,
+	Button,
+	Flex,
+	Modal,
+	ModalBody,
+	ModalCloseButton,
+	ModalContent,
+	ModalFooter,
+	ModalOverlay,
+	Select,
+	Text,
+	Textarea,
+	useColorMode,
+} from '@chakra-ui/react'
+import { Timestamp } from 'firebase/firestore'
+import React, { useState, useEffect } from 'react'
 import { ImageSelector } from './imageSelector'
-import { useOptionsContext } from '@/context/options.context'
-
 interface Props{
 	profileOwnerId: string;
 }
@@ -36,6 +36,8 @@ interface Props{
 
 export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 	const { colorMode } = useColorMode()
+
+	const [_, paymentActions] = usePayment()
 
 	const {
 		authState: { flat_share_profile, user },
@@ -51,92 +53,174 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 
 	const onOpen = () => setIsOpen(true)
 	const onClose = () => setIsOpen(false)
-	const [bio, setBio] = useState('')
-	const [isLoading, setIsLoading] = useState(false)
-	const [userId, setUserId] = useState<string>('')
+
+	const [bio, setBio] = useState(flat_share_profile?.bio || '')
 	const [_service, setService] = useState<string>('')
 	const [_profileData, setProfileData] = useState({})
 	const [profileOwner, setProfileOwner] = useState(false);
 	const [blurModal, setBlurModal] = useState<boolean>(false);
+	const [promotionOption, setPromotionOption] = useState(
+		creditTable.PROFILE_PROMO_7_DAYS,
+	)
+	const [noOfDays, setNoOfDays] = useState(7)
+	const [isLoading, setIsLoading] = useState(false)
+
+	const [showCreditInfo, setShowCreditInfo] = useState<boolean>(false)
 
 	useEffect(() => {
 		
 		const currentUser = user?._id
 		const viewedProfileId = profileOwnerId
+		if(flat_share_profile){
+			setBio(flat_share_profile?.bio || "")
+
+		}
 
 		if (viewedProfileId === currentUser) {
 			setProfileOwner(true)
 		}
 	}, [user, profileOwnerId])
 
-	useEffect(() => {
-		const fetchProfile = async () => {
-			const profile = await getProfile(userId)
+	// useEffect(() => {
+	// 	const fetchProfile = async () => {
+	// 		const profile = await getProfile(userId)
 
-			if (profile) {
-				const profileData = {
-					first_name: profile.first_name,
-					last_name: profile.last_name,
-					service_type: profile.service_type,
-					seeking: profile.seeking,
-					payment_type: profile.payment_type,
-					bio: profile.bio,
-					budget: profile.budget,
-					avatar_url: profile.avatar_url,
-					state: profile.state,
-					area: profile.area,
-					_user_ref: profile._user_ref,
-					document_id: profile.document_id,
-				}
+	// 		if (profile) {
+	// 			const profileData = {
+	// 				first_name: profile.first_name,
+	// 				last_name: profile.last_name,
+	// 				service_type: profile.service_type,
+	// 				seeking: profile.seeking,
+	// 				payment_type: profile.payment_type,
+	// 				bio: profile.bio,
+	// 				budget: profile.budget,
+	// 				avatar_url: profile.avatar_url,
+	// 				state: profile.state,
+	// 				area: profile.area,
+	// 				_user_ref: profile._user_ref,
+	// 				document_id: profile.document_id,
+	// 			}
 
-				setService(profileData.service_type)
-				setBio(profile.bio)
-				setProfileData(profileData)
-			} else {
-				console.log('Profile not found or could not be loaded.')
-			}
-		}
+	// 			setService(profileData.service_type)
+	// 			setBio(profile.bio)
+	// 			setProfileData(profileData)
+	// 		} else {
+	// 			console.log('Profile not found or could not be loaded.')
+	// 		}
+	// 	}
 
-		if (userId) {
-			fetchProfile()
-		}
-	}, [userId])
+	// 	if (userId) {
+	// 		fetchProfile()
+	// 	}
+	// }, [userId])
 
-	useEffect(() => {
-		setUserId(user?._id || '')
-		// setBio(flat_share_profile?.bio || '')
-		console.log('Bio.....................', bio)
-	}, [isOpen])
+	// useEffect(() => {
+		
+	// 	setBio(flat_share_profile?.bio || '')
+	// 	console.log('Bio.....................', bio)
+	// }, [isOpen])
+	
 
-	const update = async (e: any) => {
-		e.preventDefault()
+	const update = async () => {
 		setIsLoading(true)
-		await saveProfileDocs(
-			{
-				bio,
-				service_type: _service,
-			},
-			userId,
-		)
-		await FlatShareProfileService.update({
-			data: { bio },
-			document_id: userId,
-		})
-		createProfileSnippetAd()
+		setShowCreditInfo(false)
+
+		if (!flat_share_profile || !user) return
+
+		const profileData = {
+			bio,
+			service_type: _service,
+			first_name: user.first_name,
+			last_name: user.last_name,
+			seeking: flat_share_profile.seeking,
+			payment_type: flat_share_profile.payment_type || null,
+			budget: flat_share_profile.budget,
+			avatar_url: user.avatar_url,
+			state: flat_share_profile.state,
+			location_keyword: flat_share_profile.location_keyword,
+			_user_ref: flat_share_profile._user_ref,
+			document_id: flat_share_profile._user_id,
+			promotion_expiry_date: Timestamp.fromDate(
+				new Date(new Date().setDate(new Date().getDate() + noOfDays)),
+			),
+		}
+		
+
+		await Promise.all([
+			saveProfileDocs(
+				{
+					bio,
+					service_type: _service,
+				},
+				flat_share_profile._user_id,
+			),
+			FlatShareProfileService.update({
+				data: { bio,
+					service_type: _service, },
+				document_id: flat_share_profile._user_id,
+			}),
+			paymentActions.decrementCredit({
+				amount: promotionOption,
+				user_id: user._id,
+			}),
+			saveProfileSnippetDocs(profileData, flat_share_profile._user_id),
+		])
+
 		await getAuthDependencies()
 		setIsLoading(false)
 		onClose()
 	}
 
-	const createProfileSnippetAd = async () => {
-		await saveProfileSnippetDocs(_profileData, userId)
-		
-	}
+
+	if (!user) return null
 
 	return (
 		<>
 			{profileOwner && <Button onClick={onOpen}>Promote profile on feeds</Button>}
 			
+
+			<Modal
+				isOpen={showCreditInfo}
+				onClose={() => {
+					setIsLoading(false)
+					setShowCreditInfo(false)
+				}}
+				size={'xl'}
+			>
+				<ModalOverlay />
+				<ModalContent
+					w={'100%'}
+					margin={'auto'}
+					flexDir={'column'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					position={'relative'}
+					rounded={'16px'}
+					_dark={{ bgColor: 'black' }}
+					_light={{
+						bgColor: '#FDFDFD',
+						border: '1px',
+						borderColor: 'text_muted',
+					}}
+					py={{ base: '16px', md: '24px' }}
+					px={{ base: '16px', sm: '24px', md: '32px' }}
+					gap={{ base: '24px', md: '32px' }}
+				>
+					<Box
+						pos={'absolute'}
+						top={{ base: '16px', md: '30px' }}
+						right={{ base: '16px', md: '30px' }}
+						cursor={'pointer'}
+						onClick={() => {
+							setIsLoading(false)
+							setShowCreditInfo(false)
+						}}
+					>
+						<CloseIcon />
+					</Box>
+					<CreditInfo credit={promotionOption} onUse={update} />
+				</ModalContent>
+			</Modal>
 
 			<Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay
@@ -182,6 +266,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 								setBio(e.target.value)
 							}}
 							value={bio}
+							isRequired
 						/>
 
 						<Text
@@ -189,6 +274,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 							color={'dark_lighter'}
 							className={'animate__animated animate__fadeInUp'}
 							outlineColor={'brand_light'}
+							mt={2}
 						>
 							Enter service type
 						</Text>
@@ -201,6 +287,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 								setService(e.target.value)
 							}
 							value={_service}
+							isRequired
 						>
 							{services &&
 								services.map((data, index: number) => (
@@ -209,21 +296,59 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 									</option>
 								))}
 						</Select>
+
+						<Text
+							textAlign={'left'}
+							color={'dark_lighter'}
+							className={'animate__animated animate__fadeInUp'}
+							outlineColor={'brand_light'}
+							mt={2}
+						>
+							Promotion duration
+						</Text>
+						<Select
+							placeholder="Select option"
+							bg="dark"
+							required
+							w={'70%'}
+							onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+								setPromotionOption(Number(e.target.value))
+								if (Number(e.target.value) === creditTable.PROFILE_PROMO_7_DAYS)
+									setNoOfDays(7)
+								if (
+									Number(e.target.value) === creditTable.PROFILE_PROMO_14_DAYS
+								)
+									setNoOfDays(14)
+								if (
+									Number(e.target.value) === creditTable.PROFILE_PROMO_30_DAYS
+								)
+									setNoOfDays(30)
+							}}
+							value={promotionOption}
+							isRequired
+						>
+							<option value={creditTable.PROFILE_PROMO_7_DAYS}>
+								7 Days (3000 Credits)
+							</option>
+							<option value={creditTable.PROFILE_PROMO_14_DAYS}>
+								14 Days (5000 Credits)
+							</option>
+							<option value={creditTable.PROFILE_PROMO_30_DAYS}>
+								30 Days (8000 Credits)
+							</option>
+						</Select>
 					</Flex>
 					</ModalBody>
-
 					<ModalFooter>
-						{/* <Button color='brand' mr={3} onClick={onClose}>
-              Close
-            </Button> */}
 						<Button
 							color="brand"
 							type={'submit'}
 							fontSize={'14px'}
 							mr={5}
-							onClick={update}
+							onClick={() => setShowCreditInfo(true)}
 							isLoading={isLoading}
 							style={{ visibility: !blurModal ? "visible" : "hidden" }}
+							isDisabled={!_service || !bio || !promotionOption}
 						>
 							Promote
 						</Button>

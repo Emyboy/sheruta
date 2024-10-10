@@ -42,10 +42,7 @@ export const BookmarksProvider: React.FC<{ children: ReactNode }> = ({
 				userId,
 			)) as BookmarkDataDetails[]
 
-			if (!userBookmarks || userBookmarks.length === 0) {
-				setBookmarks([])
-				return
-			}
+			if (!userBookmarks || userBookmarks.length === 0) return setBookmarks([])
 
 			const resolvedBookmarks = await Promise.all(
 				userBookmarks.map(async (bookmark) => {

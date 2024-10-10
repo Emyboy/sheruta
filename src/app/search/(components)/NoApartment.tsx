@@ -19,7 +19,7 @@ export default function NoApartment() {
 				_light={{ color: '#11171799' }}
 				color={'text_muted'}
 			>
-				There is No Apartment that matches your search results
+				There is no Apartment or Profiles that matches your search results
 			</Text>
 		</Flex>
 	)
