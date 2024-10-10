@@ -4,6 +4,8 @@ import { HostRequestDataDetails } from '@/firebase/service/request/request.types
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
 import HomePage from './(home-page)/home-page'
+import { serverSession } from '@/utils/auth'
+import axiosInstance from '@/utils/custom-axios'
 
 export const revalidate = CACHE_TTL?.SHORT
 
@@ -19,6 +21,11 @@ export default async function page({
 		}),
 		getAllProfileSnippetDocs(searchParams),
 	])
+
+	const { data: userDependency } =
+		await axiosInstance.get(`/users/dependencies`)
+	console.log(userDependency)
+	// todo save the user dependency to the context
 
 	const finalRequests = await Promise.all(
 		requests

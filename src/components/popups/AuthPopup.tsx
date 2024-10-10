@@ -42,6 +42,7 @@ import { AxiosError } from 'axios'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface Props {}
 
@@ -321,6 +322,7 @@ const AuthForm: React.FC<{
 	const toast = useToast()
 	const [showPassword, setShowPassword] = React.useState(false)
 	const [showOTPDialog, setShowOTPDialog] = useState<boolean>(false)
+	const router = useRouter()
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: (data: SignUpProps) =>
@@ -346,7 +348,7 @@ const AuthForm: React.FC<{
 	})
 
 	const { loginWithGoogle } = useAuthContext()
-	const { setAuthState } = useAuthContext()
+	// const { setAuthState } = useAuthContext()
 	const { showToast } = useCommon()
 
 	const validationSchema = Yup.object({
@@ -388,6 +390,14 @@ const AuthForm: React.FC<{
 								message: resp?.error || 'Something went wrong',
 								status: 'error',
 							})
+						} else {
+							showToast({
+								message: 'Login successful',
+								status: 'success',
+							})
+							router.refresh()
+							setIsPasswordReset(false)
+							setIsSignUp(false)
 						}
 					})
 				}

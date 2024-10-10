@@ -9,6 +9,21 @@ import
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
+interface User
+{
+
+	_id: string;
+
+	email: string;
+
+}
+
+interface CustomSession
+{
+	user: User;
+	token: string;
+}
+
 const authOptions: NextAuthOptions = {
 	providers: [
 		GoogleProvider({
@@ -17,15 +32,18 @@ const authOptions: NextAuthOptions = {
 		}),
 		CredentialsProvider({
 			name: 'Credentials',
-			id: 'credentials',
-
+			credentials: {
+				email: { label: "Email", type: "text" },
+				password: { label: "Password", type: "password" }
+			},
+			// @ts-ignore
 			async authorize(credentials)
 			{
 				if (!credentials || !credentials.email || !credentials.password) {
 					throw new Error('Email and password are required');
 				}
 				try {
-					const { data } = await axios.post(
+					const { data } = await axios.post<{ data: { user: User; token: string; }; }>(
 						`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
 						{
 							email: credentials.email,
@@ -33,34 +51,32 @@ const authOptions: NextAuthOptions = {
 						},
 					);
 
-					console.log("This the result", data);
+
 
 					return {
-						user: { ...data?.data?.user },
-						token: data?.data?.token
+						...data.data.user,
+						token: data.data.token,
 					};
-
 				} catch (error) {
-
 					if (axios.isAxiosError(error)) {
-						throw new Error(error?.response?.data?.message);
+						throw new Error(error.response?.data?.message || 'An error occurred');
 					} else {
 						throw new Error('Something went wrong');
 					}
+
+
 				}
 			},
 		}),
 	],
 	callbacks: {
-		signIn: async ({ user, account, profile, email, credentials }) =>
+		async signIn({ user, account, profile })
 		{
 			if (account?.provider === 'google') {
 				try {
 					const { data } = await axios.post(
 						`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google/callback`,
-						{
-							...profile,
-						},
+						profile,
 					);
 
 					console.log('This is the data', data);
@@ -68,38 +84,43 @@ const authOptions: NextAuthOptions = {
 				} catch (error) {
 					return false;
 				}
-			} else {
-				return true;
-
 			}
-
-
+			return true;
 		},
-		jwt: async ({ user, token }) =>
+		async jwt({ token, user })
 		{
 			if (user) {
-				console.log("This the user ", user);
-				token.user = user?.user;
-				token.token = user?.token;
+
+				token.user = user as unknown as User;
+				token.token = (user as unknown as { token: string; }).token;
 			}
 			return token;
 		},
-		session: async ({ session, token }) =>
+		async session({ session, token })
 		{
-			console.log("This is the token", token);
-			session.user = token.user;
-			session.token = token.token;
 
-
-			return session;
+			return {
+				...session,
+				user: token.user as User,
+				token: token.token as string,
+			};
 		},
 	},
 	pages: {
 		signIn: '/',
 	},
 	secret: process.env.NEXTAUTH_SECRET,
+	debug: process.env.NODE_ENV === 'development',
 };
 
-
-
 export default authOptions;
+
+export const serverSession = (
+	...args:
+		| [ GetServerSidePropsContext[ 'req' ], GetServerSidePropsContext[ 'res' ] ]
+		| [ NextApiRequest, NextApiResponse ]
+		| []
+) =>
+{
+	return getServerSession(...args, authOptions);
+};
