@@ -27,6 +27,7 @@ export async function POST(req: Request) {
 			statusText: 'NIN Account Lookup Successful',
 		})
 	} catch (error: any) {
+		// console.log(error)
 		console.error('Error verifying NIN:', error.response?.data || error.message)
 
 		return NextResponse.json(

@@ -153,6 +153,14 @@ export const createHostRequestDTO = z.object({
 
 	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
+	background_checks: z
+		.record(
+			z.string(),
+			z.object({
+				is_approved: z.enum(['yes', 'no', 'pending']),
+			}),
+		)
+		.optional(),
 })
 
 export const createSeekerRequestDTO = z.object({
