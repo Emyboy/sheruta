@@ -15,7 +15,7 @@ import {
 	Stack,
 	Text,
 } from '@chakra-ui/react'
-import { useSearchParams } from 'next/navigation'
+import { Timestamp } from 'firebase/firestore'
 import { BiBookmark } from 'react-icons/bi'
 
 interface UserProfile {
@@ -32,11 +32,11 @@ interface UserProfile {
 		last_name: string
 		first_name: string
 	}
+	promotion_expiry_date?: Timestamp
 }
 
 export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 	const { authState } = useAuthContext()
-	const params = useSearchParams()
 
 	return (
 		<Flex m={4}>
@@ -80,7 +80,7 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 						<CardBody mb={0} border="none">
 							<Flex justify="space-between" align="center" mb={3}>
 								<Text>{`${item._user_ref.first_name} ${item._user_ref.last_name}`}</Text>
-								{!params.toString() && (
+								{item.promotion_expiry_date && (
 									<Badge color="text_color" background="border_color">
 										Promoted
 									</Badge>

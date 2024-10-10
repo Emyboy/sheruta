@@ -103,6 +103,7 @@ const initialFormState: SeekerRequestData = {
 	_state_ref: undefined,
 	_service_ref: undefined,
 	_user_ref: undefined,
+	_user_info_ref: undefined,
 	payment_type: 'weekly',
 	seeking: true, //this should be true by default for seekers
 	createdAt: Timestamp.now(),
@@ -135,13 +136,14 @@ const CreateSeekerForm: React.FC = () => {
 	useEffect(() => {
 		if (flat_share_profile && user_info) {
 			setUserInfo({
-				state: flat_share_profile?.state,
-				location: flat_share_profile?.location_keyword,
+				state: flat_share_profile.state,
+				location: flat_share_profile.location_keyword,
 			})
 
 			setFormData((prev: SeekerRequestData) => ({
 				...prev,
-				_user_ref: flat_share_profile?._user_ref,
+				_user_ref: flat_share_profile._user_ref,
+				_user_info_ref: flat_share_profile._user_info_ref,
 			}))
 		}
 	}, [flat_share_profile, user_info])

@@ -170,9 +170,21 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 			(property) => property.id === formData.property,
 		)
 
+		const amenities = formData.pre_amenities.map(
+			(amenity) =>
+				options.amenities.find((item) => item.title === amenity.title)._ref,
+		)
+
 		try {
-			const { category, service, state, area, property, ...cleanedFormData } =
-				formData
+			const {
+				category,
+				service,
+				state,
+				area,
+				property,
+				pre_amenities,
+				...cleanedFormData
+			} = formData
 
 			const data: HostRequestData = {
 				...cleanedFormData,
@@ -183,6 +195,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 				_property_type_ref: selectedProperty._ref,
 				_user_ref: flat_share_profile?._user_ref,
 				seeking: false,
+				amenities,
 				updatedAt: Timestamp.now(),
 			}
 
@@ -568,17 +581,22 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 											value={amenity.title}
 											key={amenity.id}
 											textColor={'white'}
-											isChecked={formData.amenities.includes(amenity.title)}
+											isChecked={formData.pre_amenities.some(
+												(item) => item.id === amenity.id,
+											)}
 											onChange={(e) => {
 												const { checked, value } = e.target
 												if (checked) {
-													const amenities = [...formData.amenities, value]
-													setFormData((prev) => ({ ...prev, amenities }))
+													const pre_amenities = [
+														...formData.pre_amenities,
+														{ id: amenity.title.toLowerCase(), title: value },
+													]
+													setFormData((prev) => ({ ...prev, pre_amenities }))
 												} else {
-													const amenities = formData.amenities.filter(
-														(amenity) => amenity !== value,
+													const pre_amenities = formData.pre_amenities.filter(
+														(amenity) => amenity.title !== value,
 													)
-													setFormData((prev) => ({ ...prev, amenities }))
+													setFormData((prev) => ({ ...prev, pre_amenities }))
 												}
 											}}
 										>

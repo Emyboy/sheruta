@@ -27,7 +27,8 @@ export type FormDataType = {
 	bathrooms: number | null
 	toilets: number | null
 	living_rooms: number | null
-	amenities: string[]
+	pre_amenities: string[]
+	amenities: DocumentReference[]
 	house_rules: string[] | null
 	availability_status: AvailabilityStatus | null
 	_property_type_ref: undefined | DocumentReference
@@ -60,6 +61,7 @@ export default function HostSpace() {
 		bathrooms: 0,
 		toilets: 0,
 		living_rooms: 0,
+		pre_amenities: [],
 		amenities: [],
 		house_rules: null,
 		images_urls: [],

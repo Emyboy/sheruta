@@ -3,7 +3,6 @@ import {
 	collection,
 	doc,
 	getDocs,
-	orderBy,
 	query,
 	serverTimestamp,
 	setDoc,

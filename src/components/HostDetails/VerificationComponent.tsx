@@ -24,11 +24,15 @@ import {
 	Tbody,
 	Heading,
 	VStack,
+	IconButton,
+	Alert,
+	AlertIcon,
+	Code,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { BiSolidIdCard, BiSolidLock, BiSolidTimer } from 'react-icons/bi'
-import { BsExclamationTriangle } from 'react-icons/bs'
+import { BiBadgeCheck, BiSolidIdCard, BiSolidInfoCircle, BiSolidLock, BiSolidStar, BiSolidTimer, BiStar } from 'react-icons/bi'
+import { BsExclamationTriangle, BsInfoCircle, BsQuestionCircle } from 'react-icons/bs'
 import { FaSadTear } from 'react-icons/fa'
 import { FaQuestion } from 'react-icons/fa6'
 import { IconType } from 'react-icons/lib'
@@ -118,7 +122,6 @@ const AlertBox: React.FC<AlertBoxProps> = ({
 	)
 }
 
-
 const InfoSection = ({ title, data }: { title: string; data: any }) => {
 	const borderColor = useColorModeValue('#CBD5E0', '#333333')
 
@@ -151,8 +154,14 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 			</Heading>
 			<Table variant="simple">
 				<Tbody borderColor="gray">
-					{Object.keys(data).map((key, index) => (
-						<Tr key={key}>
+					{Object.keys(data).map((key, index) => {
+						
+						const premiumData: string[] = ["Surname", "First Name", "Middle Name", "Gender", "Age", "Govt Registered Phone Number", "Marital Status", "Govt Registered Address", "Name of NOK", "State of NOK", "Town of NOK", "Address of NOK"]
+						// 
+						return (<Tr 
+						key={key} 
+						// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
+						>
 							<Td
 								ps={0}
 								fontWeight="medium"
@@ -162,7 +171,7 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 										: `1px solid ${borderColor}`
 								}
 							>
-								{key}
+								{key} 
 							</Td>
 							<Td
 								borderBottom={
@@ -171,10 +180,11 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 										: `1px solid ${borderColor}`
 								}
 							>
-								{data[key]}
+								 { (premiumData.includes(key)) ? <><Icon color="brand" as={BiSolidInfoCircle} boxSize={4} />{' '}  </> : null} {data[key]}
 							</Td>
 						</Tr>
-					))}
+					)})}
+
 				</Tbody>
 			</Table>
 			<Button mt={4} colorScheme="teal" onClick={handleDownloadPDF}>
@@ -195,7 +205,7 @@ const UserProfile = ({
 		Surname: hostNinData?.lastname || 'N/A',
 		'First Name': hostNinData?.firstname || 'N/A',
 		'Middle Name': hostNinData?.middlename || 'N/A',
-		Gender: (hostNinData?.gender === "m") ? "Male" : "Female",
+		Gender: hostNinData?.gender === 'm' ? 'Male' : 'Female',
 		Age: hostNinData?.birthdate ? calculateAge(hostNinData.birthdate) : 'N/A',
 		'Contact Number': hostUserInfo?.primary_phone_number || 'N/A',
 		'Govt Registered Phone Number': hostNinData?.phone || 'N/A',
@@ -291,6 +301,8 @@ const UserProfile = ({
 					borderRadius="100%"
 				/>
 			</Box>
+
+			<Text display="inline-flex" gap={1} justifyContent={"center"} alignItems="center" textAlign={"center"} w="full" fontWeight="normal">Fields with the icon <Icon color="brand" as={BiSolidInfoCircle} /> are NIMC verified</Text>
 			<InfoSection title="Personal Information" data={personalInfo} />
 			<InfoSection title="Occupation" data={occupation} />
 			<InfoSection title="Socials" data={socials} />
