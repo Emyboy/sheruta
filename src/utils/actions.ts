@@ -52,3 +52,7 @@ export const createNotification = async (data: NotificationsType) => {
 		data,
 	})
 }
+
+// export const createNotification = async (data: NotificationsType) => {
+// 	await NotificationsService.create(data)
+// }

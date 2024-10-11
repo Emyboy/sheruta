@@ -1,20 +1,6 @@
-import { DEFAULT_PADDING } from '@/configs/theme'
-import {
-	Badge,
-	Box,
-	Button,
-	Card,
-	CardBody,
-	Divider,
-	Flex,
-	Image,
-	Link,
-	Stack,
-	Text,
-} from '@chakra-ui/react'
+import { Box, Button, Divider, Text } from '@chakra-ui/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
-import { BiBookmark } from 'react-icons/bi'
 import { TbCircleLetterX } from 'react-icons/tb'
 import ProfileSnippetCard from './ProfileSnippetCard'
 
@@ -40,8 +26,8 @@ interface UserProfile {
 
 const ProfileSnippet = ({ userProfiles }: Props) => {
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
-	const router = useRouter()
 	const params = useSearchParams()
+	const router = useRouter()
 
 	return (
 		<React.Fragment>

@@ -31,7 +31,8 @@ export type FormDataType = {
 	bathrooms: number | null
 	toilets: number | null
 	living_rooms: number | null
-	amenities: string[]
+	pre_amenities: { id: string; title: string }[]
+	amenities: DocumentReference[]
 	house_rules: string[] | null
 	availability_status: AvailabilityStatus | null
 	_property_type_ref: undefined | DocumentReference
@@ -73,7 +74,8 @@ export default function EditHostSpace({ data }: { data: string }) {
 		bathrooms: request.bathrooms || 0,
 		toilets: request.toilets || 0,
 		living_rooms: request.living_rooms || 0,
-		amenities: request.amenities || [],
+		pre_amenities: request.amenities || [],
+		amenities: [],
 		house_rules: request.house_rules || null,
 		images_urls: request.images_urls || [],
 		imagesRefPaths: request.imagesRefPaths || [],
@@ -89,7 +91,7 @@ export default function EditHostSpace({ data }: { data: string }) {
 		google_location_object: request.google_location_object || {},
 		google_location_text: request.google_location_text || '',
 		createdAt: request.createdAt,
-		// flat_share_profile: request.flat_share_profile,
+
 		state: '',
 		area: '',
 		service: '',
