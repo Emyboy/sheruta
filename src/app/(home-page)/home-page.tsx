@@ -30,6 +30,7 @@ import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import useAuthenticatedAxios from '@/hooks/useAxios'
+import { User } from 'firebase/auth'
 
 type Props = {
 	requests: string
@@ -50,19 +51,27 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	const [processedRequests, setProcessedRequests] = useState<
 		HostRequestDataDetails[]
 	>([])
-	const axiosAuth = useAuthenticatedAxios()
+	// const axiosAuth = useAuthenticatedAxios()
 
-	// const { data, isLoading, isError } = useQuery({
-	// 	queryKey: ["testing"],
-	// 	queryFn: () => axiosAuth.get("/users/dependencies"),
+	// const { data, isLoading, isError, error, refetch } = useQuery({
+	// 	queryKey: ["testing", ],
+	// 	queryFn: () => axiosAuth.get(`/route`),
 	// 	refetchOnWindowFocus: false,
 	// })
 
 	// const {mutate, isPending} = useMutation({
-	// 	mutationFn: (data) => axiosAuth.post(`/route`, { ...data }),
-	// 	onSuccess:()=>{},
-	// 	onError:(errror)=>{
-	// 		console.log(errror)
+	// 	mutationFn: (user:User) => axiosAuth.post(`/route`, { ...data }),
+	// 	onSuccess: () =>
+	// 	{
+	// 		// what to do when
+
+	// 		toast({
+	// 			message:"user infor update"
+	// 		})
+
+	// 	},
+	// 	onError:(error)=>{
+	// 		console.log(error)
 	// 	}
 	// })
 
@@ -85,7 +94,6 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	const loadMore = async () => {
 		setIsLoading(true)
 
-		// mutate(data)
 		try {
 			const requestsRef = collection(db, DBCollectionName.flatShareRequests)
 			let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
@@ -170,6 +178,15 @@ export default function HomePage({ requests, userProfiles }: Props) {
 			if (observer.current) observer.current.disconnect()
 		}
 	}, [isLoading, hasMore, lastRequestRef])
+
+	// const handleSubmit = (values) =>
+	// {
+	// 	/**
+	// 	 * username:daniel,
+	// 	 * _id:7386yihsdf8
+	// 	 */
+	// 	mutate(values)
+	// }
 
 	// Assign ref to the last item
 	const setRef = (node: HTMLDivElement | null) => {

@@ -37,12 +37,13 @@ import AuthService from '@/firebase/service/auth/auth.firebase'
 import useCommon from '@/hooks/useCommon'
 import { DocumentData } from 'firebase/firestore'
 import { useMutation } from '@tanstack/react-query'
-import axiosInstance from '@/utils/custom-axios'
+
 import { AxiosError } from 'axios'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { unAuthenticatedAxios } from '@/utils/custom-axios'
 
 interface Props {}
 
@@ -227,7 +228,7 @@ const OTPDialog: React.FC<{
 
 	const { mutate: verifyOTP, isPending } = useMutation({
 		mutationFn: (data: { token: string }) =>
-			axiosInstance.post(`/auth/verify`, data),
+			unAuthenticatedAxios.post(`/auth/verify`, data),
 		onError: (error: any) => {
 			const errorMessage =
 				error.response?.data?.message ||
@@ -326,7 +327,7 @@ const AuthForm: React.FC<{
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: (data: SignUpProps) =>
-			axiosInstance.post(`/auth/register`, data),
+			unAuthenticatedAxios.post(`/auth/register`, data),
 		onError: (error: any) => {
 			const errorMessage =
 				error.response?.data?.message ||
@@ -348,7 +349,7 @@ const AuthForm: React.FC<{
 	})
 
 	const { loginWithGoogle } = useAuthContext()
-	// const { setAuthState } = useAuthContext()
+	const { setAuthState } = useAuthContext()
 	const { showToast } = useCommon()
 
 	const validationSchema = Yup.object({

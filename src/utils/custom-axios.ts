@@ -24,3 +24,8 @@ axiosInstance.interceptors.request.use(
 )
 
 export default axiosInstance
+
+export const unAuthenticatedAxios = axios.create({
+	baseURL: BASE_URL,
+	headers: { 'Content-Type': 'application/json' },
+})

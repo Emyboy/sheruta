@@ -22,9 +22,8 @@ export default async function page({
 		getAllProfileSnippetDocs(searchParams),
 	])
 
-	const { data: userDependency } =
-		await axiosInstance.get(`/users/dependencies`)
-	console.log(userDependency)
+	const { data } = await axiosInstance.get(`/users/dependencies`)
+	console.log(data)
 	// todo save the user dependency to the context
 
 	const finalRequests = await Promise.all(

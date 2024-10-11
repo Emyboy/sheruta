@@ -24,7 +24,14 @@ const CreditOptionsPopups = dynamic(
 )
 
 export function Providers({ children }: { children: React.ReactNode }) {
-	const queryClient = new QueryClient()
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				refetchOnWindowFocus: false,
+				retry: false,
+			},
+		},
+	})
 	return (
 		<ChakraProvider theme={theme}>
 			<ColorModeScript initialColorMode={theme.config.initialColorMode} />
