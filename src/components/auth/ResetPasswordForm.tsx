@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent } from 'react'
 import {
 	FormControl,
 	FormLabel,
@@ -11,37 +11,37 @@ import {
 	VStack,
 	Text,
 	FormErrorMessage,
-} from "@chakra-ui/react";
-import { BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
+	useColorModeValue,
+} from '@chakra-ui/react'
+import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs'
 import { useMutation } from '@tanstack/react-query'
 import { unAuthenticatedAxios } from '@/utils/custom-axios'
-import useCommon from "@/hooks/useCommon";
-import { DEFAULT_PADDING } from "@/configs/theme";
+import useCommon from '@/hooks/useCommon'
 
 type Props = {
-	token: string;
+	token: string
 }
 
 const ResetPasswordForm: React.FC<Props> = ({ token }) => {
-
-	const [password, setPassword] = useState<string>("");
-	const [confirmPassword, setConfirmPassword] = useState<string>("");
-	const [showPassword, setShowPassword] = useState<boolean>(false);
-	const [error, setError] = useState<string>("");
+	const [password, setPassword] = useState<string>('')
+	const [confirmPassword, setConfirmPassword] = useState<string>('')
+	const [showPassword, setShowPassword] = useState<boolean>(false)
+	const [error, setError] = useState<string>('')
 	const { showToast } = useCommon()
+	const borderColor = useColorModeValue('#CBD5E0', '#333333')
 
 	const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-		setPassword(e.target.value);
-		setError("");
-	};
+		setPassword(e.target.value)
+		setError('')
+	}
 
 	const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-		setConfirmPassword(e.target.value);
-		setError("");
-	};
+		setConfirmPassword(e.target.value)
+		setError('')
+	}
 
 	const { mutate: resetPassword, isPending } = useMutation({
-		mutationFn: (data: { token: string, password: string }) =>
+		mutationFn: (data: { token: string; password: string }) =>
 			unAuthenticatedAxios.put(`/auth/password/reset`, data),
 		onError: (error: any) => {
 			const errorMessage =
@@ -58,29 +58,38 @@ const ResetPasswordForm: React.FC<Props> = ({ token }) => {
 				message: 'Password reset was successful',
 				status: 'success',
 			}),
-			setTimeout(() => {
-				window.location.assign('/')
-			}, 3000)
+				setTimeout(() => {
+					window.location.assign('/')
+				}, 3000)
 		},
 	})
 
 	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
+		e.preventDefault()
 		if (password !== confirmPassword) {
-			setError("Passwords do not match.");
-			return;
+			setError('Passwords do not match.')
+			return
 		}
 		return resetPassword({ token, password })
-	};
+	}
 
 	return (
-		<VStack as="form" p={DEFAULT_PADDING} spacing={4} onSubmit={handleSubmit} minH={"50dvh"}>
-			<Text fontSize="2xl" fontWeight="bold">Reset your password</Text>
-			<FormControl id="password" isRequired isInvalid={error !== ""}>
+		<VStack
+			as="form"
+			p={10}
+			borderRadius={"lg"}
+			spacing={4}
+			onSubmit={handleSubmit}
+			border={`1px solid ${borderColor}`}
+		>
+			<Text fontSize="2xl" mb={5} fontWeight="bold">
+				Reset your password
+			</Text>
+			<FormControl id="password" isRequired isInvalid={error !== ''}>
 				<FormLabel>New Password</FormLabel>
 				<InputGroup>
 					<Input
-						type={showPassword ? "text" : "password"}
+						type={showPassword ? 'text' : 'password'}
 						placeholder="Enter new password"
 						value={password}
 						onChange={handlePasswordChange}
@@ -94,11 +103,11 @@ const ResetPasswordForm: React.FC<Props> = ({ token }) => {
 				<FormErrorMessage>{error}</FormErrorMessage>
 			</FormControl>
 
-			<FormControl id="confirm-password" isRequired isInvalid={error !== ""}>
+			<FormControl id="confirm-password" isRequired isInvalid={error !== ''}>
 				<FormLabel>Confirm New Password</FormLabel>
 				<InputGroup>
 					<Input
-						type={showPassword ? "text" : "password"}
+						type={showPassword ? 'text' : 'password'}
 						placeholder="Confirm new password"
 						value={confirmPassword}
 						onChange={handleConfirmPasswordChange}
@@ -112,12 +121,18 @@ const ResetPasswordForm: React.FC<Props> = ({ token }) => {
 				<FormErrorMessage>{error}</FormErrorMessage>
 			</FormControl>
 
-			<Button isDisabled={isPending} isLoading={isPending} w={"full"} bgColor="brand" type="submit">
+			<Button
+				isDisabled={isPending}
+				isLoading={isPending}
+				w={'full'}
+				bgColor="brand"
+				type="submit"
+				mt={5}
+			>
 				Reset Password
 			</Button>
 		</VStack>
+	)
+}
 
-	);
-};
-
-export default ResetPasswordForm;
+export default ResetPasswordForm

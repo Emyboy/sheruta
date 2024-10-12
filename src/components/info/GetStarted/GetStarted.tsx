@@ -21,7 +21,7 @@ export default function GetStarted() {
 	} = useAuthContext()
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
-	const searchParams = useSearchParams();
+	const searchParams = useSearchParams()
 
 	const next = () => {
 		setStep(step + 1)
@@ -52,7 +52,6 @@ export default function GetStarted() {
 		return null
 	}
 
-
 	// if(searchParams.get('action') && searchParams.get('action') === 'reset-password') {
 	// 	return <Flex
 	// 	bg={'dark_light'}
@@ -71,8 +70,6 @@ export default function GetStarted() {
 	// 	<>Hello</>
 	// </Flex>
 	// }
-
-
 
 	if (!user.email_verified) {
 		return (

@@ -35,15 +35,14 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { unAuthenticatedAxios } from '@/utils/custom-axios'
 
-interface Props { }
+interface Props {}
 
 export default function AuthPopup(props: Props) {
-
 	const {
 		authState: { user, auth_loading },
 	} = useAuthContext()
 	const { appState, setAppState } = useAppContext()
-	const { show_login, app_loading  } = appState
+	const { show_login, app_loading } = appState
 
 	const [isSignUp, setIsSignUp] = useState<boolean>(true)
 	const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false)
@@ -126,7 +125,7 @@ const PasswordResetForm = ({
 	setIsSignUp: (arg: boolean) => void
 }) => {
 	const [email, setEmail] = useState('')
-	const {setAppState} = useAppContext();
+	const { setAppState } = useAppContext()
 
 	const { showToast } = useCommon()
 
@@ -151,11 +150,9 @@ const PasswordResetForm = ({
 			showToast({
 				message: 'Please check your email for further instructions',
 				status: 'success',
-			}),
-			setAppState({show_login: false})
+			}), setAppState({ show_login: false })
 		},
 	})
-
 
 	const handlePasswordReset = (e: React.FormEvent) => {
 		e.preventDefault()

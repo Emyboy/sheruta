@@ -1,10 +1,5 @@
-import MainContainer from '@/components/layout/MainContainer'
-import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex } from '@chakra-ui/react'
+import { Flex } from '@chakra-ui/react'
 import React from 'react'
-import MainLeftNav from '@/components/layout/MainLeftNav'
-import { DEFAULT_PADDING } from '@/configs/theme'
-import MainHeader from '@/components/layout/MainHeader'
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm'
 
 type Props = {
@@ -13,17 +8,21 @@ type Props = {
 
 export default function page({ params: { token } }: Props) {
 	return (
-		<Flex justifyContent={'center'}>
-			<MainContainer>
-				<ThreeColumnLayout header={<MainHeader />}>
-					<Flex flexDirection={'column'} w="full">
-						<MainLeftNav />
-					</Flex>
-					<Box p={DEFAULT_PADDING}>
-						<ResetPasswordForm token={token} />
-					</Box>
-				</ThreeColumnLayout>
-			</MainContainer>
+		<Flex
+			bg={'dark_light'}
+			_dark={{ bg: 'dark' }}
+			position={'fixed'}
+			top={0}
+			bottom={0}
+			left={0}
+			right={0}
+			zIndex={500}
+			flexDir={'column'}
+			justifyContent={'center'}
+			alignItems={'center'}
+			overflowY={'auto'}
+		>
+			<ResetPasswordForm token={token} />
 		</Flex>
 	)
 }
