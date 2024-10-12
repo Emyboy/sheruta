@@ -19,11 +19,14 @@ import { signOut } from 'next-auth/react'
 
 type Props = {}
 
+const PUBLIC_URL = process.env.NEXT_PUBLIC_URL
+
 export default function MainLeftNav({}: Props) {
 	const {
 		logout,
 		authState: { user_info },
 	} = useAuthContext()
+
 	return (
 		<Flex
 			flexDirection={'column'}
@@ -63,13 +66,8 @@ export default function MainLeftNav({}: Props) {
 					bg: 'dark_light',
 				}}
 			/>
-			<a href="/">
-				<EachNav
-					Icon={BiLogInCircle}
-					label="Logout"
-					onClick={async () => await signOut()}
-				/>
-			</a>
+
+			<EachNav Icon={BiLogInCircle} label="Logout" onClick={() => signOut()} />
 		</Flex>
 	)
 }
