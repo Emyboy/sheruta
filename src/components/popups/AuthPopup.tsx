@@ -26,35 +26,24 @@ import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs'
 import MainModal from '../atoms/MainModal'
 import { useAuthContext } from '@/context/auth.context'
 import { useAppContext } from '@/context/app.context'
-import {
-	createUserWithEmailAndPassword,
-	sendPasswordResetEmail,
-	signInWithEmailAndPassword,
-	sendEmailVerification,
-} from 'firebase/auth'
-import { auth } from '@/firebase'
-import AuthService from '@/firebase/service/auth/auth.firebase'
-import useCommon from '@/hooks/useCommon'
-import { DocumentData } from 'firebase/firestore'
-import { useMutation } from '@tanstack/react-query'
 
-import { AxiosError } from 'axios'
+import useCommon from '@/hooks/useCommon'
+import { useMutation } from '@tanstack/react-query'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { unAuthenticatedAxios } from '@/utils/custom-axios'
 
-interface Props {}
-
-const PUBLIC_URL = process.env.NEXT_PUBLIC_URL
+interface Props { }
 
 export default function AuthPopup(props: Props) {
+
 	const {
 		authState: { user, auth_loading },
 	} = useAuthContext()
 	const { appState, setAppState } = useAppContext()
-	const { show_login } = appState
+	const { show_login, app_loading  } = appState
 
 	const [isSignUp, setIsSignUp] = useState<boolean>(true)
 	const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false)
@@ -137,9 +126,7 @@ const PasswordResetForm = ({
 	setIsSignUp: (arg: boolean) => void
 }) => {
 	const [email, setEmail] = useState('')
-	// const [message, setMessage] = useState('')
-	// const [error, setError] = useState('')
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const {setAppState} = useAppContext();
 
 	const { showToast } = useCommon()
 
@@ -147,24 +134,40 @@ const PasswordResetForm = ({
 		setEmail(e.target.value)
 	}
 
-	const handlePasswordReset = async (e: React.FormEvent) => {
+	const { mutate: resetRequest, isPending } = useMutation({
+		mutationFn: (data: { email: string }) =>
+			unAuthenticatedAxios.post(`/auth/password/reset-request`, data),
+		onError: (error: any) => {
+			const errorMessage =
+				error.response?.data?.message ||
+				error?.message ||
+				'Password reset request failed'
+			showToast({
+				message: errorMessage,
+				status: 'error',
+			})
+		},
+		onSuccess: () => {
+			showToast({
+				message: 'Please check your email for further instructions',
+				status: 'success',
+			}),
+			setAppState({show_login: false})
+		},
+	})
+
+
+	const handlePasswordReset = (e: React.FormEvent) => {
 		e.preventDefault()
-		setIsSubmitting(true)
 
 		try {
-			await sendPasswordResetEmail(auth, email)
-			showToast({
-				message: 'Password reset email sent successfully!',
-				status: 'success',
-			})
-			setIsPasswordReset(false)
+			resetRequest({ email })
+			return
 		} catch (err) {
 			showToast({
 				message: `An error occurred while sending password reset email. Please try again later.`,
 				status: 'error',
 			})
-		} finally {
-			setIsSubmitting(false)
 		}
 	}
 
@@ -196,7 +199,8 @@ const PasswordResetForm = ({
 					type="submit"
 					bgColor={'brand'}
 					width="full"
-					isLoading={isSubmitting}
+					isLoading={isPending}
+					disabled={isPending}
 				>
 					Reset Password
 				</Button>

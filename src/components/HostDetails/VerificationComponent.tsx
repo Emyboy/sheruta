@@ -31,8 +31,20 @@ import {
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { BiBadgeCheck, BiSolidIdCard, BiSolidInfoCircle, BiSolidLock, BiSolidStar, BiSolidTimer, BiStar } from 'react-icons/bi'
-import { BsExclamationTriangle, BsInfoCircle, BsQuestionCircle } from 'react-icons/bs'
+import {
+	BiBadgeCheck,
+	BiSolidIdCard,
+	BiSolidInfoCircle,
+	BiSolidLock,
+	BiSolidStar,
+	BiSolidTimer,
+	BiStar,
+} from 'react-icons/bi'
+import {
+	BsExclamationTriangle,
+	BsInfoCircle,
+	BsQuestionCircle,
+} from 'react-icons/bs'
 import { FaSadTear } from 'react-icons/fa'
 import { FaQuestion } from 'react-icons/fa6'
 import { IconType } from 'react-icons/lib'
@@ -155,36 +167,54 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 			<Table variant="simple">
 				<Tbody borderColor="gray">
 					{Object.keys(data).map((key, index) => {
-						
-						const premiumData: string[] = ["Surname", "First Name", "Middle Name", "Gender", "Age", "Govt Registered Phone Number", "Marital Status", "Govt Registered Address", "Name of NOK", "State of NOK", "Town of NOK", "Address of NOK"]
-						// 
-						return (<Tr 
-						key={key} 
-						// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
-						>
-							<Td
-								ps={0}
-								fontWeight="medium"
-								borderBottom={
-									Object.keys(data).length === index + 1
-										? 0
-										: `1px solid ${borderColor}`
-								}
+						const premiumData: string[] = [
+							'Surname',
+							'First Name',
+							'Middle Name',
+							'Gender',
+							'Age',
+							'Govt Registered Phone Number',
+							'Marital Status',
+							'Govt Registered Address',
+							'Name of NOK',
+							'State of NOK',
+							'Town of NOK',
+							'Address of NOK',
+						]
+						//
+						return (
+							<Tr
+								key={key}
+								// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
 							>
-								{key} 
-							</Td>
-							<Td
-								borderBottom={
-									Object.keys(data).length === index + 1
-										? 0
-										: `1px solid ${borderColor}`
-								}
-							>
-								 { (premiumData.includes(key)) ? <><Icon color="brand" as={BiSolidInfoCircle} boxSize={4} />{' '}  </> : null} {data[key]}
-							</Td>
-						</Tr>
-					)})}
-
+								<Td
+									ps={0}
+									fontWeight="medium"
+									borderBottom={
+										Object.keys(data).length === index + 1
+											? 0
+											: `1px solid ${borderColor}`
+									}
+								>
+									{key}
+								</Td>
+								<Td
+									borderBottom={
+										Object.keys(data).length === index + 1
+											? 0
+											: `1px solid ${borderColor}`
+									}
+								>
+									{premiumData.includes(key) ? (
+										<>
+											<Icon color="brand" as={BiSolidInfoCircle} boxSize={4} />{' '}
+										</>
+									) : null}{' '}
+									{data[key]}
+								</Td>
+							</Tr>
+						)
+					})}
 				</Tbody>
 			</Table>
 			<Button mt={4} colorScheme="teal" onClick={handleDownloadPDF}>
@@ -302,7 +332,18 @@ const UserProfile = ({
 				/>
 			</Box>
 
-			<Text display="inline-flex" gap={1} justifyContent={"center"} alignItems="center" textAlign={"center"} w="full" fontWeight="normal">Fields with the icon <Icon color="brand" as={BiSolidInfoCircle} /> are NIMC verified</Text>
+			<Text
+				display="inline-flex"
+				gap={1}
+				justifyContent={'center'}
+				alignItems="center"
+				textAlign={'center'}
+				w="full"
+				fontWeight="normal"
+			>
+				Fields with the icon <Icon color="brand" as={BiSolidInfoCircle} /> are
+				NIMC verified
+			</Text>
 			<InfoSection title="Personal Information" data={personalInfo} />
 			<InfoSection title="Occupation" data={occupation} />
 			<InfoSection title="Socials" data={socials} />
@@ -471,6 +512,7 @@ export default function VerificationComponent({
 		)
 	}
 
+	//@ts-ignore
 	if (
 		request.user_info.is_verified === false ||
 		Object.keys(hostNinData || {}).length === 0
