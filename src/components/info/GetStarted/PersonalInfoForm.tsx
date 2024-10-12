@@ -1,5 +1,10 @@
 'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { industries } from '@/constants'
+import { useAuthContext } from '@/context/auth.context'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import useCommon from '@/hooks/useCommon'
 import {
 	Button,
 	Divider,
@@ -7,16 +12,12 @@ import {
 	Input,
 	InputGroup,
 	InputLeftAddon,
+	Select,
 	Text,
 	VStack,
 } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
-import { Select } from '@chakra-ui/react'
-import { industries } from '@/constants'
-import useCommon from '@/hooks/useCommon'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { useAuthContext } from '@/context/auth.context'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
 
 type Props = {
 	done?: () => void
@@ -24,11 +25,16 @@ type Props = {
 
 export default function PersonalInfoForm({ done }: Props) {
 	const { showToast } = useCommon()
-	const { getAuthDependencies } = useAuthContext()
+
 	const {
 		authState: { user, flat_share_profile },
+		setAuthState,
 	} = useAuthContext()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const [isLoading, setIsLoading] = useState(false)
+
 	const [occupation, setOccupation] = useState(
 		flat_share_profile?.occupation || '',
 	)
@@ -55,13 +61,33 @@ export default function PersonalInfoForm({ done }: Props) {
 	const [twitter, setTwitter] = useState(flat_share_profile?.twitter || '')
 	const [linkedin, setLinkedin] = useState(flat_share_profile?.linkedin || '')
 
-	const handleSubmit = async (e: any) => {
-		e.preventDefault()
-		try {
-			setIsLoading(true)
-			await FlatShareProfileService.update({
-				document_id: user?._id as string,
-				data: {
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
+				setIsLoading(true)
+				if (user) {
+					await axiosInstance.put('/flat-share-profile', {
+						occupation,
+						employment_status,
+						work_industry,
+						religion,
+						tiktok,
+						facebook,
+						instagram,
+						twitter,
+						linkedin,
+						gender_preference,
+						age_preference,
+						done_kyc: true,
+					})
+				}
+			}
+		},
+		onSuccess: () => {
+			setAuthState({
+				// @ts-ignore
+				flat_share_profile: {
+					...flat_share_profile,
 					occupation,
 					employment_status,
 					work_industry,
@@ -73,46 +99,24 @@ export default function PersonalInfoForm({ done }: Props) {
 					linkedin,
 					gender_preference,
 					age_preference,
+					done_kyc: true,
 				},
 			})
-			await saveProfileDocs(
-				{
-					occupation,
-					employment_status,
-					work_industry,
-					religion,
-					tiktok,
-					facebook,
-					instagram,
-					twitter,
-					linkedin,
-					gender_preference,
-					age_preference,
-					is_verified: false,
-				},
-				user?._id as string,
-			)
-			if (user) {
-				await FlatShareProfileService.update({
-					data: {
-						done_kyc: true,
-					},
-					document_id: user._id,
-				})
-			}
-			// await getAuthDependencies()
+
 			setIsLoading(false)
 			if (done) {
 				done()
 			}
-		} catch (error) {
+		},
+		onError: (err) => {
+			setIsLoading(false)
+			console.error(err)
 			showToast({
 				message: 'Error, please try again',
 				status: 'error',
 			})
-		}
-		setIsLoading(false)
-	}
+		},
+	})
 
 	return (
 		<>
@@ -140,7 +144,12 @@ export default function PersonalInfoForm({ done }: Props) {
 				>
 					{`Let you're potential match know more about you`}
 				</Text>
-				<form onSubmit={handleSubmit}>
+				<form
+					onSubmit={(e) => {
+						e.preventDefault()
+						mutate()
+					}}
+				>
 					<VStack mt={'60px'} w={'full'} spacing={DEFAULT_PADDING}>
 						<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 							<Flex

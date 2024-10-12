@@ -26,9 +26,11 @@ const CreditOptionsPopups = dynamic(
 export function Providers({
 	children,
 	user_data,
+	options,
 }: {
 	children: React.ReactNode
 	user_data: any
+	options: any
 }) {
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -45,7 +47,7 @@ export function Providers({
 				<QueryClientProvider client={queryClient}>
 					<AppContextProvider>
 						<AuthContextProvider user_data={user_data}>
-							<OptionsProvider>
+							<OptionsProvider options={options}>
 								<InspectionsProvider>
 									<NotificationsProvider>
 										<BookmarksProvider>

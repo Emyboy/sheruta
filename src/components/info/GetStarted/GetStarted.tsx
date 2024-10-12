@@ -36,7 +36,7 @@ export default function GetStarted() {
 			<ProfilePictureSelector key={'profile-pics'} done={next} />,
 			<LocationKeywordForm key={'location-keyword'} done={next} />,
 			<PersonalInfoForm key={'personal-info'} done={next} />,
-			<GetStartedCompleted key={'completed'} done={next} />,
+			<GetStartedCompleted key={'completed'} />,
 		]
 	}
 

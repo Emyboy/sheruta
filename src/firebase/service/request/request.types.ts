@@ -54,8 +54,8 @@ export enum PaymentType {
 	monthly = 'monthly',
 	annually = 'annually',
 	quarterly = 'quarterly',
-	biannually = 'bi-annually',
-	weekly = 'weekly',
+	biannually = 'biannually',
+	daily = 'daily',
 }
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'

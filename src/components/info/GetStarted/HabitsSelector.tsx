@@ -1,90 +1,67 @@
 'use client'
-import { Button, Flex, Text } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
-import useCommon from '@/hooks/useCommon'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { HabitData } from '@/firebase/service/options/options.types'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { useAuthContext } from '@/context/auth.context'
-import DotsLoading from '@/components/info/GetStarted/DotsLoading'
-import { getDoc } from 'firebase/firestore'
 import { useOptionsContext } from '@/context/options.context'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import { HabitData } from '@/firebase/service/options/options.types'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { Button, Flex, Text } from '@chakra-ui/react'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export default function HabitsSelector({ done }: { done?: () => void }) {
 	const {
 		authState: { user, flat_share_profile },
 		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
-	const { showToast } = useCommon()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const {
 		optionsState: { habits },
 	} = useOptionsContext()
+
 	const [loading, setLoading] = useState(false)
-	const [fetching, setFetching] = useState(false)
-	const [selectedHabits, setSelectedHabits] = useState<HabitData[]>([])
+	const [selectedHabits, setSelectedHabits] = useState<string[]>(
+		flat_share_profile?.habits || [],
+	)
 
-	const getAllHabits = async () => {
-		try {
-			const documents: HabitData[] = []
-			let refs = flat_share_profile?.habits as any[]
-			if (refs && refs.length > 0) {
-				for (const ref of refs) {
-					try {
-						const docSnapshot = await getDoc(ref)
-						//@ts-ignore
-						documents.push({
-							//@ts-ignore
-							...docSnapshot.data(),
-							_ref: docSnapshot.ref,
-							id: docSnapshot.id,
-						} as HabitData)
-					} catch (error) {
-						console.error('Error getting document:', error)
-					}
-				}
+	const selectHabit = (habitId: string) =>
+		setSelectedHabits((prevHabits) => {
+			if (prevHabits.includes(habitId)) {
+				return prevHabits.filter(
+					(existingHabitId) => existingHabitId !== habitId,
+				)
+			} else {
+				return [...selectedHabits, habitId]
 			}
-			setSelectedHabits(documents)
-		} catch (e) {
-			console.log('FETCHING ERROR:', e)
-			showToast({
-				message: 'Error, please try again',
-				status: 'error',
-			})
-		}
-	}
+		})
 
-	const selectHabit = (habit: HabitData) => {
-		let habitExist = selectedHabits.find((x) => x.id == habit.id)
-		if (habitExist) {
-			setSelectedHabits(selectedHabits.filter((x) => x.id !== habit.id))
-		} else {
-			setSelectedHabits([...selectedHabits, habit])
-		}
-	}
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
+				setLoading(true)
 
-	const update = async () => {
-		if (user) {
-			setLoading(true)
-			await FlatShareProfileService.update({
-				data: { habits: selectedHabits.map((val) => val._ref) },
-				document_id: user?._id,
+				await axiosInstance.put('/flat-share-profile', {
+					habits: selectedHabits,
+				})
+			}
+		},
+		onSuccess: () => {
+			setAuthState({
+				// @ts-ignore
+				flat_share_profile: { ...flat_share_profile, habits: selectedHabits },
 			})
-			await saveProfileDocs(
-				{ habits: selectedHabits.map((val) => val._ref) },
-				user?._id,
-			)
-			await getAuthDependencies()
+
 			setLoading(false)
 			if (done) {
 				done()
 			}
-		}
-	}
-
-	useEffect(() => {
-		getAllHabits()
-	}, [])
+		},
+		onError: (err) => {
+			setLoading(false)
+			console.error(err)
+		},
+	})
 
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -103,13 +80,13 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 			>
 				{`Select habits unique to you alone`}
 			</Text>
-			{fetching && (
+			{/* {fetching && (
 				<>
 					<br />
 					<DotsLoading />
 					<br />
 				</>
-			)}
+			)} */}
 			<Flex
 				flexWrap={'wrap'}
 				gap={3}
@@ -119,20 +96,21 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 				{habits.map((habit) => {
 					return (
 						<EachOption
-							isActive={
-								selectedHabits.filter((x) => x.id == habit.id).length > 0
-							}
-							label={habit.title}
-							onClick={() => selectHabit(habit)}
+							isActive={selectedHabits.includes(habit._id)}
+							label={habit.name}
+							onClick={() => selectHabit(habit._id)}
 							key={habit.slug}
 						/>
 					)
 				})}
 			</Flex>
 			<br />
-			{!fetching && (
-				<Button onClick={update} isLoading={loading}>{`Next`}</Button>
-			)}
+
+			<Button
+				onClick={() => mutate()}
+				isDisabled={!selectedHabits.length}
+				isLoading={loading}
+			>{`Next`}</Button>
 		</Flex>
 	)
 }

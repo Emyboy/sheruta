@@ -1,15 +1,10 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
-import Image from 'next/image'
-import React, { useState } from 'react'
-import { BiSolidCheckCircle } from 'react-icons/bi'
 import { useAuthContext } from '@/context/auth.context'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import {
-	saveProfileDocs,
-	updateProfileDocs,
-} from '@/firebase/service/userProfile/user-profile'
-import { useMutation } from '@tanstack/react-query'
 import useAuthenticatedAxios from '@/hooks/useAxios'
+import { Box, Button, Flex, Text } from '@chakra-ui/react'
+import { useMutation } from '@tanstack/react-query'
+import Image from 'next/image'
+import { useState } from 'react'
+import { BiSolidCheckCircle } from 'react-icons/bi'
 
 export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 	const {
@@ -23,6 +18,7 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 	const [seeking, setSeeking] = useState<boolean | null>(
 		flat_share_profile?.seeking || null,
 	)
+	const [isLoading, setIsLoading] = useState(false)
 
 	const { mutate } = useMutation({
 		mutationFn: async () => {
@@ -43,24 +39,6 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 		},
 		onError: () => setIsLoading(false),
 	})
-
-	const [isLoading, setIsLoading] = useState(false)
-
-	const update = async () => {
-		if (user) {
-			setIsLoading(true)
-			await FlatShareProfileService.update({
-				data: { seeking: seeking as any },
-				document_id: user?._id,
-			})
-			await saveProfileDocs({ seeking: seeking as any }, user?._id)
-			await getAuthDependencies()
-			setIsLoading(false)
-			if (done) {
-				done()
-			}
-		}
-	}
 
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -87,7 +65,11 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 				/>
 			</Flex>
 			<br />
-			<Button onClick={() => mutate()} isLoading={isLoading}>{`Next`}</Button>
+			<Button
+				onClick={() => mutate()}
+				isDisabled={seeking === null}
+				isLoading={isLoading}
+			>{`Next`}</Button>
 		</Flex>
 	)
 }

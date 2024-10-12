@@ -1,75 +1,67 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 import { StateData } from '@/firebase/service/options/states/states.types'
-import {
-	Button,
-	Flex,
-	Input,
-	Select,
-	Text,
-	useToast,
-	VStack,
-} from '@chakra-ui/react'
-import React, { FormEvent, useEffect, useState } from 'react'
-import { useAuthContext } from '@/context/auth.context'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { Button, Flex, Select, Text, VStack } from '@chakra-ui/react'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export default function LocationKeywordForm({ done }: { done: () => void }) {
-	const toast = useToast()
 	const { optionsState: options } = useOptionsContext()
+
 	const [isLoading, setIsLoading] = useState(false)
 	const {
-		authState: { user },
+		authState: { user, flat_share_profile },
 		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
 
-	const [stateRef, setStateRef] = useState<string>('')
-	const [locationRef, setLocationRef] = useState<string>('')
+	const axiosInstance = useAuthenticatedAxios()
 
-	const updateLocation = async (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		let keyword = options.location_keywords.find(
-			(x: LocationKeywordData) => x.id === locationRef,
-		)
-		let theState = options.states.find((x: StateData) => x.id === stateRef)
+	const [state, setState] = useState<string>(flat_share_profile?.state || '')
+	const [location, setLocation] = useState<string>(
+		// @ts-ignore
+		flat_share_profile.location || '',
+	)
 
-		if (keyword && theState && user && user._id) {
-			try {
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
 				setIsLoading(true)
 
-				await FlatShareProfileService.update({
-					data: {
-						location_keyword: keyword._ref,
-						state: theState._ref,
-					},
-					document_id: user._id,
-				})
-				await saveProfileDocs(
-					{ location_keyword: keyword._ref, state: theState._ref },
-					user._id,
-				)
-				await getAuthDependencies()
-				setIsLoading(false)
-				if (done) {
-					done()
-				}
-			} catch (e) {
-				toast({
-					title: 'Error, please try again',
-					status: 'error',
+				await axiosInstance.put('/flat-share-profile', {
+					state,
+					location,
 				})
 			}
+		},
+		onSuccess: () => {
+			setAuthState({
+				// @ts-ignore
+				flat_share_profile: { ...flat_share_profile, state, location },
+			})
+
 			setIsLoading(false)
-		}
-	}
+			if (done) {
+				done()
+			}
+		},
+		onError: (err) => {
+			setIsLoading(false)
+			console.error(err)
+		},
+	})
 
 	return (
 		<>
 			<Flex
 				// @ts-ignore
-				onSubmit={updateLocation}
+				onSubmit={(e) => {
+					e.preventDefault()
+					mutate()
+				}}
 				flexDir={'column'}
 				justifyContent={'center'}
 				alignItems={'center'}
@@ -99,11 +91,19 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 							<Select
 								placeholder="Select state"
 								bg="dark"
-								onChange={(e) => setStateRef(e.target.value)}
+								textTransform={'capitalize'}
+								value={state}
+								onChange={(e) => setState(e.target.value)}
 							>
 								{options.states.map((state: StateData) => {
 									return (
-										<option key={state.id} value={state.id}>
+										<option
+											key={state._id}
+											value={state._id}
+											style={{
+												textTransform: 'capitalize',
+											}}
+										>
 											{state.name}
 										</option>
 									)
@@ -111,7 +111,7 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 							</Select>
 						</Flex>
 					</Flex>
-					{stateRef && (
+					{state && (
 						<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 							<Flex
 								justifyContent={'flex-start'}
@@ -125,15 +125,21 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 								<Select
 									placeholder="Select area"
 									bg="dark"
-									onChange={(e) => setLocationRef(e.target.value)}
+									value={location}
+									textTransform={'capitalize'}
+									onChange={(e) => setLocation(e.target.value)}
 								>
-									{options.location_keywords
-										.filter(
-											(loc: LocationKeywordData) => loc._state_id == stateRef,
-										)
+									{options.locations
+										.filter((loc: LocationKeywordData) => loc.state == state)
 										.map((loc: LocationKeywordData) => {
 											return (
-												<option key={loc.id} value={loc.id}>
+												<option
+													key={loc._id}
+													value={loc._id}
+													style={{
+														textTransform: 'capitalize',
+													}}
+												>
 													{loc.name}
 												</option>
 											)
@@ -147,7 +153,7 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 				<Button
 					type={'submit'}
 					isLoading={isLoading}
-					isDisabled={!locationRef || !stateRef}
+					isDisabled={!location || !state}
 				>{`Next`}</Button>
 			</Flex>
 		</>

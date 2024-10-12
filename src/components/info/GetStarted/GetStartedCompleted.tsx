@@ -1,26 +1,11 @@
-import Confetti from 'react-confetti'
-import React, { useEffect, useState } from 'react'
 import { Flex, Text } from '@chakra-ui/react'
-import {
-	getDoc,
-	getDocs,
-	where,
-	query,
-	collection,
-	DocumentReference,
-	DocumentSnapshot,
-} from 'firebase/firestore'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { db } from '@/firebase'
-import { useAuthContext } from '@/context/auth.context'
-export default function GetStartedCompleted({ done }: { done: () => void }) {
+import { useEffect, useState } from 'react'
+import Confetti from 'react-confetti'
+
+export default function GetStartedCompleted() {
 	const [width, setWidth] = useState(100)
 	const [height, setHeight] = useState(400)
 	const [run, setRun] = useState(true)
-
-	const {
-		authState: { user },
-	} = useAuthContext()
 
 	useEffect(() => {
 		if (typeof window !== undefined) {

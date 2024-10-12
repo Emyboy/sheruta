@@ -1,12 +1,10 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
-import Image from 'next/image'
-import React, { useState } from 'react'
-import { BiSolidCheckCircle } from 'react-icons/bi'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { useAuthContext } from '@/context/auth.context'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 import useAuthenticatedAxios from '@/hooks/useAxios'
+import { Box, Button, Flex, Text } from '@chakra-ui/react'
 import { useMutation } from '@tanstack/react-query'
+import Image from 'next/image'
+import { useState } from 'react'
+import { BiSolidCheckCircle } from 'react-icons/bi'
 
 export default function GenderSelect({ done }: { done?: () => void }) {
 	const {
@@ -31,8 +29,7 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 				})
 			}
 		},
-		onSuccess: (data) => {
-			console.log(data)
+		onSuccess: () => {
 			// @ts-ignore
 			setAuthState({ user_info: { ...user_info, gender } })
 			setIsLoading(false)
@@ -45,22 +42,6 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 			setIsLoading(false)
 		},
 	})
-
-	const update = async () => {
-		if (gender && user) {
-			setIsLoading(true)
-			await UserInfoService.update({
-				data: { gender },
-				document_id: user?._id,
-			})
-			await saveProfileDocs({ gender }, user?._id)
-			await getAuthDependencies()
-			setIsLoading(false)
-			if (done) {
-				done()
-			}
-		}
-	}
 
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -87,7 +68,11 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 				/>
 			</Flex>
 			<br />
-			<Button onClick={() => mutate()} isLoading={isLoading}>{`Next`}</Button>
+			<Button
+				onClick={() => mutate()}
+				isDisabled={!gender}
+				isLoading={isLoading}
+			>{`Next`}</Button>
 		</Flex>
 	)
 }

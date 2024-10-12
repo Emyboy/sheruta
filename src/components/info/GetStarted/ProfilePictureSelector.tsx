@@ -12,6 +12,8 @@ import {
 } from 'firebase/storage'
 import UserService from '@/firebase/service/user/user.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useMutation } from '@tanstack/react-query'
 
 export default function ProfilePictureSelector({
 	done,
@@ -21,7 +23,11 @@ export default function ProfilePictureSelector({
 	const {
 		authState: { user },
 		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const { showToast } = useCommon()
 	const cropperRef = useRef<CropperRef>(null)
 	const [loading, setLoading] = useState(false)
@@ -55,7 +61,7 @@ export default function ProfilePictureSelector({
 		setCroppedImage(selectedImage)
 	}
 
-	let uploadImage = async () => {
+	const uploadImage = async () => {
 		setLoading(true)
 
 		if (!user || !croppedImage) {
@@ -77,7 +83,7 @@ export default function ProfilePictureSelector({
 
 		const blob = new Blob(byteArrays, { type: 'image/png' })
 		const storage = getStorage()
-		const storageRef = ref(storage, 'images/rivers.jpg')
+		const storageRef = ref(storage, `images/${user._id}.jpg`)
 		const uploadTask = uploadBytesResumable(storageRef, blob)
 
 		uploadTask.on(
@@ -120,36 +126,40 @@ export default function ProfilePictureSelector({
 			async () => {
 				getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
 					console.log('File available at', downloadURL)
-					await UserService.update({
-						data: { avatar_url: downloadURL },
-						document_id: user?._id,
+					await axiosInstance.put('/users', {
+						avatar_url: downloadURL,
 					})
-					await saveProfileDocs({ avatar_url: downloadURL }, user?._id)
+					setAuthState({
+						user: { ...user, avatar_url: downloadURL },
+					})
 
-					await getAuthDependencies()
 					setLoading(false)
-					if (done) {
-						done()
-					}
 				})
 			},
 		)
 	}
 
-	const update = () => {
-		if (selectedImage) {
-			return uploadImage()
-		}
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (selectedImage) {
+				return uploadImage()
+			}
 
-		if (user?.avatar_url && done) {
-			done()
-		} else {
-			showToast({
-				message: 'Please select an image',
-				status: 'info',
-			})
-		}
-	}
+			if (user?.avatar_url && done) {
+				done()
+			} else {
+				showToast({
+					message: 'Please select an image',
+					status: 'info',
+				})
+			}
+		},
+		onSuccess: () => {},
+		onError: (err) => {
+			console.error(err)
+			setLoading(false)
+		},
+	})
 
 	return (
 		<>
@@ -273,7 +283,11 @@ export default function ProfilePictureSelector({
 					</Flex>
 
 					<br />
-					<Button onClick={update} isLoading={loading}>
+					<Button
+						onClick={() => mutate()}
+						isDisabled={!selectedImage}
+						isLoading={loading}
+					>
 						{user?.avatar_url ? 'Next' : 'Upload'}
 					</Button>
 				</Flex>

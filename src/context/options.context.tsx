@@ -13,6 +13,7 @@ import { useAppContext } from './app.context'
 
 export interface OptionsState {
 	location_keywords: any[]
+	locations: any[]
 	states: any[]
 	services: any[]
 	habits: any[]
@@ -29,7 +30,7 @@ interface OptionsContextType {
 
 const OptionsContext = createContext<OptionsContextType | undefined>(undefined)
 
-const initialOptionsState: OptionsState = {
+const initialOptionsState: Omit<OptionsState, 'locations'> = {
 	location_keywords: [],
 	states: [],
 	services: [],
@@ -40,50 +41,26 @@ const initialOptionsState: OptionsState = {
 	amenities: [],
 }
 
-export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
-	children,
-}) => {
+export const OptionsProvider: React.FC<{
+	children: ReactNode
+	options: any
+}> = ({ children, options }) => {
 	const { setAppState } = useAppContext()
-	const [optionsState, setOptionsState] =
-		useState<OptionsState>(initialOptionsState)
+	const [optionsState, setOptionsState] = useState<OptionsState>(
+		options || initialOptionsState,
+	)
 
 	const updateOptionsState = (newState: Partial<OptionsState>) => {
 		setOptionsState((prevState) => ({ ...prevState, ...newState }))
 	}
 
 	useEffect(() => {
-		;(async () => {
-			setAppState({ app_loading: true })
-			const optionsCollections = [
-				DBCollectionName.locationKeyWords,
-				DBCollectionName.states,
-				DBCollectionName.services,
-				DBCollectionName.habits,
-				DBCollectionName.interests,
-				DBCollectionName.categories,
-				DBCollectionName.propertyTypes,
-				DBCollectionName.amenities,
-			]
-
-			const optionPromises = optionsCollections.map(async (collectionName) => {
-				const querySnapshot = await getDocs(collection(db, collectionName))
-				const options = querySnapshot.docs.map((doc) => ({
-					id: doc.id,
-					_ref: doc.ref,
-					...doc.data(),
-				}))
-				return { [collectionName]: options }
-			})
-
-			const results = await Promise.all(optionPromises)
-			const options: OptionsState = Object.assign({}, ...results)
-
-			console.log('THE OPTIONS::', options)
-
+		setAppState({ app_loading: true })
+		if (options) {
 			setOptionsState(options)
-			setAppState({ app_loading: false })
-		})()
-	}, [])
+		}
+		setAppState({ app_loading: false })
+	}, [options])
 
 	return (
 		<OptionsContext.Provider
