@@ -24,6 +24,7 @@ export default function MainLeftNav({}: Props) {
 		logout,
 		authState: { user_info },
 	} = useAuthContext()
+
 	return (
 		<Flex
 			flexDirection={'column'}

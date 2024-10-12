@@ -5,16 +5,46 @@ import { BiSolidCheckCircle } from 'react-icons/bi'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useMutation } from '@tanstack/react-query'
 
 export default function GenderSelect({ done }: { done?: () => void }) {
 	const {
 		authState: { user, user_info },
 		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const [gender, setGender] = useState<'male' | 'female' | null>(
 		user_info?.gender || null,
 	)
 	const [isLoading, setIsLoading] = useState(false)
+
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
+				setIsLoading(true)
+				await axiosInstance.put('/user-info', {
+					gender,
+				})
+			}
+		},
+		onSuccess: (data) => {
+			console.log(data)
+			// @ts-ignore
+			setAuthState({ user_info: { ...user_info, gender } })
+			setIsLoading(false)
+			if (done) {
+				done()
+			}
+		},
+		onError: (err) => {
+			console.log(err)
+			setIsLoading(false)
+		},
+	})
 
 	const update = async () => {
 		if (gender && user) {
@@ -57,7 +87,7 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 				/>
 			</Flex>
 			<br />
-			<Button onClick={update} isLoading={isLoading}>{`Next`}</Button>
+			<Button onClick={() => mutate()} isLoading={isLoading}>{`Next`}</Button>
 		</Flex>
 	)
 }

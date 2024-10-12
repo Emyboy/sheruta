@@ -8,18 +8,43 @@ import {
 	saveProfileDocs,
 	updateProfileDocs,
 } from '@/firebase/service/userProfile/user-profile'
+import { useMutation } from '@tanstack/react-query'
+import useAuthenticatedAxios from '@/hooks/useAxios'
 
 export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 	const {
 		authState: { user, flat_share_profile },
 		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
 
-	const [isLoading, setIsLoading] = useState(false)
+	const axiosInstance = useAuthenticatedAxios()
 
-	const [seeking, setSeeking] = useState<boolean | null | undefined>(
-		flat_share_profile?.seeking,
+	const [seeking, setSeeking] = useState<boolean | null>(
+		flat_share_profile?.seeking || null,
 	)
+
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
+				setIsLoading(true)
+				await axiosInstance.put('/flat-share-profile', {
+					seeking,
+				})
+			}
+		},
+		onSuccess: () => {
+			// @ts-ignore
+			setAuthState({ flat_share_profile: { ...flat_share_profile, seeking } })
+			setIsLoading(false)
+			if (done) {
+				done()
+			}
+		},
+		onError: () => setIsLoading(false),
+	})
+
+	const [isLoading, setIsLoading] = useState(false)
 
 	const update = async () => {
 		if (user) {
@@ -62,7 +87,7 @@ export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 				/>
 			</Flex>
 			<br />
-			<Button onClick={update} isLoading={isLoading}>{`Next`}</Button>
+			<Button onClick={() => mutate()} isLoading={isLoading}>{`Next`}</Button>
 		</Flex>
 	)
 }

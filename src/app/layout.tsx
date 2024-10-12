@@ -4,17 +4,20 @@ import { Providers } from '../configs/Providers'
 import 'react-loading-skeleton/dist/skeleton.css'
 import 'react-horizontal-scrolling-menu/dist/styles.css'
 import 'react-advanced-cropper/dist/style.css'
+import axiosInstance from '@/utils/custom-axios'
 
 export const metadata: Metadata = {
 	title: 'Sheruta NG',
 	description: 'Flat or space for share in lagos, abuja, lekki and more',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: {
 	children: React.ReactNode
 }) {
+	const { data } = await axiosInstance.get(`/users/dependencies`)
+
 	return (
 		<html lang="en">
 			<head>
@@ -34,7 +37,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<body>
-				<Providers>{children}</Providers>
+				<Providers user_data={data.user_data}>{children}</Providers>
 			</body>
 		</html>
 	)
