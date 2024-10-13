@@ -83,7 +83,7 @@ export default function ProfilePictureSelector({
 
 		const blob = new Blob(byteArrays, { type: 'image/png' })
 		const storage = getStorage()
-		const storageRef = ref(storage, `images/${user._id}.jpg`)
+		const storageRef = ref(storage, `images/users/${user._id}.jpg`)
 		const uploadTask = uploadBytesResumable(storageRef, blob)
 
 		uploadTask.on(
@@ -124,17 +124,22 @@ export default function ProfilePictureSelector({
 				}
 			},
 			async () => {
-				getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-					console.log('File available at', downloadURL)
-					await axiosInstance.put('/users', {
-						avatar_url: downloadURL,
-					})
-					setAuthState({
-						user: { ...user, avatar_url: downloadURL },
-					})
+				getDownloadURL(uploadTask.snapshot.ref)
+					.then(async (downloadURL) => {
+						console.log('File available at', downloadURL)
+						await axiosInstance.put('/users', {
+							avatar_url: downloadURL,
+						})
+						setAuthState({
+							user: { ...user, avatar_url: downloadURL },
+						})
 
-					setLoading(false)
-				})
+						setLoading(false)
+					})
+					.catch((err) => {
+						console.error(err)
+						setLoading(false)
+					})
 			},
 		)
 	}
