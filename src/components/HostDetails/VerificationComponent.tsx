@@ -512,6 +512,7 @@ export default function VerificationComponent({
 		)
 	}
 
+	//@ts-ignore
 	if (
 		request.user_info.is_verified === false ||
 		Object.keys(hostNinData || {}).length === 0
