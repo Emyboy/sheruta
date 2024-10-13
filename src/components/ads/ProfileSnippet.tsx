@@ -19,6 +19,11 @@ import { useAuthContext } from '@/context/auth.context'
 import { DocumentReference, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
+import { useRouter, useSearchParams } from 'next/navigation'
+import React from 'react'
+import { TbCircleLetterX } from 'react-icons/tb'
+import ProfileSnippetCard from './ProfileSnippetCard'
+
 type Props = {
 	userProfiles: any
 }
@@ -103,6 +108,8 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 	}
 
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
+	// const params = useSearchParams()
+	// const router = useRouter()
 
 	return (
 		<>

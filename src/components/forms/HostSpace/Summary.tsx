@@ -16,11 +16,7 @@ import {
 	Textarea,
 	VStack,
 } from '@chakra-ui/react'
-import {
-	Autocomplete,
-	LoadScript,
-	useJsApiLoader,
-} from '@react-google-maps/api'
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api'
 import React, { useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
@@ -222,6 +218,15 @@ export default function Summary({
 				_property_type_ref: selectedProperty._ref,
 			}))
 		}
+
+		const amenities = formData.pre_amenities.map(
+			(amenity) =>
+				options.amenities.find((item) => item.title === amenity)._ref,
+		)
+		setFormData((prev) => ({
+			...prev,
+			amenities,
+		}))
 
 		next()
 	}
@@ -555,25 +560,25 @@ export default function Summary({
 										onChange={(e) => {
 											const { checked, value } = e.target
 											if (checked) {
-												const amenities = [...formData.amenities, value]
-												setFormData((prev) => ({ ...prev, amenities }))
+												const pre_amenities = [...formData.pre_amenities, value]
+												setFormData((prev) => ({ ...prev, pre_amenities }))
 												localStorage.setItem(
 													'host_space_form',
 													JSON.stringify({
 														...formData,
-														amenities,
+														pre_amenities,
 													}),
 												)
 											} else {
-												const amenities = formData.amenities.filter(
+												const pre_amenities = formData.pre_amenities.filter(
 													(amenity) => amenity !== value,
 												)
-												setFormData((prev) => ({ ...prev, amenities }))
+												setFormData((prev) => ({ ...prev, pre_amenities }))
 												localStorage.setItem(
 													'host_space_form',
 													JSON.stringify({
 														...formData,
-														amenities,
+														pre_amenities,
 													}),
 												)
 											}

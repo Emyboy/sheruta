@@ -29,12 +29,11 @@ import {
 import { Timestamp } from 'firebase/firestore'
 import React, { useState, useEffect } from 'react'
 import { ImageSelector } from './imageSelector'
-interface Props{
-	profileOwnerId: string;
+interface Props {
+	profileOwnerId: string
 }
 
-
-export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
+export const UpdateProfilePopup = ({ profileOwnerId }: Props) => {
 	const { colorMode } = useColorMode()
 
 	const [_, paymentActions] = usePayment()
@@ -48,7 +47,6 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 		optionsState: { services },
 	} = useOptionsContext()
 
-
 	const [isOpen, setIsOpen] = useState(false)
 
 	const onOpen = () => setIsOpen(true)
@@ -57,8 +55,8 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 	const [bio, setBio] = useState(flat_share_profile?.bio || '')
 	const [_service, setService] = useState<string>('')
 	const [_profileData, setProfileData] = useState({})
-	const [profileOwner, setProfileOwner] = useState(false);
-	const [blurModal, setBlurModal] = useState<boolean>(false);
+	const [profileOwner, setProfileOwner] = useState(false)
+	const [blurModal, setBlurModal] = useState<boolean>(false)
 	const [promotionOption, setPromotionOption] = useState(
 		creditTable.PROFILE_PROMO_7_DAYS,
 	)
@@ -68,12 +66,10 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 	const [showCreditInfo, setShowCreditInfo] = useState<boolean>(false)
 
 	useEffect(() => {
-		
 		const currentUser = user?._id
 		const viewedProfileId = profileOwnerId
-		if(flat_share_profile){
-			setBio(flat_share_profile?.bio || "")
-
+		if (flat_share_profile) {
+			setBio(flat_share_profile?.bio || '')
 		}
 
 		if (viewedProfileId === currentUser) {
@@ -115,11 +111,10 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 	// }, [userId])
 
 	// useEffect(() => {
-		
+
 	// 	setBio(flat_share_profile?.bio || '')
 	// 	console.log('Bio.....................', bio)
 	// }, [isOpen])
-	
 
 	const update = async () => {
 		setIsLoading(true)
@@ -144,7 +139,6 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 				new Date(new Date().setDate(new Date().getDate() + noOfDays)),
 			),
 		}
-		
 
 		await Promise.all([
 			saveProfileDocs(
@@ -155,8 +149,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 				flat_share_profile._user_id,
 			),
 			FlatShareProfileService.update({
-				data: { bio,
-					service_type: _service, },
+				data: { bio, service_type: _service },
 				document_id: flat_share_profile._user_id,
 			}),
 			paymentActions.decrementCredit({
@@ -171,13 +164,13 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 		onClose()
 	}
 
-
 	if (!user) return null
 
 	return (
 		<>
-			{profileOwner && <Button onClick={onOpen}>Promote profile on feeds</Button>}
-			
+			{profileOwner && (
+				<Button onClick={onOpen}>Promote profile on feeds</Button>
+			)}
 
 			<Modal
 				isOpen={showCreditInfo}
@@ -224,8 +217,8 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 
 			<Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay
-				backdropFilter="blur(100px)" // Adjust the value for more or less blur
-				bg="rgba(0, 0, 0, 0.5)" 
+					backdropFilter="blur(100px)" // Adjust the value for more or less blur
+					bg="rgba(0, 0, 0, 0.5)"
 				/>
 				<ModalContent
 					background={colorMode === 'dark' ? 'dark' : 'accent_lighter'}
@@ -237,107 +230,106 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 						fontSize={'xl'}
 						className={'animate__animated animate__fadeInUp animate__faster'}
 						fontWeight={'400'}
-						style={{ visibility: !blurModal ? "visible" : "hidden" }}
+						style={{ visibility: !blurModal ? 'visible' : 'hidden' }}
 					>{`Update Profile`}</Text>
 					<ModalCloseButton />
-					<ImageSelector onShowCropper={setBlurModal}/>
-					
-					<ModalBody
-					style={{ visibility: !blurModal ? "visible" : "hidden" }}
-					 
-					>
-					<Flex
-						flexDirection={'column'}
-						justifyContent={'center'}
-						alignItems={'center'}
-					>
-						<Text
-							textAlign={'left'}
-							color={'dark_lighter'}
-							className={'animate__animated animate__fadeInUp'}
-							outlineColor={'brand_light'}
-						>
-							Update bio
-						</Text>
-						<Textarea
-							w={'70%'}
-							placeholder="Ex: Searching for a vacant space in Lekki, go through my profile"
-							onChange={(e) => {
-								setBio(e.target.value)
-							}}
-							value={bio}
-							isRequired
-						/>
+					<ImageSelector onShowCropper={setBlurModal} />
 
-						<Text
-							textAlign={'left'}
-							color={'dark_lighter'}
-							className={'animate__animated animate__fadeInUp'}
-							outlineColor={'brand_light'}
-							mt={2}
+					<ModalBody style={{ visibility: !blurModal ? 'visible' : 'hidden' }}>
+						<Flex
+							flexDirection={'column'}
+							justifyContent={'center'}
+							alignItems={'center'}
 						>
-							Enter service type
-						</Text>
-						<Select
-							placeholder="Select option"
-							bg="dark"
-							required
-							w={'70%'}
-							onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-								setService(e.target.value)
-							}
-							value={_service}
-							isRequired
-						>
-							{services &&
-								services.map((data, index: number) => (
-									<option key={index} value={data.item}>
-										{data.title}
-									</option>
-								))}
-						</Select>
+							<Text
+								textAlign={'left'}
+								color={'dark_lighter'}
+								className={'animate__animated animate__fadeInUp'}
+								outlineColor={'brand_light'}
+							>
+								Update bio
+							</Text>
+							<Textarea
+								w={'70%'}
+								placeholder="Ex: Searching for a vacant space in Lekki, go through my profile"
+								onChange={(e) => {
+									setBio(e.target.value)
+								}}
+								value={bio}
+								isRequired
+							/>
 
-						<Text
-							textAlign={'left'}
-							color={'dark_lighter'}
-							className={'animate__animated animate__fadeInUp'}
-							outlineColor={'brand_light'}
-							mt={2}
-						>
-							Promotion duration
-						</Text>
-						<Select
-							placeholder="Select option"
-							bg="dark"
-							required
-							w={'70%'}
-							onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-								setPromotionOption(Number(e.target.value))
-								if (Number(e.target.value) === creditTable.PROFILE_PROMO_7_DAYS)
-									setNoOfDays(7)
-								if (
-									Number(e.target.value) === creditTable.PROFILE_PROMO_14_DAYS
-								)
-									setNoOfDays(14)
-								if (
-									Number(e.target.value) === creditTable.PROFILE_PROMO_30_DAYS
-								)
-									setNoOfDays(30)
-							}}
-							value={promotionOption}
-							isRequired
-						>
-							<option value={creditTable.PROFILE_PROMO_7_DAYS}>
-								7 Days (3000 Credits)
-							</option>
-							<option value={creditTable.PROFILE_PROMO_14_DAYS}>
-								14 Days (5000 Credits)
-							</option>
-							<option value={creditTable.PROFILE_PROMO_30_DAYS}>
-								30 Days (8000 Credits)
-							</option>
-						</Select>
-					</Flex>
+							<Text
+								textAlign={'left'}
+								color={'dark_lighter'}
+								className={'animate__animated animate__fadeInUp'}
+								outlineColor={'brand_light'}
+								mt={2}
+							>
+								Enter service type
+							</Text>
+							<Select
+								placeholder="Select option"
+								bg="dark"
+								required
+								w={'70%'}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+									setService(e.target.value)
+								}
+								value={_service}
+								isRequired
+							>
+								{services &&
+									services.map((data, index: number) => (
+										<option key={index} value={data.item}>
+											{data.title}
+										</option>
+									))}
+							</Select>
+
+							<Text
+								textAlign={'left'}
+								color={'dark_lighter'}
+								className={'animate__animated animate__fadeInUp'}
+								outlineColor={'brand_light'}
+								mt={2}
+							>
+								Promotion duration
+							</Text>
+							<Select
+								placeholder="Select option"
+								bg="dark"
+								required
+								w={'70%'}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+									setPromotionOption(Number(e.target.value))
+									if (
+										Number(e.target.value) === creditTable.PROFILE_PROMO_7_DAYS
+									)
+										setNoOfDays(7)
+									if (
+										Number(e.target.value) === creditTable.PROFILE_PROMO_14_DAYS
+									)
+										setNoOfDays(14)
+									if (
+										Number(e.target.value) === creditTable.PROFILE_PROMO_30_DAYS
+									)
+										setNoOfDays(30)
+								}}
+								value={promotionOption}
+								isRequired
+							>
+								<option value={creditTable.PROFILE_PROMO_7_DAYS}>
+									7 Days (3000 Credits)
+								</option>
+								<option value={creditTable.PROFILE_PROMO_14_DAYS}>
+									14 Days (5000 Credits)
+								</option>
+								<option value={creditTable.PROFILE_PROMO_30_DAYS}>
+									30 Days (8000 Credits)
+								</option>
+							</Select>
+						</Flex>
 					</ModalBody>
 					<ModalFooter>
 						<Button
@@ -347,7 +339,7 @@ export const UpdateProfilePopup = ({profileOwnerId}:Props) => {
 							mr={5}
 							onClick={() => setShowCreditInfo(true)}
 							isLoading={isLoading}
-							style={{ visibility: !blurModal ? "visible" : "hidden" }}
+							style={{ visibility: !blurModal ? 'visible' : 'hidden' }}
 							isDisabled={!_service || !bio || !promotionOption}
 						>
 							Promote

@@ -15,6 +15,7 @@ import {
 	BiWallet,
 	BiWrench,
 } from 'react-icons/bi'
+import { signOut } from 'next-auth/react'
 
 type Props = {}
 
@@ -63,7 +64,11 @@ export default function MainLeftNav({}: Props) {
 				}}
 			/>
 			<a href="/">
-				<EachNav Icon={BiLogInCircle} label="Logout" onClick={logout} />
+				<EachNav
+					Icon={BiLogInCircle}
+					label="Logout"
+					onClick={async () => await signOut()}
+				/>
 			</a>
 		</Flex>
 	)

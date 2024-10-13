@@ -84,7 +84,10 @@ export default function PersonalInfo({ userProfile }: Props) {
 	// 	window.open(`https://tiktok.com/@${_userFlatshareProfile.tiktok}`)
 	// }
 
-	console.log('state name:.........................', userProfile.flatShareProfile)
+	console.log(
+		'state name:.........................',
+		userProfile.flatShareProfile,
+	)
 
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING}>

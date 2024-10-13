@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Box, Button, Center, Flex, Text, useColorMode, ModalOverlay } from '@chakra-ui/react'
+import {
+	Box,
+	Button,
+	Center,
+	Flex,
+	Text,
+	useColorMode,
+	ModalOverlay,
+} from '@chakra-ui/react'
 import { BiCamera } from 'react-icons/bi'
 import { Cropper, CropperRef, CircleStencil } from 'react-advanced-cropper'
 import { useAuthContext } from '@/context/auth.context'
@@ -12,12 +20,12 @@ import {
 } from 'firebase/storage'
 import UserService from '@/firebase/service/user/user.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from 'react'
 
-interface Props{
-	onShowCropper: Dispatch<SetStateAction<boolean>>;
+interface Props {
+	onShowCropper: Dispatch<SetStateAction<boolean>>
 }
-export const ImageSelector = ({onShowCropper}: Props) => {
+export const ImageSelector = ({ onShowCropper }: Props) => {
 	const {
 		authState: { user },
 		getAuthDependencies,
@@ -29,7 +37,7 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 	const [croppedImage, setCroppedImage] = useState<string | undefined>('')
 	const [selectedImage, setSelectedImage] = useState('')
 
-	useEffect(()=>{
+	useEffect(() => {
 		onShowCropper(showCropper)
 	}, [showCropper])
 
@@ -143,12 +151,10 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 		}
 	}
 
-
 	return (
 		<>
 			{showCropper && (
 				<>
-				
 					<Flex
 						flexDir={'column'}
 						justifyContent={'center'}
@@ -187,10 +193,10 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 							</Box>
 							<Center
 								position={{
-								base: "fixed",
-								md: "relative"
-							}}
-											bottom={10}
+									base: 'fixed',
+									md: 'relative',
+								}}
+								bottom={10}
 							>
 								<Button onClick={update} isLoading={loading}>
 									Crop
@@ -198,7 +204,6 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 							</Center>
 						</Flex>
 					</Flex>
-					
 				</>
 			)}
 
@@ -208,7 +213,6 @@ export const ImageSelector = ({onShowCropper}: Props) => {
 					justifyContent={'center'}
 					alignItems={'center'}
 				>
-					
 					<Text
 						textAlign={'center'}
 						as={'h1'}

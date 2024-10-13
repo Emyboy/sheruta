@@ -62,19 +62,12 @@ export default function EachRequest({ request }: Props) {
 
 	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
 		useHandleBookmark(request.id || request.uuid, request._user_ref._id)
-
-	const canInteract = !(
-		request.availability_status === 'reserved' &&
-		authState.user?._id !== request.reserved_by
-	)
-
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
+	const { addAnalyticsData, getAnalyticsData } = useAnalytics()
 
 	const [analyticsData, setAnalyticsData] = useState<
 		AnalyticsDataDetails | undefined
 	>(undefined)
-
-	const { addAnalyticsData, getAnalyticsData } = useAnalytics()
 
 	useEffect(() => {
 		const fetchAnalyticsData = async () => {
@@ -102,6 +95,11 @@ export default function EachRequest({ request }: Props) {
 			})
 		}
 	}
+
+	const canInteract = !(
+		request.availability_status === 'reserved' &&
+		authState.user?._id !== request.reserved_by
+	)
 
 	return (
 		<Box
@@ -187,7 +185,7 @@ export default function EachRequest({ request }: Props) {
 											{request._user_ref.last_name}{' '}
 											{request._user_ref.first_name}
 										</Text>
-										{request.user_info?.is_verified && (
+										{request._user_info_ref?.is_verified && (
 											<LuBadgeCheck fill="#00bc73" />
 										)}
 									</Flex>
@@ -415,7 +413,7 @@ export default function EachRequest({ request }: Props) {
 					justifyContent={'space-between'}
 				>
 					<Flex gap={DEFAULT_PADDING}>
-						{!request.user_info?.hide_phone ? (
+						{!request._user_info_ref?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									isDisabled={
@@ -444,7 +442,7 @@ export default function EachRequest({ request }: Props) {
 											try {
 												// Handle the call
 												await handleCall({
-													number: request.user_info.primary_phone_number,
+													number: request._user_info_ref.primary_phone_number,
 													recipient_id: request._user_ref._id,
 													sender_details: authState.user
 														? {

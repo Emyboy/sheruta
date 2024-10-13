@@ -28,6 +28,10 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
 import ProfileSnippet from '@/components/ads/ProfileSnippet'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { User } from 'firebase/auth'
+import axios from 'axios'
 
 type Props = {
 	requests: string
@@ -41,20 +45,58 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
 	const [lastVisible, setLastVisible] = useState<DocumentData | null>(null) // Store the last document
-
+	const [data, setData] = useState([])
 	const lastRequestRef = useRef<HTMLDivElement | null>(null)
 	const observer = useRef<IntersectionObserver | null>(null)
 
 	const [processedRequests, setProcessedRequests] = useState<
 		HostRequestDataDetails[]
 	>([])
+	// const axiosAuth = useAuthenticatedAxios()
+
+	const backend_url = process.env.NEXTAUTH_URL  
+const user_id = "670922143217d7ba32c1d8ea"
+
+	axios
+		.get(
+			'https://sheruta-api-production.up.railway.app/api/users/670922143217d7ba32c1d8ea',
+		)
+		.then((res) => {
+			setData(res.data)
+			console.log(res.data)
+			setIsLoading(false)
+		})
+
+	console.log(data)
+
+	// const { data, isLoading, isError, error, refetch } = useQuery({
+	// 	queryKey: ["testing", ],
+	// 	queryFn: () => axiosAuth.get(`/route`),
+	// 	refetchOnWindowFocus: false,
+	// })
+
+	// const {mutate, isPending} = useMutation({
+	// 	mutationFn: (user:User) => axiosAuth.post(`/route`, { ...data }),
+	// 	onSuccess: () =>
+	// 	{
+	// 		// what to do when
+
+	// 		toast({
+	// 			message:"user infor update"
+	// 		})
+
+	// 	},
+	// 	onError:(error)=>{
+	// 		console.log(error)
+	// 	}
+	// })
 
 	useEffect(() => {
 		const processRequests = async () => {
 			if (flatShareRequests.length > 0) {
 				const updatedRequests = await Promise.all(
 					flatShareRequests.map(async (request: HostRequestDataDetails) =>
-						request.user_info?.hide_profile ? null : { ...request },
+						request._user_info_ref?.hide_profile ? null : { ...request },
 					),
 				)
 				const filteredRequests = updatedRequests.filter(Boolean)
@@ -67,6 +109,7 @@ export default function HomePage({ requests, userProfiles }: Props) {
 
 	const loadMore = async () => {
 		setIsLoading(true)
+
 		try {
 			const requestsRef = collection(db, DBCollectionName.flatShareRequests)
 			let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
@@ -89,36 +132,12 @@ export default function HomePage({ requests, userProfiles }: Props) {
 				// Resolve any document references in the new requests
 				const resolvedRequests = await resolveArrayOfReferences(newRequests)
 
-				// Further resolve user information and filter out hidden profiles
-				const resolvedNewRequests = await Promise.all(
-					resolvedRequests
-						?.filter(
-							(request: HostRequestDataDetails) => request?._user_ref?._id,
-						)
-						.map(async (request: HostRequestDataDetails) => {
-							const userId = request._user_ref._id
-							const user_info = await UserInfoService.get(userId)
-
-							// Only include requests where the user profile is not hidden
-							if (!user_info?.hide_profile) {
-								return {
-									...request,
-									user_info,
-								}
-							}
-
-							// Return null if the user profile is hidden
-							return null
-						}),
-					// Filter out any null results from hidden profiles
-				).then((results) => results.filter((request) => request !== null))
-
 				// Update state with filtered new requests (removing duplicates)
 				setFlatShareRequests((prevRequests) => {
 					const existingIds = new Set(prevRequests.map((request) => request.id))
 
 					// Filter out new requests that already exist in previous requests
-					const filteredNewRequests = resolvedNewRequests.filter(
+					const filteredNewRequests = resolvedRequests.filter(
 						(request) => !existingIds.has(request.id),
 					)
 
@@ -151,6 +170,15 @@ export default function HomePage({ requests, userProfiles }: Props) {
 			if (observer.current) observer.current.disconnect()
 		}
 	}, [isLoading, hasMore, lastRequestRef])
+
+	// const handleSubmit = (values) =>
+	// {
+	// 	/**
+	// 	 * username:daniel,
+	// 	 * _id:7386yihsdf8
+	// 	 */
+	// 	mutate(values)
+	// }
 
 	// Assign ref to the last item
 	const setRef = (node: HTMLDivElement | null) => {

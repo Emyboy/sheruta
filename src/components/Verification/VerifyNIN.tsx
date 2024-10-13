@@ -255,7 +255,12 @@ const VerifyNIN = ({
 				if (lastNameMatches && genderMatches) {
 					//TODO: Handle scenarios where there can be an existing NIN on the database already
 					await UserInfoService.update({
-						data: { is_verified: true, date_of_birth: data.birthdate, nin },
+						data: {
+							is_verified: true,
+							date_of_birth: data.birthdate,
+							nin,
+							nin_data: { ...data },
+						},
 						document_id: userId,
 					})
 					showToast({

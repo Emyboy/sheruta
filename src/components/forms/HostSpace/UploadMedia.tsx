@@ -19,7 +19,7 @@ import {
 	useToast,
 	VStack,
 } from '@chakra-ui/react'
-import { Timestamp } from 'firebase/firestore'
+import { DocumentReference, Timestamp } from 'firebase/firestore'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
@@ -37,7 +37,7 @@ export default function UploadMedia({
 }: HostSpaceFormProps) {
 	const toast = useToast()
 	const {
-		authState: { user, user_info, flat_share_profile },
+		authState: { flat_share_profile },
 	} = useAuthContext()
 	const router = useRouter()
 
@@ -121,7 +121,7 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (!user || !user_info)
+		if (!flat_share_profile)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -130,7 +130,7 @@ export default function UploadMedia({
 		setLoading(true)
 
 		try {
-			const userId = user._id
+			const userId = flat_share_profile._user_id
 			const imageUploadPromises = formData.images_urls.map((url, i) =>
 				SherutaDB.uploadMedia({
 					data: url,
@@ -166,8 +166,15 @@ export default function UploadMedia({
 
 			const images_urls = mediaUrls.filter((url) => url !== null)
 
-			const { category, service, state, area, property, ...cleanedFormData } =
-				formData
+			const {
+				category,
+				service,
+				state,
+				area,
+				property,
+				pre_amenities,
+				...cleanedFormData
+			} = formData
 
 			let data: HostRequestData = {
 				...cleanedFormData,
@@ -179,7 +186,8 @@ export default function UploadMedia({
 				uuid,
 				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
-				_user_ref: flat_share_profile?._user_ref,
+				_user_ref: flat_share_profile._user_ref,
+				_user_info_ref: flat_share_profile._user_info_ref,
 			}
 
 			createHostRequestDTO.parse(data)
