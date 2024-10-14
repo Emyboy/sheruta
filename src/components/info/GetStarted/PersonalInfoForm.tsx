@@ -77,7 +77,10 @@ export default function PersonalInfoForm({ done }: Props) {
 					twitter,
 					linkedin,
 					gender_preference,
-					age_preference,
+					age_preference: {
+						min: age_preference.split(' ')[0],
+						max: age_preference.split(' ')[2],
+					},
 					done_kyc: true,
 				})
 			}
@@ -260,9 +263,8 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setGenderPreference(e.target.value)}
 									value={gender_preference}
 								>
-									<option value="Males only">Male only</option>
-									<option value="Females only">Female only</option>
-									<option value="Both genders">Both genders</option>
+									<option value="male">Male only</option>
+									<option value="female">Female only</option>
 								</Select>
 							</Flex>
 							<Flex
