@@ -25,7 +25,7 @@ export default async function page({ searchParams }: Props) {
 	])
 
 	const { data } = await axiosInstance.get(`/users/dependencies`)
-	console.log(data)
+	console.log("User dependencies", data)
 	// todo save the user dependency to the context
 
 	const finalRequests = await Promise.all(
