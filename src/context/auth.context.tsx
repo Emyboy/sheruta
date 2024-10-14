@@ -40,6 +40,7 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined)
 
 interface AuthContextProviderProps {
 	children: ReactNode
+	user_data?: any; 
 	
 }
 
