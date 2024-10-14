@@ -397,6 +397,7 @@ const AuthForm: React.FC<{
 								status: 'success',
 							})
 							router.refresh()
+							window.location.reload()
 							setIsPasswordReset(false)
 							setIsSignUp(false)
 						}

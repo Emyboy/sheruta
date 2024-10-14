@@ -65,22 +65,21 @@ export default function PersonalInfoForm({ done }: Props) {
 		mutationFn: async () => {
 			if (user) {
 				setIsLoading(true)
-				if (user) {
-					await axiosInstance.put('/flat-share-profile', {
-						occupation,
-						employment_status,
-						work_industry,
-						religion,
-						tiktok,
-						facebook,
-						instagram,
-						twitter,
-						linkedin,
-						gender_preference,
-						age_preference,
-						done_kyc: true,
-					})
-				}
+
+				await axiosInstance.put('/flat-share-profile', {
+					occupation,
+					employment_status,
+					work_industry,
+					religion,
+					tiktok,
+					facebook,
+					instagram,
+					twitter,
+					linkedin,
+					gender_preference,
+					age_preference,
+					done_kyc: true,
+				})
 			}
 		},
 		onSuccess: () => {
@@ -104,9 +103,7 @@ export default function PersonalInfoForm({ done }: Props) {
 			})
 
 			setIsLoading(false)
-			if (done) {
-				done()
-			}
+			done && done()
 		},
 		onError: (err) => {
 			setIsLoading(false)
@@ -285,7 +282,7 @@ export default function PersonalInfoForm({ done }: Props) {
 									value={age_preference}
 								>
 									<option value="18 - 23 yrs">18 - 23 yrs</option>
-									<option value="24 - 29 yrs">25 - 29 yrs</option>
+									<option value="24 - 29 yrs">24 - 29 yrs</option>
 									<option value="30 - 35 yrs">30 - 35 yrs</option>
 									<option value="Above 35 yrs">Above 35 yrs</option>
 									<option value="Any age">Any age</option>

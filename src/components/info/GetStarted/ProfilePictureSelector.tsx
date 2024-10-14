@@ -159,7 +159,7 @@ export default function ProfilePictureSelector({
 				})
 			}
 		},
-		onSuccess: () => {},
+		onSuccess: () => done && done(),
 		onError: (err) => {
 			console.error(err)
 			setLoading(false)
