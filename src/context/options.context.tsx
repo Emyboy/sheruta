@@ -42,6 +42,7 @@ const initialOptionsState: OptionsState = {
 
 export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
 	children,
+	
 }) => {
 	const { setAppState } = useAppContext()
 	const [optionsState, setOptionsState] =
