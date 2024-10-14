@@ -54,20 +54,21 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	>([])
 	// const axiosAuth = useAuthenticatedAxios()
 
-	const backend_url = process.env.NEXTAUTH_URL  
+	const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL  
 const user_id = "670922143217d7ba32c1d8ea"
+    
 
-	axios
-		.get(
-			'https://sheruta-api-production.up.railway.app/api/users/670922143217d7ba32c1d8ea',
-		)
-		.then((res) => {
-			setData(res.data)
-			console.log(res.data)
-			setIsLoading(false)
-		})
+	// axios
+	// 	.get(
+	// 		`${backend_url}/users/670922143217d7ba32c1d8ea`,
+	// 	)
+	// 	.then((res) => {
+	// 		setData(res.data)
+	// 		console.log(res.data)
+	// 		setIsLoading(false)
+	// 	})
 
-	console.log(data)
+	// console.log(backend_url)
 
 	// const { data, isLoading, isError, error, refetch } = useQuery({
 	// 	queryKey: ["testing", ],

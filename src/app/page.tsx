@@ -24,8 +24,8 @@ export default async function page({ searchParams }: Props) {
 		getAllProfileSnippetDocs(searchParams || {}),
 	])
 
-	const { data } = await axiosInstance.get(`/users/dependencies`)
-	console.log(data)
+	// const { data } = await axiosInstance.get(`/users/dependencies`)
+	// console.log(data)
 	// todo save the user dependency to the context
 
 	const finalRequests = await Promise.all(
