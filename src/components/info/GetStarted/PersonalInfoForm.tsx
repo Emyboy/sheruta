@@ -1,8 +1,8 @@
 'use client'
 
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { industries } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
 import useAuthenticatedAxios from '@/hooks/useAxios'
 import useCommon from '@/hooks/useCommon'
 import {
@@ -20,16 +20,19 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 
 type Props = {
-	done?: () => void
+	done: () => void
 }
 
 export default function PersonalInfoForm({ done }: Props) {
 	const { showToast } = useCommon()
 
 	const {
-		authState: { user, flat_share_profile },
+		authState: { user, user_info, flat_share_profile },
 		setAuthState,
 	} = useAuthContext()
+	const {
+		optionsState: { work_industries },
+	} = useOptionsContext()
 
 	const axiosInstance = useAuthenticatedAxios()
 
@@ -65,24 +68,26 @@ export default function PersonalInfoForm({ done }: Props) {
 		mutationFn: async () => {
 			if (user) {
 				setIsLoading(true)
+				await Promise.all([
+					axiosInstance.put('/flat-share-profile', {
+						occupation,
+						employment_status,
+						work_industry,
+						religion,
+						tiktok,
+						facebook,
+						instagram,
+						twitter,
+						linkedin,
+						gender_preference,
+						age_preference: {
+							min: age_preference.split(' ')[0],
+							max: age_preference.split(' ')[2],
+						},
+					}),
 
-				await axiosInstance.put('/flat-share-profile', {
-					occupation,
-					employment_status,
-					work_industry,
-					religion,
-					tiktok,
-					facebook,
-					instagram,
-					twitter,
-					linkedin,
-					gender_preference,
-					age_preference: {
-						min: age_preference.split(' ')[0],
-						max: age_preference.split(' ')[2],
-					},
-					done_kyc: true,
-				})
+					axiosInstance.post('/user-info/kyc/complete'),
+				])
 			}
 		},
 		onSuccess: () => {
@@ -106,7 +111,7 @@ export default function PersonalInfoForm({ done }: Props) {
 			})
 
 			setIsLoading(false)
-			done && done()
+			done()
 		},
 		onError: (err) => {
 			setIsLoading(false)
@@ -192,11 +197,11 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setEmploymentStatus(e.target.value)}
 									value={employment_status}
 								>
+									<option value={''}>None</option>
 									<option value="employed">Employed</option>
 									<option value="unemployed">Unemployed</option>
-									<option value="self employed">Self employed</option>
+									<option value="self_employed">Self employed</option>
 									<option value="student">Student</option>
-									<option value="corps member">{`Corps member (NYSC)`}</option>
 								</Select>
 							</Flex>
 						</Flex>
@@ -217,9 +222,9 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setWorkIndustry(e.target.value)}
 									value={work_industry}
 								>
-									{industries.map((industry) => (
-										<option key={industry} value={industry.toLowerCase()}>
-											{industry}
+									{work_industries.map((industry: any) => (
+										<option key={industry._id} value={industry._id}>
+											{industry.name}
 										</option>
 									))}
 								</Select>
@@ -242,7 +247,9 @@ export default function PersonalInfoForm({ done }: Props) {
 								>
 									<option value="christian">Christian</option>
 									<option value="muslim">Muslim</option>
-									<option value="others">Others</option>
+									<option value="traditional">Traditional</option>
+									<option value="atheist">Atheist</option>
+									<option value="other">Others</option>
 								</Select>
 							</Flex>
 						</Flex>
@@ -283,11 +290,10 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setAgePreference(e.target.value)}
 									value={age_preference}
 								>
-									<option value="18 - 23 yrs">18 - 23 yrs</option>
-									<option value="24 - 29 yrs">24 - 29 yrs</option>
-									<option value="30 - 35 yrs">30 - 35 yrs</option>
-									<option value="Above 35 yrs">Above 35 yrs</option>
-									<option value="Any age">Any age</option>
+									<option value="18 - 23">18 - 23 yrs</option>
+									<option value="24 - 29">24 - 29 yrs</option>
+									<option value="30 - 35">30 - 35 yrs</option>
+									<option value="35 - 1000">Above 35 yrs</option>
 								</Select>
 							</Flex>
 						</Flex>

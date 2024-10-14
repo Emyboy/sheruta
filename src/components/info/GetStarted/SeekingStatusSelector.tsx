@@ -9,7 +9,6 @@ import { BiSolidCheckCircle } from 'react-icons/bi'
 export default function SeekingStatusSelector({ done }: { done?: () => void }) {
 	const {
 		authState: { user, flat_share_profile },
-		getAuthDependencies,
 		setAuthState,
 	} = useAuthContext()
 

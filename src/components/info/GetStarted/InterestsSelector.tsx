@@ -16,7 +16,6 @@ import { useMutation } from '@tanstack/react-query'
 export default function InterestsSelector({ done }: { done?: () => void }) {
 	const {
 		authState: { user, flat_share_profile },
-		getAuthDependencies,
 		setAuthState,
 	} = useAuthContext()
 	const {

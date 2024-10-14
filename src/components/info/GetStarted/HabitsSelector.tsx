@@ -10,7 +10,6 @@ import { useState } from 'react'
 export default function HabitsSelector({ done }: { done?: () => void }) {
 	const {
 		authState: { user, flat_share_profile },
-		getAuthDependencies,
 		setAuthState,
 	} = useAuthContext()
 

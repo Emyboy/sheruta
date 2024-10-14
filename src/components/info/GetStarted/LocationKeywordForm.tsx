@@ -14,7 +14,6 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 	const [isLoading, setIsLoading] = useState(false)
 	const {
 		authState: { user, flat_share_profile },
-		getAuthDependencies,
 		setAuthState,
 	} = useAuthContext()
 
@@ -95,7 +94,7 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 								value={state}
 								onChange={(e) => setState(e.target.value)}
 							>
-								{options.states.map((state: StateData) => {
+								{options.states.map((state) => {
 									return (
 										<option
 											key={state._id}
@@ -130,8 +129,8 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 									onChange={(e) => setLocation(e.target.value)}
 								>
 									{options.locations
-										.filter((loc: LocationKeywordData) => loc.state == state)
-										.map((loc: LocationKeywordData) => {
+										.filter((loc) => loc.state == state)
+										.map((loc) => {
 											return (
 												<option
 													key={loc._id}

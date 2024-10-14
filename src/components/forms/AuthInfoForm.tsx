@@ -22,7 +22,6 @@ import { useMutation } from '@tanstack/react-query'
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
 		authState: { flat_share_profile, user, user_info },
-		getAuthDependencies,
 		setAuthState,
 	} = useAuthContext()
 

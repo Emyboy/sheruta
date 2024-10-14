@@ -1,19 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Box, Button, Center, Flex, Text } from '@chakra-ui/react'
-import { BiCamera } from 'react-icons/bi'
-import { Cropper, CropperRef, CircleStencil } from 'react-advanced-cropper'
 import { useAuthContext } from '@/context/auth.context'
+import useAuthenticatedAxios from '@/hooks/useAxios'
 import useCommon from '@/hooks/useCommon'
+import { Box, Button, Center, Flex, Text } from '@chakra-ui/react'
+import { useMutation } from '@tanstack/react-query'
 import {
+	getDownloadURL,
 	getStorage,
 	ref,
 	uploadBytesResumable,
-	getDownloadURL,
 } from 'firebase/storage'
-import UserService from '@/firebase/service/user/user.firebase'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import useAuthenticatedAxios from '@/hooks/useAxios'
-import { useMutation } from '@tanstack/react-query'
+import React, { useRef, useState } from 'react'
+import { CircleStencil, Cropper, CropperRef } from 'react-advanced-cropper'
+import { BiCamera } from 'react-icons/bi'
 
 export default function ProfilePictureSelector({
 	done,
@@ -22,9 +20,9 @@ export default function ProfilePictureSelector({
 }) {
 	const {
 		authState: { user },
-		getAuthDependencies,
 		setAuthState,
 	} = useAuthContext()
+	console.log(user)
 
 	const axiosInstance = useAuthenticatedAxios()
 
@@ -290,7 +288,7 @@ export default function ProfilePictureSelector({
 					<br />
 					<Button
 						onClick={() => mutate()}
-						isDisabled={!selectedImage}
+						isDisabled={!selectedImage && !user?.avatar_url}
 						isLoading={loading}
 					>
 						{user?.avatar_url ? 'Next' : 'Upload'}

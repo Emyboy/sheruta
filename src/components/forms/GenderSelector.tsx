@@ -9,7 +9,6 @@ import { BiSolidCheckCircle } from 'react-icons/bi'
 export default function GenderSelect({ done }: { done?: () => void }) {
 	const {
 		authState: { user, user_info },
-		getAuthDependencies,
 		setAuthState,
 	} = useAuthContext()
 

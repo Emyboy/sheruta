@@ -1,26 +1,30 @@
 'use client'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { collection, getDocs } from 'firebase/firestore'
+
 import React, {
 	createContext,
-	useState,
-	useContext,
 	ReactNode,
+	useContext,
 	useEffect,
+	useState,
 } from 'react'
 import { useAppContext } from './app.context'
 
+type OptionType = {
+	_id: string
+	name: string
+}
+
 export interface OptionsState {
-	location_keywords: any[]
-	locations: any[]
-	states: any[]
-	services: any[]
-	habits: any[]
-	interests: any[]
-	categories: any[]
-	property_types: any[]
-	amenities: any[]
+	location_keywords: OptionType[]
+	locations: (OptionType & { state: string })[]
+	states: OptionType[]
+	services: OptionType[]
+	habits: OptionType[]
+	interests: OptionType[]
+	categories: OptionType[]
+	property_types: OptionType[]
+	amenities: OptionType[]
+	work_industries: OptionType[]
 }
 
 interface OptionsContextType {
@@ -30,8 +34,9 @@ interface OptionsContextType {
 
 const OptionsContext = createContext<OptionsContextType | undefined>(undefined)
 
-const initialOptionsState: Omit<OptionsState, 'locations'> = {
+const initialOptionsState: OptionsState = {
 	location_keywords: [],
+	locations: [],
 	states: [],
 	services: [],
 	habits: [],
@@ -39,6 +44,7 @@ const initialOptionsState: Omit<OptionsState, 'locations'> = {
 	categories: [],
 	property_types: [],
 	amenities: [],
+	work_industries: [],
 }
 
 export const OptionsProvider: React.FC<{
