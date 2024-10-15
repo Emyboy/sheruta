@@ -150,7 +150,8 @@ const PasswordResetForm = ({
 			showToast({
 				message: 'Please check your email for further instructions',
 				status: 'success',
-			}), setAppState({ show_login: false })
+			}),
+				setAppState({ show_login: false })
 		},
 	})
 
@@ -381,7 +382,11 @@ const AuthForm: React.FC<{
 		onSubmit: async (values: SignUpProps) => {
 			try {
 				if (isSignUp) {
-					mutate(values)
+					mutate({
+						...values,
+						first_name: values.first_name.trim().split(" ")[0],
+						last_name: values.last_name.trim().split(" ")[0],
+					})
 				} else {
 					await signIn('credentials', {
 						email: values.email,
