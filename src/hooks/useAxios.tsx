@@ -1,6 +1,6 @@
-import { useSession } from 'next-auth/react'
 import axios, { AxiosInstance } from 'axios'
-import { useEffect, useMemo } from 'react'
+import { useSession } from 'next-auth/react'
+import { useMemo } from 'react'
 
 const useAuthenticatedAxios = (): AxiosInstance => {
 	const { data: session } = useSession()

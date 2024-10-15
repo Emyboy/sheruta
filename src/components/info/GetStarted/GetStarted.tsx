@@ -1,19 +1,18 @@
-import { Flex, Box, Text, Link } from '@chakra-ui/react'
-import { useAuthContext } from '@/context/auth.context'
-import GetStartedBeginning from '@/components/info/GetStarted/GetStartedBeginning'
-import GenderSelect from '@/components/forms/GenderSelector'
-import { useEffect, useState } from 'react'
 import AuthInfoForm from '@/components/forms/AuthInfoForm'
-import { BiLeftArrowAlt } from 'react-icons/bi'
-import SeekingStatusSelector from '@/components/info/GetStarted/SeekingStatusSelector'
+import GenderSelect from '@/components/forms/GenderSelector'
+import GetStartedBeginning from '@/components/info/GetStarted/GetStartedBeginning'
+import GetStartedCompleted from '@/components/info/GetStarted/GetStartedCompleted'
 import HabitsSelector from '@/components/info/GetStarted/HabitsSelector'
 import InterestsSelector from '@/components/info/GetStarted/InterestsSelector'
 import ProfilePictureSelector from '@/components/info/GetStarted/ProfilePictureSelector'
-import PersonalInfoForm from './PersonalInfoForm'
-import LocationKeywordForm from './LocationKeywordForm'
-import GetStartedCompleted from '@/components/info/GetStarted/GetStartedCompleted'
+import SeekingStatusSelector from '@/components/info/GetStarted/SeekingStatusSelector'
 import EmailVerification from '@/components/Verification/EmailVerification'
-import { useSearchParams } from 'next/navigation'
+import { useAuthContext } from '@/context/auth.context'
+import { Flex } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+import { BiLeftArrowAlt } from 'react-icons/bi'
+import LocationKeywordForm from './LocationKeywordForm'
+import PersonalInfoForm from './PersonalInfoForm'
 
 export default function GetStarted() {
 	const {
@@ -21,7 +20,6 @@ export default function GetStarted() {
 	} = useAuthContext()
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
-	const searchParams = useSearchParams()
 
 	const next = () => {
 		setStep(step + 1)
@@ -38,7 +36,7 @@ export default function GetStarted() {
 			<ProfilePictureSelector key={'profile-pics'} done={next} />,
 			<LocationKeywordForm key={'location-keyword'} done={next} />,
 			<PersonalInfoForm key={'personal-info'} done={next} />,
-			<GetStartedCompleted key={'completed'} done={next} />,
+			<GetStartedCompleted key={'completed'} />,
 		]
 	}
 
@@ -51,25 +49,6 @@ export default function GetStarted() {
 	if (!user) {
 		return null
 	}
-
-	// if(searchParams.get('action') && searchParams.get('action') === 'reset-password') {
-	// 	return <Flex
-	// 	bg={'dark_light'}
-	// 	_dark={{ bg: 'dark' }}
-	// 	position={'fixed'}
-	// 	top={0}
-	// 	bottom={0}
-	// 	left={0}
-	// 	right={0}
-	// 	zIndex={500}
-	// 	flexDir={'column'}
-	// 	justifyContent={'center'}
-	// 	alignItems={'center'}
-	// 	overflowY={'auto'}
-	// >
-	// 	<>Hello</>
-	// </Flex>
-	// }
 
 	if (!user.email_verified) {
 		return (

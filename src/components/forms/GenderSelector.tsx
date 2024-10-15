@@ -1,36 +1,46 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react'
-import Image from 'next/image'
-import React, { useState } from 'react'
-import { BiSolidCheckCircle } from 'react-icons/bi'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { useAuthContext } from '@/context/auth.context'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { Box, Button, Flex, Text } from '@chakra-ui/react'
+import { useMutation } from '@tanstack/react-query'
+import Image from 'next/image'
+import { useState } from 'react'
+import { BiSolidCheckCircle } from 'react-icons/bi'
 
 export default function GenderSelect({ done }: { done?: () => void }) {
 	const {
 		authState: { user, user_info },
-		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const [gender, setGender] = useState<'male' | 'female' | null>(
 		user_info?.gender || null,
 	)
 	const [isLoading, setIsLoading] = useState(false)
 
-	const update = async () => {
-		if (gender && user) {
-			setIsLoading(true)
-			await UserInfoService.update({
-				data: { gender },
-				document_id: user?._id,
-			})
-			await saveProfileDocs({ gender }, user?._id)
-			await getAuthDependencies()
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
+				setIsLoading(true)
+				await axiosInstance.put('/user-info', {
+					gender,
+				})
+			}
+		},
+		onSuccess: () => {
+			// @ts-ignore
+			setAuthState({ user_info: { ...user_info, gender } })
 			setIsLoading(false)
 			if (done) {
 				done()
 			}
-		}
-	}
+		},
+		onError: (err) => {
+			console.log(err)
+			setIsLoading(false)
+		},
+	})
 
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -57,7 +67,11 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 				/>
 			</Flex>
 			<br />
-			<Button onClick={update} isLoading={isLoading}>{`Next`}</Button>
+			<Button
+				onClick={() => mutate()}
+				isDisabled={!gender}
+				isLoading={isLoading}
+			>{`Next`}</Button>
 		</Flex>
 	)
 }

@@ -10,82 +10,65 @@ import DotsLoading from '@/components/info/GetStarted/DotsLoading'
 import { getDoc } from 'firebase/firestore'
 import { useOptionsContext } from '@/context/options.context'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useMutation } from '@tanstack/react-query'
 
 export default function InterestsSelector({ done }: { done?: () => void }) {
 	const {
 		authState: { user, flat_share_profile },
-		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
-	const { showToast } = useCommon()
 	const {
 		optionsState: { interests },
 	} = useOptionsContext()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const [loading, setLoading] = useState(false)
-	const [fetching, setFetching] = useState(false)
-	const [selectedHabits, setSelectedHabits] = useState<HabitData[]>([])
+	const [selectedInterests, setSelectedInterests] = useState<string[]>(
+		flat_share_profile?.interests || [],
+	)
 
-	const getAllHabits = async () => {
-		try {
-			const documents: HabitData[] = []
-			let refs = flat_share_profile?.interests as any[]
-
-			if (refs && refs?.length > 0) {
-				for (const ref of refs) {
-					try {
-						const docSnapshot = await getDoc(ref)
-						//@ts-ignore
-						documents.push({
-							//@ts-ignore
-							...docSnapshot.data(),
-							_ref: docSnapshot.ref,
-							id: docSnapshot.id,
-						} as HabitData)
-					} catch (error) {
-						console.error('Error getting document:', error)
-					}
-				}
+	const selectInterest = (interestId: string) =>
+		setSelectedInterests((prevInterests) => {
+			if (prevInterests.includes(interestId)) {
+				return prevInterests.filter(
+					(existingInterestId) => existingInterestId !== interestId,
+				)
+			} else {
+				return [...prevInterests, interestId]
 			}
+		})
 
-			setSelectedHabits(documents)
-		} catch (e) {
-			showToast({
-				message: 'Error, please try again',
-				status: 'error',
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
+				setLoading(true)
+
+				await axiosInstance.put('/flat-share-profile', {
+					interests: selectedInterests,
+				})
+			}
+		},
+		onSuccess: () => {
+			setAuthState({
+				// @ts-ignore
+				flat_share_profile: {
+					...flat_share_profile,
+					interests: selectedInterests,
+				},
 			})
-		}
-	}
 
-	const selectHabit = (habit: HabitData) => {
-		let habitExist = selectedHabits.find((x) => x.id == habit.id)
-		if (habitExist) {
-			setSelectedHabits(selectedHabits.filter((x) => x.id !== habit.id))
-		} else {
-			setSelectedHabits([...selectedHabits, habit])
-		}
-	}
-
-	const update = async () => {
-		if (user) {
-			setLoading(true)
-			await FlatShareProfileService.update({
-				data: { interests: selectedHabits.map((val) => val._ref) },
-				document_id: user?._id,
-			})
-			await saveProfileDocs(
-				{ interests: selectedHabits.map((val) => val._ref) },
-				user?._id,
-			)
-			await getAuthDependencies()
 			setLoading(false)
 			if (done) {
 				done()
 			}
-		}
-	}
-
-	useEffect(() => {
-		getAllHabits()
-	}, [])
+		},
+		onError: (err) => {
+			setLoading(false)
+			console.error(err)
+		},
+	})
 
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -104,36 +87,31 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 			>
 				{`Select traits you want prospects to have`}
 			</Text>
-			{fetching && (
-				<>
-					<br />
-					<DotsLoading />
-					<br />
-				</>
-			)}
+
 			<Flex
 				flexWrap={'wrap'}
 				gap={3}
 				py={10}
 				className={'animate__animated animate__fadeIn'}
 			>
-				{interests.map((habit) => {
+				{interests.map((interest) => {
 					return (
 						<EachOption
-							isActive={
-								selectedHabits.filter((x) => x.id == habit.id).length > 0
-							}
-							label={habit.title}
-							onClick={() => selectHabit(habit)}
-							key={habit.slug}
+							isActive={selectedInterests.includes(interest._id)}
+							label={interest.name}
+							onClick={() => selectInterest(interest._id)}
+							key={interest.slug}
 						/>
 					)
 				})}
 			</Flex>
 			<br />
-			{!fetching && (
-				<Button onClick={update} isLoading={loading}>{`Next`}</Button>
-			)}
+
+			<Button
+				onClick={() => mutate()}
+				isDisabled={!selectedInterests.length}
+				isLoading={loading}
+			>{`Next`}</Button>
 		</Flex>
 	)
 }
