@@ -18,6 +18,7 @@ export default function ProfilePictureSelector({
 }: {
 	done?: () => void
 }) {
+
 	const {
 		authState: { user },
 		setAuthState,

@@ -11,16 +11,14 @@ import axiosInstance from '@/utils/custom-axios'
 type Props = {}
 
 export default async function page({}: Props) {
-
 	const { data } = await axiosInstance.get(`/users/dependencies`)
 
 	//data.options
 
 	//data.user_data
 
-	console.log("User dependencies", JSON.stringify(data.options))
+	console.log('User dependencies', JSON.stringify(data.options))
 
-	
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>

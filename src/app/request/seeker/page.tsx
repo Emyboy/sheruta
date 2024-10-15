@@ -19,7 +19,7 @@ export default function Page({}: Props) {
 	const handleBackClick = () => {
 		router.back()
 	}
-	
+
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>

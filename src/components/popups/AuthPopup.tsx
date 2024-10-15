@@ -384,8 +384,8 @@ const AuthForm: React.FC<{
 				if (isSignUp) {
 					mutate({
 						...values,
-						first_name: values.first_name.trim().split(" ")[0],
-						last_name: values.last_name.trim().split(" ")[0],
+						first_name: values.first_name.trim().split(' ')[0],
+						last_name: values.last_name.trim().split(' ')[0],
 					})
 				} else {
 					await signIn('credentials', {
@@ -393,6 +393,7 @@ const AuthForm: React.FC<{
 						password: values.password,
 						redirect: false,
 					}).then((resp) => {
+						console.log(resp)
 						if (resp?.error) {
 							console.log('This is the error', resp?.error)
 							showToast({

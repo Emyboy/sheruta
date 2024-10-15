@@ -18,6 +18,9 @@ export default function GetStarted() {
 	const {
 		authState: { user, flat_share_profile, user_info },
 	} = useAuthContext()
+
+	// console.log(!flat_share_profile?.budget, "here")
+
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
 
@@ -50,34 +53,40 @@ export default function GetStarted() {
 		return null
 	}
 
-	if (!user.email_verified) {
-		return (
-			<Flex
-				bg={'dark_light'}
-				_dark={{ bg: 'dark' }}
-				position={'fixed'}
-				top={0}
-				bottom={0}
-				left={0}
-				right={0}
-				zIndex={500}
-				flexDir={'column'}
-				justifyContent={'center'}
-				alignItems={'center'}
-				overflowY={'auto'}
-			>
-				<EmailVerification />
-			</Flex>
-		)
-	}
+	// if (!user?.email_verified) {
+	// 	return (
+	// 		<Flex
+	// 			bg={'dark_light'}
+	// 			_dark={{ bg: 'dark' }}
+	// 			position={'fixed'}
+	// 			top={0}
+	// 			bottom={0}
+	// 			left={0}
+	// 			right={0}
+	// 			zIndex={500}
+	// 			flexDir={'column'}
+	// 			justifyContent={'center'}
+	// 			alignItems={'center'}
+	// 			overflowY={'auto'}
+	// 		>
+	// 			<EmailVerification />
+	// 		</Flex>
+	// 	)
+	// }
 
-	if (
-		!flat_share_profile?.budget ||
+	console.log(
 		!user_info?.gender ||
 		!flat_share_profile?.occupation ||
 		!flat_share_profile?.budget ||
-		!flat_share_profile?.done_kyc
+		!flat_share_profile?.done_kyc)
+
+	if (
+		!user_info?.gender ||
+		!flat_share_profile?.occupation ||
+		!flat_share_profile?.budget 
+		// || !flat_share_profile?.done_kyc
 	) {
+		
 		return (
 			<>
 				<Flex

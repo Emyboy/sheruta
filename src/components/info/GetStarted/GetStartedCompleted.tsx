@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Confetti from 'react-confetti'
 
 export default function GetStartedCompleted() {
+
 	const [width, setWidth] = useState(100)
 	const [height, setHeight] = useState(400)
 	const [run, setRun] = useState(true)
