@@ -16,12 +16,17 @@ import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import AuthService from '@/firebase/service/auth/auth.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 import { PaymentType } from '@/firebase/service/request/request.types'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useMutation } from '@tanstack/react-query'
 
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
 		authState: { flat_share_profile, user, user_info },
-		getAuthDependencies,
+		setAuthState,
 	} = useAuthContext()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const [first_name, setFirstName] = useState(user?.first_name || '')
 	const [last_name, setLastName] = useState(user?.last_name || '')
 	const [primary_phone_number, setPhoneNumber] = useState(
@@ -32,60 +37,67 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 	const [bio, setBio] = useState(flat_share_profile?.bio || '')
 
 	const [payment_type, setPaymentType] = useState(
-		flat_share_profile?.payment_type || '',
+		flat_share_profile?.payment_type ? flat_share_profile.payment_type[0] : '',
 	)
 
 	const [isLoading, setIsLoading] = useState(false)
 
-	const update = async (e: any) => {
-		e.preventDefault()
-		if (first_name && last_name && budget && primary_phone_number && user) {
-			setIsLoading(true)
-
-			await AuthService.update({
-				data: { first_name, last_name },
-				document_id: user._id,
-			})
-
-			await UserInfoService.update({
-				data: { primary_phone_number },
-				document_id: user._id,
-			})
-
-			await saveProfileDocs(
-				{
-					first_name,
-					last_name,
-					primary_phone_number,
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (user) {
+				setIsLoading(true)
+				await Promise.all([
+					axiosInstance.put('/user-info', {
+						gender: user_info?.gender,
+						primary_phone_number,
+					}),
+					axiosInstance.put('/flat-share-profile', {
+						// ...flat_share_profile,
+						budget,
+						bio,
+						payment_type: [payment_type],
+					}),
+					axiosInstance.put('/users', {
+						// ...user,
+						first_name,
+						last_name,
+					}),
+				])
+			}
+		},
+		onSuccess: () => {
+			setAuthState({
+				// @ts-ignore
+				flat_share_profile: {
+					...flat_share_profile,
 					budget,
 					bio,
-					payment_type,
-					document_id: user?._id,
-					// _user_ref: `/users/${user?._id}`, // this ended up setting the value as string in user_profile collection rather than reference
-					_user_ref: flat_share_profile?._user_ref,
+					// @ts-ignore
+					payment_type: [payment_type],
 				},
-				user?._id,
-			)
-
-			await FlatShareProfileService.update({
-				data: { budget, bio, payment_type: payment_type as PaymentType },
-				document_id: user?._id,
+				// @ts-ignore
+				user: { ...user, first_name, last_name },
+				// @ts-ignore
+				user_info: { ...user_info, primary_phone_number },
 			})
-
-			await getAuthDependencies()
-
 			setIsLoading(false)
-
 			if (done) {
 				done()
 			}
-		}
-	}
+		},
+		onError: (err) => {
+			console.error(err)
+			setIsLoading(false)
+		},
+	})
 
 	return (
 		<>
 			<Flex
-				onSubmit={update}
+				onSubmit={(e) => {
+					e.preventDefault()
+					mutate()
+				}}
 				flexDir={'column'}
 				justifyContent={'center'}
 				alignItems={'center'}
@@ -207,11 +219,11 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								}
 								value={payment_type}
 							>
-								<option value="Weekly">Weekly</option>
-								<option value="Monthly">Monthly</option>
-								<option value="Bi-annually">Bi-annually</option>
-								<option value="Quaterly">Quaterly</option>
-								<option value="Annually">Annually</option>
+								<option value="daily">Daily</option>
+								<option value="weekly">Weekly</option>
+								<option value="monthly">Monthly</option>
+								<option value="biannually">Bi-annually</option>
+								<option value="annually">Annually</option>
 							</Select>
 						</Flex>
 					</Flex>
@@ -236,7 +248,17 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 					</Flex>
 				</VStack>
 				<br />
-				<Button type={'submit'} isLoading={isLoading}>{`Next`}</Button>
+				<Button
+					type={'submit'}
+					isDisabled={
+						!first_name ||
+						!last_name ||
+						!budget ||
+						!primary_phone_number ||
+						!payment_type
+					}
+					isLoading={isLoading}
+				>{`Next`}</Button>
 			</Flex>
 		</>
 	)

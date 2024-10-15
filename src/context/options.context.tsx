@@ -1,25 +1,30 @@
 'use client'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { collection, getDocs } from 'firebase/firestore'
+
 import React, {
 	createContext,
-	useState,
-	useContext,
 	ReactNode,
+	useContext,
 	useEffect,
+	useState,
 } from 'react'
 import { useAppContext } from './app.context'
 
+type OptionType = {
+	_id: string
+	name: string
+}
+
 export interface OptionsState {
-	location_keywords: any[]
-	states: any[]
-	services: any[]
-	habits: any[]
-	interests: any[]
-	categories: any[]
-	property_types: any[]
-	amenities: any[]
+	location_keywords: OptionType[]
+	locations: (OptionType & { state: string })[]
+	states: OptionType[]
+	services: OptionType[]
+	habits: OptionType[]
+	interests: OptionType[]
+	categories: OptionType[]
+	property_types: OptionType[]
+	amenities: OptionType[]
+	work_industries: OptionType[]
 }
 
 interface OptionsContextType {
@@ -31,6 +36,7 @@ const OptionsContext = createContext<OptionsContextType | undefined>(undefined)
 
 const initialOptionsState: OptionsState = {
 	location_keywords: [],
+	locations: [],
 	states: [],
 	services: [],
 	habits: [],
@@ -38,52 +44,29 @@ const initialOptionsState: OptionsState = {
 	categories: [],
 	property_types: [],
 	amenities: [],
+	work_industries: [],
 }
 
-export const OptionsProvider: React.FC<{ children: ReactNode }> = ({
-	children,
-}) => {
+export const OptionsProvider: React.FC<{
+	children: ReactNode
+	options: any
+}> = ({ children, options }) => {
 	const { setAppState } = useAppContext()
-	const [optionsState, setOptionsState] =
-		useState<OptionsState>(initialOptionsState)
+	const [optionsState, setOptionsState] = useState<OptionsState>(
+		options || initialOptionsState,
+	)
 
 	const updateOptionsState = (newState: Partial<OptionsState>) => {
 		setOptionsState((prevState) => ({ ...prevState, ...newState }))
 	}
 
 	useEffect(() => {
-		;(async () => {
-			setAppState({ app_loading: true })
-			const optionsCollections = [
-				DBCollectionName.locationKeyWords,
-				DBCollectionName.states,
-				DBCollectionName.services,
-				DBCollectionName.habits,
-				DBCollectionName.interests,
-				DBCollectionName.categories,
-				DBCollectionName.propertyTypes,
-				DBCollectionName.amenities,
-			]
-
-			const optionPromises = optionsCollections.map(async (collectionName) => {
-				const querySnapshot = await getDocs(collection(db, collectionName))
-				const options = querySnapshot.docs.map((doc) => ({
-					id: doc.id,
-					_ref: doc.ref,
-					...doc.data(),
-				}))
-				return { [collectionName]: options }
-			})
-
-			const results = await Promise.all(optionPromises)
-			const options: OptionsState = Object.assign({}, ...results)
-
-			console.log('THE OPTIONS::', options)
-
+		setAppState({ app_loading: true })
+		if (options) {
 			setOptionsState(options)
-			setAppState({ app_loading: false })
-		})()
-	}, [])
+		}
+		setAppState({ app_loading: false })
+	}, [options])
 
 	return (
 		<OptionsContext.Provider

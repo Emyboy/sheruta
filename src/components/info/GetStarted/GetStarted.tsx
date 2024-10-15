@@ -1,18 +1,18 @@
-import { Flex, Box, Text, Link } from '@chakra-ui/react'
-import { useAuthContext } from '@/context/auth.context'
-import GetStartedBeginning from '@/components/info/GetStarted/GetStartedBeginning'
-import GenderSelect from '@/components/forms/GenderSelector'
-import { useEffect, useState } from 'react'
 import AuthInfoForm from '@/components/forms/AuthInfoForm'
-import { BiLeftArrowAlt } from 'react-icons/bi'
-import SeekingStatusSelector from '@/components/info/GetStarted/SeekingStatusSelector'
+import GenderSelect from '@/components/forms/GenderSelector'
+import GetStartedBeginning from '@/components/info/GetStarted/GetStartedBeginning'
+import GetStartedCompleted from '@/components/info/GetStarted/GetStartedCompleted'
 import HabitsSelector from '@/components/info/GetStarted/HabitsSelector'
 import InterestsSelector from '@/components/info/GetStarted/InterestsSelector'
 import ProfilePictureSelector from '@/components/info/GetStarted/ProfilePictureSelector'
-import PersonalInfoForm from './PersonalInfoForm'
-import LocationKeywordForm from './LocationKeywordForm'
-import GetStartedCompleted from '@/components/info/GetStarted/GetStartedCompleted'
+import SeekingStatusSelector from '@/components/info/GetStarted/SeekingStatusSelector'
 import EmailVerification from '@/components/Verification/EmailVerification'
+import { useAuthContext } from '@/context/auth.context'
+import { Flex } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+import { BiLeftArrowAlt } from 'react-icons/bi'
+import LocationKeywordForm from './LocationKeywordForm'
+import PersonalInfoForm from './PersonalInfoForm'
 import { useSearchParams } from 'next/navigation'
 
 export default function GetStarted() {
@@ -38,7 +38,7 @@ export default function GetStarted() {
 			<ProfilePictureSelector key={'profile-pics'} done={next} />,
 			<LocationKeywordForm key={'location-keyword'} done={next} />,
 			<PersonalInfoForm key={'personal-info'} done={next} />,
-			<GetStartedCompleted key={'completed'} done={next} />,
+			<GetStartedCompleted key={'completed'} />,
 		]
 	}
 

@@ -60,8 +60,8 @@ export const homeTabSearch = [
 	},
 	{
 		ref: 'age_preference',
-		id: '25-29 years',
-		title: '25-29 years',
+		id: '24-29 years',
+		title: '24-29 years',
 	},
 	{
 		ref: 'work_industry',
