@@ -9,7 +9,6 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 
 export default function LocationKeywordForm({ done }: { done: () => void }) {
-
 	const { optionsState: options } = useOptionsContext()
 
 	const [isLoading, setIsLoading] = useState(false)

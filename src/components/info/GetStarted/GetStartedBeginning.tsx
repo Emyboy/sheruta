@@ -3,7 +3,6 @@ import { useAuthContext } from '@/context/auth.context'
 import Image from 'next/image'
 
 export default function GetStartedBeginning({ done }: { done: () => void }) {
-
 	const {
 		authState: { user, user_info, flat_share_profile },
 	} = useAuthContext()

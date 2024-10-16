@@ -20,23 +20,16 @@ import { useAppContext } from './app.context'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import axiosInstance from '@/utils/custom-axios'
 import useAuthenticatedAxios from '@/hooks/useAxios'
-
-// export interface AuthState {
-// 	user: AuthUser | null
-// 	user_info: UserInfo | null
-// 	user_settings: null
-// 	flat_share_profile: null | FlatShareProfileData
-// 	auth_loading?: boolean
-// }
+import { signOut } from 'next-auth/react'
 
 export interface AuthState {
-	user: any
-	user_info: any
+	user: AuthUser | null
+	user_info:  UserInfo | null
 	user_settings: any
-	wallet: any,
-	flat_share_profile: any,
-	notifications: any,
-    auth_loading?: boolean
+	wallet: any
+	flat_share_profile: null | FlatShareProfileData
+	notifications: any
+	auth_loading?: boolean
 }
 
 interface AuthContextProps {
@@ -59,26 +52,26 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	children,
 	user_data,
 }) => {
-console.log(user_data)
-	// const signin = useAuthenticatedAxios()
+
+	const signin = useAuthenticatedAxios()
 
 	const toast = useToast()
 	const { setAppState } = useAppContext()
 	const [state, setState] = useState<AuthState>(
-		user_data ? { ...user_data } : {
-			user: null,
-			user_info: null,
-			user_settings: null,
-			wallet: null,
-			flat_share_profile: null,
-			notifications: [],
-			auth_loading: false,
-		},
-	);	
+		user_data
+			? { ...user_data }
+			: {
+					user: null,
+					user_info: null,
+					user_settings: null,
+					wallet: null,
+					flat_share_profile: null,
+					notifications: [],
+					auth_loading: false,
+				},
+	)
 
 	const getAuthDependencies = async (): Promise<any> => {
-
-		return;
 		// if (state.user) {
 		// 	console.log('GETTING AUTH DEPENDENCIES')
 		// 	let userData = await AuthService.getUser(state.user._id)
@@ -87,7 +80,7 @@ console.log(user_data)
 		// } else {
 		// 	return Promise.reject('User not found')
 		// }
-		// const { data } = await signin.get(`/users/dependencies`)
+		const { data } = await signin.get(`/users/dependencies`)
 		// console.log(data)
 		// @ts-ignore
 		setAuthState((prev) => ({ ...prev, ...data.user_data }))
@@ -105,16 +98,13 @@ console.log(user_data)
 	}
 
 	const logout = async () => {
-		return;
-		await auth.signOut()
+		signOut()
 		localStorage.clear()
 		sessionStorage.clear()
 		window.location.reload()
 	}
 
 	const loginWithGoogle = async () => {
-
-		return;
 
 		const provider = new GoogleAuthProvider()
 		signInWithPopup(auth, provider)

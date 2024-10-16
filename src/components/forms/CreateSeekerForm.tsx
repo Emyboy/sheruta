@@ -11,10 +11,7 @@ import {
 	Textarea,
 	useColorMode,
 } from '@chakra-ui/react'
-import {
-	Autocomplete,
-	useJsApiLoader,
-} from '@react-google-maps/api'
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api'
 
 import useCommon from '@/hooks/useCommon'
 import {
@@ -27,7 +24,7 @@ import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 
 import { z, ZodError } from 'zod'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { FormEvent, useCallback, useEffect, useState } from 'react'
 import useAnalytics from '@/hooks/useAnalytics'
 import { useMutation } from '@tanstack/react-query'
 import useAuthenticatedAxios from '@/hooks/useAxios'
@@ -91,7 +88,6 @@ const CreateSeekerForm: React.FC = () => {
 		libraries,
 	})
 
-	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const {
 		authState: { flat_share_profile, user, user_info },
 	} = useAuthContext()
@@ -103,15 +99,21 @@ const CreateSeekerForm: React.FC = () => {
 	const [newLocations, setNewLocations] = useState<any[]>([])
 
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
-	const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null)
+	const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+		null,
+	)
 
 	const getLocations = (stateId: string) => {
 		return locations.filter((item) => item.state === stateId)
 	}
 
 	useEffect(() => {
-		if(flat_share_profile?.state){
+		if (flat_share_profile?.state) {
 			setNewLocations(getLocations(flat_share_profile.state))
+			setFormData((prev) => ({
+				...prev,
+				state: flat_share_profile.state
+			}))
 		}
 	}, [flat_share_profile?.state])
 
@@ -143,11 +145,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -167,10 +169,7 @@ const CreateSeekerForm: React.FC = () => {
 	) => {
 		const { id, name, value } = e.target
 
-		const updateRentInvalidState = (
-			paymentType: string,
-			rentValue: number,
-		) => {
+		const updateRentInvalidState = (paymentType: string, rentValue: number) => {
 			const rentLimit = RentLimits[paymentType as PaymentType]
 			setIsRentInvalid(rentValue < rentLimit)
 		}
@@ -195,7 +194,8 @@ const CreateSeekerForm: React.FC = () => {
 
 			case 'location':
 				if (value) {
-					const { name, _id } = locations.find((data) => data._id === value) ?? {}
+					const { name, _id } =
+						locations.find((data) => data._id === value) ?? {}
 					setSelectedLocation(name as string)
 					setSelectedLocationId(_id as string)
 				}
@@ -214,12 +214,16 @@ const CreateSeekerForm: React.FC = () => {
 	}
 
 	const { mutate: postRequest, isPending } = useMutation({
-
 		mutationFn: async () => {
 			if (user) {
-				setIsLoading(true)
+
+				const finalFormData = {
+					...formData,
+					rent: Number(formData.rent),
+				}
+
 				await Promise.all([
-					axiosInstance.post('/flat-share-requests/seeker', formData),
+					axiosInstance.post('/flat-share-requests/seeker', finalFormData),
 				])
 			}
 		},
@@ -249,84 +253,13 @@ const CreateSeekerForm: React.FC = () => {
 		},
 	})
 
-	// const handleSubmit = async (
-	// 	e: React.FormEvent<HTMLFormElement>,
-	// ): Promise<any> => {
-	// 	e.preventDefault()
-	// 	try {
-	// 		if (
-	// 			!flat_share_profile ||
-	// 			!user ||
-	// 			Object.keys(flat_share_profile || {}).length === 0 ||
-	// 			Object.keys(user || {}).length === 0
-	// 		) {
-	// 			return showToast({
-	// 				message: 'Please login and try again',
-	// 				status: 'error',
-	// 			})
-	// 		}
-
-	// 		// setIsLoading(true)
-
-	// 		// if (!flat_share_profile?._user_id || !user?._id)
-	// 		// 	return showToast({
-	// 		// 		message: 'Please log in to make a request',
-	// 		// 		status: 'error',
-	// 		// 	})
-
-	// 		//create new form data object by retrieving the global form data and options ref
-	// 		const finalFormData = {
-	// 			...formData,
-	// 			// ...optionsRef,
-	// 		}
-
-	// 		finalFormData.rent = Number(finalFormData.rent)
-	// 		createSeekerRequestDTO.parse(finalFormData)
-
-	// 		console.log(finalFormData)
-
-	// 		// const res: DocumentData = await SherutaDB.create({
-	// 		// 	collection_name: 'requests',
-	// 		// 	data: finalFormData,
-	// 		// 	document_id: initialFormState.uuid as string,
-	// 		// })
-
-	// 		// if (Object.keys(res).length) {
-	// 		// 	showToast({
-	// 		// 		message: 'Your request has been posted successfully',
-	// 		// 		status: 'success',
-	// 		// 	})
-
-	// 		// 	//add analytics
-	// 		// 	await addAnalyticsData('posts', selectedLocationId as string)
-
-	// 		// 	setTimeout(() => {
-	// 		// 		window.location.assign('/')
-	// 		// 	}, 1000)
-	// 		// }
-	// 	} catch (error) {
-	// 		console.error(error)
-	// 		// if (error instanceof ZodError) {
-	// 		// 	setFormErrors(extractErrors(error.issues as ErrorObject[]))
-	// 		// 	console.error('Zod Validation Error:', error.issues)
-	// 		// } else {
-	// 		// 	showToast({
-	// 		// 		message: 'Error, please try again',
-	// 		// 		status: 'error',
-	// 		// 	})
-	// 		// }
-	// 		setIsLoading(false)
-	// 	}
-	// }
 
 	return (
-		<form>
+		<form onSubmit={(e: FormEvent) => e.preventDefault()}>
 			<Flex mb={4} gap={4}>
 				<FormControl
 					isRequired
-					isInvalid={
-						isRentInvalid || typeof formErrors?.rent !== 'undefined'
-					}
+					isInvalid={isRentInvalid || typeof formErrors?.rent !== 'undefined'}
 					flex="1"
 				>
 					<FormLabel requiredIndicator={null} htmlFor="budget">
@@ -398,7 +331,6 @@ const CreateSeekerForm: React.FC = () => {
 						onChange={handleChange}
 						placeholder="Select a location"
 						bgColor={colorMode}
-						defaultValue={flat_share_profile?.location}
 					>
 						{newLocations &&
 							newLocations.map((data, index: number) => (
@@ -468,6 +400,7 @@ const CreateSeekerForm: React.FC = () => {
 						onChange={handleChange}
 						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
 						minLength={140}
+						maxLength={500}
 						rows={10}
 					/>
 				</FormControl>

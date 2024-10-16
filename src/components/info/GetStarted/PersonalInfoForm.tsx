@@ -24,7 +24,6 @@ type Props = {
 }
 
 export default function PersonalInfoForm({ done }: Props) {
-
 	const { showToast } = useCommon()
 
 	const {
