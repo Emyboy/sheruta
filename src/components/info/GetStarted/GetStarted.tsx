@@ -18,7 +18,6 @@ export default function GetStarted() {
 	const {
 		authState: { user, flat_share_profile, user_info },
 	} = useAuthContext()
-
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
 
@@ -51,7 +50,7 @@ export default function GetStarted() {
 		return null
 	}
 
-	// if (!user?.email_verified) {
+	// if (!user.email_verified) {
 	// 	return (
 	// 		<Flex
 	// 			bg={'dark_light'}
@@ -73,9 +72,9 @@ export default function GetStarted() {
 	// }
 
 	if (
+		!flat_share_profile?.budget ||
 		!user_info?.gender ||
 		!flat_share_profile?.occupation ||
-		!flat_share_profile?.budget ||
 		!user_info?.done_kyc
 	) {
 		return (
