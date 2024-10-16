@@ -165,55 +165,20 @@ export const createHostRequestDTO = z.object({
 
 export const createSeekerRequestDTO = z.object({
 	description: z.string().optional(),
-	uuid: z.string(),
-
-	budget: z.number(),
-
+	rent: z.number(),
 	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
-	_location_keyword_ref: z.custom<DocumentReference | undefined>(
-		(val) => val instanceof DocumentReference,
-		{
-			message: 'Must be a DocumentReference',
-		},
-	),
+	location: z.string().optional(),
+	state: z.string().optional(),
+	service: z.string().optional(),
 
-	_state_ref: z.custom<DocumentReference | undefined>(
-		(val) => val instanceof DocumentReference,
-		{
-			message: 'Must be a DocumentReference',
-		},
-	),
-	_service_ref: z.custom<DocumentReference | undefined>(
-		(val) => val instanceof DocumentReference,
-		{
-			message: 'Must be a DocumentReference',
-		},
-	),
-	_user_ref: z.custom<DocumentReference | undefined>(
-		(val) => val instanceof DocumentReference,
-		{
-			message: 'Must be a DocumentReference',
-		},
-	),
-	_user_info_ref: z.custom<DocumentReference | undefined>(
-		(val) => val instanceof DocumentReference,
-		{
-			message: 'Must be a DocumentReference',
-		},
-	),
 	payment_type: z.enum([
 		'monthly',
 		'annually',
-		'bi-annually',
 		'quarterly',
-		'weekly',
+		'biannually',
+		'daily',
 	]),
-
-	seeking: z.boolean(), // true for seekers
-
-	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
-	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })
 
 export type HostRequestData = z.infer<typeof createHostRequestDTO>

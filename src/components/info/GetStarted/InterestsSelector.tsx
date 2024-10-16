@@ -18,6 +18,7 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 		authState: { user, flat_share_profile },
 		setAuthState,
 	} = useAuthContext()
+
 	const {
 		optionsState: { interests },
 	} = useOptionsContext()
