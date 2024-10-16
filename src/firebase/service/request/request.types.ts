@@ -1,5 +1,9 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
+import { AuthUser } from '../auth/auth.types'
+import { FlatShareProfileData } from '../flat-share-profile/flat-share-profile.types'
+import { UserInfoDTO } from '../user-info/user-info.types'
+import { OptionType } from '@/context/options.context'
 
 export interface RequestData {
 	title?: string
@@ -226,27 +230,14 @@ export type HostRequestDataDetails = Omit<
 
 export type SeekerRequestDataDetails = Omit<
 	SeekerRequestData,
-	'_location_keyword_ref' | '_state_ref' | '_service_ref' | '_user_ref'
+	'location' | 'state' | 'service' | 'user'
 > & {
 	id: string
-	_location_keyword_ref: { slug: string; id: string }
-	_service_ref: { title: string; about: string; slug: string }
-	_category_ref: { title: string; slug: string }
-	_property_type_ref: { title: string }
-	_state_ref: { title: string; slug: string }
-	_user_ref: {
-		first_name: string
-		last_name: string
-		avatar_url: string
-		_id: string
-		email: string
-	}
-	flat_share_profile: { bio: string | null }
-	user_info: {
-		primary_phone_number: string
-		hide_profile: boolean
-		is_verified: boolean
-		gender: string
-	}
-	ref: DocumentReference
+	location: OptionType
+	service: OptionType
+	state: OptionType
+	user: AuthUser
+	flat_share_profile: FlatShareProfileData
+	user_info: UserInfoDTO
+	updatedAt: string
 }

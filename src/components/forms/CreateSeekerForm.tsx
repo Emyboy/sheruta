@@ -112,7 +112,7 @@ const CreateSeekerForm: React.FC = () => {
 			setNewLocations(getLocations(flat_share_profile.state))
 			setFormData((prev) => ({
 				...prev,
-				state: flat_share_profile.state
+				state: flat_share_profile.state,
 			}))
 		}
 	}, [flat_share_profile?.state])
@@ -216,7 +216,6 @@ const CreateSeekerForm: React.FC = () => {
 	const { mutate: postRequest, isPending } = useMutation({
 		mutationFn: async () => {
 			if (user) {
-
 				const finalFormData = {
 					...formData,
 					rent: Number(formData.rent),
@@ -252,7 +251,6 @@ const CreateSeekerForm: React.FC = () => {
 			}
 		},
 	})
-
 
 	return (
 		<form onSubmit={(e: FormEvent) => e.preventDefault()}>
