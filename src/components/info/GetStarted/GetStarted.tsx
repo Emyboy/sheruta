@@ -76,7 +76,7 @@ export default function GetStarted() {
 		!user_info?.gender ||
 		!flat_share_profile?.occupation ||
 		!flat_share_profile?.budget ||
-		!flat_share_profile?.done_kyc
+		!user_info?.done_kyc
 	) {
 		return (
 			<>

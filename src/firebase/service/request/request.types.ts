@@ -1,6 +1,62 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
 
+export interface LocationObject {
+	formatted_address?: string
+	geometry?: {
+		location?: {
+			lat: number
+			lng: number
+		}
+	}
+	[key: string]: any
+}
+
+export enum PaymentType {
+	monthly = 'monthly',
+	annually = 'annually',
+	quarterly = 'quarterly',
+	biannually = 'biannually',
+	daily = 'daily',
+}
+
+export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
+
+const timestampSchema = z.object({
+	seconds: z.number().int().positive(),
+	nanoseconds: z.number().int().nonnegative().max(999_999_999),
+})
+
+export const createHostSpaceRequestDTO = z.object({
+	description: z.string(),
+	service_charge: z.number().nullable(),
+	rent: z.number(),
+	payment_type: z.custom<PaymentType>(),
+	bathrooms: z.number().nullable(),
+	toilets: z.number().nullable(),
+	living_rooms: z.number().nullable(),
+	amenities: z.array(z.string()),
+	house_rules: z.array(z.string()),
+	availability_status: z.custom<AvailabilityStatus>(),
+	images_urls: z.array(z.string()),
+	video_url: z.string().nullable(),
+	google_location_object: z.custom<LocationObject>(),
+	google_location_text: z.string(),
+	state: z.string(),
+	location: z.string(),
+	service: z.string(),
+	category: z.string(),
+	property_type: z.string(),
+
+	// imagesRefPaths: z.array(z.string()).nullable().optional(),
+	// videoRefPath: z.string().nullable().optional(),
+
+	reserved_by: z.string().optional(),
+	reservation_expiry: z.instanceof(Timestamp).optional(),
+})
+
+export type HostSpaceFormData = z.infer<typeof createHostSpaceRequestDTO>
+
 export interface RequestData {
 	title?: string
 	description?: string
@@ -38,33 +94,6 @@ export interface RequestData {
 	createdAt: Timestamp
 	updatedAt: Timestamp
 }
-
-export interface LocationObject {
-	formatted_address?: string
-	geometry?: {
-		location?: {
-			lat: number
-			lng: number
-		}
-	}
-	[key: string]: any
-}
-
-export enum PaymentType {
-	monthly = 'monthly',
-	annually = 'annually',
-	quarterly = 'quarterly',
-	biannually = 'biannually',
-	daily = 'daily',
-}
-
-export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
-
-const timestampSchema = z.object({
-	seconds: z.number().int().positive(),
-	nanoseconds: z.number().int().nonnegative().max(999_999_999),
-})
-
 export const createHostRequestDTO = z.object({
 	uuid: z.string(),
 	description: z.string(),
@@ -74,12 +103,10 @@ export const createHostRequestDTO = z.object({
 		'monthly',
 		'annually',
 		'quarterly',
-		'bi-annually',
+		'biannually',
 		'weekly',
 	]),
-	availability_status: z
-		.enum(['available', 'unavailable', 'reserved'])
-		.nullable(),
+	availability_status: z.enum(['available', 'unavailable', 'reserved']),
 	bathrooms: z.number().nullable(),
 	toilets: z.number().nullable(),
 	living_rooms: z.number().nullable(),
@@ -162,7 +189,6 @@ export const createHostRequestDTO = z.object({
 		)
 		.optional(),
 })
-
 export const createSeekerRequestDTO = z.object({
 	description: z.string().optional(),
 	uuid: z.string(),
@@ -215,10 +241,8 @@ export const createSeekerRequestDTO = z.object({
 	updatedAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 	createdAt: z.union([z.instanceof(Timestamp), timestampSchema]),
 })
-
 export type HostRequestData = z.infer<typeof createHostRequestDTO>
 export type SeekerRequestData = z.infer<typeof createSeekerRequestDTO>
-
 export type HostRequestDataDetails = Omit<
 	HostRequestData,
 	| '_location_keyword_ref'
@@ -258,7 +282,6 @@ export type HostRequestDataDetails = Omit<
 	}
 	ref: DocumentReference
 }
-
 export type SeekerRequestDataDetails = Omit<
 	SeekerRequestData,
 	'_location_keyword_ref' | '_state_ref' | '_service_ref' | '_user_ref'
@@ -285,3 +308,32 @@ export type SeekerRequestDataDetails = Omit<
 	}
 	ref: DocumentReference
 }
+
+// export interface FlatShareRequest extends Document {
+// 	bedrooms: number
+// 	bathrooms: number
+// 	toilets: number
+// 	rent: number
+// 	description: string
+// 	house_rules: string[]
+// 	living_rooms: number
+// 	availability_status: AvailabilityStatus
+// 	seeking: boolean
+// 	service_charge: number
+// 	image_urls: string[]
+// 	video_url: string
+// 	user: User
+// 	user_info: UserInfo
+// 	flat_share_profile: FlatShareProfile
+// 	location: OptionType & { state: string }
+// 	service: OptionType
+// 	category: OptionType
+// 	amenities: OptionType[]
+// 	property_type: OptionType
+// 	state: OptionType
+// 	view_count: number
+// 	call_count: number
+// 	question_count: number
+// 	google_location_object: any
+// 	google_location_text: string
+// }

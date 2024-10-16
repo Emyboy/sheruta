@@ -1,25 +1,21 @@
 'use client'
+
+import { auth } from '@/firebase'
+import AuthService from '@/firebase/service/auth/auth.firebase'
 import { AuthUser, RegisterDTO } from '@/firebase/service/auth/auth.types'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { UserInfo } from '@/firebase/service/user-info/user-info.types'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useToast } from '@chakra-ui/react'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import React, {
 	createContext,
-	useContext,
-	useState,
 	ReactNode,
+	useContext,
 	useEffect,
+	useState,
 } from 'react'
-import {
-	GoogleAuthProvider,
-	onAuthStateChanged,
-	signInWithPopup,
-} from 'firebase/auth'
-import { app, auth } from '@/firebase'
-import AuthService from '@/firebase/service/auth/auth.firebase'
-import { useToast } from '@chakra-ui/react'
 import { useAppContext } from './app.context'
-import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
-import axiosInstance from '@/utils/custom-axios'
-import useAuthenticatedAxios from '@/hooks/useAxios'
 
 export interface AuthState {
 	user: AuthUser | null
