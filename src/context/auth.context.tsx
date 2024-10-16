@@ -24,7 +24,7 @@ import { signOut } from 'next-auth/react'
 
 export interface AuthState {
 	user: AuthUser | null
-	user_info:  UserInfo | null
+	user_info: UserInfo | null
 	user_settings: any
 	wallet: any
 	flat_share_profile: null | FlatShareProfileData
@@ -52,7 +52,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	children,
 	user_data,
 }) => {
-
 	const signin = useAuthenticatedAxios()
 
 	const toast = useToast()
@@ -105,7 +104,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	}
 
 	const loginWithGoogle = async () => {
-
 		const provider = new GoogleAuthProvider()
 		signInWithPopup(auth, provider)
 			.then(async (result) => {

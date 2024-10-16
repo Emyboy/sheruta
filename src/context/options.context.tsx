@@ -9,9 +9,10 @@ import React, {
 } from 'react'
 import { useAppContext } from './app.context'
 
-type OptionType = {
+export type OptionType = {
 	_id: string
 	name: string
+	slug?: string
 }
 
 export interface OptionsState {
