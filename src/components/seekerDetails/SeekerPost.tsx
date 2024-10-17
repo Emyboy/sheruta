@@ -67,7 +67,7 @@ const SeekerPost = ({
 		? SuperJSON.parse(requestData)
 		: undefined
 
-		console.log(postData)
+	console.log(postData)
 
 	const [lastUpdated, setLastUpdated] = useState<string>('99 years ago')
 
