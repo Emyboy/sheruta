@@ -67,6 +67,8 @@ const SeekerPost = ({
 		? SuperJSON.parse(requestData)
 		: undefined
 
+	console.log(postData)
+
 	const [lastUpdated, setLastUpdated] = useState<string>('99 years ago')
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -313,8 +315,7 @@ const SeekerPost = ({
 												fontSize={'24px'}
 												icon={<BiPhone />}
 												onClick={async () => {
-													if (authState.user?._id === postData.user._id)
-														return
+													if (authState.user?._id === postData.user._id) return
 													await handleCall({
 														number: postData.user_info.primary_phone_number,
 														recipient_id: postData.user._id,
@@ -327,10 +328,7 @@ const SeekerPost = ({
 																}
 															: null,
 													})
-													await addAnalyticsData(
-														'calls',
-														postData.location._id,
-													)
+													await addAnalyticsData('calls', postData.location._id)
 												}}
 											/>
 										</Tooltip>
@@ -392,9 +390,7 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 	const { authState } = useAuthContext()
 
 	const name =
-		capitalizeString(postData.user.first_name) +
-		' ' +
-		postData.user.last_name
+		capitalizeString(postData.user.first_name) + ' ' + postData.user.last_name
 	const handle = postData.user.first_name
 	const userInfo = postData.user_info
 	const bio = postData.flat_share_profile.bio || 'No Bio Available'

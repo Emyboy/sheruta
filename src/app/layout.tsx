@@ -18,6 +18,8 @@ export default async function RootLayout({
 }) {
 	const { data } = await axiosInstance.get(`/users/dependencies`)
 
+	// console.log(data)
+
 	return (
 		<html lang="en">
 			<head>

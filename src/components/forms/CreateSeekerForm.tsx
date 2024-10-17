@@ -73,9 +73,9 @@ const initialFormState: SeekerRequestData = {
 	rent: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
-	location: undefined,
-	state: undefined,
-	service: undefined,
+	location: "",
+	state: "",
+	service: "",
 	payment_type: PaymentType.daily,
 }
 
@@ -221,9 +221,7 @@ const CreateSeekerForm: React.FC = () => {
 					rent: Number(formData.rent),
 				}
 
-				await Promise.all([
-					axiosInstance.post('/flat-share-requests/seeker', finalFormData),
-				])
+				axiosInstance.post('/flat-share-requests/seeker', finalFormData)
 			}
 		},
 		onSuccess: async () => {
