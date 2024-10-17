@@ -95,17 +95,24 @@ export default function ApartmentDetails({
 			{activeTab === 'Apartment Summary' && (
 				<ApartmentSummary request={request} />
 			)}
-			{activeTab === 'Discussion' && (
+			{activeTab === 'Discussion' && <Text p={4}>Discussions coming soon</Text>}
+			{activeTab === 'Verification' && (
+				<Text p={4}>Verification coming soon</Text>
+			)}
+
+			{/* {activeTab === 'Discussion' && (
 				<DiscussionComponent
 					requestId={request._id}
 					discussions={discussions || []}
 					hostId={request.user._id}
 				/>
-			)}
+			)} */}
 			{/* {activeTab === 'Verification' && (
 				<VerificationComponent request={request} hostNinData={hostNinData} />
 			)} */}
-			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
+			{activeTab === 'Pay Details' && (
+				<Text p={4}>Pay Details coming soon</Text>
+			)}
 		</>
 	)
 }

@@ -172,11 +172,11 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 
 		setLoading(true)
 
-		const { _id, ...cleanedFormData } = formData
+		const { _id, availability_status, ...cleanedFormData } = formData
 		console.log('data to be updated: ', cleanedFormData)
 
 		try {
-			const res = await axiosInstance.post(
+			const res = await axiosInstance.put(
 				'/flat-share-requests/host',
 				cleanedFormData,
 			)

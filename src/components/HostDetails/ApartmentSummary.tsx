@@ -200,7 +200,6 @@ export default function ApartmentSummary({
 								fontWeight={'200'}
 								textTransform={'capitalize'}
 							>
-								/Default
 								{/* /{request.payment_type} */}
 							</Text>
 						</Flex>
@@ -225,7 +224,8 @@ export default function ApartmentSummary({
 								: openReserveApartmentModal
 						}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={!canInteract}
+						// isDisabled={!canInteract}
+						isDisabled={true}
 					>
 						{request.availability_status === 'reserved'
 							? request.reserved_by === authState.user?._id
@@ -293,7 +293,6 @@ export default function ApartmentSummary({
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									px={0}
-									isDisabled={!canInteract}
 									bg="none"
 									color="text_muted"
 									display={'flex'}
@@ -312,21 +311,22 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
-									onClick={async () =>
-										canInteract &&
-										(await handleCall({
-											number: request.user_info.primary_phone_number,
-											recipient_id: request.user._id,
-											sender_details: authState.user
-												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
-												: null,
-										}))
-									}
+									// onClick={async () =>
+									// 	canInteract &&
+									// 	(await handleCall({
+									// 		number: request.user_info.primary_phone_number,
+									// 		recipient_id: request.user._id,
+									// 		sender_details: authState.user
+									// 			? {
+									// 					avatar_url: authState.user.avatar_url,
+									// 					first_name: authState.user.first_name,
+									// 					last_name: authState.user.last_name,
+									// 					id: authState.user._id,
+									// 				}
+									// 			: null,
+									// 	}))
+									// }
+									isDisabled={!canInteract}
 								>
 									<BiPhone />
 								</Button>
@@ -741,6 +741,7 @@ export default function ApartmentSummary({
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
 						// isDisabled={!canInteract}
+						isDisabled={true}
 					>
 						Book Inspection
 					</Button>

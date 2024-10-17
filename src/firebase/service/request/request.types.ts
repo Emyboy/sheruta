@@ -26,11 +26,6 @@ export enum PaymentType {
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
-const timestampSchema = z.object({
-	seconds: z.number().int().positive(),
-	nanoseconds: z.number().int().nonnegative().max(999_999_999),
-})
-
 export const createHostSpaceRequestDTO = z.object({
 	description: z.string(),
 	service_charge: z.number().nullable(),
