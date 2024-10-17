@@ -43,7 +43,7 @@ import {
 	BiSolidBookmark,
 } from 'react-icons/bi'
 import SuperJSON from 'superjson'
-import { SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 
 import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useAnalytics from '@/hooks/useAnalytics'
@@ -60,7 +60,7 @@ const SeekerPost = ({
 	const { authState } = useAuthContext()
 	const { copyShareUrl, handleDeletePost } = useShareSpace()
 
-	const postData: SeekerRequestDataDetails | undefined = requestData
+	const postData: FlatShareRequest | undefined = requestData
 		? SuperJSON.parse(requestData)
 		: undefined
 
@@ -84,11 +84,12 @@ const SeekerPost = ({
 		}
 	}, [postData, authState])
 
-
 	if (!(postData && requestId)) {
-		return <Box w="100%" textAlign="center">
-			{'This Post does not exist'}
-		</Box>
+		return (
+			<Box w="100%" textAlign="center">
+				{'This Post does not exist'}
+			</Box>
+		)
 	}
 
 	const deletePost = async (): Promise<void> => {
@@ -113,8 +114,7 @@ const SeekerPost = ({
 						<Avatar
 							size="lg"
 							src={
-								postData.user.avatar_url ||
-								'https://via.placeholder.com/150'
+								postData.user.avatar_url || 'https://via.placeholder.com/150'
 							}
 						/>
 						<Box ml={2}>
@@ -288,11 +288,11 @@ const SeekerPost = ({
 												recipient_id: postData.user._id,
 												sender_details: authState.user
 													? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
+															avatar_url: authState.user.avatar_url,
+															first_name: authState.user.first_name,
+															last_name: authState.user.last_name,
+															id: authState.user._id,
+														}
 													: null,
 											})
 											await addAnalyticsData('calls', postData.location._id)
@@ -315,10 +315,7 @@ const SeekerPost = ({
 									icon={<BiEnvelope />}
 									onClick={async () => {
 										handleDM(postData.user._id)
-										await addAnalyticsData(
-											'messages',
-											postData.location._id,
-										)
+										await addAnalyticsData('messages', postData.location._id)
 									}}
 								/>
 							</Tooltip>
@@ -347,7 +344,7 @@ const SeekerPost = ({
 	)
 }
 
-const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
+const UserCard = ({ postData }: { postData: FlatShareRequest }) => {
 	const { authState } = useAuthContext()
 
 	const name =
@@ -413,11 +410,11 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 									recipient_id: postData.user._id,
 									sender_details: authState.user
 										? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
+												avatar_url: authState.user.avatar_url,
+												first_name: authState.user.first_name,
+												last_name: authState.user.last_name,
+												id: authState.user._id,
+											}
 										: null,
 								})
 							}}

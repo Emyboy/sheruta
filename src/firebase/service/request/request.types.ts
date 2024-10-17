@@ -227,6 +227,7 @@ export interface FlatShareRequest {
 	reserved_by: string | undefined
 	reservation_expiry: Date | undefined
 	background_checks: any | undefined
+	payment_type: PaymentType
 }
 
 export type SeekerRequestDataDetails = Omit<

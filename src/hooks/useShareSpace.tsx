@@ -58,7 +58,6 @@ export default function useShareSpace() {
 			setIsLoading(true)
 
 			if (authState.user?._id === userId && requestId) {
-
 				await axiosInstance.delete(`/flat-share-requests/${requestId}`)
 
 				showToast({
@@ -69,7 +68,6 @@ export default function useShareSpace() {
 				setTimeout(() => {
 					window.location.reload()
 				}, 1000)
-
 			} else {
 				showToast({
 					message: 'You are not authorized to delete this post',

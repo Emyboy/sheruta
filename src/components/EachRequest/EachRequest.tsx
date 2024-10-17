@@ -4,9 +4,7 @@ import CloseIcon from '@/assets/svg/close-icon-dark'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
-import {
-	FlatShareRequest,
-} from '@/firebase/service/request/request.types'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
