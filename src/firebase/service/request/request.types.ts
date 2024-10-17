@@ -1,13 +1,9 @@
+import { OptionType } from '@/context/options.context'
 import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
 import { AuthUser } from '../auth/auth.types'
 import { FlatShareProfileData } from '../flat-share-profile/flat-share-profile.types'
-<<<<<<< HEAD
 import { UserInfo, UserInfoDTO } from '../user-info/user-info.types'
-=======
-import { UserInfoDTO } from '../user-info/user-info.types'
->>>>>>> e1653861d25aefc6b7a7e89db1449b798ce1e394
-import { OptionType } from '@/context/options.context'
 
 export interface LocationObject {
 	formatted_address?: string
@@ -103,7 +99,6 @@ export interface RequestData {
 	updatedAt: Timestamp
 }
 
-
 export const createHostRequestDTO = z.object({
 	// uuid: z.string(),
 	description: z.string(),
@@ -143,7 +138,7 @@ export const createHostRequestDTO = z.object({
 	service: z.string(),
 	category: z.string(),
 	property_type: z.string(),
-	
+
 	imagesRefPaths: z.array(z.string()),
 	videoRefPath: z.string().nullable(),
 
@@ -180,9 +175,9 @@ export type HostRequestData = z.infer<typeof createHostRequestDTO>
 export type SeekerRequestData = z.infer<typeof createSeekerRequestDTO>
 export type HostRequestDataDetails = Omit<
 	HostRequestData,
-	'location' 
-	| 'state' 
-	| 'service' 
+	| 'location'
+	| 'state'
+	| 'service'
 	| 'user'
 	| 'category'
 	| 'property_type'
