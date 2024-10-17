@@ -25,22 +25,22 @@ export default async function page({ searchParams }: Props) {
 	])
 
 	// const { data } = await axiosInstance.get(`/users/dependencies`)
-	// console.log(data)
+	// console.log('Data from dependencies',data)
 	// todo save the user dependency to the context
 
-	const finalRequests = await Promise.all(
-		requests
-			?.filter((request: HostRequestDataDetails) => request?._user_ref?._id)
-			.map(async (request: HostRequestDataDetails) => {
-				const userId = request._user_ref._id
-				const user_info = await UserInfoService.get(userId)
+	// const finalRequests = await Promise.all(
+	// 	requests
+	// 		?.filter((request: HostRequestDataDetails) => request?._user_ref?._id)
+	// 		.map(async (request: HostRequestDataDetails) => {
+	// 			const userId = request._user_ref._id
+	// 			const user_info = await UserInfoService.get(userId)
 
-				return {
-					...request,
-					user_info,
-				}
-			}) || [],
-	)
+	// 			return {
+	// 				...request,
+	// 				user_info,
+	// 			}
+	// 		}) || [],
+	// )
 
 	return (
 		<HomePage

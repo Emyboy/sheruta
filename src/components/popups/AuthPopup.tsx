@@ -150,7 +150,8 @@ const PasswordResetForm = ({
 			showToast({
 				message: 'Please check your email for further instructions',
 				status: 'success',
-			}), setAppState({ show_login: false })
+			}),
+				setAppState({ show_login: false })
 		},
 	})
 
@@ -222,10 +223,11 @@ const OTPDialog: React.FC<{
 	email: string
 	onVerificationSuccess: () => void
 	password: string
-}> = ({ email, onVerificationSuccess }) => {
+}> = ({ email, onVerificationSuccess, password }) => {
 	const [otp, setOTP] = useState('')
 	const toast = useToast()
 	const { setAppState } = useAppContext()
+	const router = useRouter()
 
 	const { mutate: verifyOTP, isPending } = useMutation({
 		mutationFn: (data: { token: string }) =>
@@ -253,9 +255,10 @@ const OTPDialog: React.FC<{
 			})
 			signIn('credentials', {
 				email,
-				password: email,
+				password,
 			})
 			setAppState({ show_login: false })
+			router.push('/')
 		},
 	})
 
@@ -398,6 +401,7 @@ const AuthForm: React.FC<{
 								status: 'success',
 							})
 							router.refresh()
+							window.location.reload()
 							setIsPasswordReset(false)
 							setIsSignUp(false)
 						}

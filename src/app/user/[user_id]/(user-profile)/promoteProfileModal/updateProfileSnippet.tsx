@@ -279,12 +279,12 @@ export const UpdateProfilePopup = ({ profileOwnerId }: Props) => {
 								value={_service}
 								isRequired
 							>
-								{services &&
+								{/* {services &&
 									services.map((data, index: number) => (
 										<option key={index} value={data.item}>
 											{data.title}
 										</option>
-									))}
+									))} */}
 							</Select>
 
 							<Text

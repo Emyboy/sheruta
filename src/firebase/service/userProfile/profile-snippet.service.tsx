@@ -59,7 +59,7 @@ export const updateProfileSnippetDocs = async (
 			updatedAt: serverTimestamp(),
 		})
 		const data = docSnap
-		console.log(data)
+		console.log('From profile snippet', data)
 	} catch (error) {
 		console.log(error)
 	}

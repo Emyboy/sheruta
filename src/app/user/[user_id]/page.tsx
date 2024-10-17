@@ -11,6 +11,7 @@ import { CACHE_TTL } from '@/constants'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { Box, Flex } from '@chakra-ui/react'
+import axios from 'axios'
 import {
 	collection,
 	doc,
@@ -21,6 +22,8 @@ import {
 	query,
 	where,
 } from 'firebase/firestore'
+import { useAuthContext } from '@/context/auth.context'
+import axiosInstance from '@/utils/custom-axios'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -28,186 +31,31 @@ export default async function page(props: any) {
 	const { params } = props
 	const { user_id } = params
 
-	async function getUserData() {
-		try {
-			const userDoc = await getDoc(doc(db, DBCollectionName.users, user_id))
+	console.log('user id........', user_id)
+	console.log('user params........', params)
 
-			const formattedUserDoc = userDoc.exists() ? userDoc.data() : null
+	const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+	const fullURL =  `${backendURL}/users/${user_id}`
 
-			// console.log('Basic user profile:...............',formattedUserDoc)
+	console.log('Full URL........', fullURL)
 
-			return {
-				user: formattedUserDoc
-					? {
-							first_name: formattedUserDoc.first_name,
-							last_name: formattedUserDoc.last_name,
-							email: formattedUserDoc.email,
-							avatar_url: formattedUserDoc.avatar_url,
-						}
-					: null,
-			}
-		} catch (error) {
-			console.error('Error getting user profile:', error)
-			throw new Error('Failed to get user profile')
-		}
-	}
+	await axios.get(
+				fullURL,
+			  {
+				timeout: 5000,
+			  }
+			).then((response) => {
+				console.log(response.data); 
+			  });
+	
+			
 
-	const user = await getUserData()
+	// console.log('User Profile Data:.........................................................................................................................................', user)
+		
+	
 
-	async function getUserProfile() {
-		try {
-			const [flatShareProfileDocs, userInfoDocs] = await Promise.all([
-				getDocs(
-					query(
-						collection(db, DBCollectionName.flatShareProfile),
-						where('_user_id', '==', user_id),
-					),
-				),
-				getDocs(
-					query(
-						collection(db, DBCollectionName.userInfos),
-						where('_user_id', '==', user_id),
-					),
-				),
-			])
 
-			const formattedFlatShareProfile = flatShareProfileDocs.docs[0].data()
-				? flatShareProfileDocs.docs[0].data()
-				: null
-
-			const formattedUserInfoDoc = userInfoDocs.docs[0].data()
-				? userInfoDocs.docs[0].data()
-				: null
-
-			// console.log('FS profile:...............',formattedFlatShareProfile)
-			// console.log('User info:...............',formattedUserInfoDoc)
-
-			let interestsData: any = []
-
-			try {
-				if (formattedFlatShareProfile?.interests) {
-					const arrayDocRef =
-						formattedFlatShareProfile.interests as DocumentReference[]
-
-					const docSnapshots = await Promise.all(
-						arrayDocRef.map((docRef) => getDoc(docRef)),
-					)
-
-					interestsData = docSnapshots
-						.map((docSnapshot: DocumentSnapshot) =>
-							docSnapshot.exists() ? docSnapshot.data() : null,
-						)
-						.filter((data) => data !== null)
-				}
-			} catch (error) {
-				console.error('Error fetching document:', error)
-			}
-
-			let habitsData: any = []
-
-			try {
-				if (formattedFlatShareProfile?.habits) {
-					const arrayDocRef =
-						formattedFlatShareProfile.habits as DocumentReference[]
-
-					const docSnapshots = await Promise.all(
-						arrayDocRef.map((docRef) => getDoc(docRef)),
-					)
-					habitsData = docSnapshots
-						.map((docSnapshot: DocumentSnapshot) =>
-							docSnapshot.exists() ? docSnapshot.data() : null,
-						)
-						.filter((data) => data !== null)
-				}
-			} catch (error) {
-				console.error('Error fetching document:', error)
-			}
-
-			let locationValue: any = null
-
-			try {
-				const locationKeywordDocRef =
-					formattedFlatShareProfile?.location_keyword as DocumentReference
-
-				const docSnapshot = await getDoc(locationKeywordDocRef)
-
-				if (docSnapshot.exists()) {
-					locationValue = docSnapshot.data()
-				} else {
-					console.log('Location keyword document does not exist.')
-				}
-			} catch (error) {
-				console.error('Error fetching document:', error)
-			}
-
-			let stateValue: any = null
-
-			try {
-				const stateDocRef =
-					formattedFlatShareProfile?.state as DocumentReference
-
-				const docSnapshot = await getDoc(stateDocRef)
-
-				if (docSnapshot.exists()) {
-					stateValue = docSnapshot.data()
-				} else {
-					console.log('state document does not exist.')
-				}
-			} catch (error) {
-				console.error('Error fetching state document ref:', error)
-			}
-
-			const user = {
-				flatShareProfile: formattedFlatShareProfile
-					? {
-							// ...formattedFlatShareProfile,
-							occupation: formattedFlatShareProfile.occupation,
-							budget: formattedFlatShareProfile.budget,
-							interests: interestsData,
-							area: locationValue.name,
-							habits: habitsData,
-							work_industry: formattedFlatShareProfile.work_industry,
-							credits: formattedFlatShareProfile.credits,
-							gender_preference: formattedFlatShareProfile.gender_preference,
-							age_preference: formattedFlatShareProfile.age_preference,
-							bio: formattedFlatShareProfile.bio,
-							payment_type: formattedFlatShareProfile.payment_type,
-							socials: {
-								twitter: formattedFlatShareProfile.twitter,
-								tiktok: formattedFlatShareProfile.tiktok,
-								facebook: formattedFlatShareProfile.facebook,
-								linkedin: formattedFlatShareProfile.linkedin,
-								instagram: formattedFlatShareProfile.instagram,
-							},
-							state: stateValue,
-							seeking: formattedFlatShareProfile.seeking,
-							employment_status: formattedFlatShareProfile.employment_status,
-							religion: formattedFlatShareProfile.religion,
-							done_kyc: formattedFlatShareProfile.done_kyc,
-						}
-					: null,
-				userInfo: formattedUserInfoDoc
-					? {
-							// ...formattedUserInfoDoc,
-							whatsapp: formattedUserInfoDoc.whatsapp_phone_number,
-							phone_number: formattedUserInfoDoc.primary_phone_number,
-							gender: formattedUserInfoDoc.gender,
-							bio: formattedUserInfoDoc.bio,
-							is_verified: formattedUserInfoDoc.is_verified,
-						}
-					: null,
-			}
-
-			const plainUser = JSON.stringify(user)
-
-			return plainUser
-		} catch (error) {
-			console.error('Error fetching document:', error)
-		}
-	}
-
-	const otherInfos = await getUserProfile()
-
+	
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
@@ -226,27 +74,13 @@ export default async function page(props: any) {
 								/>
 							</Flex>
 						</Box>
-
+{/* 
 						{user ? (
-							<UserProfilePage
-								data={user}
-								flatshareInfos={otherInfos}
-								user_id={user_id}
-								// profileInfo={userProfiles}
-							/>
+							<UserProfilePage user_id={user_id} profileInfo={user} />
 						) : (
 							<PageNotFound />
-						)}
+						)} */}
 					</Flex>
-					{/* {user ? (
-						<UserProfilePage
-							data={user}
-							userId={otherInfos}
-							user_id={user_id}
-						/>
-					) : (
-						<PageNotFound />
-					)} */}
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>

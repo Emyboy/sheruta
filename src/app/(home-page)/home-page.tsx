@@ -54,9 +54,8 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	>([])
 	// const axiosAuth = useAuthenticatedAxios()
 
-	const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL  
-const user_id = "670922143217d7ba32c1d8ea"
-    
+	const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL
+	const user_id = '670922143217d7ba32c1d8ea'
 
 	// axios
 	// 	.get(

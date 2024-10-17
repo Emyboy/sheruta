@@ -1,6 +1,5 @@
-import { Option } from '../options.types'
-import { DocumentReference } from 'firebase/firestore'
-
-export interface StateData extends Option {
-	_ref: DocumentReference
+export interface StateData {
+	_id: string
+	name: string
+	slug: string
 }

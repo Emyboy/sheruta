@@ -28,7 +28,7 @@ const FlatShareProfileDataSchema = z.object({
 	gender_preference: z.string().nullable().optional(),
 	age_preference: z.string().nullable().optional(),
 	payment_type: z
-		.enum(['monthly', 'annually', 'bi-annually', 'quarterly', 'weekly'])
+		.array(z.enum(['monthly', 'annually', 'biannually', 'daily', 'weekly']))
 		.nullable(),
 	bio: z.string().nullable(),
 	// bio: z.string().optional(),

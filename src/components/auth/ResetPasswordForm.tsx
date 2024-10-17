@@ -77,7 +77,7 @@ const ResetPasswordForm: React.FC<Props> = ({ token }) => {
 		<VStack
 			as="form"
 			p={10}
-			borderRadius={"lg"}
+			borderRadius={'lg'}
 			spacing={4}
 			onSubmit={handleSubmit}
 			border={`1px solid ${borderColor}`}
