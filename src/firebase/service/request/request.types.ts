@@ -99,7 +99,6 @@ export interface RequestData {
 	updatedAt: Timestamp
 }
 
-
 export const createHostRequestDTO = z.object({
 	// uuid: z.string(),
 	description: z.string(),
@@ -139,7 +138,7 @@ export const createHostRequestDTO = z.object({
 	service: z.string(),
 	category: z.string(),
 	property_type: z.string(),
-	
+
 	imagesRefPaths: z.array(z.string()),
 	videoRefPath: z.string().nullable(),
 
@@ -156,7 +155,7 @@ export const createHostRequestDTO = z.object({
 		.optional(),
 })
 export const createSeekerRequestDTO = z.object({
-	description: z.string().optional(),
+	description: z.string(),
 	rent: z.number(),
 	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
@@ -176,9 +175,9 @@ export type HostRequestData = z.infer<typeof createHostRequestDTO>
 export type SeekerRequestData = z.infer<typeof createSeekerRequestDTO>
 export type HostRequestDataDetails = Omit<
 	HostRequestData,
-	'location' 
-	| 'state' 
-	| 'service' 
+	| 'location'
+	| 'state'
+	| 'service'
 	| 'user'
 	| 'category'
 	| 'property_type'

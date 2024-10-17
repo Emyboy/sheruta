@@ -132,11 +132,11 @@ export default function EachRequest({ request }: Props) {
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
-										avatar_url: authState.user.avatar_url,
-										first_name: authState.user.first_name,
-										last_name: authState.user.last_name,
-										id: authState.user._id,
-									}
+											avatar_url: authState.user.avatar_url,
+											first_name: authState.user.first_name,
+											last_name: authState.user.last_name,
+											id: authState.user._id,
+										}
 									: null,
 								action_url: `/user/${request.user._id}`,
 							}))
@@ -167,11 +167,11 @@ export default function EachRequest({ request }: Props) {
 											type: 'profile_view',
 											sender_details: authState.user
 												? {
-													avatar_url: authState.user.avatar_url,
-													first_name: authState.user.first_name,
-													last_name: authState.user.last_name,
-													id: authState.user._id,
-												}
+														avatar_url: authState.user.avatar_url,
+														first_name: authState.user.first_name,
+														last_name: authState.user.last_name,
+														id: authState.user._id,
+													}
 												: null,
 											action_url: `/user/${request.user._id}`,
 										}))
@@ -182,8 +182,7 @@ export default function EachRequest({ request }: Props) {
 											textTransform={'capitalize'}
 											fontSize={{ base: 'base', md: 'lg' }}
 										>
-											{request.user.last_name}{' '}
-											{request.user.first_name}
+											{request.user.last_name} {request.user.first_name}
 										</Text>
 										{request.user_info?.is_verified && (
 											<LuBadgeCheck fill="#00bc73" />
@@ -401,7 +400,7 @@ export default function EachRequest({ request }: Props) {
 						)}
 					</Flex>
 				</Link>
-				{(request.image_urls && request.image_urls.length > 0) && (
+				{request.image_urls && request.image_urls.length > 0 && (
 					<EachRequestMedia
 						video={request.video_url}
 						images={request.image_urls}
@@ -417,8 +416,7 @@ export default function EachRequest({ request }: Props) {
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									isDisabled={
-										!canInteract ||
-										authState.user?._id === request.user._id
+										!canInteract || authState.user?._id === request.user._id
 									}
 									px={0}
 									bg="none"
@@ -446,17 +444,14 @@ export default function EachRequest({ request }: Props) {
 													recipient_id: request.user._id,
 													sender_details: authState.user
 														? {
-															avatar_url: authState.user.avatar_url,
-															first_name: authState.user.first_name,
-															last_name: authState.user.last_name,
-															id: authState.user._id,
-														}
+																avatar_url: authState.user.avatar_url,
+																first_name: authState.user.first_name,
+																last_name: authState.user.last_name,
+																id: authState.user._id,
+															}
 														: null,
 												})
-												await addAnalyticsData(
-													'calls',
-													request.location._id,
-												)
+												await addAnalyticsData('calls', request.location._id)
 											} catch (error) {
 												console.error(
 													'Error during call or analytics update:',
@@ -487,9 +482,7 @@ export default function EachRequest({ request }: Props) {
 											)
 
 											if (res)
-												window.location.assign(
-													`/messages/${request.user._id}`,
-												)
+												window.location.assign(`/messages/${request.user._id}`)
 										} catch (error) {
 											console.error(
 												'Error during messaging or analytics update:',
@@ -590,11 +583,11 @@ const EachRequestMedia = ({
 		url: string
 		type: string
 	}[] = video
-			? [
+		? [
 				{ url: video, type: 'video' },
 				...images.map((url) => ({ url, type: 'img' })),
 			]
-			: images.map((url) => ({ url, type: 'img' }))
+		: images.map((url) => ({ url, type: 'img' }))
 
 	const [clicked, setClicked] = useState(false)
 	const [activeIdx, setActiveIdx] = useState<number>(0)
