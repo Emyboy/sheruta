@@ -196,6 +196,7 @@ export type HostRequestDataDetails = Omit<
 	flat_share_profile: FlatShareProfileData
 	updatedAt: string
 	createdAt: string
+	seeking: boolean
 }
 
 export type SeekerRequestDataDetails = Omit<
@@ -211,6 +212,7 @@ export type SeekerRequestDataDetails = Omit<
 	user_info: UserInfoDTO
 	updatedAt: string
 	createdAt: string
+	seeking: boolean
 }
 
 // export interface FlatShareRequest{

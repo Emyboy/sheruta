@@ -13,7 +13,7 @@ import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { db } from '@/firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import { HostRequestDataDetails, SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { resolveArrayOfReferences } from '@/utils/index.utils'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
@@ -185,9 +185,9 @@ export default function HomePage({ requests, userProfiles }: Props) {
 						<ProfileSnippet userProfiles={userProfiles} />
 
 						<Flex flexDirection={'column'} gap={0}>
-							{processedRequests.map((request: any, index: number) => (
+							{processedRequests.map((request: SeekerRequestDataDetails & HostRequestDataDetails, index: number) => (
 								<Box
-									key={request.id}
+									key={request._id}
 									ref={index === processedRequests.length - 1 ? setRef : null}
 									style={{ transition: 'opacity 0.3s ease-in-out' }}
 								>

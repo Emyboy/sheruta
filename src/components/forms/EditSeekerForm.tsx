@@ -14,10 +14,7 @@ import {
 	useColorMode,
 } from '@chakra-ui/react'
 import Link from 'next/link'
-import {
-	Autocomplete,
-	useJsApiLoader,
-} from '@react-google-maps/api'
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api'
 import useCommon from '@/hooks/useCommon'
 import {
 	createSeekerRequestDTO,
@@ -112,10 +109,7 @@ const EditSeekerForm: React.FC<{
 	useEffect(() => {
 		if (parsedRequestData) {
 			// Check for missing parsedRequestData or mismatched user ID
-			if (
-				user &&
-				parsedRequestData.user._id !== user?._id
-			) {
+			if (user && parsedRequestData.user._id !== user?._id) {
 				window.location.assign('/')
 				return
 			}
@@ -137,15 +131,12 @@ const EditSeekerForm: React.FC<{
 				description: parsedRequestData.description,
 				rent: parsedRequestData.rent || 0,
 				payment_type: parsedRequestData?.payment_type as PaymentType,
-				google_location_object: parsedRequestData?.google_location_object ||
-					{},
-				google_location_text: parsedRequestData?.google_location_text ||
-					'',
+				google_location_object: parsedRequestData?.google_location_object || {},
+				google_location_text: parsedRequestData?.google_location_text || '',
 			}))
 
 			setNewLocations(getLocations(parsedRequestData.state._id))
 		}
-
 	}, [])
 
 	console.log(formData)
@@ -181,11 +172,11 @@ const EditSeekerForm: React.FC<{
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -206,14 +197,10 @@ const EditSeekerForm: React.FC<{
 	) => {
 		const { id, name, value } = e.target
 
-		const updateRentInvalidState = (
-			paymentType: string,
-			rentValue: number,
-		) => {
+		const updateRentInvalidState = (paymentType: string, rentValue: number) => {
 			const rentLimit = rentLimits[paymentType as PaymentType]
 			setIsRentInvalid(rentValue < rentLimit)
 		}
-
 
 		switch (id) {
 			case 'rent':
@@ -269,7 +256,10 @@ const EditSeekerForm: React.FC<{
 
 			createSeekerRequestDTO.parse(finalFormData)
 
-			await axiosInstance.put(`/flat-share-requests/seeker/${requestId}`, finalFormData)
+			await axiosInstance.put(
+				`/flat-share-requests/seeker/${requestId}`,
+				finalFormData,
+			)
 		},
 		onSuccess: async () => {
 			showToast({
@@ -295,10 +285,12 @@ const EditSeekerForm: React.FC<{
 	})
 
 	return (
-		<form onSubmit={(e: FormEvent) => {
-			e.preventDefault();
-			editRequest()
-		}}>
+		<form
+			onSubmit={(e: FormEvent) => {
+				e.preventDefault()
+				editRequest()
+			}}
+		>
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired isInvalid={isRentInvalid} flex="1">
 					<FormLabel requiredIndicator={null} htmlFor="budget">

@@ -253,10 +253,12 @@ const CreateSeekerForm: React.FC = () => {
 	})
 
 	return (
-		<form onSubmit={(e: FormEvent) => {
-			e.preventDefault();
-			postRequest()
-		}}>
+		<form
+			onSubmit={(e: FormEvent) => {
+				e.preventDefault()
+				postRequest()
+			}}
+		>
 			<Flex mb={4} gap={4}>
 				<FormControl
 					isRequired
