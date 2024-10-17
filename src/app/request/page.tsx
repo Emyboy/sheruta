@@ -6,10 +6,19 @@ import MainLeftNav from '@/components/layout/MainLeftNav'
 import MainPostOptions from '@/components/atoms/MainPostOptions'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import MainHeader from '@/components/layout/MainHeader'
+import axiosInstance from '@/utils/custom-axios'
 
 type Props = {}
 
-export default function page({}: Props) {
+export default async function page({}: Props) {
+	const { data } = await axiosInstance.get(`/users/dependencies`)
+
+	//data.options
+
+	//data.user_data
+
+	console.log('User dependencies', JSON.stringify(data.options))
+
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>

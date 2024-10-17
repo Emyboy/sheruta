@@ -89,15 +89,10 @@ export function formatPrice(digit: number): string {
 	return formatter.format(digit)
 }
 
-export function timeAgo(updatedAt: {
-	seconds: number
-	nanoseconds: number
-}): string {
-	if (typeof updatedAt === 'undefined') return 'unknown'
+export function timeAgo(updatedAt: string): string {
+	if (!updatedAt) return 'unknown'
 
-	const updatedDate = new Date(
-		updatedAt.seconds * 1000 + updatedAt.nanoseconds / 1000000,
-	)
+	const updatedDate = new Date(updatedAt)
 	const now = new Date()
 	const seconds = Math.floor((now.getTime() - updatedDate.getTime()) / 1000)
 

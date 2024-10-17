@@ -14,8 +14,8 @@ export interface UserInfo {
 	nin: string | null
 	hide_profile: boolean
 	hide_phone: boolean
+	done_kyc: boolean
 	nin_data?: NINResponseDTO
-	done_kyc: true
 }
 
 export interface UserInfoDTO {

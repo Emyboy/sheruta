@@ -1,27 +1,34 @@
 'use client'
-
-import { auth } from '@/firebase'
-import AuthService from '@/firebase/service/auth/auth.firebase'
 import { AuthUser, RegisterDTO } from '@/firebase/service/auth/auth.types'
-import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { UserInfo } from '@/firebase/service/user-info/user-info.types'
-import useAuthenticatedAxios from '@/hooks/useAxios'
-import { useToast } from '@chakra-ui/react'
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import React, {
 	createContext,
-	ReactNode,
 	useContext,
-	useEffect,
 	useState,
+	ReactNode,
+	useEffect,
 } from 'react'
+import {
+	GoogleAuthProvider,
+	onAuthStateChanged,
+	signInWithPopup,
+} from 'firebase/auth'
+import { app, auth } from '@/firebase'
+import AuthService from '@/firebase/service/auth/auth.firebase'
+import { useToast } from '@chakra-ui/react'
 import { useAppContext } from './app.context'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import axiosInstance from '@/utils/custom-axios'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { signOut } from 'next-auth/react'
 
 export interface AuthState {
 	user: AuthUser | null
 	user_info: UserInfo | null
-	user_settings: null
+	user_settings: any
+	wallet: any
 	flat_share_profile: null | FlatShareProfileData
+	notifications: any
 	auth_loading?: boolean
 }
 
@@ -50,13 +57,17 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	const toast = useToast()
 	const { setAppState } = useAppContext()
 	const [state, setState] = useState<AuthState>(
-		user_data || {
-			user: null,
-			user_info: null,
-			user_settings: null,
-			flat_share_profile: null,
-			auth_loading: false,
-		},
+		user_data
+			? { ...user_data }
+			: {
+					user: null,
+					user_info: null,
+					user_settings: null,
+					wallet: null,
+					flat_share_profile: null,
+					notifications: [],
+					auth_loading: false,
+				},
 	)
 
 	const getAuthDependencies = async (): Promise<any> => {
@@ -69,7 +80,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 		// 	return Promise.reject('User not found')
 		// }
 		const { data } = await signin.get(`/users/dependencies`)
-		console.log(data)
+		// console.log(data)
 		// @ts-ignore
 		setAuthState((prev) => ({ ...prev, ...data.user_data }))
 	}
@@ -86,7 +97,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	}
 
 	const logout = async () => {
-		await auth.signOut()
+		signOut()
 		localStorage.clear()
 		sessionStorage.clear()
 		window.location.reload()
@@ -127,17 +138,17 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 			})
 	}
 
-	useEffect(() => {
-		// onAuthStateChanged(auth, async (user) => {
-		// 	if (user) {
-		// 		let userData = await AuthService.getUser(user.uid)
-		// 		setAuthState({ ...userData })
-		// 		setAppState({ app_loading: false })
-		// 	} else {
-		// 		setAppState({ app_loading: false })
-		// 	}
-		// })
-	}, [])
+	// useEffect(() => {
+	// 	// onAuthStateChanged(auth, async (user) => {
+	// 	// 	if (user) {
+	// 	// 		let userData = await AuthService.getUser(user.uid)
+	// 	// 		setAuthState({ ...userData })
+	// 	// 		setAppState({ app_loading: false })
+	// 	// 	} else {
+	// 	// 		setAppState({ app_loading: false })
+	// 	// 	}
+	// 	// })
+	// }, [])
 
 	return (
 		<AuthContext.Provider

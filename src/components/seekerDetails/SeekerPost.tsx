@@ -67,6 +67,8 @@ const SeekerPost = ({
 		? SuperJSON.parse(requestData)
 		: undefined
 
+	console.log(postData)
+
 	const [lastUpdated, setLastUpdated] = useState<string>('99 years ago')
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -82,9 +84,9 @@ const SeekerPost = ({
 		if (
 			postData &&
 			typeof authState.user !== 'undefined' &&
-			typeof postData?._user_ref?._id !== 'undefined'
+			typeof postData?.user?._id !== 'undefined'
 		) {
-			setIsPostAdmin(authState.user?._id === postData?._user_ref?._id)
+			setIsPostAdmin(authState.user?._id === postData.user._id)
 			setLastUpdated(timeAgo(postData.updatedAt))
 		}
 	}, [postData, authState])
@@ -141,7 +143,7 @@ const SeekerPost = ({
 								<Avatar
 									size="lg"
 									src={
-										postData._user_ref.avatar_url ||
+										postData.user.avatar_url ||
 										'https://via.placeholder.com/150'
 									}
 								/>
@@ -282,7 +284,7 @@ const SeekerPost = ({
 									variant="subtle"
 									fontWeight={300}
 								>
-									{postData._service_ref?.title}
+									{postData.service?.name}
 								</Badge>
 							</Text>
 						</Flex>
@@ -303,21 +305,20 @@ const SeekerPost = ({
 										<Tooltip
 											bgColor={colorMode === 'dark' ? '#fff' : 'gray.300'}
 											hasArrow
-											label={`Call ${postData._user_ref?.first_name}`}
+											label={`Call ${postData.user?.first_name}`}
 											color={colorMode === 'dark' ? 'black' : 'black'}
 										>
 											<IconButton
 												variant="outline"
-												aria-label={`Call ${postData._user_ref?.first_name}`}
+												aria-label={`Call ${postData.user?.first_name}`}
 												border="none"
 												fontSize={'24px'}
 												icon={<BiPhone />}
 												onClick={async () => {
-													if (authState.user?._id === postData._user_ref._id)
-														return
+													if (authState.user?._id === postData.user._id) return
 													await handleCall({
 														number: postData.user_info.primary_phone_number,
-														recipient_id: postData._user_ref._id,
+														recipient_id: postData.user._id,
 														sender_details: authState.user
 															? {
 																	avatar_url: authState.user.avatar_url,
@@ -327,10 +328,7 @@ const SeekerPost = ({
 																}
 															: null,
 													})
-													await addAnalyticsData(
-														'calls',
-														postData._location_keyword_ref.id,
-													)
+													await addAnalyticsData('calls', postData.location._id)
 												}}
 											/>
 										</Tooltip>
@@ -339,20 +337,20 @@ const SeekerPost = ({
 									<Tooltip
 										bgColor={colorMode === 'dark' ? '#fff' : 'gray.300'}
 										hasArrow
-										label={`Dm ${postData._user_ref.first_name}`}
+										label={`Dm ${postData.user.first_name}`}
 										color={colorMode === 'dark' ? 'black' : 'black'}
 									>
 										<IconButton
 											variant="outline"
-											aria-label={`Message ${postData._user_ref.first_name}`}
+											aria-label={`Message ${postData.user.first_name}`}
 											border="none"
 											fontSize="24px"
 											icon={<BiEnvelope />}
 											onClick={async () => {
-												handleDM(postData._user_ref._id)
+												handleDM(postData.user._id)
 												await addAnalyticsData(
 													'messages',
-													postData._location_keyword_ref.id,
+													postData.location._id,
 												)
 											}}
 										/>
@@ -360,7 +358,7 @@ const SeekerPost = ({
 								</Box>
 								<Flex flexWrap={'wrap'}>
 									<Text fontSize={'1.4rem'} fontWeight={'700'}>
-										&#8358;{postData.budget?.toLocaleString()}
+										&#8358;{postData.rent?.toLocaleString()}
 									</Text>
 									<Text fontSize={20} fontWeight={200}>
 										{'/'}
@@ -392,13 +390,11 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 	const { authState } = useAuthContext()
 
 	const name =
-		capitalizeString(postData._user_ref.first_name) +
-		' ' +
-		postData._user_ref.last_name
-	const handle = postData._user_ref.first_name
+		capitalizeString(postData.user.first_name) + ' ' + postData.user.last_name
+	const handle = postData.user.first_name
 	const userInfo = postData.user_info
 	const bio = postData.flat_share_profile.bio || 'No Bio Available'
-	const profilePicture = postData._user_ref.avatar_url
+	const profilePicture = postData.user.avatar_url
 
 	return (
 		<Box bgColor="#202020" borderRadius="15px">
@@ -439,7 +435,7 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 						variant="ghost"
 						colorScheme="white"
 						size={'md'}
-						onClick={() => handleDM(postData._user_ref._id)}
+						onClick={() => handleDM(postData.user._id)}
 					/>
 					{userInfo?.primary_phone_number ? (
 						<IconButton
@@ -450,10 +446,10 @@ const UserCard = ({ postData }: { postData: SeekerRequestDataDetails }) => {
 							ml={2}
 							size={'md'}
 							onClick={async () => {
-								if (authState.user?._id === postData._user_ref._id) return
+								if (authState.user?._id === postData.user._id) return
 								await handleCall({
 									number: userInfo.primary_phone_number,
-									recipient_id: postData._user_ref._id,
+									recipient_id: postData.user._id,
 									sender_details: authState.user
 										? {
 												avatar_url: authState.user.avatar_url,

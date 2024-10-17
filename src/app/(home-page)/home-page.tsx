@@ -31,6 +31,7 @@ import HomeTabs from './HomeTabs'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import useAuthenticatedAxios from '@/hooks/useAxios'
 import { User } from 'firebase/auth'
+import SuperJSON from 'superjson'
 
 type Props = {
 	requests: string
@@ -39,7 +40,7 @@ type Props = {
 
 export default function HomePage({ requests, userProfiles }: Props) {
 	const [flatShareRequests, setFlatShareRequests] = useState<any[]>(
-		requests ? JSON.parse(requests) : [],
+		requests ? SuperJSON.parse(requests) : [],
 	)
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
@@ -80,7 +81,7 @@ export default function HomePage({ requests, userProfiles }: Props) {
 			if (flatShareRequests.length > 0) {
 				const updatedRequests = await Promise.all(
 					flatShareRequests.map(async (request: HostRequestDataDetails) =>
-						request._user_info_ref?.hide_profile ? null : { ...request },
+						request.user_info?.hide_profile ? null : { ...request },
 					),
 				)
 				const filteredRequests = updatedRequests.filter(Boolean)
@@ -91,69 +92,69 @@ export default function HomePage({ requests, userProfiles }: Props) {
 		processRequests()
 	}, [flatShareRequests])
 
-	const loadMore = async () => {
-		setIsLoading(true)
+	// const loadMore = async () => {
+	// 	setIsLoading(true)
 
-		try {
-			const requestsRef = collection(db, DBCollectionName.flatShareRequests)
-			let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
+	// 	try {
+	// 		const requestsRef = collection(db, DBCollectionName.flatShareRequests)
+	// 		let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
 
-			if (lastVisible) {
-				requestsQuery = query(requestsQuery, startAfter(lastVisible))
-			}
+	// 		if (lastVisible) {
+	// 			requestsQuery = query(requestsQuery, startAfter(lastVisible))
+	// 		}
 
-			const querySnapshot = await getDocs(requestsQuery)
+	// 		const querySnapshot = await getDocs(requestsQuery)
 
-			if (querySnapshot.empty) {
-				setHasMore(false)
-			} else {
-				// Extract new requests from the querySnapshot
-				const newRequests = querySnapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				})) as HostRequestDataDetails[]
+	// 		if (querySnapshot.empty) {
+	// 			setHasMore(false)
+	// 		} else {
+	// 			// Extract new requests from the querySnapshot
+	// 			const newRequests = querySnapshot.docs.map((doc) => ({
+	// 				id: doc.id,
+	// 				...doc.data(),
+	// 			})) as HostRequestDataDetails[]
 
-				// Resolve any document references in the new requests
-				const resolvedRequests = await resolveArrayOfReferences(newRequests)
+	// 			// Resolve any document references in the new requests
+	// 			const resolvedRequests = await resolveArrayOfReferences(newRequests)
 
-				// Update state with filtered new requests (removing duplicates)
-				setFlatShareRequests((prevRequests) => {
-					const existingIds = new Set(prevRequests.map((request) => request.id))
+	// 			// Update state with filtered new requests (removing duplicates)
+	// 			setFlatShareRequests((prevRequests) => {
+	// 				const existingIds = new Set(prevRequests.map((request) => request.id))
 
-					// Filter out new requests that already exist in previous requests
-					const filteredNewRequests = resolvedRequests.filter(
-						(request) => !existingIds.has(request.id),
-					)
+	// 				// Filter out new requests that already exist in previous requests
+	// 				const filteredNewRequests = resolvedRequests.filter(
+	// 					(request) => !existingIds.has(request.id),
+	// 				)
 
-					return [...prevRequests, ...filteredNewRequests]
-				})
+	// 				return [...prevRequests, ...filteredNewRequests]
+	// 			})
 
-				setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]) // Update last visible document
-			}
-		} catch (error) {
-			console.error('Failed to load more data', error)
-		} finally {
-			setIsLoading(false)
-		}
-	}
+	// 			setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]) // Update last visible document
+	// 		}
+	// 	} catch (error) {
+	// 		console.error('Failed to load more data', error)
+	// 	} finally {
+	// 		setIsLoading(false)
+	// 	}
+	// }
 
-	useEffect(() => {
-		if (isLoading) return
+	// useEffect(() => {
+	// 	if (isLoading) return
 
-		if (observer.current) observer.current.disconnect()
+	// 	if (observer.current) observer.current.disconnect()
 
-		observer.current = new IntersectionObserver((entries) => {
-			if (entries[0].isIntersecting && hasMore) {
-				loadMore()
-			}
-		})
+	// 	observer.current = new IntersectionObserver((entries) => {
+	// 		if (entries[0].isIntersecting && hasMore) {
+	// 			loadMore()
+	// 		}
+	// 	})
 
-		if (lastRequestRef.current) observer.current.observe(lastRequestRef.current)
+	// 	if (lastRequestRef.current) observer.current.observe(lastRequestRef.current)
 
-		return () => {
-			if (observer.current) observer.current.disconnect()
-		}
-	}, [isLoading, hasMore, lastRequestRef])
+	// 	return () => {
+	// 		if (observer.current) observer.current.disconnect()
+	// 	}
+	// }, [isLoading, hasMore, lastRequestRef])
 
 	// const handleSubmit = (values) =>
 	// {
