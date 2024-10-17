@@ -1,9 +1,9 @@
+import { OptionType } from '@/context/options.context'
 import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
 import { AuthUser } from '../auth/auth.types'
 import { FlatShareProfileData } from '../flat-share-profile/flat-share-profile.types'
-import { UserInfoDTO } from '../user-info/user-info.types'
-import { OptionType } from '@/context/options.context'
+import { UserInfo, UserInfoDTO } from '../user-info/user-info.types'
 
 export interface LocationObject {
 	formatted_address?: string
@@ -26,11 +26,6 @@ export enum PaymentType {
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
 
-const timestampSchema = z.object({
-	seconds: z.number().int().positive(),
-	nanoseconds: z.number().int().nonnegative().max(999_999_999),
-})
-
 export const createHostSpaceRequestDTO = z.object({
 	description: z.string(),
 	service_charge: z.number().nullable(),
@@ -41,8 +36,8 @@ export const createHostSpaceRequestDTO = z.object({
 	living_rooms: z.number().nullable(),
 	amenities: z.array(z.string()),
 	house_rules: z.array(z.string()),
-	availability_status: z.custom<AvailabilityStatus>(),
-	images_urls: z.array(z.string()),
+	// availability_status: z.custom<AvailabilityStatus>(),
+	image_urls: z.array(z.string()),
 	video_url: z.string().nullable(),
 	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
@@ -99,7 +94,6 @@ export interface RequestData {
 	updatedAt: Timestamp
 }
 
-
 export const createHostRequestDTO = z.object({
 	// uuid: z.string(),
 	description: z.string(),
@@ -139,7 +133,7 @@ export const createHostRequestDTO = z.object({
 	service: z.string(),
 	category: z.string(),
 	property_type: z.string(),
-	
+
 	imagesRefPaths: z.array(z.string()),
 	videoRefPath: z.string().nullable(),
 
@@ -176,9 +170,9 @@ export type HostRequestData = z.infer<typeof createHostRequestDTO>
 export type SeekerRequestData = z.infer<typeof createSeekerRequestDTO>
 export type HostRequestDataDetails = Omit<
 	HostRequestData,
-	'location' 
-	| 'state' 
-	| 'service' 
+	| 'location'
+	| 'state'
+	| 'service'
 	| 'user'
 	| 'category'
 	| 'property_type'
@@ -197,6 +191,41 @@ export type HostRequestDataDetails = Omit<
 	flat_share_profile: FlatShareProfileData
 	updatedAt: string
 	createdAt: string
+}
+
+export interface FlatShareRequest {
+	_id: string
+	bedrooms: number
+	bathrooms: number
+	toilets: number
+	rent: number
+	description: string
+	house_rules: string[]
+	living_rooms: number
+	availability_status: AvailabilityStatus
+	seeking: boolean
+	service_charge: number
+	image_urls: string[]
+	video_url: string
+	user: AuthUser
+	user_info: UserInfo
+	flat_share_profile: FlatShareProfileData
+	location: OptionType & { state: string }
+	service: OptionType
+	category: OptionType
+	amenities: OptionType[]
+	property_type: OptionType
+	state: OptionType
+	view_count: number
+	call_count: number
+	question_count: number
+	google_location_object: any
+	google_location_text: string
+	updatedAt: Date
+	createdAt: Date
+	reserved_by: string | undefined
+	reservation_expiry: Date | undefined
+	background_checks: any | undefined
 }
 
 export type SeekerRequestDataDetails = Omit<

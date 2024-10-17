@@ -19,7 +19,10 @@ import {
 import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import {
+	FlatShareRequest,
+	HostRequestDataDetails,
+} from '@/firebase/service/request/request.types'
 import ReservationService from '@/firebase/service/reservations/reservations.firebase'
 import {
 	ReservationDTO,
@@ -86,7 +89,7 @@ import SearchLocation from './SearchLocation'
 export default function ApartmentSummary({
 	request,
 }: {
-	request: HostRequestDataDetails
+	request: FlatShareRequest
 }) {
 	const router = useRouter()
 
@@ -97,7 +100,7 @@ export default function ApartmentSummary({
 
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
-		useHandleBookmark(request.id, request._user_ref._id)
+		useHandleBookmark(request._id, request.user._id)
 
 	const [showBookInspectionModal, setShowBookInspectionModal] =
 		useState<boolean>(false)
@@ -113,7 +116,7 @@ export default function ApartmentSummary({
 	const canInteract = !(
 		(request.availability_status === 'reserved' &&
 			authState.user?._id !== request.reserved_by) ||
-		authState.user?._id === request._user_ref._id
+		authState.user?._id === request.user._id
 	)
 
 	const [loading, setLoading] = useState(false)
@@ -121,7 +124,7 @@ export default function ApartmentSummary({
 		setLoading(true)
 		try {
 			await ReservationService.deleteReservedListing({
-				request_id: request.id,
+				request_id: request._id,
 				doc_id: authState.user?._id as string,
 			})
 			revalidatePathOnClient(pathname)
@@ -143,13 +146,13 @@ export default function ApartmentSummary({
 			<ReserveApartmentModal
 				closeModal={closeReserveApartmentModal}
 				showBookApartmentModal={showReserveApartmentModal}
-				request_id={request.id}
-				recipient_id={request._user_ref._id}
+				request_id={request._id}
+				recipient_id={request.user._id}
 			/>
 			<BookInspectionModal
 				closeModal={closeModal}
 				showBookInspectionModal={showBookInspectionModal}
-				host_details={request._user_ref}
+				host_details={request.user}
 				inspection_location={request.google_location_text}
 			/>
 			<Flex
@@ -190,14 +193,14 @@ export default function ApartmentSummary({
 								fontSize={{ base: '18px', md: '24px' }}
 								fontWeight={'extrabold'}
 							>
-								₦{request.budget.toLocaleString()}
+								₦{request.rent.toLocaleString()}
 							</Text>{' '}
 							<Text
 								fontSize={{ base: 'lg', md: 'xl' }}
 								fontWeight={'200'}
 								textTransform={'capitalize'}
 							>
-								/{request.payment_type}
+								{/* /{request.payment_type} */}
 							</Text>
 						</Flex>
 					</Flex>
@@ -221,7 +224,8 @@ export default function ApartmentSummary({
 								: openReserveApartmentModal
 						}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={!canInteract}
+						// isDisabled={!canInteract}
+						isDisabled={true}
 					>
 						{request.availability_status === 'reserved'
 							? request.reserved_by === authState.user?._id
@@ -233,7 +237,7 @@ export default function ApartmentSummary({
 
 				<Flex gap={{ base: '8px', md: '16px' }}>
 					<Avatar
-						src={request._user_ref.avatar_url}
+						src={request.user.avatar_url}
 						size={{
 							md: 'md',
 							base: 'md',
@@ -252,35 +256,35 @@ export default function ApartmentSummary({
 						flexDir={'column'}
 					>
 						<Link
-							href={canInteract ? `/user/${request._user_ref._id}` : ''}
+							href={canInteract ? `/user/${request.user._id}` : ''}
 							style={{ textDecoration: 'none' }}
-							onClick={async () =>
-								canInteract &&
-								(await createNotification({
-									is_read: false,
-									message: NotificationsBodyMessage.profile_view,
-									recipient_id: request._user_ref._id,
-									type: 'profile_view',
-									sender_details: authState.user
-										? {
-												avatar_url: authState.user.avatar_url,
-												first_name: authState.user.first_name,
-												last_name: authState.user.last_name,
-												id: authState.user._id,
-											}
-										: null,
-									action_url: `/user/${request._user_ref._id}`,
-								}))
-							}
+							// onClick={async () =>
+							// 	canInteract &&
+							// 	(await createNotification({
+							// 		is_read: false,
+							// 		message: NotificationsBodyMessage.profile_view,
+							// 		recipient_id: request.user._id,
+							// 		type: 'profile_view',
+							// 		sender_details: authState.user
+							// 			? {
+							// 					avatar_url: authState.user.avatar_url,
+							// 					first_name: authState.user.first_name,
+							// 					last_name: authState.user.last_name,
+							// 					id: authState.user._id,
+							// 				}
+							// 			: null,
+							// 		action_url: `/user/${request.user._id}`,
+							// 	}))
+							// }
 						>
 							<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 								<Text
 									textTransform={'capitalize'}
 									fontSize={{ base: 'base', md: 'lg' }}
 								>
-									{request._user_ref.last_name} {request._user_ref.first_name}
+									{request.user.last_name} {request.user.first_name}
 								</Text>
-								{request._user_info_ref?.is_verified && (
+								{request.user_info?.is_verified && (
 									<LuBadgeCheck fill="#00bc73" />
 								)}
 							</Flex>
@@ -289,7 +293,6 @@ export default function ApartmentSummary({
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									px={0}
-									isDisabled={!canInteract}
 									bg="none"
 									color="text_muted"
 									display={'flex'}
@@ -308,29 +311,28 @@ export default function ApartmentSummary({
 										md: 'xl',
 										base: 'lg',
 									}}
-									onClick={async () =>
-										canInteract &&
-										(await handleCall({
-											number: request._user_info_ref.primary_phone_number,
-											recipient_id: request._user_ref._id,
-											sender_details: authState.user
-												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
-												: null,
-										}))
-									}
+									// onClick={async () =>
+									// 	canInteract &&
+									// 	(await handleCall({
+									// 		number: request.user_info.primary_phone_number,
+									// 		recipient_id: request.user._id,
+									// 		sender_details: authState.user
+									// 			? {
+									// 					avatar_url: authState.user.avatar_url,
+									// 					first_name: authState.user.first_name,
+									// 					last_name: authState.user.last_name,
+									// 					id: authState.user._id,
+									// 				}
+									// 			: null,
+									// 	}))
+									// }
+									isDisabled={!canInteract}
 								>
 									<BiPhone />
 								</Button>
 							</MainTooltip>
 							<MainTooltip label="Message me" placement="top">
-								<Link
-									href={canInteract ? `/messages/${request._user_ref._id}` : ''}
-								>
+								<Link href={canInteract ? `/messages/${request.user._id}` : ''}>
 									<Button
 										px={0}
 										isDisabled={!canInteract}
@@ -353,29 +355,29 @@ export default function ApartmentSummary({
 											base: 'lg',
 										}}
 										ml={'-8px'}
-										onClick={async () =>
-											canInteract &&
-											(await NotificationsService.create({
-												collection_name: DBCollectionName.notifications,
-												data: {
-													type: 'message',
-													message: NotificationsBodyMessage.message,
-													recipient_id: request._user_ref._id,
-													sender_details: authState.user
-														? {
-																id: authState.user._id,
-																avatar_url: authState.user.avatar_url,
-																first_name: authState.user.first_name,
-																last_name: authState.user.last_name,
-															}
-														: null,
-													is_read: false,
-													action_url: authState.user
-														? `/messages/${authState.user._id}`
-														: '',
-												},
-											}))
-										}
+										// onClick={async () =>
+										// 	canInteract &&
+										// 	(await NotificationsService.create({
+										// 		collection_name: DBCollectionName.notifications,
+										// 		data: {
+										// 			type: 'message',
+										// 			message: NotificationsBodyMessage.message,
+										// 			recipient_id: request.user._id,
+										// 			sender_details: authState.user
+										// 				? {
+										// 						id: authState.user._id,
+										// 						avatar_url: authState.user.avatar_url,
+										// 						first_name: authState.user.first_name,
+										// 						last_name: authState.user.last_name,
+										// 					}
+										// 				: null,
+										// 			is_read: false,
+										// 			action_url: authState.user
+										// 				? `/messages/${authState.user._id}`
+										// 				: '',
+										// 		},
+										// 	}))
+										// }
 									>
 										<MdOutlineMailOutline />
 									</Button>
@@ -426,7 +428,7 @@ export default function ApartmentSummary({
 										bgColor="none"
 										onClick={() =>
 											copyShareUrl(
-												`/request/${request.seeking ? 'seeker' : 'host'}/${request.id}`,
+												`/request/${request.seeking ? 'seeker' : 'host'}/${request._id}`,
 												request.seeking
 													? 'Looking for apartment'
 													: 'New apartment',
@@ -444,7 +446,7 @@ export default function ApartmentSummary({
 											Share
 										</Text>
 									</Button>
-									{authState.user?._id === request._user_ref._id && (
+									{authState.user?._id === request.user._id && (
 										<>
 											<Button
 												variant="ghost"
@@ -452,7 +454,7 @@ export default function ApartmentSummary({
 												isLoading={isLoading}
 												bgColor="none"
 												onClick={() => {
-													router.push(`${request.id}/edit`)
+													router.push(`${request._id}/edit`)
 												}}
 												width="100%"
 												display="flex"
@@ -472,8 +474,8 @@ export default function ApartmentSummary({
 												bgColor="none"
 												onClick={() =>
 													handleDeletePost({
-														requestId: request.id,
-														userId: request._user_ref._id,
+														requestId: request._id,
+														userId: request.user._id,
 													})
 												}
 												width="100%"
@@ -541,13 +543,9 @@ export default function ApartmentSummary({
 			>
 				<Text color="text_muted" fontSize={'sm'}>
 					Posted{' '}
-					{formatDistanceToNow(
-						new Date(
-							request.updatedAt.seconds * 1000 +
-								request.updatedAt.nanoseconds / 1000000,
-						),
-						{ addSuffix: true },
-					)}
+					{formatDistanceToNow(new Date(request.createdAt), {
+						addSuffix: true,
+					})}
 				</Text>
 				<Flex alignItems={'center'} as="address" color="brand" gap={'10px'}>
 					<BiLocationPlus size={'24px'} />
@@ -588,7 +586,7 @@ export default function ApartmentSummary({
 							py={'5px'}
 							textTransform={'capitalize'}
 						>
-							{request._service_ref.title}
+							{request.service.name}
 						</Badge>
 
 						<Badge
@@ -598,7 +596,7 @@ export default function ApartmentSummary({
 							py={'5px'}
 							textTransform={'capitalize'}
 						>
-							{request._category_ref.title}
+							{request.category.name}
 						</Badge>
 					</Flex>
 
@@ -614,7 +612,7 @@ export default function ApartmentSummary({
 						}}
 						textTransform={'capitalize'}
 					>
-						{request._property_type_ref.title}
+						{request.property_type.name}
 					</Badge>
 				</Flex>
 				<Flex
@@ -638,7 +636,7 @@ export default function ApartmentSummary({
 							</Text>
 						</Flex>
 						<Text color={'text_muted'} fontWeight={'light'} fontSize={'sm'}>
-							{request._service_ref.about}
+							{request.service.name}
 						</Text>
 					</Flex>
 					<AvailabilityStatusCard
@@ -676,7 +674,7 @@ export default function ApartmentSummary({
 								fontWeight={'200'}
 								textTransform={'capitalize'}
 							>
-								{request.payment_type}
+								{/* {request.payment_type} */}
 							</Text>
 						</Flex>
 						<Flex
@@ -688,7 +686,7 @@ export default function ApartmentSummary({
 								Rent
 							</Text>
 							<Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={'light'}>
-								₦{request.budget.toLocaleString()}
+								₦{request.rent.toLocaleString()}
 							</Text>
 						</Flex>
 					</Flex>
@@ -725,7 +723,7 @@ export default function ApartmentSummary({
 							>
 								₦
 								{(
-									(request.service_charge || 0) + request.budget
+									(request.service_charge || 0) + request.rent
 								).toLocaleString()}
 							</Text>
 						</Flex>
@@ -742,7 +740,8 @@ export default function ApartmentSummary({
 						_light={{ color: 'white' }}
 						onClick={openModal}
 						fontSize={{ base: 'sm', md: 'base' }}
-						isDisabled={!canInteract}
+						// isDisabled={!canInteract}
+						isDisabled={true}
 					>
 						Book Inspection
 					</Button>
@@ -767,7 +766,7 @@ export default function ApartmentSummary({
 						<SimpleGrid columns={[2, null, 3]} spacingY="16px">
 							{request.amenities.map((amenity) => (
 								<Flex
-									key={amenity.id}
+									key={amenity._id}
 									gap={'10px'}
 									alignItems={'center'}
 									justifyContent={'start'}
@@ -777,7 +776,7 @@ export default function ApartmentSummary({
 										fontWeight={'300'}
 										fontSize={{ base: 'base', md: 'lg' }}
 									>
-										{amenity.title}
+										{amenity.name}
 									</Text>
 								</Flex>
 							))}
@@ -863,66 +862,6 @@ export default function ApartmentSummary({
 						</SimpleGrid>
 					</Flex>
 				)}
-				{/* <Flex
-					my={{ base: '24px', sm: '32px' }}
-					flexDir={'column'}
-					gap={DEFAULT_PADDING}
-					p={DEFAULT_PADDING}
-					rounded={'16px'}
-					border={'1px'}
-					borderColor={'brand_dark'}
-					_light={{ borderColor: '#1117171A' }}
-				>
-					<Flex alignItems={'center'} p={DEFAULT_PADDING}>
-						<Text
-							fontWeight={'300'}
-							fontSize={{ base: 'base', md: 'lg' }}
-							_dark={{ color: 'white' }}
-							textColor={'#11171799'}
-						>
-							Choose Inspection Mode
-						</Text>
-					</Flex>
-					<Flex
-						rounded={DEFAULT_PADDING}
-						p={{ base: DEFAULT_PADDING, md: '30px' }}
-						bgColor={'#FFA5001A'}
-						flexDir={'column'}
-						gap={'32px'}
-						mb={'16px'}
-					>
-						<Flex
-							gap={'8px'}
-							alignSelf={'start'}
-							alignItems={'center'}
-							justifyContent={'center'}
-						>
-							<CiCircleInfo fill="#FFA500" size={'24px'} />
-							<Text
-								fontWeight={'400'}
-								fontSize={{ base: 'base', md: 'xl' }}
-								textColor={'#111717CC'}
-								_dark={{ color: 'text_muted' }}
-							>
-								Virtual/physical Inspection is Available
-							</Text>
-						</Flex>
-						<Button
-							rounded={DEFAULT_PADDING}
-							paddingX={{ base: '45px', sm: '100px', md: '150px' }}
-							h={{ base: '48px', md: '60px' }}
-							paddingY={'16px'}
-							bgColor={'#FFA500'}
-							textColor={'white'}
-							fontWeight={'20px'}
-							marginX={'auto'}
-							onClick={openModal}
-							fontSize={{ base: 'sm', md: 'base' }}
-						>
-							Book Inspection
-						</Button>
-					</Flex>
-				</Flex> */}
 				<Flex
 					my={'16px'}
 					_light={{
@@ -949,7 +888,7 @@ export default function ApartmentSummary({
 					>
 						<Flex alignItems={'center'} gap={'16px'} justifyContent={'start'}>
 							<Avatar
-								src={request._user_ref.avatar_url}
+								src={request.user.avatar_url}
 								w={{
 									md: '100px',
 									base: '60px',
@@ -978,7 +917,7 @@ export default function ApartmentSummary({
 									_light={{ color: '#111717CC' }}
 									textTransform={'capitalize'}
 								>
-									{request._user_ref.last_name} {request._user_ref.first_name}
+									{request.user.last_name} {request.user.first_name}
 								</Text>
 								<Text
 									fontWeight={'300'}
@@ -1940,9 +1879,9 @@ const AvailabilityStatusCard = ({
 	updatedAt,
 	updateReservation,
 }: {
-	status: 'available' | 'unavailable' | 'reserved' | null
-	updatedAt: { seconds: number; nanoseconds: number }
-	updateReservation: any
+	status: 'available' | 'unavailable' | 'reserved'
+	updatedAt: Date
+	updateReservation: Date | undefined
 }) => {
 	if (status === 'available')
 		return (
@@ -1970,12 +1909,7 @@ const AvailabilityStatusCard = ({
 						{status}:{' '}
 					</Text>
 					User confirmed the space is still available{' '}
-					{formatDistanceToNow(
-						new Date(
-							updatedAt.seconds * 1000 + updatedAt.nanoseconds / 1000000,
-						),
-						{ addSuffix: true },
-					)}
+					{formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
 				</Text>
 			</Flex>
 		)
@@ -2005,12 +1939,7 @@ const AvailabilityStatusCard = ({
 						{status}:{' '}
 					</Text>
 					This space is has been confirmed taken by the host{' '}
-					{formatDistanceToNow(
-						new Date(
-							updatedAt.seconds * 1000 + updatedAt.nanoseconds / 1000000,
-						),
-						{ addSuffix: true },
-					)}
+					{formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
 				</Text>
 			</Flex>
 		)
@@ -2040,6 +1969,7 @@ const AvailabilityStatusCard = ({
 						{status}:{' '}
 					</Text>
 					{`This space has been reserved by a community member for an inspection advantage.
+					 
 					Bookmark post or check back in ${getTimeDifferenceInHours(updateReservation)} hours`}
 				</Text>
 			</Flex>
