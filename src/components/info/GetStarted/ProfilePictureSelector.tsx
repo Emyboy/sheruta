@@ -22,7 +22,6 @@ export default function ProfilePictureSelector({
 		authState: { user },
 		setAuthState,
 	} = useAuthContext()
-	console.log(user)
 
 	const axiosInstance = useAuthenticatedAxios()
 

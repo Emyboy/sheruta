@@ -221,9 +221,7 @@ const CreateSeekerForm: React.FC = () => {
 					rent: Number(formData.rent),
 				}
 
-				await Promise.all([
-					axiosInstance.post('/flat-share-requests/seeker', finalFormData),
-				])
+				axiosInstance.post('/flat-share-requests/seeker', finalFormData)
 			}
 		},
 		onSuccess: async () => {

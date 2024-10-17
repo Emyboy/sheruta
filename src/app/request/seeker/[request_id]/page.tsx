@@ -4,7 +4,6 @@ import { Box, Flex } from '@chakra-ui/react'
 import React from 'react'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import SeekerPost from '@/components/seekerDetails/SeekerPost'
 import SuperJSON from 'superjson'
 import MainBackHeader from '@/components/atoms/MainBackHeader'
@@ -42,17 +41,17 @@ export async function getSeekerRequestData(
 	requestId: string,
 ): Promise<string | undefined> {
 	try {
-
-		const { data : {data : requestData} } : {
-			data : {
-				data : SeekerRequestData | undefined
+		const {
+			data: { data: requestData },
+		}: {
+			data: {
+				data: SeekerRequestData | undefined
 			}
 		} = await axiosInstance.get(`/flat-share-requests/${requestId}`)
 
-
-		return (requestData &&
-			Object.keys(requestData).length > 0 ) ? SuperJSON.stringify(requestData): undefined
-
+		return requestData && Object.keys(requestData).length > 0
+			? SuperJSON.stringify(requestData)
+			: undefined
 	} catch (error: any) {
 		console.error('Error fetching request data:', error)
 	}

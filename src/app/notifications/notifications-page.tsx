@@ -20,6 +20,7 @@ const ButtonText: Record<NotificationsType['type'], string> = {
 	profile_view: 'View',
 	bookmark: 'Message',
 	reservation: 'Message',
+	background_check : ''
 }
 
 export default function NotificationsPage({}: Props) {

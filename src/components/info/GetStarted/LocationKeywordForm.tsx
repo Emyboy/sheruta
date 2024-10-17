@@ -1,8 +1,6 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
-import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
-import { StateData } from '@/firebase/service/options/states/states.types'
 import useAuthenticatedAxios from '@/hooks/useAxios'
 import { Button, Flex, Select, Text, VStack } from '@chakra-ui/react'
 import { useMutation } from '@tanstack/react-query'
@@ -16,6 +14,8 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 		authState: { user, flat_share_profile },
 		setAuthState,
 	} = useAuthContext()
+
+	console.log(options)
 
 	const axiosInstance = useAuthenticatedAxios()
 

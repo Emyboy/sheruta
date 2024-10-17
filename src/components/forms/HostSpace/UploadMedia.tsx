@@ -4,7 +4,9 @@ import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
 import {
 	createHostRequestDTO,
+	createHostSpaceRequestDTO,
 	HostRequestData,
+	HostSpaceFormData,
 } from '@/firebase/service/request/request.types'
 import {
 	Box,
@@ -30,23 +32,27 @@ import { revalidatePathOnClient } from '@/utils/actions'
 import { convertRefToData } from '@/utils/index.utils'
 import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 import useAnalytics from '@/hooks/useAnalytics'
+import useAuthenticatedAxios from '@/hooks/useAxios'
 
 export default function UploadMedia({
 	formData,
 	setFormData,
 }: HostSpaceFormProps) {
-	const toast = useToast()
-	const {
-		authState: { flat_share_profile },
-	} = useAuthContext()
 	const router = useRouter()
+
+	const {
+		authState: { user },
+	} = useAuthContext()
+
+	const toast = useToast()
+
+	const { addAnalyticsData } = useAnalytics()
+	const axiosInstance = useAuthenticatedAxios()
 
 	const [loading, setLoading] = useState(false)
 	const [length, setLength] = useState(4)
 
 	const [mediaRefPaths, setMediaRefPaths] = useState<string[]>([])
-
-	const { addAnalyticsData } = useAnalytics()
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -121,7 +127,7 @@ export default function UploadMedia({
 				status: 'error',
 			})
 
-		if (!flat_share_profile)
+		if (!user)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -130,7 +136,7 @@ export default function UploadMedia({
 		setLoading(true)
 
 		try {
-			const userId = flat_share_profile._user_id
+			const userId = user._id
 			const imageUploadPromises = formData.images_urls.map((url, i) =>
 				SherutaDB.uploadMedia({
 					data: url,
@@ -166,54 +172,31 @@ export default function UploadMedia({
 
 			const images_urls = mediaUrls.filter((url) => url !== null)
 
-			const {
-				category,
-				service,
-				state,
-				area,
-				property,
-				pre_amenities,
-				...cleanedFormData
-			} = formData
-
-			let data: HostRequestData = {
-				...cleanedFormData,
-				imagesRefPaths: newMediaRefPaths,
-				videoRefPath,
-				seeking: false,
+			const data: HostSpaceFormData = {
+				...formData,
+				// imagesRefPaths: newMediaRefPaths,
+				// videoRefPath,
 				video_url,
 				images_urls,
-				uuid,
-				createdAt: Timestamp.now(),
-				updatedAt: Timestamp.now(),
-				_user_ref: flat_share_profile._user_ref,
-				_user_info_ref: flat_share_profile._user_info_ref,
 			}
 
-			createHostRequestDTO.parse(data)
+			createHostSpaceRequestDTO.parse(data)
+			console.log('parsed data: ', data)
 
-			await SherutaDB.create({
-				collection_name: 'requests',
-				data,
-				document_id: uuid,
-			})
+			const res = await axiosInstance.post('/flat-share-requests/host')
+			console.log('result: ', res)
 
 			revalidatePathOnClient()
 
 			localStorage.removeItem('host_space_form')
 			toast({ status: 'success', title: 'You have successfully added a space' })
 
-			if (data._location_keyword_ref) {
-				const locationKeywordData = (await convertRefToData(
-					data._location_keyword_ref,
-				)) as LocationKeywordData
-				//add analytics
-				await addAnalyticsData('posts', locationKeywordData.id as string)
-			}
-
-			router.push(`/request/host/${uuid}`)
+			// router.push(`/request/host/${uuid}`)
 		} catch (e) {
-			await Promise.all(mediaRefPaths.map((url) => SherutaDB.deleteMedia(url)))
+			await Promise.all(
+				mediaRefPaths.map((path) => SherutaDB.deleteMedia(path)),
+			)
+
 			if (e instanceof ZodError) {
 				e.errors.forEach((error: any) => {
 					console.log(
@@ -221,7 +204,7 @@ export default function UploadMedia({
 					)
 				})
 			} else {
-				console.log('Unknown error', e)
+				console.error('Unknown error', e)
 			}
 			toast({ title: 'Error creating your details', status: 'error' })
 		}
