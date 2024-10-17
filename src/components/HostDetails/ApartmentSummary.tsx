@@ -543,7 +543,7 @@ export default function ApartmentSummary({
 			>
 				<Text color="text_muted" fontSize={'sm'}>
 					Posted{' '}
-					{formatDistanceToNow(new Date(request.updatedAt), {
+					{formatDistanceToNow(new Date(request.createdAt), {
 						addSuffix: true,
 					})}
 				</Text>

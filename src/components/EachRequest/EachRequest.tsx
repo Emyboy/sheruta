@@ -330,7 +330,7 @@ export default function EachRequest({ request }: Props) {
 							{request.availability_status === 'reserved'
 								? `Checkback in
 									${getTimeDifferenceInHours(request.reservation_expiry)} hours`
-								: timeAgo(request.updatedAt)}
+								: timeAgo(request.createdAt)}
 						</Text>
 					</Flex>
 				</Flex>
