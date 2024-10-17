@@ -89,7 +89,7 @@ export function formatPrice(digit: number): string {
 	return formatter.format(digit)
 }
 
-export function timeAgo(updatedAt: string): string {
+export function timeAgo(updatedAt: Date): string {
 	if (!updatedAt) return 'unknown'
 
 	const updatedDate = new Date(updatedAt)

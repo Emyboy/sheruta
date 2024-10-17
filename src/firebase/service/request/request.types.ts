@@ -222,6 +222,7 @@ export interface FlatShareRequest {
 	google_location_object: any
 	google_location_text: string
 	updatedAt: Date
+	createdAt: Date
 	reserved_by: string | undefined
 	reservation_expiry: Date | undefined
 	background_checks: any | undefined
