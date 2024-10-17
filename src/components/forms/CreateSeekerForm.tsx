@@ -32,7 +32,7 @@ import useAuthenticatedAxios from '@/hooks/useAxios'
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-const RentLimits: Record<PaymentType, number> = {
+const rentLimits: Record<PaymentType, number> = {
 	daily: 10000,
 	monthly: 25000,
 	quarterly: 80000,
@@ -73,9 +73,9 @@ const initialFormState: SeekerRequestData = {
 	rent: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
-	location: "",
-	state: "",
-	service: "",
+	location: '',
+	state: '',
+	service: '',
 	payment_type: PaymentType.daily,
 }
 
@@ -89,7 +89,7 @@ const CreateSeekerForm: React.FC = () => {
 	})
 
 	const {
-		authState: { flat_share_profile, user, user_info },
+		authState: { flat_share_profile, user },
 	} = useAuthContext()
 
 	const {
@@ -170,7 +170,7 @@ const CreateSeekerForm: React.FC = () => {
 		const { id, name, value } = e.target
 
 		const updateRentInvalidState = (paymentType: string, rentValue: number) => {
-			const rentLimit = RentLimits[paymentType as PaymentType]
+			const rentLimit = rentLimits[paymentType as PaymentType]
 			setIsRentInvalid(rentValue < rentLimit)
 		}
 
@@ -221,7 +221,9 @@ const CreateSeekerForm: React.FC = () => {
 					rent: Number(formData.rent),
 				}
 
-				axiosInstance.post('/flat-share-requests/seeker', finalFormData)
+				createSeekerRequestDTO.parse(finalFormData)
+
+				await axiosInstance.post('/flat-share-requests/seeker', finalFormData)
 			}
 		},
 		onSuccess: async () => {
@@ -251,7 +253,12 @@ const CreateSeekerForm: React.FC = () => {
 	})
 
 	return (
-		<form onSubmit={(e: FormEvent) => e.preventDefault()}>
+		<form
+			onSubmit={(e: FormEvent) => {
+				e.preventDefault()
+				postRequest()
+			}}
+		>
 			<Flex mb={4} gap={4}>
 				<FormControl
 					isRequired
@@ -266,12 +273,12 @@ const CreateSeekerForm: React.FC = () => {
 						id="rent"
 						name="rent"
 						onChange={handleChange}
-						placeholder={`Minimum ₦${RentLimits[formData?.payment_type || 'daily'].toLocaleString()}`}
+						placeholder={`Minimum ₦${rentLimits[formData?.payment_type || 'daily'].toLocaleString()}`}
 						defaultValue={!formData?.rent ? '' : formData.rent}
 					/>
 					<FormErrorMessage>
 						Please enter an amount that meets the minimum required value of ₦
-						{RentLimits[formData?.payment_type || 'weekly'].toLocaleString()}.
+						{rentLimits[formData?.payment_type || 'daily'].toLocaleString()}.
 					</FormErrorMessage>
 				</FormControl>
 
@@ -410,7 +417,6 @@ const CreateSeekerForm: React.FC = () => {
 				colorScheme="teal"
 				size="lg"
 				width="full"
-				onClick={() => postRequest()}
 			>
 				Submit Request
 			</Button>

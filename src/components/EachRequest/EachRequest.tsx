@@ -4,10 +4,7 @@ import CloseIcon from '@/assets/svg/close-icon-dark'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
-import {
-	FlatShareRequest,
-	HostRequestDataDetails,
-} from '@/firebase/service/request/request.types'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
@@ -330,7 +327,7 @@ export default function EachRequest({ request }: Props) {
 							{request.availability_status === 'reserved'
 								? `Checkback in
 									${getTimeDifferenceInHours(request.reservation_expiry)} hours`
-								: timeAgo(request.createdAt)}
+								: timeAgo(request.updatedAt)}
 						</Text>
 					</Flex>
 				</Flex>
@@ -566,7 +563,7 @@ export default function EachRequest({ request }: Props) {
 							textTransform={'capitalize'}
 							fontSize={{ base: 'sm', md: 'base' }}
 						>
-							{/* /{request.payment_type} */}
+							/{request.payment_type}
 						</Text>
 					</Flex>
 				</Flex>
