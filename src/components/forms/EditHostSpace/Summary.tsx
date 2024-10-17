@@ -4,7 +4,9 @@ import { useOptionsContext } from '@/context/options.context'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
 	createHostRequestDTO,
+	createHostSpaceRequestDTO,
 	HostRequestData,
+	HostSpaceFormData,
 } from '@/firebase/service/request/request.types'
 import {
 	Box,
@@ -29,6 +31,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { HostSpaceFormProps } from '.'
 import { useAuthContext } from '@/context/auth.context'
+import { revalidatePathOnClient } from '@/utils/actions'
+import useAuthenticatedAxios from '@/hooks/useAxios'
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
 	process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
@@ -52,6 +56,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
+	const axiosInstance = useAuthenticatedAxios()
+
 	const { isLoaded } = useJsApiLoader({
 		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
 		libraries,
@@ -59,12 +65,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 
 	const [loading, setLoading] = useState(false)
 
-	const [houseRules, setHouseRules] = useState<string[]>(
-		formData.house_rules ? formData.house_rules : [''],
-	)
-
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
-		options.location_keywords,
+		options.locations,
 	)
 
 	const [autocomplete, setAutocomplete] =
@@ -103,13 +105,23 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 		}
 	}, [autocomplete, formData.google_location_text])
 
-	const addHouseRule = () => setHouseRules((prev) => [...prev, ''])
+	const addHouseRule = () =>
+		setFormData((prev) => ({
+			...prev,
+			house_rules: [...formData.house_rules, ''],
+		}))
 
 	const removeHouseRule = (i: number) => {
-		const updatedRules = houseRules.filter((_, idx) => idx !== i)
+		const updatedRules = formData.house_rules.filter((_, idx) => idx !== i)
 
-		setHouseRules(updatedRules)
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
+		localStorage.setItem(
+			'host_space_form',
+			JSON.stringify({
+				...formData,
+				house_rules: updatedRules,
+			}),
+		)
 	}
 
 	const handleHouseRuleChange = (
@@ -118,11 +130,17 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	) => {
 		const { value } = e.target
 
-		const updatedRules = [...houseRules]
+		const updatedRules = [...formData.house_rules]
 		updatedRules[idx] = value
-		setHouseRules(updatedRules)
 
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
+		localStorage.setItem(
+			'host_space_form',
+			JSON.stringify({
+				...formData,
+				house_rules: updatedRules,
+			}),
+		)
 	}
 
 	const handleChange = (
@@ -131,7 +149,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 		>,
 	) => {
 		if (
-			e.target.name === 'budget' ||
+			e.target.name === 'rent' ||
 			e.target.name === 'service_charge' ||
 			e.target.name === 'bathrooms' ||
 			e.target.name === 'toilets' ||
@@ -154,67 +172,28 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 
 		setLoading(true)
 
-		const selectedCategory = options.categories.find(
-			(category) => category.id === formData.category,
-		)
-		const selectedService = options.services.find(
-			(service) => service.id === formData.service,
-		)
-		const selectedLocation = filteredLocationOptions.find(
-			(location) => location.id === formData.area,
-		)
-		const selectedState = options.states.find(
-			(state) => state.id === formData.state,
-		)
-		const selectedProperty = options.property_types.find(
-			(property) => property.id === formData.property,
-		)
-
-		const amenities = formData.pre_amenities.map(
-			(amenity) =>
-				options.amenities.find((item) => item.title === amenity.title)._ref,
-		)
+		const { _id, availability_status, ...cleanedFormData } = formData
+		console.log('data to be updated: ', cleanedFormData)
 
 		try {
-			const {
-				category,
-				service,
-				state,
-				area,
-				property,
-				pre_amenities,
-				...cleanedFormData
-			} = formData
+			const res = await axiosInstance.put(
+				'/flat-share-requests/host',
+				cleanedFormData,
+			)
 
-			const data: HostRequestData = {
-				...cleanedFormData,
-				_location_keyword_ref: selectedLocation._ref,
-				_state_ref: selectedState._ref,
-				_service_ref: selectedService._ref,
-				_category_ref: selectedCategory._ref,
-				_property_type_ref: selectedProperty._ref,
-				_user_ref: flat_share_profile?._user_ref,
-				seeking: false,
-				amenities,
-				updatedAt: Timestamp.now(),
-			}
+			console.log(res)
 
-			console.log('data before parse', data)
+			revalidatePathOnClient(`/request/host/${_id}`)
 
-			createHostRequestDTO.parse(data)
-
-			await SherutaDB.update({
-				collection_name: DBCollectionName.flatShareRequests,
-				data,
-				document_id: formData.uuid,
-			})
+			localStorage.removeItem('host_space_form')
+			toast({ status: 'success', title: 'You have successfully added a space' })
 
 			toast({
 				status: 'success',
 				title: 'You have successfully updated your space',
 			})
 
-			router.push(`/request/host/${data.uuid}`)
+			router.push(`/request/host/${_id}`)
 		} catch (e) {
 			console.log('Unknown error', e)
 			toast({ title: 'Error updating your details', status: 'error' })
@@ -226,8 +205,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 	useEffect(() => {
 		if (formData.state)
 			setFilteredLocationOptions(
-				options.location_keywords.filter(
-					(location) => location._state_id === formData.state,
+				options.locations.filter(
+					(location) => location.state === formData.state,
 				),
 			)
 	}, [formData.state])
@@ -285,8 +264,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 								required
 								type="text"
 								min={1}
-								value={String(formData.budget)}
-								name="budget"
+								value={String(formData.rent)}
+								name="rent"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Price"
@@ -346,7 +325,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 								<option style={{ color: 'black' }} value="annually">
 									Annually
 								</option>
-								<option style={{ color: 'black' }} value="bi-annually">
+								<option style={{ color: 'black' }} value="biannually">
 									Bi-Annually
 								</option>
 							</Select>
@@ -410,11 +389,11 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 							>
 								{options.categories.map((category) => (
 									<option
-										key={category.id}
+										key={category._id}
 										style={{ color: 'black' }}
-										value={category.id}
+										value={category._id}
 									>
-										{category.title}
+										{category.name}
 									</option>
 								))}
 							</Select>
@@ -514,11 +493,11 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 							>
 								{options.services.map((service) => (
 									<option
-										key={service.id}
+										key={service._id}
 										style={{ color: 'black', textTransform: 'capitalize' }}
-										value={service.id}
+										value={service._id}
 									>
-										{service.title}
+										{service.name}
 									</option>
 								))}
 							</Select>
@@ -538,8 +517,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 								_light={{ color: 'dark' }}
 								onChange={handleChange}
 								required
-								value={formData.property}
-								name="property"
+								value={formData.property_type}
+								name="property_type"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Property Type"
@@ -548,11 +527,11 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 							>
 								{options.property_types.map((property) => (
 									<option
-										key={property.id}
+										key={property._id}
 										style={{ color: 'black', textTransform: 'capitalize' }}
-										value={property.id}
+										value={property._id}
 									>
-										{property.title}
+										{property.name}
 									</option>
 								))}
 							</Select>
@@ -570,40 +549,46 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 							</Text>
 
 							<SimpleGrid columns={[1, 2, 3]} spacingY="8px">
-								{options.amenities.map((amenity) => {
-									return (
-										<Checkbox
-											type="checkbox"
-											colorScheme="green"
-											textTransform={'capitalize'}
-											color={'border_color'}
-											_light={{ color: 'dark' }}
-											value={amenity.title}
-											key={amenity.id}
-											textColor={'white'}
-											isChecked={formData.pre_amenities.some(
-												(item) => item.id === amenity.id,
-											)}
-											onChange={(e) => {
-												const { checked, value } = e.target
-												if (checked) {
-													const pre_amenities = [
-														...formData.pre_amenities,
-														{ id: amenity.title.toLowerCase(), title: value },
-													]
-													setFormData((prev) => ({ ...prev, pre_amenities }))
-												} else {
-													const pre_amenities = formData.pre_amenities.filter(
-														(amenity) => amenity.title !== value,
-													)
-													setFormData((prev) => ({ ...prev, pre_amenities }))
-												}
-											}}
-										>
-											{amenity.title}
-										</Checkbox>
-									)
-								})}
+								{options.amenities.map((amenity) => (
+									<Checkbox
+										key={amenity._id}
+										textTransform={'capitalize'}
+										color={'border_color'}
+										colorScheme="green"
+										_light={{ color: 'dark' }}
+										value={amenity._id}
+										textColor={'white'}
+										isChecked={formData.amenities.includes(amenity._id)}
+										onChange={(e) => {
+											const { checked, value } = e.target
+											if (checked) {
+												const amenities = [...formData.amenities, value]
+												setFormData((prev) => ({ ...prev, amenities }))
+												localStorage.setItem(
+													'host_space_form',
+													JSON.stringify({
+														...formData,
+														amenities,
+													}),
+												)
+											} else {
+												const amenities = formData.amenities.filter(
+													(amenity) => amenity !== value,
+												)
+												setFormData((prev) => ({ ...prev, amenities }))
+												localStorage.setItem(
+													'host_space_form',
+													JSON.stringify({
+														...formData,
+														amenities,
+													}),
+												)
+											}
+										}}
+									>
+										{amenity.name}
+									</Checkbox>
+								))}
 							</SimpleGrid>
 						</Flex>
 					</Flex>
@@ -628,39 +613,45 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 								/>
 							</Box>
 						</Flex>
-						{houseRules.map((_, i) => (
-							<Box key={i} pos={'relative'}>
-								<Input
-									onChange={(e) => handleHouseRuleChange(e, i)}
-									minLength={5}
-									value={houseRules[i]}
-									_placeholder={{ color: 'text_muted' }}
-									borderColor={'border_color'}
-									_dark={{ borderColor: 'dark_light' }}
-									placeholder="Enter your rule"
-								/>
-								{houseRules.length > 1 && (
-									<Box
-										cursor={'pointer'}
-										pos={'absolute'}
-										top={'-8px'}
-										right={'-8px'}
-										_dark={{
-											bgColor: 'dark',
-										}}
-										bgColor="white"
-										rounded={'full'}
-									>
-										<BiMinusCircle
-											onClick={() => removeHouseRule(i)}
-											size={'20px'}
-											fill="#00bc73"
-											title="remove house rule"
-										/>
-									</Box>
-								)}
-							</Box>
-						))}
+						{(formData.house_rules.length ? formData.house_rules : ['']).map(
+							(_, i) => (
+								<Box key={i} pos={'relative'}>
+									<Input
+										onChange={(e) => handleHouseRuleChange(e, i)}
+										minLength={5}
+										value={
+											(formData.house_rules.length
+												? formData.house_rules
+												: [''])[i]
+										}
+										_placeholder={{ color: 'text_muted' }}
+										borderColor={'border_color'}
+										_dark={{ borderColor: 'dark_light' }}
+										placeholder="Enter your rule"
+									/>
+									{formData.house_rules.length > 1 && (
+										<Box
+											cursor={'pointer'}
+											pos={'absolute'}
+											top={'-8px'}
+											right={'-8px'}
+											_dark={{
+												bgColor: 'dark',
+											}}
+											bgColor="white"
+											rounded={'full'}
+										>
+											<BiMinusCircle
+												onClick={() => removeHouseRule(i)}
+												size={'20px'}
+												fill="#00bc73"
+												title="remove house rule"
+											/>
+										</Box>
+									)}
+								</Box>
+							),
+						)}
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -689,8 +680,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 								{options.states.map((state) => (
 									<option
 										style={{ color: 'black', textTransform: 'capitalize' }}
-										value={state.id}
-										key={state.id}
+										value={state._id}
+										key={state._id}
 									>
 										{state.name}
 									</option>
@@ -712,8 +703,8 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 								_light={{ color: 'dark' }}
 								onChange={handleChange}
 								required
-								value={formData.area}
-								name="area"
+								value={formData.location}
+								name="location"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Area"
@@ -721,20 +712,20 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 								color={'border_color'}
 							>
 								{formData.state &&
-									filteredLocationOptions.map((area) => (
+									filteredLocationOptions.map((location) => (
 										<option
 											style={{ color: 'black', textTransform: 'capitalize' }}
-											value={area.id}
-											key={area.id}
+											value={location._id}
+											key={location._id}
 										>
-											{area.name}
+											{location.name}
 										</option>
 									))}
 							</Select>
 						</Flex>
 					</Flex>
 
-					{formData.area &&
+					{formData.location &&
 						(!isLoaded ? (
 							<Text width={'full'} textAlign={'center'}>
 								Loading google maps
@@ -742,7 +733,13 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 						) : (
 							<FormControl mt={1}>
 								<FormLabel htmlFor="address">
-									Choose a more descriptive location in {formData.area}?
+									Where in{' '}
+									{
+										filteredLocationOptions.find(
+											(location) => location._id === formData.location,
+										)?.name
+									}
+									?
 								</FormLabel>
 								<Autocomplete
 									onLoad={handleLoad}

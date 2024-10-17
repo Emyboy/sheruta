@@ -1,13 +1,17 @@
 'use client'
 
 import ApartmentSummary from '@/components/HostDetails/ApartmentSummary'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import {
+	FlatShareRequest,
+	HostRequestDataDetails,
+} from '@/firebase/service/request/request.types'
 import { Flex, Text } from '@chakra-ui/react'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import DiscussionComponent from './DiscussionComponent'
 import VerificationComponent from './VerificationComponent'
 import { NINResponseDTO } from '../types'
+import { DiscussionData } from '@/firebase/service/discussions/discussions.types'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -21,18 +25,14 @@ export default function ApartmentDetails({
 	discussions,
 	hostNinData,
 }: {
-	request: string
-	discussions: string | undefined
+	request: FlatShareRequest
+	discussions: DiscussionData[] | undefined
 	hostNinData: NINResponseDTO | undefined
 }) {
 	const params = useSearchParams()
 	const [activeTab, setActiveTab] = useState(
 		params.get('tab')?.toString() || 'Apartment Summary',
 	)
-
-	const parsedRequest: HostRequestDataDetails = JSON.parse(request)
-
-	const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
 
 	return (
 		<>
@@ -93,22 +93,26 @@ export default function ApartmentDetails({
 			</Flex>
 
 			{activeTab === 'Apartment Summary' && (
-				<ApartmentSummary request={parsedRequest} />
+				<ApartmentSummary request={request} />
 			)}
-			{activeTab === 'Discussion' && (
-				<DiscussionComponent
-					requestId={parsedRequest.id}
-					discussions={parsedDiscussions}
-					hostId={parsedRequest._user_ref._id}
-				/>
-			)}
+			{activeTab === 'Discussion' && <Text p={4}>Discussions coming soon</Text>}
 			{activeTab === 'Verification' && (
-				<VerificationComponent
-					request={parsedRequest}
-					hostNinData={hostNinData}
-				/>
+				<Text p={4}>Verification coming soon</Text>
 			)}
-			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
+
+			{/* {activeTab === 'Discussion' && (
+				<DiscussionComponent
+					requestId={request._id}
+					discussions={discussions || []}
+					hostId={request.user._id}
+				/>
+			)} */}
+			{/* {activeTab === 'Verification' && (
+				<VerificationComponent request={request} hostNinData={hostNinData} />
+			)} */}
+			{activeTab === 'Pay Details' && (
+				<Text p={4}>Pay Details coming soon</Text>
+			)}
 		</>
 	)
 }

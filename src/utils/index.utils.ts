@@ -89,7 +89,7 @@ export function formatPrice(digit: number): string {
 	return formatter.format(digit)
 }
 
-export function timeAgo(updatedAt: string): string {
+export function timeAgo(updatedAt: Date): string {
 	if (!updatedAt) return 'unknown'
 
 	const updatedDate = new Date(updatedAt)
@@ -187,12 +187,10 @@ export const handleDM = (userId: string | null) => {
 	window.location.href = `/messages/${userId}`
 }
 
-export function getTimeDifferenceInHours(timestamp?: Timestamp) {
-	if (!timestamp) return 48
+export function getTimeDifferenceInHours(date?: Date) {
+	if (!date) return 48
 
-	const { nanoseconds, seconds } = timestamp
-
-	const expiryInMilliseconds = seconds * 1000 + nanoseconds / 1e6
+	const expiryInMilliseconds = date.getTime()
 
 	const nowInMilliseconds = new Date().getTime()
 

@@ -5,11 +5,11 @@ import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import {
 	AvailabilityStatus,
-	HostRequestDataDetails,
+	FlatShareRequest,
+	HostSpaceFormData,
 	PaymentType,
 } from '@/firebase/service/request/request.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
-import { DocumentReference, Timestamp } from '@firebase/firestore'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { FaAngleLeft } from 'react-icons/fa'
@@ -18,97 +18,67 @@ import Summary from './Summary'
 
 export type HostSpaceFormProps = {
 	next: () => void
-	formData: FormDataType
-	setFormData: React.Dispatch<React.SetStateAction<FormDataType>>
+	formData: HostSpaceFormData & {
+		availability_status: AvailabilityStatus
+		_id: string
+	}
+	setFormData: React.Dispatch<
+		React.SetStateAction<
+			HostSpaceFormData & {
+				availability_status: AvailabilityStatus
+				_id: string
+			}
+		>
+	>
 }
 
-export type FormDataType = {
-	uuid: string
-	description: string
-	service_charge: number | null
-	budget: number
-	payment_type: PaymentType
-	bathrooms: number | null
-	toilets: number | null
-	living_rooms: number | null
-	pre_amenities: { id: string; title: string }[]
-	amenities: DocumentReference[]
-	house_rules: string[] | null
-	availability_status: AvailabilityStatus | null
-	_property_type_ref: undefined | DocumentReference
-	_location_keyword_ref: undefined | DocumentReference
-	_state_ref: undefined | DocumentReference
-	_service_ref: undefined | DocumentReference
-	_category_ref: undefined | DocumentReference
-	_user_ref: undefined | DocumentReference
-	images_urls: string[]
-	imagesRefPaths: string[]
-	video_url: string | null
-	videoRefPath: string | null
-	google_location_object: Record<string, any>
-	google_location_text: string
-	createdAt: Timestamp | { seconds: number; nanoseconds: number }
-	// flat_share_profile: userSchema
-	state?: string
-	area?: string
-	service?: string
-	category?: string
-	property?: string
-}
-
-export default function EditHostSpace({ data }: { data: string }) {
+export default function EditHostSpace({
+	request,
+}: {
+	request: FlatShareRequest
+}) {
 	const router = useRouter()
-	const request: HostRequestDataDetails = JSON.parse(data)
+
 	const { optionsState: options } = useOptionsContext()
 	const { appState } = useAppContext()
 	const {
 		authState: { user },
 	} = useAuthContext()
 
-	const [hostSpaceData, setHostSpaceData] = useState<FormDataType>({
-		uuid: request.uuid || '',
+	const [hostSpaceData, setHostSpaceData] = useState<
+		HostSpaceFormData & { availability_status: AvailabilityStatus; _id: string }
+	>({
+		_id: request._id,
 		description: request.description || '',
 		service_charge: request.service_charge || 0,
-		budget: request.budget || 0,
-		payment_type: (request.payment_type as PaymentType) || PaymentType.monthly,
+		rent: request.rent || 0,
+		// @ts-ignore
+		payment_type: request.payment_type || PaymentType.monthly,
 		bathrooms: request.bathrooms || 0,
 		toilets: request.toilets || 0,
 		living_rooms: request.living_rooms || 0,
-		pre_amenities: request.amenities || [],
-		amenities: [],
+		amenities: request.amenities.map((amenity) => amenity._id) || [],
 		house_rules: request.house_rules || null,
-		images_urls: request.images_urls || [],
-		imagesRefPaths: request.imagesRefPaths || [],
-		video_url: request.video_url || null,
-		videoRefPath: request.videoRefPath || null,
-		availability_status: request.availability_status || 'available',
-		_location_keyword_ref: undefined,
-		_state_ref: undefined,
-		_service_ref: undefined,
-		_category_ref: undefined,
-		_property_type_ref: undefined,
-		_user_ref: undefined,
+		image_urls: request.image_urls || [],
+		// imagesRefPaths: request.imagesRefPaths || [],
+		video_url: request.video_url,
+		// videoRefPath: request.videoRefPath || null,
+		availability_status: request.availability_status,
 		google_location_object: request.google_location_object || {},
 		google_location_text: request.google_location_text || '',
-		createdAt: request.createdAt,
-
-		state: '',
-		area: '',
-		service: '',
-		category: '',
-		property: '',
+		state: request.state._id,
+		location: request.location._id,
+		service: request.service._id,
+		category: request.category._id,
+		property_type: request.property_type._id,
 	})
 
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
 
-	const next = () => {
-		setStep((prev) => prev + 1)
-	}
+	const next = () => setStep((prev) => prev + 1)
 
-	const back = () => {
-		setStep((prev) => prev - 1)
-	}
+	const back = () => setStep((prev) => prev - 1)
 
 	const allSteps = (): Array<React.ReactNode> => [
 		<Summary
@@ -135,58 +105,8 @@ export default function EditHostSpace({ data }: { data: string }) {
 	}, [step])
 
 	useEffect(() => {
-		if (user?._id !== request._user_ref._id) return router.back()
 		if (appState.app_loading) return
-
-		const selectedCategory = options.categories.find(
-			(category) => category.id === request._category_ref.slug,
-		)
-		if (selectedCategory) {
-			setHostSpaceData((prev) => ({
-				...prev,
-				category: selectedCategory.id,
-			}))
-		}
-
-		const selectedService = options.services.find(
-			(service) => service.id === request._service_ref.slug,
-		)
-		if (selectedService) {
-			setHostSpaceData((prev) => ({
-				...prev,
-				service: selectedService.id,
-			}))
-		}
-
-		const selectedProperty = options.property_types.find(
-			(property) => property.id === request._property_type_ref.slug,
-		)
-		if (selectedProperty) {
-			setHostSpaceData((prev) => ({
-				...prev,
-				property: selectedProperty.id,
-			}))
-		}
-
-		const selectedState = options.states.find(
-			(state) => state.slug === request._state_ref.slug,
-		)
-		if (selectedState) {
-			setHostSpaceData((prev) => ({
-				...prev,
-				state: selectedState.id,
-			}))
-		}
-
-		const selectedLocation = options.location_keywords.find(
-			(location) => location.id === request._location_keyword_ref.slug,
-		)
-		if (selectedLocation) {
-			setHostSpaceData((prev) => ({
-				...prev,
-				area: selectedLocation.id,
-			}))
-		}
+		if (user?._id !== request.user._id) return router.back()
 	}, [appState.app_loading])
 
 	return (

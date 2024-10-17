@@ -4,7 +4,9 @@ import CloseIcon from '@/assets/svg/close-icon-dark'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
-import { HostRequestDataDetails, SeekerRequestDataDetails } from '@/firebase/service/request/request.types'
+import {
+	FlatShareRequest,
+} from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
@@ -52,7 +54,7 @@ import MainTooltip from '../atoms/MainTooltip'
 import useAnalytics from '@/hooks/useAnalytics'
 import { AnalyticsDataDetails } from '@/firebase/service/analytics/analytics.types'
 
-type Props = { request: HostRequestDataDetails & SeekerRequestDataDetails }
+type Props = { request: FlatShareRequest }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()

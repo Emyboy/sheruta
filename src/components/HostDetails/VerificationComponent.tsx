@@ -5,7 +5,10 @@ import { useAuthContext } from '@/context/auth.context'
 import { useNotificationContext } from '@/context/notifications.context'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import {
+	FlatShareRequest,
+	HostRequestDataDetails,
+} from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import { createNotification } from '@/utils/actions'
 import {
@@ -356,7 +359,7 @@ export default function VerificationComponent({
 	request,
 	hostNinData,
 }: {
-	request: HostRequestDataDetails
+	request: FlatShareRequest
 	hostNinData: NINResponseDTO | undefined
 }) {
 	const {
@@ -388,9 +391,9 @@ export default function VerificationComponent({
 	useEffect(() => {
 		const getHost = async () => {
 			const [userInfo, userData, userFlatShare] = await Promise.all([
-				UserInfoService.get(request._user_ref._id),
-				UserService.get(request._user_ref._id),
-				FlatShareProfileService.get(request._user_ref._id),
+				UserInfoService.get(request.user._id),
+				UserService.get(request.user._id),
+				FlatShareProfileService.get(request.user._id),
 			])
 
 			setStateData((await convertRefToData(userFlatShare?.state)) as StateData)
@@ -428,7 +431,8 @@ export default function VerificationComponent({
 				})
 			}
 
-			const backgroundChecks = request?.background_checks || {}
+			// const backgroundChecks = request?.background_checks || {}
+			const backgroundChecks: any = {}
 
 			if (backgroundChecks?.[user._id]) {
 				return showToast({
@@ -452,13 +456,13 @@ export default function VerificationComponent({
 				data: {
 					background_checks: { ...backgroundChecks },
 				},
-				document_id: request.id,
+				document_id: request._id,
 			})
 
 			// await createNotification({
 			// 	is_read: false,
 			// 	message: NotificationsBodyMessage.background_check,
-			// 	recipient_id: request._user_ref._id,
+			// 	recipient_id: request.user._id,
 			// 	type: 'background_check',
 			// 	sender_details: user
 			// 		? {
@@ -468,7 +472,7 @@ export default function VerificationComponent({
 			// 				id: user._id,
 			// 			}
 			// 		: null,
-			// 	action_url: `/user/${request._user_ref._id}`,
+			// 	action_url: `/user/${request.user._id}`,
 			// })
 
 			showToast({
