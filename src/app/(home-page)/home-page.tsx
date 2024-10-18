@@ -11,41 +11,18 @@ import MainRightNav from '@/components/layout/MainRightNav'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import {
-	FlatShareRequest,
-	HostRequestDataDetails,
-	SeekerRequestDataDetails,
-} from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { resolveArrayOfReferences } from '@/utils/index.utils'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
-import {
-	collection,
-	DocumentData,
-	getDocs,
-	limit,
-	orderBy,
-	query,
-	startAfter,
-} from 'firebase/firestore'
+import { DocumentData } from 'firebase/firestore'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import useAuthenticatedAxios from '@/hooks/useAxios'
-import { User } from 'firebase/auth'
-import SuperJSON from 'superjson'
 
 type Props = {
-	requests: string
+	requests: FlatShareRequest[]
 	userProfiles: any
 }
 
 export default function HomePage({ requests, userProfiles }: Props) {
-	const [flatShareRequests, setFlatShareRequests] = useState<any[]>(
-		requests ? SuperJSON.parse(requests) : [],
-	)
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
 	const [lastVisible, setLastVisible] = useState<DocumentData | null>(null) // Store the last document
@@ -82,19 +59,18 @@ export default function HomePage({ requests, userProfiles }: Props) {
 
 	useEffect(() => {
 		const processRequests = async () => {
-			if (flatShareRequests.length > 0) {
-				const updatedRequests = await Promise.all(
-					flatShareRequests.map(async (request: FlatShareRequest) =>
-						request.user_info?.hide_profile ? null : { ...request },
-					),
+			if (requests.length > 0) {
+				const updatedRequests = requests.map((request: FlatShareRequest) =>
+					request.user_info?.hide_profile ? null : { ...request },
 				)
+
 				const filteredRequests = updatedRequests.filter(Boolean)
 				setProcessedRequests(filteredRequests as FlatShareRequest[])
 			}
 		}
 
 		processRequests()
-	}, [flatShareRequests])
+	}, [requests])
 
 	// const loadMore = async () => {
 	// 	setIsLoading(true)
@@ -189,20 +165,18 @@ export default function HomePage({ requests, userProfiles }: Props) {
 						<ProfileSnippet userProfiles={userProfiles} />
 
 						<Flex flexDirection={'column'} gap={0}>
-							{processedRequests.map(
-								(request: FlatShareRequest, index: number) => (
-									<Box
-										key={request._id}
-										ref={index === processedRequests.length - 1 ? setRef : null}
-										style={{ transition: 'opacity 0.3s ease-in-out' }}
-									>
-										{index === 3 && <JoinTheCommunity key={index} />}
-										<Flex px={DEFAULT_PADDING}>
-											<EachRequest request={request} />
-										</Flex>
-									</Box>
-								),
-							)}
+							{processedRequests.map((request, index) => (
+								<Box
+									key={request._id}
+									ref={index === processedRequests.length - 1 ? setRef : null}
+									style={{ transition: 'opacity 0.3s ease-in-out' }}
+								>
+									{index === 3 && <JoinTheCommunity key={index} />}
+									<Flex px={DEFAULT_PADDING}>
+										<EachRequest request={request} />
+									</Flex>
+								</Box>
+							))}
 
 							{isLoading && processedRequests.length > 0 && (
 								<Box textAlign="center" mt="4" width="100%">

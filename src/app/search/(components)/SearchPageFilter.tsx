@@ -71,19 +71,19 @@ export default function SearchPageFilter({}: Props) {
 	const { replace } = useRouter()
 
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
-		options.location_keywords,
+		options.locations,
 	)
 
 	useEffect(() => {
 		if (searchParams.get('state')?.toString()) {
 			setFilteredLocationOptions(
-				options.location_keywords.filter(
+				options.locations.filter(
 					(location) =>
-						location._state_id === searchParams.get('state')?.toString(),
+						location.state === searchParams.get('state')?.toString(),
 				),
 			)
 		} else {
-			setFilteredLocationOptions(options.location_keywords)
+			setFilteredLocationOptions(options.locations)
 		}
 	}, [searchParams.toString(), searchParams.get('state')?.toString()])
 
@@ -184,8 +184,8 @@ export default function SearchPageFilter({}: Props) {
 							{options.states.map((state) => (
 								<option
 									style={{ color: 'black', textTransform: 'capitalize' }}
-									value={state.id}
-									key={state.id}
+									value={state._id}
+									key={state._id}
 								>
 									{state.name}
 								</option>
@@ -227,13 +227,13 @@ export default function SearchPageFilter({}: Props) {
 							>
 								Filter by city
 							</option>
-							{filteredLocationOptions.map((area) => (
+							{filteredLocationOptions.map((location) => (
 								<option
 									style={{ color: 'black', textTransform: 'capitalize' }}
-									value={area.id}
-									key={area.id}
+									value={location._id}
+									key={location._id}
 								>
-									{area.name}
+									{location.name}
 								</option>
 							))}
 						</Select>
@@ -256,7 +256,7 @@ export default function SearchPageFilter({}: Props) {
 					{budgetList.map((budget, i) => (
 						<Checkbox
 							key={i}
-							name="budget"
+							name="rent"
 							textTransform={'capitalize'}
 							_dark={{ color: 'text_muted' }}
 							colorScheme="green"
@@ -287,19 +287,19 @@ export default function SearchPageFilter({}: Props) {
 				<SimpleGrid columns={1} spacingY={{ base: '12px', md: '16px' }}>
 					{options.services.map((service) => (
 						<Checkbox
-							key={service.id}
+							key={service._id}
 							textTransform={'capitalize'}
 							_dark={{ color: 'text_muted' }}
 							colorScheme="green"
 							color={'#11171799'}
 							fontWeight={'300'}
 							fontSize={{ base: 'xs', md: 'sm' }}
-							value={service.id}
+							value={service._id}
 							name="service"
 							onChange={handleCheckBoxOptions}
-							defaultChecked={searchParams.toString().includes(service.id)}
+							defaultChecked={searchParams.toString().includes(service._id)}
 						>
-							{service.title}
+							{service.name}
 						</Checkbox>
 					))}
 				</SimpleGrid>

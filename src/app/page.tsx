@@ -1,6 +1,7 @@
 import { CACHE_TTL } from '@/constants'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
 import {
+	FlatShareRequest,
 	HostRequestDataDetails,
 	SeekerRequestDataDetails,
 } from '@/firebase/service/request/request.types'
@@ -20,30 +21,15 @@ type Props = {
 }
 
 export default async function page({ searchParams }: Props) {
-	// const [requests, userProfiles] = await Promise.all([
-	// 	SherutaDB.getAll({
-	// 		collection_name: DBCollectionName.flatShareRequests,
-	// 		_limit: 30,
-	// 	}),
-	// 	getAllProfileSnippetDocs(searchParams || {}),
-	// ])
-
 	const {
 		data: { data: requests },
 	}: {
 		data: {
-			data: SeekerRequestDataDetails | HostRequestDataDetails | undefined
+			data: FlatShareRequest[]
 		}
-	} = await axiosInstance.get(`/flat-share-requests?page=1&limit=30`)
+	} = await axiosInstance.get(
+		`/flat-share-requests?page=${searchParams?.page || 1}&limit=30`,
+	)
 
-	const finalRequests =
-		requests && Object.keys(requests).length > 0
-			? SuperJSON.stringify(requests)
-			: '[]'
-
-	// const { data } = await axiosInstance.get(`/users/dependencies`)
-	// console.log(data)
-	// todo save the user dependency to the context
-
-	return <HomePage requests={finalRequests} userProfiles={'[]'} />
+	return <HomePage requests={requests} userProfiles={'[]'} />
 }

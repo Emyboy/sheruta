@@ -1,9 +1,9 @@
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
+import { revalidatePathOnClient } from '@/utils/actions'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import useCommon from './useCommon'
 import useAuthenticatedAxios from './useAxios'
+import useCommon from './useCommon'
 
 export default function useShareSpace() {
 	const { showToast } = useCommon()
@@ -65,9 +65,8 @@ export default function useShareSpace() {
 					status: 'success',
 				})
 
-				setTimeout(() => {
-					window.location.reload()
-				}, 1000)
+				revalidatePathOnClient()
+				router.push('/')
 			} else {
 				showToast({
 					message: 'You are not authorized to delete this post',
