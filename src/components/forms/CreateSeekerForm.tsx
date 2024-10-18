@@ -73,9 +73,9 @@ const initialFormState: SeekerRequestData = {
 	rent: 0,
 	google_location_object: {} as LocationObject,
 	google_location_text: '',
-	location: "",
-	state: "",
-	service: "",
+	location: '',
+	state: '',
+	service: '',
 	payment_type: PaymentType.daily,
 }
 
