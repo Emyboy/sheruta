@@ -7,7 +7,7 @@ type Props = {
 
 export default function ProfileAboutMe({ userProfile }: Props) {
 	type Interest = {
-		title: string
+		name: string
 	}
 	let userInterests: Interest[] = userProfile.flatShareProfile?.interests
 	const userBio: string | null = userProfile.flatShareProfile?.bio || null
@@ -45,7 +45,7 @@ export default function ProfileAboutMe({ userProfile }: Props) {
 								bg: 'dark_light',
 							}}
 						>
-							{item.title}
+							{item.name}
 						</Badge>
 					)
 				})}
