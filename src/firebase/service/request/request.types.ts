@@ -150,7 +150,7 @@ export const createHostRequestDTO = z.object({
 		.optional(),
 })
 export const createSeekerRequestDTO = z.object({
-	description: z.string().optional(),
+	description: z.string(),
 	rent: z.number(),
 	google_location_object: z.custom<LocationObject>(),
 	google_location_text: z.string(),
@@ -191,6 +191,7 @@ export type HostRequestDataDetails = Omit<
 	flat_share_profile: FlatShareProfileData
 	updatedAt: string
 	createdAt: string
+	seeking: boolean
 }
 
 export interface FlatShareRequest {
@@ -226,6 +227,7 @@ export interface FlatShareRequest {
 	reserved_by: string | undefined
 	reservation_expiry: Date | undefined
 	background_checks: any | undefined
+	payment_type: PaymentType
 }
 
 export type SeekerRequestDataDetails = Omit<
@@ -241,6 +243,7 @@ export type SeekerRequestDataDetails = Omit<
 	user_info: UserInfoDTO
 	updatedAt: string
 	createdAt: string
+	seeking: boolean
 }
 
 // export interface FlatShareRequest{
