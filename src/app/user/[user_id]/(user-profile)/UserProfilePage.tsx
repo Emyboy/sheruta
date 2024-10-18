@@ -12,21 +12,26 @@ import axiosInstance from '@/utils/custom-axios'
 // import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 
 interface Props {
-	profileInfo: any
+	userBasics: any
+	userInfo: any
+	flatshareInfo:any
 	user_id: string
 }
 
-export default function UserProfilePage({ profileInfo, user_id }: Props) {
+export default function UserProfilePage({ userInfo, user_id, flatshareInfo, userBasics }: Props) {
 	// const userProfile = JSON.parse(flatshareInfos)
 	// const {authState} = useAuthContext()
 	// console.log('Auth state.................',authState)
-
-	// console.log('Auth state.................',profileInfo)
+    
+	// console.log('user Basics.................',userBasics)
+	// console.log('user info.................',userInfo)
+	// console.log('flatshare info.................',flatshareInfo)
 	// console.log('User id.................',user_id)
-
+    
+	return null
 	return (
 		<Flex flexDir={'column'}>
-			{/* <MainSection>
+			<MainSection>
 				<ProfileHero data={data} userProfile={userProfile} user_id={user_id} />
 			</MainSection>
 			<MainSection heading="About me">
@@ -35,11 +40,11 @@ export default function UserProfilePage({ profileInfo, user_id }: Props) {
 			<PersonalInfo userProfile={userProfile} />
 			<UpdateProfilePopup profileOwnerId={user_id} />
 			<MainSection heading="My Postings" borderBottom={0}>
-				<EachRequest request={request} />
+				{/* <EachRequest request={request} />
 				<EachRequest />
-				<EachRequest />
+				<EachRequest /> */}
 			</MainSection>
-			<MobileNavFooter /> */}
+			<MobileNavFooter />
 		</Flex>
 	)
 }

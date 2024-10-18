@@ -39,31 +39,27 @@ export default async function page(props: any) {
 
 	console.log('Full URL........', fullURL)
 
-	await axios.get(
-				fullURL,
-			  {
-				timeout: 5000,
-			  }
-			).then((response) => {
-				console.log(response.data); 
-			  });
-	
-			
 
-	// console.log('User Profile Data:.........................................................................................................................................', user)
-		
-	
+	try{
+     const response = 	await axios.get(
+		fullURL,
+	  {
+		timeout: 5000,
+	  }
+	)
+	const data = response.data
+	const {user} = data
+	// console.log('This is the user...............',user.flat_share_profile)
+	// const {user, flat_share_profile, user_info} = user
 
-
-	
-	return (
+	 return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>
 				<ThreeColumnLayout header={<MainHeader />}>
 					<Flex flexDirection={'column'} w="full">
 						<MainLeftNav />
 					</Flex>
-
+	
 					<Flex flexDirection={'column'} w="full">
 						<Box my={3}>
 							<Flex alignContent={'center'}>
@@ -74,15 +70,41 @@ export default async function page(props: any) {
 								/>
 							</Flex>
 						</Box>
-{/* 
+	
 						{user ? (
-							<UserProfilePage user_id={user_id} profileInfo={user} />
+							<UserProfilePage user_id={user_id} userBasics={user.user} 
+							flatshareInfo={user.flat_share_profile}
+							userInfo={user.user_info}
+							/>
 						) : (
 							<PageNotFound />
-						)} */}
+						)}
 					</Flex>
 				</ThreeColumnLayout>
 			</MainContainer>
 		</Flex>
 	)
+	
+	} catch(error)
+	{
+		let errorMessage = 'An unexpected error occurred.';
+    
+		
+		if (axios.isAxiosError(error) && error.response) {
+		  errorMessage = error.response.data.message || 'API error occurred.';
+		} else if (error instanceof Error) {
+		  errorMessage = error.message;
+		}
+	
+		return <p>Error fetching user data: {errorMessage}</p>;
+	}
+
+	
+
+
+
+
 }
+
+
+  
