@@ -1,4 +1,5 @@
 'use client'
+
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
@@ -28,100 +29,131 @@ import usePayment from '@/hooks/usePayment'
 import NotificationsService, {
 	NotificationsBodyMessage,
 } from '@/firebase/service/notifications/notifications.firebase'
+import useAuthenticatedAxios from '@/hooks/useAxios'
 
-type Props = {}
+type Props = {
+	// conversation: ConversationData
+}
 
-export default function MessageDetails({}: Props) {
+export default function MessageDetails({  }: Props) {
+
+	// console.log(conversation)
+
 	const toast = useToast()
 	const [_, paymentActions] = usePayment()
-	const { authState } = useAuthContext()
-	const { user } = authState
+	const { authState: { user, flat_share_profile } } = useAuthContext()
 	const { message_id } = useParams()
 	const [conversation, setConversation] = useState<null | ConversationData>(
 		null,
 	)
 	const [loading, setLoading] = useState(true)
 
+	const axiosInstance = useAuthenticatedAxios()
+
 	const getConversation = async () => {
 		if (user) {
 			setLoading(true)
-			let isOwner = await ConversationsService.get(
-				generateConversationID({
-					owner_id: message_id as string,
-					guest_id: user._id,
-				}),
-			)
-			let isGuest = await ConversationsService.get(
-				generateConversationID({
-					guest_id: message_id as string,
-					owner_id: user._id,
-				}),
-			)
 
-			if (isGuest) {
-				setLoading(false)
-				return setConversation(isGuest)
-			} else if (isOwner) {
-				setLoading(false)
-				return setConversation(isOwner)
-			} else {
-				setLoading(false)
-			}
+			const {
+				data: { data: isOwner },
+			}: {
+				data: { data: ConversationData }
+			} = await axiosInstance.get(`/conversations/${message_id}`);
+
+			// let isOwner = await ConversationsService.get(
+			// 	generateConversationID({
+			// 		owner_id: message_id as string,
+			// 		guest_id: user._id,
+			// 	}),
+			// )
+			// let isGuest = await ConversationsService.get(
+			// 	generateConversationID({
+			// 		guest_id: message_id as string,
+			// 		owner_id: user._id,
+			// 	}),
+			// )
+
+			// if (isGuest) {
+			// 	setLoading(false)
+			// 	return setConversation(isGuest)
+			// } else if (isOwner) {
+			// 	setLoading(false)
+			// 	return setConversation(isOwner)
+			// } else {
+			// 	setLoading(false)
+			// }
+
+			setConversation(isOwner)
 
 			setLoading(false)
+
+			return
+
 		}
 	}
 
 	useEffect(() => {
 		;(async () => {
 			if (message_id && user) {
+				createNewConversation()
 				getConversation()
 			}
 		})()
 	}, [user])
 
 	const createNewConversation = async () => {
-		if (
-			(authState.flat_share_profile?.credits as number) >=
-				creditTable.CONVERSATION &&
+		if (user &&
+			// (flat_share_profile?.credits as number) >= creditTable.CONVERSATION &&
 			user?._id !== message_id
 		) {
 			try {
 				setLoading(true)
-				let _owner = await getDoc(
-					doc(db, DBCollectionName.users, user?._id as string),
-				)
-				let _guest = await getDoc(
-					doc(db, DBCollectionName.users, message_id as string),
-				)
 
-				await ConversationsService.create({
-					conversation_id: generateConversationID({
-						guest_id: message_id as string,
-						owner_id: user?._id as string,
-					}),
-					guest_ref: _guest.ref,
-					owner_ref: _owner.ref,
-				})
+				const {
+					data: { data: _owner },
+				}: {
+					data: { data: ConversationData }
+				} = await axiosInstance.post(`/conversations/670c221722d8093e89b057a4`);
 
-				await paymentActions.decrementCredit({
-					amount: creditTable.CONVERSATION,
-					user_id: user?._id as string,
-				})
+
+				// let _owner = await getDoc(
+				// 	doc(db, DBCollectionName.users, user?._id as string),
+				// )
+				// let _guest = await getDoc(
+				// 	doc(db, DBCollectionName.users, message_id as string),
+				// )
+
+				// await ConversationsService.create({
+				// 	conversation_id: generateConversationID({
+				// 		guest_id: message_id as string,
+				// 		owner_id: user?._id as string,
+				// 	}),
+				// 	guest_ref: _guest.ref,
+				// 	owner_ref: _owner.ref,
+				// })
+
+				// await paymentActions.decrementCredit({
+				// 	amount: creditTable.CONVERSATION,
+				// 	user_id: user?._id as string,
+				// })
 
 				getConversation()
 			} catch (error) {
 				setLoading(false)
 				toast({ title: 'Error, please try again', status: 'error' })
+			} finally {
+				setLoading(false)
 			}
 		} else {
 			alert("You don't have enough credit")
 		}
 	}
 
-	const theGuest = conversation?.participants.find(
+	const theGuest = conversation?.members.find(
 		(participant) => participant._id !== user?._id,
 	)
+
+	console.log(theGuest)
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -135,8 +167,8 @@ export default function MessageDetails({}: Props) {
 							subHeading={
 								theGuest
 									? 'Last seen: ' +
-										// moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
-										moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
+									// moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
+									moment(theGuest?.last_seen.toDate().toISOString()).fromNow()
 									: null
 							}
 						/>
@@ -155,13 +187,15 @@ export default function MessageDetails({}: Props) {
 								<Spinner color="brand" />
 							</Flex>
 						)}
-						{!loading && !conversation && user?._id !== message_id && (
+						{/* {!loading && !conversation && user?._id !== message_id && (
 							<CreditInfo
 								credit={creditTable.CONVERSATION}
 								onUse={createNewConversation}
 							/>
-						)}
+						)} */}
+
 						{!user && <LoginCard Icon={BiSolidMessageSquareDetail} />}
+
 						{conversation && user && (
 							<MessageSection
 								guest={theGuest as AuthUser}
@@ -185,6 +219,7 @@ const MessageSection = ({
 	conversation: ConversationData
 	isLoading: boolean
 }) => {
+	console.log('I am here')
 	const {
 		authState: { user },
 	} = useAuthContext()

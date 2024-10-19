@@ -1,3 +1,4 @@
+'use client'
 import MainSection from '@/components/atoms/MainSection'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import { Flex } from '@chakra-ui/react'
@@ -5,21 +6,22 @@ import ProfileAboutMe from './ProfileAboutMe'
 import ProfileHero from './ProfileHero'
 import PersonalInfo from './personal-info/PersonalInfo'
 import { UpdateProfilePopup } from './promoteProfileModal/updateProfileSnippet'
+import { useEffect, useState } from 'react'
+import { useAuthContext } from '@/context/auth.context'
+import axiosInstance from '@/utils/custom-axios'
 // import EachRequest from '@/components/EachRequest/EachRequest'
 // import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
 
 interface Props {
-	data: any
-	flatshareInfos: any
+	userInfos: any
 	user_id: string
 }
 
-export default async function UserProfilePage({
-	data,
-	flatshareInfos,
-	user_id,
-}: Props) {
-	const userProfile = JSON.parse(flatshareInfos)
+export default function UserProfilePage({ userInfos, user_id }: Props) {
+	const userProfile = JSON.parse(userInfos)
+
+	const { user } = userProfile
+	const data = user
 
 	return (
 		<Flex flexDir={'column'}>
@@ -30,7 +32,7 @@ export default async function UserProfilePage({
 				<ProfileAboutMe userProfile={userProfile} />
 			</MainSection>
 			<PersonalInfo userProfile={userProfile} />
-			<UpdateProfilePopup />
+			<UpdateProfilePopup profileOwnerId={user_id} />
 			<MainSection heading="My Postings" borderBottom={0}>
 				{/* <EachRequest request={request} />
 				<EachRequest />

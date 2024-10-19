@@ -1,4 +1,24 @@
-import { Box, Button, Divider, Text } from '@chakra-ui/react'
+import {
+	Card,
+	CardHeader,
+	CardBody,
+	CardFooter,
+	Image,
+	Stack,
+	Heading,
+	Text,
+	Button,
+	Divider,
+	Box,
+	Flex,
+	Badge,
+	Link,
+} from '@chakra-ui/react'
+import { BiBookmark } from 'react-icons/bi'
+import { useAuthContext } from '@/context/auth.context'
+import { DocumentReference, getDoc } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 import { TbCircleLetterX } from 'react-icons/tb'
@@ -7,64 +27,181 @@ import ProfileSnippetCard from './ProfileSnippetCard'
 type Props = {
 	userProfiles: any
 }
-
-interface UserProfile {
-	state: any
-	seeking: boolean
-	document_id: string
-	bio: string
-	budget: number
-	payment_type: string
-	location_keyword: any
-	service_type: string
-	_user_ref: {
-		avatar_url: string
-		last_name: string
-		first_name: string
-	}
-}
-
 const ProfileSnippet = ({ userProfiles }: Props) => {
+	const [snippetData, setSnippetData] = useState<Record<string, any>>({})
+	const { authState } = useAuthContext()
+
+	useEffect(() => {
+		const fetchData = async () => {
+			let locationValue: any = null
+
+			try {
+				const locationKeywordDocRef = authState.flat_share_profile
+					?.location_keyword as DocumentReference
+
+				const docSnapshot = await getDoc(locationKeywordDocRef)
+
+				if (docSnapshot.exists()) {
+					locationValue = docSnapshot.data()
+				} else {
+					console.log('Location keyword document does not exist.')
+				}
+			} catch (error) {
+				console.error('Error fetching Location keyword document:', error)
+			}
+
+			let stateValue: any = null
+
+			try {
+				const stateDocRef = authState.flat_share_profile
+					?.state as DocumentReference
+
+				const docSnapshot = await getDoc(stateDocRef)
+
+				if (docSnapshot.exists()) {
+					stateValue = docSnapshot.data()
+				} else {
+					console.log('state document does not exist.')
+				}
+			} catch (error) {
+				console.error('Error fetching state document ref:', error)
+			}
+
+			const profileSnippetData = {
+				firstName: authState.user?.first_name,
+				lastName: authState.user?.last_name,
+				bio: authState.flat_share_profile?.bio,
+				state: stateValue ? stateValue.name : null,
+				area: locationValue ? locationValue.name : null,
+				seeking: authState.flat_share_profile?.seeking,
+				budget: authState.flat_share_profile?.budget,
+			}
+
+			setSnippetData(profileSnippetData)
+		}
+		fetchData()
+	}, [authState])
+
+	interface UserProfile {
+		collection_name: string
+
+		twitter: string
+		employment_status: string
+		state: string
+		phone_number: string
+		linkedin: string
+		work_industry: string
+		instagram: string
+		seeking: boolean
+		document_id: string
+		religion: string
+		avatar_url: string
+		first_name: string
+		last_name: string
+		email: string
+		area: string
+		bio: string
+		_id: string
+		budget: number
+		payment_type: string
+		service_type: string
+	}
+
 	const parsedUserProfile: UserProfile[] = JSON.parse(userProfiles)
-	const params = useSearchParams()
-	const router = useRouter()
+	// const params = useSearchParams()
+	// const router = useRouter()
 
 	return (
-		<React.Fragment>
-			{params.toString() && (
-				<Button
-					w={'100%'}
-					gap={2}
-					mb={'-1rem'}
-					p={0}
-					pr={3}
-					justifyContent={'end'}
-					fontSize={{ base: 'sm', md: 'base' }}
-					fontWeight={300}
-					color={'brand'}
-					bgColor={'transparent'}
-					_hover={{ bgColor: 'transparent', textDecoration: 'none' }}
-					onClick={() => router.push('/')}
-				>
-					Clear Filters
-					<TbCircleLetterX size={'16px'} />
-				</Button>
-			)}
-
+		<>
 			{parsedUserProfile.length > 0 ? (
-				parsedUserProfile.map((item, i) => (
-					<ProfileSnippetCard item={item} key={i} />
-				))
+				parsedUserProfile.map((item, index) => {
+					const ProfileSnippetBio = item?.bio
+					const maxBioLength = 84
+
+					return (
+						<Box m={4} key={index}>
+							<Card
+								direction={{ base: 'column', sm: 'row' }}
+								overflow="hidden"
+								variant="outline"
+							>
+								<Image
+									objectFit="cover"
+									maxW={{ base: '100%', sm: '200px' }}
+									w="600px"
+									src={`${item?.avatar_url}`}
+									alt="Profile Image"
+								/>
+
+								<Stack>
+									<Link
+										href={`/user/${item?.document_id}`}
+										style={{ textDecoration: 'none' }}
+									>
+										<CardBody mb={0} border="none">
+											<Flex justify="space-between" align="center" mb={3}>
+												<Text>{`${item?.first_name} ${item.last_name}`}</Text>
+												<Badge color="text_color" background="border_color">
+													Promoted
+												</Badge>
+											</Flex>
+
+											<Flex>
+												<Text color="muted_text" py="2" fontSize="0.8em">
+													{ProfileSnippetBio
+														? ProfileSnippetBio.length > maxBioLength
+															? `${ProfileSnippetBio.substring(0, maxBioLength)}......`
+															: ProfileSnippetBio
+														: 'Hi! I am a user of Sheruta, you should go through my profile and see if we are a match'}
+												</Text>
+											</Flex>
+
+											<Flex
+												style={{ fontSize: '10px' }}
+												justify="space-between"
+												align="center"
+											>
+												<Text color="text_muted" fontWeight="700">
+													{`Preferred area: ${item.area} ,${item.state}`}{' '}
+												</Text>
+												<Badge
+													colorScheme="green"
+													rounded="md"
+													textTransform="capitalize"
+												>
+													{item.service_type}
+												</Badge>
+												<Badge
+													colorScheme={item.seeking ? 'orange' : 'teal'}
+													textTransform="capitalize"
+												>
+													{item?.seeking ? 'Seeker' : 'I have a space'}
+												</Badge>
+											</Flex>
+										</CardBody>
+									</Link>
+									<Divider />
+									<Flex justify="space-between" align="center" mb={2}>
+										<Button colorScheme="lueb" color="text_muted">
+											<BiBookmark style={{ fontSize: '1.5em' }} />
+										</Button>
+										<Box mr={2} color="text_muted">
+											{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_type ? item?.payment_type : ''}`}{' '}
+										</Box>
+									</Flex>
+								</Stack>
+							</Card>
+						</Box>
+					)
+				})
 			) : (
 				<Box>
-					<Text w={'100%'} textAlign={'center'} fontWeight={600} my={4}>
-						No profiles found
-					</Text>
+					<Text>Feature your profile here.</Text>
 				</Box>
 			)}
 
 			<Divider />
-		</React.Fragment>
+		</>
 	)
 }
 

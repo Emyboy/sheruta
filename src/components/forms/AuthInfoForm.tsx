@@ -183,7 +183,6 @@ export default function AuthInfoForm({ done }: { done: () => void }) {
 								{flat_share_profile?.seeking ? 'Budget' : 'Rent'}
 							</Text>
 							<CurrencyInput
-								required
 								style={{
 									padding: 8,
 									paddingLeft: 19,
