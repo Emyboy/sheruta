@@ -51,6 +51,7 @@ export type NotificationType = {
 	receiver_flat_share_profile: FlatShareProfileData
 	// receiver_user_settings:USerset
 	receiver_user_info: UserInfo
+	createdAt: Date
 }
 
 export type returnedNotifications = NotificationsType & {

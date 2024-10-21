@@ -1,7 +1,8 @@
 'use client'
 
 import { NotificationType } from '@/firebase/service/notifications/notifications.types'
-import useCommon from '@/hooks/useCommon'
+import axiosInstance from '@/utils/custom-axios'
+import { AxiosResponse } from 'axios'
 import {
 	createContext,
 	ReactNode,
@@ -9,13 +10,12 @@ import {
 	useEffect,
 	useState,
 } from 'react'
-import { useAuthContext } from './auth.context'
 
 interface NotificationContextType {
 	notifications: NotificationType[]
 	unreadNotifications: boolean
 	// updateNotification: (id: string) => Promise<void>
-	// readAllNotifications: (ids: string[]) => Promise<void>
+	markAsRead: () => Promise<AxiosResponse<any, any>>
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -37,9 +37,12 @@ export const NotificationsProvider: React.FC<{
 
 	useEffect(() => {
 		setUnreadNotifications(
-			notifications.some((notification) => notification.seen),
+			notifications.some((notification) => !notification.seen),
 		)
 	}, [notifications])
+
+	const markAsRead = async () =>
+		await axiosInstance.put('/notifications/mark-all-as-seen')
 
 	return (
 		<NotificationContext.Provider
@@ -47,7 +50,7 @@ export const NotificationsProvider: React.FC<{
 				unreadNotifications,
 				notifications,
 				// updateNotification,
-				// readAllNotifications,
+				markAsRead,
 			}}
 		>
 			{children}

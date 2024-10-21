@@ -30,7 +30,6 @@ export default function EachMessageBobble({ message, handleDelete }: Props) {
 		toast({ title: `Message copied` })
 	}
 
-
 	return (
 		<>
 			<Menu>
@@ -84,7 +83,10 @@ export default function EachMessageBobble({ message, handleDelete }: Props) {
 					{isUserOwn && (
 						<>
 							<Divider />
-							<MenuItem icon={<BiTrash size={20} />} onClick={async() => await handleDelete(message._id)}>
+							<MenuItem
+								icon={<BiTrash size={20} />}
+								onClick={async () => await handleDelete(message._id)}
+							>
 								Delete
 							</MenuItem>
 						</>
