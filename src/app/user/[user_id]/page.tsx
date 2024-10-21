@@ -24,31 +24,21 @@ export default async function page(props: any) {
 	const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
 	const fullURL = `${backendURL}/users/${user_id}`
 
-	try{
-     const response = 	await axiosInstance.get(
-		fullURL,
-	  {
-		// timeout: 5000,
-	  }
-	)
-	const data = response.data
-	const {user} = data
+	try {
+		const response = await axiosInstance.get(fullURL, {
+			// timeout: 5000,
+		})
+		const data = response.data
+		const { user } = data
 
-	const authRes = await axiosInstance.get(
-		`${backendURL}/users/dependencies`
-	)
-	 
-	const userAuth = authRes.data
+		const authRes = await axiosInstance.get(`${backendURL}/users/dependencies`)
 
-	console.log(userAuth)
+		const userAuth = authRes.data
 
+		console.log(userAuth)
 
-     
-	
-
-	
-	// console.log('This is the user...............',user)
-	// const {user, flat_share_profile, user_info} = user
+		// console.log('This is the user...............',user)
+		// const {user, flat_share_profile, user_info} = user
 
 		const userDetails = {
 			user: user.user

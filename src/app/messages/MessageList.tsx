@@ -23,7 +23,6 @@ export default function MessageList({ messageList, handleDelete }: Props) {
 	}
 
 	useEffect(() => {
-
 		if (messageList && messageList.length) {
 			goDown()
 		}
@@ -33,7 +32,13 @@ export default function MessageList({ messageList, handleDelete }: Props) {
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING} pb={NAV_HEIGHT}>
 			{messageList &&
 				messageList.map((message: DirectMessageData, index) => {
-					return <EachMessageBobble key={Math.random()} message={message} handleDelete={handleDelete} />
+					return (
+						<EachMessageBobble
+							key={Math.random()}
+							message={message}
+							handleDelete={handleDelete}
+						/>
+					)
 				})}
 			{messageList && messageList.length > 0 ? (
 				<Flex justifyContent={'center'}>
