@@ -108,6 +108,11 @@ export default function PersonalInfoForm({ done }: Props) {
 					age_preference,
 					done_kyc: true,
 				},
+				user_info: {
+					...user_info,
+					// @ts-ignore
+					done_kyc: true,
+				},
 			})
 
 			setIsLoading(false)

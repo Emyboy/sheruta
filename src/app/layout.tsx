@@ -16,7 +16,7 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode
 }) {
-	const { data } = await axiosInstance.get(`/users/dependencies`)
+	const data = await fetchDependency()
 
 	return (
 		<html lang="en">
@@ -43,4 +43,14 @@ export default async function RootLayout({
 			</body>
 		</html>
 	)
+}
+
+const fetchDependency = async () => {
+	try {
+		const { data } = await axiosInstance.get(`/users/dependencies`)
+
+		return data
+	} catch (err) {
+		console.log(err)
+	}
 }

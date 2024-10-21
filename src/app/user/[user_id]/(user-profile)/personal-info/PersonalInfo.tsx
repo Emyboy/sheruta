@@ -51,7 +51,6 @@ export default function PersonalInfo({ userProfile }: Props) {
 
 	console.log('Work industry', _userFlatshareProfile?.work_industry)
 
-
 	const instagramUrl = `https://instagram.com/${socials?.instagram}`
 	const facebookUrl = `https://facebook.com/${socials?.facebook}`
 	const twitterUrl = `https://x.com/${socials?.twitter}`

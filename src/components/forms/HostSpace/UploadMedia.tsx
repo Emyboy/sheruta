@@ -3,9 +3,12 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import SherutaDB from '@/firebase/service/index.firebase'
 import {
-	createHostRequestDTO,
-	HostRequestData,
+	createHostSpaceRequestDTO,
+	HostSpaceFormData,
 } from '@/firebase/service/request/request.types'
+import useAnalytics from '@/hooks/useAnalytics'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { revalidatePathOnClient } from '@/utils/actions'
 import {
 	Box,
 	Button,
@@ -19,34 +22,32 @@ import {
 	useToast,
 	VStack,
 } from '@chakra-ui/react'
-import { DocumentReference, Timestamp } from 'firebase/firestore'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { BiMinusCircle, BiPlusCircle } from 'react-icons/bi'
 import { ZodError } from 'zod'
 import { HostSpaceFormProps } from '.'
-import { revalidatePathOnClient } from '@/utils/actions'
-import { convertRefToData } from '@/utils/index.utils'
-import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
-import useAnalytics from '@/hooks/useAnalytics'
 
 export default function UploadMedia({
 	formData,
 	setFormData,
 }: HostSpaceFormProps) {
-	const toast = useToast()
-	const {
-		authState: { flat_share_profile },
-	} = useAuthContext()
 	const router = useRouter()
+
+	const {
+		authState: { user },
+	} = useAuthContext()
+
+	const toast = useToast()
+
+	const { addAnalyticsData } = useAnalytics()
+	const axiosInstance = useAuthenticatedAxios()
 
 	const [loading, setLoading] = useState(false)
 	const [length, setLength] = useState(4)
 
 	const [mediaRefPaths, setMediaRefPaths] = useState<string[]>([])
-
-	const { addAnalyticsData } = useAnalytics()
 
 	const handleUploadImages = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -66,11 +67,11 @@ export default function UploadMedia({
 		const reader = new FileReader()
 		reader.readAsDataURL(selectedFile)
 		reader.onload = () => {
-			const additionalImgs = [...formData.images_urls]
+			const additionalImgs = [...formData.image_urls]
 			additionalImgs[i] = reader.result as string
 			setFormData((prev) => ({
 				...prev,
-				images_urls: additionalImgs,
+				image_urls: additionalImgs,
 			}))
 		}
 		reader.onerror = (err) => {
@@ -115,13 +116,13 @@ export default function UploadMedia({
 		e.preventDefault()
 		const uuid = crypto.randomUUID()
 
-		if (formData.images_urls.length < length)
+		if (formData.image_urls.length < length)
 			return toast({
 				title: `Upload at least ${length} images`,
 				status: 'error',
 			})
 
-		if (!flat_share_profile)
+		if (!user)
 			return toast({
 				status: 'error',
 				title: 'please login to upload your space ',
@@ -130,8 +131,8 @@ export default function UploadMedia({
 		setLoading(true)
 
 		try {
-			const userId = flat_share_profile._user_id
-			const imageUploadPromises = formData.images_urls.map((url, i) =>
+			const userId = user._id
+			const imageUploadPromises = formData.image_urls.map((url, i) =>
 				SherutaDB.uploadMedia({
 					data: url,
 					storageUrl: `images/requests/${userId}/${uuid}/image_${i}`,
@@ -164,56 +165,31 @@ export default function UploadMedia({
 				videoRefPath = newMediaRefPaths.pop() || null
 			}
 
-			const images_urls = mediaUrls.filter((url) => url !== null)
+			const image_urls = mediaUrls.filter((url) => url !== null)
 
-			const {
-				category,
-				service,
-				state,
-				area,
-				property,
-				pre_amenities,
-				...cleanedFormData
-			} = formData
-
-			let data: HostRequestData = {
-				...cleanedFormData,
-				imagesRefPaths: newMediaRefPaths,
-				videoRefPath,
-				seeking: false,
+			const data: HostSpaceFormData = {
+				...formData,
+				// imagesRefPaths: newMediaRefPaths,
+				// videoRefPath,
 				video_url,
-				images_urls,
-				uuid,
-				createdAt: Timestamp.now(),
-				updatedAt: Timestamp.now(),
-				_user_ref: flat_share_profile._user_ref,
-				_user_info_ref: flat_share_profile._user_info_ref,
+				image_urls,
 			}
 
-			createHostRequestDTO.parse(data)
+			createHostSpaceRequestDTO.parse(data)
 
-			await SherutaDB.create({
-				collection_name: 'requests',
-				data,
-				document_id: uuid,
-			})
+			const res = await axiosInstance.post('/flat-share-requests/host', data)
 
 			revalidatePathOnClient()
 
 			localStorage.removeItem('host_space_form')
 			toast({ status: 'success', title: 'You have successfully added a space' })
 
-			if (data._location_keyword_ref) {
-				const locationKeywordData = (await convertRefToData(
-					data._location_keyword_ref,
-				)) as LocationKeywordData
-				//add analytics
-				await addAnalyticsData('posts', locationKeywordData.id as string)
-			}
-
-			router.push(`/request/host/${uuid}`)
+			router.push(`/request/host/${res.data.data._id}`)
 		} catch (e) {
-			await Promise.all(mediaRefPaths.map((url) => SherutaDB.deleteMedia(url)))
+			await Promise.all(
+				mediaRefPaths.map((path) => SherutaDB.deleteMedia(path)),
+			)
+
 			if (e instanceof ZodError) {
 				e.errors.forEach((error: any) => {
 					console.log(
@@ -221,7 +197,7 @@ export default function UploadMedia({
 					)
 				})
 			} else {
-				console.log('Unknown error', e)
+				console.error('Unknown error', e)
 			}
 			toast({ title: 'Error creating your details', status: 'error' })
 		}
@@ -246,7 +222,7 @@ export default function UploadMedia({
 						justifyContent={'center'}
 						gap={DEFAULT_PADDING}
 					>
-						{formData.images_urls.length >= 4 && length < 8 && (
+						{formData.image_urls.length >= 4 && length < 8 && (
 							<Box
 								alignSelf={'end'}
 								onClick={() => setLength((prev) => prev + 1)}
@@ -287,11 +263,11 @@ export default function UploadMedia({
 											p={0}
 											onClick={() => {
 												setLength((prev) => prev - 1)
-												const images_urls = formData.images_urls.filter(
+												const image_urls = formData.image_urls.filter(
 													(_, idx) => i !== idx,
 												)
-												setFormData((prev) => ({ ...prev, images_urls }))
-												console.log(images_urls)
+												setFormData((prev) => ({ ...prev, image_urls }))
+												console.log(image_urls)
 											}}
 										>
 											<BiMinusCircle
@@ -317,9 +293,9 @@ export default function UploadMedia({
 											opacity: 25,
 										}}
 									>
-										{formData.images_urls[i] ? (
+										{formData.image_urls[i] ? (
 											<Image
-												src={formData.images_urls[i]}
+												src={formData.image_urls[i]}
 												alt="additional Image"
 												objectFit="fill"
 												objectPosition="center"

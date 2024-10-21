@@ -6,7 +6,7 @@ import ProfileAboutMe from './ProfileAboutMe'
 import ProfileHero from './ProfileHero'
 import PersonalInfo from './personal-info/PersonalInfo'
 import { UpdateProfilePopup } from './promoteProfileModal/updateProfileSnippet'
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 import { useAuthContext } from '@/context/auth.context'
 import axiosInstance from '@/utils/custom-axios'
 // import EachRequest from '@/components/EachRequest/EachRequest'
@@ -17,14 +17,12 @@ interface Props {
 	user_id: string
 }
 
-export default function UserProfilePage({ userInfos, user_id,  }: Props) {
+export default function UserProfilePage({ userInfos, user_id }: Props) {
 	const userProfile = JSON.parse(userInfos)
 
+	const { user } = userProfile
+	const data = user
 
-	const {user} = userProfile
-	const data = user;
-    
-	
 	return (
 		<Flex flexDir={'column'}>
 			<MainSection>

@@ -1,4 +1,5 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
+import { AuthUser } from '../auth/auth.types'
 
 export interface DirectMessageDTO {
 	_conversation_id: string
@@ -12,15 +13,17 @@ export interface DirectMessageDTO {
 }
 
 export interface DirectMessageData {
-	id: string
-	_conversation_id: string
-	_conversation_ref: DocumentReference
-	_sender_ref: DocumentReference
-	_sender_id: string
-	_receiver_id: string
-	_receiver_ref: DocumentReference
-	message_text: string
+	_id: string
+	sender: AuthUser
+	content: string
 	seen: boolean
-	createdAt: Timestamp
-	updatedAt: Timestamp
+	conversation: string
+	request: null | string
+	// _conversation_ref: DocumentReference
+	// _sender_ref: DocumentReference
+	// _sender_id: string
+	// _receiver_id: string
+	// _receiver_ref: DocumentReference
+	createdAt: string
+	updatedAt: string
 }

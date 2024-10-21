@@ -2,6 +2,7 @@
 
 import EachRequest from '@/components/EachRequest/EachRequest'
 import JoinTheCommunity from '@/components/ads/JoinTheCommunity'
+import ProfileSnippet from '@/components/ads/ProfileSnippet'
 import SpaceSkeleton from '@/components/atoms/SpaceSkeleton'
 import MainHeader from '@/components/layout/MainHeader'
 import MainLeftNav from '@/components/layout/MainLeftNav'
@@ -10,64 +11,33 @@ import MainRightNav from '@/components/layout/MainRightNav'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { resolveArrayOfReferences } from '@/utils/index.utils'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
-import {
-	collection,
-	DocumentData,
-	getDocs,
-	limit,
-	orderBy,
-	query,
-	startAfter,
-} from 'firebase/firestore'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-import ProfileSnippet from '@/components/ads/ProfileSnippet'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import useAuthenticatedAxios from '@/hooks/useAxios'
-import { User } from 'firebase/auth'
-import axios from 'axios'
+import { unAuthenticatedAxios } from '@/utils/custom-axios'
 
 type Props = {
-	requests: string
+	requests: FlatShareRequest[] | undefined
 	userProfiles: any
 }
 
 export default function HomePage({ requests, userProfiles }: Props) {
-	const [flatShareRequests, setFlatShareRequests] = useState<any[]>(
-		requests ? JSON.parse(requests) : [],
-	)
+	const [flatShareRequests, setFlatShareRequests] = useState<
+		FlatShareRequest[]
+	>(requests ? requests : [])
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
-	const [lastVisible, setLastVisible] = useState<DocumentData | null>(null) // Store the last document
-	const [data, setData] = useState([])
+	const [page, setPage] = useState(1)
+
 	const lastRequestRef = useRef<HTMLDivElement | null>(null)
 	const observer = useRef<IntersectionObserver | null>(null)
 
 	const [processedRequests, setProcessedRequests] = useState<
-		HostRequestDataDetails[]
+		FlatShareRequest[]
 	>([])
+
 	// const axiosAuth = useAuthenticatedAxios()
-
-	const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL
-	const user_id = '670922143217d7ba32c1d8ea'
-
-	// axios
-	// 	.get(
-	// 		`${backend_url}/users/670922143217d7ba32c1d8ea`,
-	// 	)
-	// 	.then((res) => {
-	// 		setData(res.data)
-	// 		console.log(res.data)
-	// 		setIsLoading(false)
-	// 	})
-
-	// console.log(backend_url)
 
 	// const { data, isLoading, isError, error, refetch } = useQuery({
 	// 	queryKey: ["testing", ],
@@ -95,12 +65,12 @@ export default function HomePage({ requests, userProfiles }: Props) {
 		const processRequests = async () => {
 			if (flatShareRequests.length > 0) {
 				const updatedRequests = await Promise.all(
-					flatShareRequests.map(async (request: HostRequestDataDetails) =>
-						request._user_info_ref?.hide_profile ? null : { ...request },
+					flatShareRequests.map(async (request: FlatShareRequest) =>
+						request.user_info?.hide_profile ? null : { ...request },
 					),
 				)
 				const filteredRequests = updatedRequests.filter(Boolean)
-				setProcessedRequests(filteredRequests as HostRequestDataDetails[])
+				setProcessedRequests(filteredRequests as FlatShareRequest[])
 			}
 		}
 
@@ -111,40 +81,30 @@ export default function HomePage({ requests, userProfiles }: Props) {
 		setIsLoading(true)
 
 		try {
-			const requestsRef = collection(db, DBCollectionName.flatShareRequests)
-			let requestsQuery = query(requestsRef, orderBy('updatedAt'), limit(10))
+			const {
+				data: { data: requests },
+			}: {
+				data: { data: FlatShareRequest[] }
+			} = await unAuthenticatedAxios.get(
+				`/flat-share-requests?page=${page}&limit=10`,
+			)
 
-			if (lastVisible) {
-				requestsQuery = query(requestsQuery, startAfter(lastVisible))
-			}
-
-			const querySnapshot = await getDocs(requestsQuery)
-
-			if (querySnapshot.empty) {
-				setHasMore(false)
+			if (requests && requests?.length === 0) {
+				setHasMore(false) // No more data to load
 			} else {
-				// Extract new requests from the querySnapshot
-				const newRequests = querySnapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				})) as HostRequestDataDetails[]
-
-				// Resolve any document references in the new requests
-				const resolvedRequests = await resolveArrayOfReferences(newRequests)
-
-				// Update state with filtered new requests (removing duplicates)
+				// Filter out duplicates
 				setFlatShareRequests((prevRequests) => {
-					const existingIds = new Set(prevRequests.map((request) => request.id))
+					const existingIds = new Set(prevRequests.map((req) => req._id))
 
-					// Filter out new requests that already exist in previous requests
-					const filteredNewRequests = resolvedRequests.filter(
-						(request) => !existingIds.has(request.id),
+					// Filter out requests that already exist
+					const newRequests = requests.filter(
+						(request) => !existingIds.has(request._id),
 					)
 
-					return [...prevRequests, ...filteredNewRequests]
+					return [...prevRequests, ...newRequests]
 				})
 
-				setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]) // Update last visible document
+				setPage((prevPage) => prevPage + 1) // Increment the page number
 			}
 		} catch (error) {
 			console.error('Failed to load more data', error)
@@ -153,9 +113,9 @@ export default function HomePage({ requests, userProfiles }: Props) {
 		}
 	}
 
+	// Infinite scroll effect using IntersectionObserver
 	useEffect(() => {
 		if (isLoading) return
-
 		if (observer.current) observer.current.disconnect()
 
 		observer.current = new IntersectionObserver((entries) => {
@@ -164,21 +124,14 @@ export default function HomePage({ requests, userProfiles }: Props) {
 			}
 		})
 
-		if (lastRequestRef.current) observer.current.observe(lastRequestRef.current)
+		if (lastRequestRef.current) {
+			observer.current.observe(lastRequestRef.current)
+		}
 
 		return () => {
 			if (observer.current) observer.current.disconnect()
 		}
 	}, [isLoading, hasMore, lastRequestRef])
-
-	// const handleSubmit = (values) =>
-	// {
-	// 	/**
-	// 	 * username:daniel,
-	// 	 * _id:7386yihsdf8
-	// 	 */
-	// 	mutate(values)
-	// }
 
 	// Assign ref to the last item
 	const setRef = (node: HTMLDivElement | null) => {
@@ -200,18 +153,20 @@ export default function HomePage({ requests, userProfiles }: Props) {
 						<ProfileSnippet userProfiles={userProfiles} />
 
 						<Flex flexDirection={'column'} gap={0}>
-							{processedRequests.map((request: any, index: number) => (
-								<Box
-									key={request.id}
-									ref={index === processedRequests.length - 1 ? setRef : null}
-									style={{ transition: 'opacity 0.3s ease-in-out' }}
-								>
-									{index === 3 && <JoinTheCommunity key={index} />}
-									<Flex px={DEFAULT_PADDING}>
-										<EachRequest request={request} />
-									</Flex>
-								</Box>
-							))}
+							{processedRequests.map(
+								(request: FlatShareRequest, index: number) => (
+									<Box
+										key={request._id}
+										ref={index === processedRequests.length - 1 ? setRef : null}
+										style={{ transition: 'opacity 0.3s ease-in-out' }}
+									>
+										{index === 3 && <JoinTheCommunity key={index} />}
+										<Flex px={DEFAULT_PADDING}>
+											<EachRequest request={request} />
+										</Flex>
+									</Box>
+								),
+							)}
 
 							{isLoading && processedRequests.length > 0 && (
 								<Box textAlign="center" mt="4" width="100%">

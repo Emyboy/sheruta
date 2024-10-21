@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react'
 import { BiLeftArrowAlt } from 'react-icons/bi'
 import LocationKeywordForm from './LocationKeywordForm'
 import PersonalInfoForm from './PersonalInfoForm'
-import { useSearchParams } from 'next/navigation'
 
 export default function GetStarted() {
 	const {
@@ -21,7 +20,6 @@ export default function GetStarted() {
 	} = useAuthContext()
 	const [step, setStep] = useState(0)
 	const [percentage, setPercentage] = useState(0)
-	const searchParams = useSearchParams()
 
 	const next = () => {
 		setStep(step + 1)
@@ -52,53 +50,32 @@ export default function GetStarted() {
 		return null
 	}
 
-	// if(searchParams.get('action') && searchParams.get('action') === 'reset-password') {
-	// 	return <Flex
-	// 	bg={'dark_light'}
-	// 	_dark={{ bg: 'dark' }}
-	// 	position={'fixed'}
-	// 	top={0}
-	// 	bottom={0}
-	// 	left={0}
-	// 	right={0}
-	// 	zIndex={500}
-	// 	flexDir={'column'}
-	// 	justifyContent={'center'}
-	// 	alignItems={'center'}
-	// 	overflowY={'auto'}
-	// >
-	// 	<>Hello</>
-	// </Flex>
+	// if (!user.email_verified) {
+	// 	return (
+	// 		<Flex
+	// 			bg={'dark_light'}
+	// 			_dark={{ bg: 'dark' }}
+	// 			position={'fixed'}
+	// 			top={0}
+	// 			bottom={0}
+	// 			left={0}
+	// 			right={0}
+	// 			zIndex={500}
+	// 			flexDir={'column'}
+	// 			justifyContent={'center'}
+	// 			alignItems={'center'}
+	// 			overflowY={'auto'}
+	// 		>
+	// 			<EmailVerification />
+	// 		</Flex>
+	// 	)
 	// }
-
-	if (!user.email_verified) {
-		return (
-			<Flex
-				bg={'dark_light'}
-				_dark={{ bg: 'dark' }}
-				position={'fixed'}
-				top={0}
-				bottom={0}
-				left={0}
-				right={0}
-				zIndex={500}
-				flexDir={'column'}
-				justifyContent={'center'}
-				alignItems={'center'}
-				overflowY={'auto'}
-			>
-				<EmailVerification />
-			</Flex>
-		)
-	}
 
 	if (
 		!flat_share_profile?.budget ||
 		!user_info?.gender ||
 		!flat_share_profile?.occupation ||
-		!flat_share_profile?.budget
-		// ||
-		// !flat_share_profile?.done_kyc
+		!user_info?.done_kyc
 	) {
 		return (
 			<>
