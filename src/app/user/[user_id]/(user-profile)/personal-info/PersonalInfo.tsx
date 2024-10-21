@@ -35,7 +35,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 		userProfile.flatShareProfile
 
 	type Habits = {
-		title: string
+		name: string
 	}
 
 	type Socials = {
@@ -48,6 +48,8 @@ export default function PersonalInfo({ userProfile }: Props) {
 
 	const socials: Socials = userProfile.flatShareProfile.socials
 	const habits: Habits[] = userProfile.flatShareProfile.habits
+
+	console.log('Work industry', _userFlatshareProfile?.work_industry)
 
 	const instagramUrl = `https://instagram.com/${socials?.instagram}`
 	const facebookUrl = `https://facebook.com/${socials?.facebook}`
@@ -91,7 +93,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 					<EachPersonalInfo
 						Icon={BiMapPin}
 						heading="Preferred Location"
-						subHeading={`${userProfile.flatShareProfile?.area}, ${userProfile.flatShareProfile?.state.name}`}
+						subHeading={`${userProfile.flatShareProfile?.area}, ${userProfile.flatShareProfile?.state}`}
 					/>
 					<EachPersonalInfo
 						Icon={BiMoney}
@@ -141,7 +143,7 @@ export default function PersonalInfo({ userProfile }: Props) {
 									bg: 'dark_light',
 								}}
 							>
-								{item.title}
+								{item.name}
 							</Badge>
 						)
 					})}

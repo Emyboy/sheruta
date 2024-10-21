@@ -69,7 +69,7 @@ const authOptions: NextAuthOptions = {
 						profile,
 					)
 
-					console.log('This is the data', data)
+					console.log('This is the auth data', data)
 					return true
 				} catch (error) {
 					return false

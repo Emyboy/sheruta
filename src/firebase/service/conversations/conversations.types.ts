@@ -16,11 +16,12 @@ export interface ConversationsDTO {
 
 export interface ConversationData {
 	_id: string
-	owner_id: string
-	participants: AuthUser[]
+	// owner_id: string
+	host: AuthUser
+	members: AuthUser[]
 	updatedAt: Timestamp
 	createdAt: Timestamp
-	participants_ids: string[]
-	owner_ref: DocumentReference
-	participants_refs: DocumentReference[]
+	// participants_ids: string[]
+	// owner_ref: DocumentReference
+	// participants_refs: DocumentReference[]
 }

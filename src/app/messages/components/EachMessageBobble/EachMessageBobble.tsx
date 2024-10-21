@@ -1,9 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
-import MessagesService from '@/firebase/service/messages/messages.firebase'
 import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 import {
-	Button,
 	Divider,
 	Flex,
 	Menu,
@@ -15,29 +13,23 @@ import {
 } from '@chakra-ui/react'
 import React from 'react'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
-import { BiCopy, BiDotsVertical, BiFlag, BiTrash } from 'react-icons/bi'
+import { BiCopy, BiTrash } from 'react-icons/bi'
 
 type Props = {
 	message: DirectMessageData
+	handleDelete: (message_id: string) => Promise<void>
 }
 
-export default function EachMessageBobble({ message }: Props) {
+export default function EachMessageBobble({ message, handleDelete }: Props) {
 	const toast = useToast()
 	const { authState } = useAuthContext()
 	const user = authState.user
-	const isUserOwn = message._sender_id === user?._id
+	const isUserOwn = message.sender._id === user?._id
 
 	const handleCopy = () => {
 		toast({ title: `Message copied` })
 	}
 
-	const handleDelete = async () => {
-		try {
-			await MessagesService.deleteMessage(message.id)
-		} catch (error) {
-			toast({ title: `Error deleting message`, status: 'error' })
-		}
-	}
 
 	return (
 		<>
@@ -75,24 +67,24 @@ export default function EachMessageBobble({ message }: Props) {
 							// gap={DEFAULT_PADDING}
 						>
 							<Text
-								textAlign={message.message_text.length > 20 ? 'justify' : 'end'}
+								textAlign={message.content.length > 20 ? 'justify' : 'end'}
 								fontSize={'sm'}
 							>
-								{message.message_text}
+								{message.content}
 							</Text>
 							<Flex justifyContent={'flex-end'} color={'text_muted'}></Flex>
 						</Flex>
 					</Flex>
 				</MenuButton>
 				<MenuList bg="dark" zIndex={200}>
-					<CopyToClipboard text={message.message_text} onCopy={handleCopy}>
+					<CopyToClipboard text={message.content} onCopy={handleCopy}>
 						<MenuItem icon={<BiCopy size={20} />}>Copy</MenuItem>
 					</CopyToClipboard>
 					{/* <MenuItem icon={<BiFlag size={20} />}>Report</MenuItem> */}
 					{isUserOwn && (
 						<>
 							<Divider />
-							<MenuItem icon={<BiTrash size={20} />} onClick={handleDelete}>
+							<MenuItem icon={<BiTrash size={20} />} onClick={async() => await handleDelete(message._id)}>
 								Delete
 							</MenuItem>
 						</>

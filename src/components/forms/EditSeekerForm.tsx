@@ -242,6 +242,13 @@ const EditSeekerForm: React.FC<{
 
 	const { mutate: editRequest, isPending } = useMutation({
 		mutationFn: async () => {
+			if(!axiosInstance){
+				return showToast({
+					message: 'Failed to post request, please try again',
+                    status: 'error',
+				})
+			}
+			
 			if (!(user?._id && parsedRequestData?.user._id === user._id)) {
 				return showToast({
 					message: 'You are not authorized to edit this request',

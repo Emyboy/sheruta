@@ -11,9 +11,7 @@ import MainRightNav from '@/components/layout/MainRightNav'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
-import {
-	FlatShareRequest
-} from '@/firebase/service/request/request.types'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
@@ -25,9 +23,9 @@ type Props = {
 }
 
 export default function HomePage({ requests, userProfiles }: Props) {
-	const [flatShareRequests, setFlatShareRequests] = useState<FlatShareRequest[]>(
-		requests ? requests : [],
-	)
+	const [flatShareRequests, setFlatShareRequests] = useState<
+		FlatShareRequest[]
+	>(requests ? requests : [])
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
 	const [page, setPage] = useState(1)
@@ -38,7 +36,6 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	const [processedRequests, setProcessedRequests] = useState<
 		FlatShareRequest[]
 	>([])
-
 
 	// const axiosAuth = useAuthenticatedAxios()
 
@@ -88,7 +85,9 @@ export default function HomePage({ requests, userProfiles }: Props) {
 				data: { data: requests },
 			}: {
 				data: { data: FlatShareRequest[] }
-			} = await unAuthenticatedAxios.get(`/flat-share-requests?page=${page}&limit=10`)
+			} = await unAuthenticatedAxios.get(
+				`/flat-share-requests?page=${page}&limit=10`,
+			)
 
 			if (requests && requests?.length === 0) {
 				setHasMore(false) // No more data to load
@@ -98,7 +97,9 @@ export default function HomePage({ requests, userProfiles }: Props) {
 					const existingIds = new Set(prevRequests.map((req) => req._id))
 
 					// Filter out requests that already exist
-					const newRequests = requests.filter((request) => !existingIds.has(request._id))
+					const newRequests = requests.filter(
+						(request) => !existingIds.has(request._id),
+					)
 
 					return [...prevRequests, ...newRequests]
 				})
