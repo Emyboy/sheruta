@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Box, Button, Center, Flex, Text, useColorMode } from '@chakra-ui/react'
+import {
+	Box,
+	Button,
+	Center,
+	Flex,
+	Text,
+	useColorMode,
+	ModalOverlay,
+} from '@chakra-ui/react'
 import { BiCamera } from 'react-icons/bi'
 import { Cropper, CropperRef, CircleStencil } from 'react-advanced-cropper'
 import { useAuthContext } from '@/context/auth.context'
@@ -12,8 +20,12 @@ import {
 } from 'firebase/storage'
 import UserService from '@/firebase/service/user/user.firebase'
 import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import { Dispatch, SetStateAction } from 'react'
 
-export const ImageSelector = () => {
+interface Props {
+	onShowCropper: Dispatch<SetStateAction<boolean>>
+}
+export const ImageSelector = ({ onShowCropper }: Props) => {
 	const {
 		authState: { user },
 		getAuthDependencies,
@@ -24,6 +36,10 @@ export const ImageSelector = () => {
 	const [showCropper, setShowCropper] = useState(false)
 	const [croppedImage, setCroppedImage] = useState<string | undefined>('')
 	const [selectedImage, setSelectedImage] = useState('')
+
+	useEffect(() => {
+		onShowCropper(showCropper)
+	}, [showCropper])
 
 	const onCrop = () => {
 		if (cropperRef?.current) {
@@ -115,7 +131,7 @@ export const ImageSelector = () => {
 			},
 			async () => {
 				getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-					console.log('File available at', downloadURL)
+					console.log('DownloadURL', downloadURL)
 					await UserService.update({
 						data: { avatar_url: downloadURL },
 						document_id: user?._id,
@@ -123,9 +139,7 @@ export const ImageSelector = () => {
 					await saveProfileDocs({ avatar_url: downloadURL }, user?._id)
 					await getAuthDependencies()
 					setLoading(false)
-					// if (done) {
-					// 	done()
-					// }
+					setShowCropper(false)
 				})
 			},
 		)
@@ -145,7 +159,7 @@ export const ImageSelector = () => {
 						flexDir={'column'}
 						justifyContent={'center'}
 						alignItems={'center'}
-						my={'50vh'}
+						// my={'50vh'}
 						gap={8}
 					>
 						<Text
@@ -162,14 +176,14 @@ export const ImageSelector = () => {
 								maxW={'95vw'}
 								// h={}
 								w={{
-									md: '600px',
+									md: '300px',
 									base: '90vw',
 								}}
 							>
 								<Cropper
 									ref={cropperRef}
 									src={selectedImage}
-									// onChange={handleCropComplete}
+									onChange={handleCropComplete}
 									stencilComponent={CircleStencil}
 									stencilProps={{
 										aspectRatio: 9 / 16,
@@ -178,13 +192,13 @@ export const ImageSelector = () => {
 								<br />
 							</Box>
 							<Center
-							// 	position={{
-							// 	base: "fixed",
-							// 	md: "relative"
-							// }}
-							// 				bottom={10}
+								position={{
+									base: 'fixed',
+									md: 'relative',
+								}}
+								bottom={10}
 							>
-								<Button onClick={onCrop} isLoading={loading}>
+								<Button onClick={update} isLoading={loading}>
 									Crop
 								</Button>
 							</Center>
@@ -246,15 +260,6 @@ export const ImageSelector = () => {
 							justify-content={'center'}
 						/>
 					</Flex>
-					{/* <Text
-						textAlign={'center'}
-						color={'dark_lighter'}
-						className={'animate__animated animate__fadeInUp'}
-                        justifyContent={'center'}
-					>
-						{`Update display picture`}
-					</Text>
-                    */}
 					{/* <Button onClick={update} isLoading={loading}>
 						{user?.avatar_url ? 'Next' : 'Upload'}
 					</Button> */}

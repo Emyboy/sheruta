@@ -16,7 +16,7 @@ export default function EachConversation({ active, data, hasUnread }: Props) {
 	const { authState } = useAuthContext()
 	const { user } = authState
 
-	const guest = data.participants.find(
+	const guest = data.members.find(
 		(participant) => participant._id !== user?._id,
 	)
 
@@ -43,7 +43,7 @@ export default function EachConversation({ active, data, hasUnread }: Props) {
 					<Text textTransform={'capitalize'}>{guest?.first_name}</Text>
 					<Text fontSize={'sm'} color="text_muted">
 						{/* {new Date(data.updatedAt.nanoseconds)} */}
-						{moment(data.updatedAt.toDate().toISOString()).fromNow()}
+						{moment(data.updatedAt).fromNow()}
 					</Text>
 				</Flex>
 				{hasUnread && <Box h={3} w={3} rounded={'full'} bg="brand" />}

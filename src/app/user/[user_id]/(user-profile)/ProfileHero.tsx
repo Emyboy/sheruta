@@ -29,7 +29,7 @@ type Props = {
 }
 
 export default function ProfileHero({ data, userProfile, user_id }: Props) {
-	const _user: AuthUser = data.user
+	const _user: AuthUser = data
 	const userFlatshareProfile: FlatShareProfileData =
 		userProfile.flatShareProfile
 	const {
@@ -72,7 +72,7 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 			>
 				<Image
 					style={{ position: 'absolute' }}
-					src={_user.avatar_url || '/assets/avatar.webp'}
+					src={data.avatar_url || '/assets/avatar.webp'}
 					fill
 					alt={'user'}
 				/>
@@ -126,7 +126,7 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 				>
 					<BiSolidLocationPlus />
 					<Text color="text_muted" as={'span'}>
-						{`${userProfile.flatShareProfile?.state.name}, Nigeria`}
+						{`${userFlatshareProfile?.state}, Nigeria`}
 					</Text>
 				</Flex>
 
@@ -155,11 +155,11 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 							<BiMessageRoundedDetail size={25} />
 						</Button>
 					</Link>
-					<IconButton
+					{/* <IconButton
 						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 						aria-label="Bookmark this profile"
 						onClick={async () => await toggleSaveProfile()}
-					/>
+					/> */}
 				</Flex>
 			</Flex>
 		</Flex>

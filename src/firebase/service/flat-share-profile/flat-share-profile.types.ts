@@ -65,6 +65,7 @@ export type UpdateFlatShareProfileDataDTO = {
 	gender_preference?: string
 	age_preference?: string
 	payment_type?: PaymentType | null
+	service_type?: string
 	// socials: object
 }
 

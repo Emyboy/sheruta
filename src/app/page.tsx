@@ -1,16 +1,7 @@
 import { CACHE_TTL } from '@/constants'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import {
-	FlatShareRequest,
-	HostRequestDataDetails,
-	SeekerRequestDataDetails,
-} from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
-import HomePage from './(home-page)/home-page'
-import { serverSession } from '@/utils/auth'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 import axiosInstance from '@/utils/custom-axios'
-import SuperJSON from 'superjson'
+import HomePage from './(home-page)/home-page'
 
 export const revalidate = CACHE_TTL?.SHORT
 
