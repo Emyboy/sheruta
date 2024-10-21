@@ -16,7 +16,6 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode
 }) {
-
 	const data = await fetchDependency()
 
 	return (
@@ -46,14 +45,11 @@ export default async function RootLayout({
 	)
 }
 
-
 const fetchDependency = async () => {
 	try {
-		
 		const { data } = await axiosInstance.get(`/users/dependencies`)
 
 		return data
-
 	} catch (err) {
 		console.log(err)
 	}

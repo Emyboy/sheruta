@@ -215,6 +215,14 @@ const CreateSeekerForm: React.FC = () => {
 
 	const { mutate: postRequest, isPending } = useMutation({
 		mutationFn: async () => {
+
+			if(!axiosInstance){
+				return showToast({
+					message: 'Failed to post request, please try again',
+                    status: 'error',
+				})
+			}
+
 			if (user) {
 				const finalFormData = {
 					...formData,
