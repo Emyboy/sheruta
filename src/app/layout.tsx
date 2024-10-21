@@ -16,9 +16,11 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode
 }) {
-	const { data } = await axiosInstance.get(`/users/dependencies`)
-
-	// console.log(data)
+	const { data: userDependency } =
+		await axiosInstance.get(`/users/dependencies`)
+	const {
+		data: { notifications },
+	} = await axiosInstance.get('/notifications')
 
 	return (
 		<html lang="en">
@@ -39,7 +41,11 @@ export default async function RootLayout({
 				/>
 			</head>
 			<body>
-				<Providers options={data.options} user_data={data.user_data}>
+				<Providers
+					options={userDependency.options}
+					user_data={userDependency.user_data}
+					notifications={notifications}
+				>
 					{children}
 				</Providers>
 			</body>
