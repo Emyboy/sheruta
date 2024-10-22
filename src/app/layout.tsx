@@ -16,8 +16,10 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode
 }) {
-	const notifications = await fetchNotifications()
-	const data = await fetchDependency()
+	const { data, notifications } = (await fetchDependency()) || {
+		data: {},
+		notifications: { notifications: [] },
+	}
 
 	return (
 		<html lang="en">
@@ -50,24 +52,18 @@ export default async function RootLayout({
 	)
 }
 
-const fetchNotifications = async () => {
-	try {
-		const {
-			data: { notifications },
-		} = await axiosInstance.get('/notifications')
-
-		return notifications
-	} catch (error) {
-		console.error(error)
-		return { notifications: [] }
-	}
-}
-
 const fetchDependency = async () => {
 	try {
 		const { data } = await axiosInstance.get(`/users/dependencies`)
 
-		return data
+		let notifications = { notifications: [] }
+		if (data.user_data.user) {
+			const { data } = await axiosInstance.get('/notifications')
+
+			notifications = data.notifications
+		}
+
+		return { data, notifications }
 	} catch (err) {
 		console.error(err)
 	}

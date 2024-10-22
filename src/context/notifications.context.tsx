@@ -33,8 +33,6 @@ export const NotificationsProvider: React.FC<{
 	)
 	const [unreadNotifications, setUnreadNotifications] = useState<boolean>(false)
 
-	console.log(notifications)
-
 	useEffect(() => {
 		setUnreadNotifications(
 			notifications.some((notification) => !notification.seen),
