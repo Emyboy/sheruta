@@ -3,7 +3,7 @@
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex, Spinner, useToast } from '@chakra-ui/react'
+import { Box, Flex, Link, Spinner, useToast } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import MainBodyContent from '@/components/layout/MainBodyContent'
@@ -32,14 +32,16 @@ import NotificationsService, {
 import useAuthenticatedAxios from '@/hooks/useAxios'
 import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 import useCommon from '@/hooks/useCommon'
+import { useQuery } from '@tanstack/react-query'
 
 type Props = {}
 
 export default function MessageDetails({ }: Props) {
-
 	const toast = useToast()
 	const [_, paymentActions] = usePayment()
-	const { authState: { user, flat_share_profile } } = useAuthContext()
+	const {
+		authState: { user, flat_share_profile },
+	} = useAuthContext()
 	const { message_id } = useParams()
 	const [conversation, setConversation] = useState<null | ConversationData>(
 		null,
@@ -51,25 +53,26 @@ export default function MessageDetails({ }: Props) {
 
 	const getConversation = async () => {
 		try {
-
 			setLoading(true)
 
 			if (!user) {
 				return
 			}
-			
+
 			if (!axiosInstance) {
-				toast({ title: 'Session not ready. Please try again later.', status: 'warning' })
+				toast({
+					title: 'Session not ready. Please try again later.',
+					status: 'warning',
+				})
 				return
 			}
 			const {
 				data: { data: isOwner },
 			}: {
 				data: { data: ConversationData }
-			} = await axiosInstance.get(`/conversations/${message_id}`);
+			} = await axiosInstance.get(`/conversations/${message_id}`)
 
 			setConversation(isOwner)
-
 		} catch (err) {
 			console.log(err)
 			showToast({
@@ -79,7 +82,6 @@ export default function MessageDetails({ }: Props) {
 		} finally {
 			setLoading(false)
 		}
-
 	}
 
 	useEffect(() => {
@@ -89,7 +91,7 @@ export default function MessageDetails({ }: Props) {
 					await createNewConversation()
 					await getConversation()
 				} catch (error) {
-					console.error("Error initiating conversation:", error)
+					console.error('Error initiating conversation:', error)
 				}
 			}
 		}
@@ -100,16 +102,19 @@ export default function MessageDetails({ }: Props) {
 		}
 	}, [user, message_id, axiosInstance])
 
-
 	const createNewConversation = async () => {
-		if (user &&
+		if (
+			user &&
 			// (flat_share_profile?.credits as number) >= creditTable.CONVERSATION &&
 			user?._id !== message_id
 		) {
 			try {
 				setLoading(true)
 				if (!axiosInstance) {
-					toast({ title: 'Session not ready. Please try again later.', status: 'warning' })
+					toast({
+						title: 'Session not ready. Please try again later.',
+						status: 'warning',
+					})
 					return
 				}
 
@@ -117,7 +122,7 @@ export default function MessageDetails({ }: Props) {
 					data: { data: _owner },
 				}: {
 					data: { data: ConversationData }
-				} = await axiosInstance.post(`/conversations/${message_id}`);
+				} = await axiosInstance.post(`/conversations/${message_id}`)
 
 				getConversation()
 			} catch (error) {
@@ -140,16 +145,20 @@ export default function MessageDetails({ }: Props) {
 			<MainContainer>
 				<ThreeColumnLayout
 					header={
-						<MainBackHeader
-							image_url={theGuest?.avatar_url || null}
-							isLoading={loading}
-							heading={theGuest?.first_name || ''}
-							subHeading={
-								theGuest
-									? `Last seen: ${moment(theGuest.last_seen).fromNow()}`
-									: null
-							}
-						/>
+						<>
+							<Link href={`/user/${theGuest?._id}`} _hover={{ textDecoration: "none" }}>
+								<MainBackHeader
+									image_url={theGuest?.avatar_url || null}
+									isLoading={loading}
+									heading={theGuest?.first_name || ''}
+									subHeading={
+										theGuest
+											? `Last seen: ${moment(theGuest.last_seen).fromNow()}`
+											: null
+									}
+								/>
+							</Link>
+						</>
 					}
 				>
 					<Flex flexDirection={'column'} w="full">
@@ -198,7 +207,6 @@ const MessageSection = ({
 	conversation: ConversationData
 	isLoading: boolean
 }) => {
-
 	const {
 		authState: { user },
 	} = useAuthContext()
@@ -209,42 +217,64 @@ const MessageSection = ({
 
 	const router = useRouter()
 
-	const [messageList, setMessageList] = useState<DirectMessageData[]>([])
+	// const [messageList, setMessageList] = useState<DirectMessageData[]>([])
 
-	const getMessages = async () => {
-		if (!axiosInstance) return null;
+	// const getMessages = async () => {
+	// 	if (!axiosInstance) return null
 
-		const {
-			data: { data: { docs: messages } },
-		}: {
-			data: { data: { docs: DirectMessageData[] } }
-		} = await axiosInstance.get(`/messages/${conversation._id}`)
+	// 	const {
+	// 		data: {
+	// 			data: { docs: messages },
+	// 		},
+	// 	}: {
+	// 		data: { data: { docs: DirectMessageData[] } }
+	// 	} = await axiosInstance.get(`/messages/${conversation._id}`)
 
-		setMessageList(messages.reverse())
-	}
+	// 	setMessageList(messages.reverse())
+	// }
+
+	const { data: messageList, refetch } = useQuery({
+		queryKey: ["testing", conversation._id], // Include conversation ID
+		queryFn: async () => {
+			const {
+				data: {
+					data: { docs },
+				},
+			} = await axiosInstance.get(`/messages/${conversation._id}`);
+	
+			return docs.reverse(); // Return the reversed messages
+		},
+		refetchOnWindowFocus: false,
+		staleTime: 5000, // Data is considered fresh for 5 seconds
+		refetchInterval: 5000, // Refetch every 5 seconds to check for new messages
+	});
 
 	const handleSubmit = async (message: string) => {
 		try {
-
 			if (!user?._id)
 				return toast({
 					status: 'error',
 					title: 'please log in to message this person',
 				})
 
-
 			// Ensure axiosInstance is ready before making the request
 			if (!axiosInstance) {
-				toast({ title: 'Session not ready. Please try again later.', status: 'warning' })
+				toast({
+					title: 'Session not ready. Please try again later.',
+					status: 'warning',
+				})
 				return
 			}
 
-			await axiosInstance.post(`/messages/dm`, {
-				content: message,
-				conversation_id: conversation._id
-			})
+			await Promise.all([
+				axiosInstance.post(`/messages/dm`, {
+					content: message,
+					conversation_id: conversation._id,
+				}),
+				// getMessages()
+				refetch()
+			])
 
-			await getMessages()
 
 			// await Promise.all([
 			// 	MessagesService.sendDM({
@@ -280,7 +310,8 @@ const MessageSection = ({
 		try {
 			await Promise.all([
 				axiosInstance?.delete(`/messages/${message_id}`),
-				getMessages()
+				// getMessages(),
+				refetch()
 			])
 		} catch (error) {
 			toast({ title: `Error deleting message`, status: 'error' })
@@ -288,13 +319,19 @@ const MessageSection = ({
 	}
 
 	useEffect(() => {
-		getMessages()
+		// getMessages()
+		refetch()
 	}, [conversation._id])
 
 	return (
 		<>
 			<Box p={DEFAULT_PADDING}>
-				<MessageList isLoading={isLoading} conversation={conversation} messageList={messageList} handleDelete={handleDelete} />
+				<MessageList
+					isLoading={isLoading}
+					conversation={conversation}
+					messageList={messageList}
+					handleDelete={handleDelete}
+				/>
 				<Flex
 					zIndex={50}
 					justifyContent={'center'}
