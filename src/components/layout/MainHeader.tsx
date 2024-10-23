@@ -15,6 +15,7 @@ import {
 import MainIconBtn from '../atoms/MainIconBtn'
 import MainBodyContent from './MainBodyContent'
 import MobileHeader from './MobileHeader'
+import useHeaderBubbles from '@/hooks/useHeaderBubbles'
 
 type Props = {}
 
@@ -22,6 +23,7 @@ export default function MainHeader({}: Props) {
 	const pathname = usePathname()
 	const { toggleColorMode } = useColorMode()
 	const { unreadNotifications } = useNotificationContext()
+	const {bubbles} = useHeaderBubbles()
 
 	return (
 		<>
@@ -70,6 +72,7 @@ export default function MainHeader({}: Props) {
 								label="Messages"
 								Icon={BiMessageRoundedDetail}
 								active={pathname.includes('messages')}
+								hasNotification={bubbles.messages}
 							/>
 						</Link>
 						<Link href={`/search`}>

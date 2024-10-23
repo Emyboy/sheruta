@@ -3,43 +3,36 @@
 import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainContainer from '@/components/layout/MainContainer'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { Box, Flex, Spinner, useToast } from '@chakra-ui/react'
+import { Box, Flex, Link, Spinner, useToast } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import MainBodyContent from '@/components/layout/MainBodyContent'
 import MessageInput from '../components/MessageInput'
 import MessageList from '../MessageList'
-import MessagesService from '@/firebase/service/messages/messages.firebase'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
-import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import moment from 'moment'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
-import { generateConversationID } from '@/firebase/service/conversations/conversation.utils'
 import LoginCard from '@/components/atoms/LoginCard'
 import { BiSolidMessageSquareDetail } from 'react-icons/bi'
 import CreditInfo from '@/components/info/CreditInfo/CreditInfo'
 import { creditTable } from '@/constants'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
 import usePayment from '@/hooks/usePayment'
-import NotificationsService, {
-	NotificationsBodyMessage,
-} from '@/firebase/service/notifications/notifications.firebase'
 import useAuthenticatedAxios from '@/hooks/useAxios'
-import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 import useCommon from '@/hooks/useCommon'
+import { useQuery } from '@tanstack/react-query'
+import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 
 type Props = {}
 
 export default function MessageDetails({ }: Props) {
-
 	const toast = useToast()
 	const [_, paymentActions] = usePayment()
-	const { authState: { user, flat_share_profile } } = useAuthContext()
+	const {
+		authState: { user, flat_share_profile },
+	} = useAuthContext()
 	const { message_id } = useParams()
 	const [conversation, setConversation] = useState<null | ConversationData>(
 		null,
@@ -51,25 +44,26 @@ export default function MessageDetails({ }: Props) {
 
 	const getConversation = async () => {
 		try {
-
 			setLoading(true)
 
 			if (!user) {
 				return
 			}
-			
+
 			if (!axiosInstance) {
-				toast({ title: 'Session not ready. Please try again later.', status: 'warning' })
+				toast({
+					title: 'Session not ready. Please try again later.',
+					status: 'warning',
+				})
 				return
 			}
 			const {
 				data: { data: isOwner },
 			}: {
 				data: { data: ConversationData }
-			} = await axiosInstance.get(`/conversations/${message_id}`);
+			} = await axiosInstance.get(`/conversations/${message_id}`)
 
 			setConversation(isOwner)
-
 		} catch (err) {
 			console.log(err)
 			showToast({
@@ -79,37 +73,40 @@ export default function MessageDetails({ }: Props) {
 		} finally {
 			setLoading(false)
 		}
-
 	}
 
 	useEffect(() => {
 		const initiateConversation = async () => {
 			if (axiosInstance && message_id && user) {
 				try {
-					await createNewConversation()
-					await getConversation()
+					await Promise.all([
+						createNewConversation(),
+						getConversation()
+					])
 				} catch (error) {
-					console.error("Error initiating conversation:", error)
+					console.error('Error initiating conversation:', error)
 				}
 			}
 		}
 
 		if (user && message_id && axiosInstance) {
-			console.log(axiosInstance)
 			initiateConversation()
 		}
 	}, [user, message_id, axiosInstance])
 
-
 	const createNewConversation = async () => {
-		if (user &&
+		if (
+			user &&
 			// (flat_share_profile?.credits as number) >= creditTable.CONVERSATION &&
 			user?._id !== message_id
 		) {
 			try {
 				setLoading(true)
 				if (!axiosInstance) {
-					toast({ title: 'Session not ready. Please try again later.', status: 'warning' })
+					toast({
+						title: 'Session not ready. Please try again later.',
+						status: 'warning',
+					})
 					return
 				}
 
@@ -117,7 +114,7 @@ export default function MessageDetails({ }: Props) {
 					data: { data: _owner },
 				}: {
 					data: { data: ConversationData }
-				} = await axiosInstance.post(`/conversations/${message_id}`);
+				} = await axiosInstance.post(`/conversations/${message_id}`)
 
 				getConversation()
 			} catch (error) {
@@ -144,6 +141,7 @@ export default function MessageDetails({ }: Props) {
 							image_url={theGuest?.avatar_url || null}
 							isLoading={loading}
 							heading={theGuest?.first_name || ''}
+							customHeadingRoute={`/user/${theGuest?._id}`}
 							subHeading={
 								theGuest
 									? `Last seen: ${moment(theGuest.last_seen).fromNow()}`
@@ -198,7 +196,6 @@ const MessageSection = ({
 	conversation: ConversationData
 	isLoading: boolean
 }) => {
-
 	const {
 		authState: { user },
 	} = useAuthContext()
@@ -206,70 +203,59 @@ const MessageSection = ({
 	const toast = useToast()
 
 	const axiosInstance = useAuthenticatedAxios()
-
-	const router = useRouter()
-
-	const [messageList, setMessageList] = useState<DirectMessageData[]>([])
-
-	const getMessages = async () => {
-		if (!axiosInstance) return null;
-
-		const {
-			data: { data: { docs: messages } },
-		}: {
-			data: { data: { docs: DirectMessageData[] } }
-		} = await axiosInstance.get(`/messages/${conversation._id}`)
-
-		setMessageList(messages.reverse())
-	}
+	const { data: messageList, refetch } = useQuery({
+		queryKey: [conversation._id],
+		queryFn: async () => {
+			if (!axiosInstance) return [];
+	
+			let allMessages: DirectMessageData[] = [];
+			let currentPage = 1;
+			let totalPages = 1; // Initialize totalPages to enter the loop
+	
+			// Fetch all pages of messages
+			while (currentPage <= totalPages) {
+				const {
+					data: {
+						data: { docs, totalPages: pages },
+					},
+				} = await axiosInstance.get(`/messages/${conversation._id}`, {
+					params: { page: currentPage },
+				});
+	
+				allMessages = [...allMessages, ...docs]; // Collect all messages
+				totalPages = pages; // Update totalPages
+				currentPage++; // Move to the next page
+			}
+	
+			return allMessages.reverse(); // Return the reversed messages
+		},
+		refetchOnWindowFocus: false,
+	});
+	
 
 	const handleSubmit = async (message: string) => {
 		try {
-
 			if (!user?._id)
 				return toast({
 					status: 'error',
 					title: 'please log in to message this person',
 				})
 
-
-			// Ensure axiosInstance is ready before making the request
 			if (!axiosInstance) {
-				toast({ title: 'Session not ready. Please try again later.', status: 'warning' })
+				toast({
+					title: 'Session not ready. Please try again later.',
+					status: 'warning',
+				})
 				return
 			}
 
-			await axiosInstance.post(`/messages/dm`, {
-				content: message,
-				conversation_id: conversation._id
-			})
-
-			await getMessages()
-
-			// await Promise.all([
-			// 	MessagesService.sendDM({
-			// 		message,
-			// 		conversation_id: conversation._id,
-			// 		recipient_id: guest._id,
-			// 		user_id: user._id,
-			// 	}),
-			// 	NotificationsService.create({
-			// 		collection_name: DBCollectionName.notifications,
-			// 		data: {
-			// 			is_read: false,
-			// 			message: NotificationsBodyMessage.message,
-			// 			recipient_id: guest._id,
-			// 			sender_details: {
-			// 				id: user._id,
-			// 				avatar_url: user.avatar_url,
-			// 				first_name: user.first_name,
-			// 				last_name: user.last_name,
-			// 			},
-			// 			type: 'message',
-			// 			action_url: `/messages/${user._id}`,
-			// 		},
-			// 	}),
-			// ])
+			await Promise.all([
+				axiosInstance.post(`/messages/dm`, {
+					content: message,
+					conversation_id: conversation._id,
+				}),
+				refetch(),
+			])
 		} catch (error) {
 			console.log(error)
 			toast({ title: 'error, please try again', status: 'error' })
@@ -280,7 +266,7 @@ const MessageSection = ({
 		try {
 			await Promise.all([
 				axiosInstance?.delete(`/messages/${message_id}`),
-				getMessages()
+				refetch(),
 			])
 		} catch (error) {
 			toast({ title: `Error deleting message`, status: 'error' })
@@ -288,13 +274,18 @@ const MessageSection = ({
 	}
 
 	useEffect(() => {
-		getMessages()
+		refetch()
 	}, [conversation._id])
 
 	return (
 		<>
 			<Box p={DEFAULT_PADDING}>
-				<MessageList isLoading={isLoading} conversation={conversation} messageList={messageList} handleDelete={handleDelete} />
+				<MessageList
+					isLoading={isLoading}
+					conversation={conversation}
+					messages={messageList}
+					handleDelete={handleDelete}
+				/>
 				<Flex
 					zIndex={50}
 					justifyContent={'center'}

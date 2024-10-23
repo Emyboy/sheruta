@@ -37,30 +37,6 @@ export default function HomePage({ requests, userProfiles }: Props) {
 		FlatShareRequest[]
 	>([])
 
-	// const axiosAuth = useAuthenticatedAxios()
-
-	// const { data, isLoading, isError, error, refetch } = useQuery({
-	// 	queryKey: ["testing", ],
-	// 	queryFn: () => axiosAuth.get(`/route`),
-	// 	refetchOnWindowFocus: false,
-	// })
-
-	// const {mutate, isPending} = useMutation({
-	// 	mutationFn: (user:User) => axiosAuth.post(`/route`, { ...data }),
-	// 	onSuccess: () =>
-	// 	{
-	// 		// what to do when
-
-	// 		toast({
-	// 			message:"user infor update"
-	// 		})
-
-	// 	},
-	// 	onError:(error)=>{
-	// 		console.log(error)
-	// 	}
-	// })
-
 	useEffect(() => {
 		const processRequests = async () => {
 			if (flatShareRequests.length > 0) {

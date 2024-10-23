@@ -56,13 +56,13 @@ export default function useShareSpace() {
 	}): Promise<void> => {
 		try {
 			setIsLoading(true)
-			if(!axiosInstance){
+			if (!axiosInstance) {
 				return showToast({
 					message: 'Failed to delete the post',
-                    status: 'error',
+					status: 'error',
 				})
 			}
-			
+
 			if (authState.user?._id === userId && requestId) {
 				await axiosInstance.delete(`/flat-share-requests/${requestId}`)
 
@@ -72,7 +72,7 @@ export default function useShareSpace() {
 				})
 
 				setTimeout(() => {
-					window.location.reload()
+					window.location.assign('/')
 				}, 1000)
 			} else {
 				showToast({

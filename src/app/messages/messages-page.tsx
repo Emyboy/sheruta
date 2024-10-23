@@ -26,32 +26,37 @@ type Props = {}
 export default function MessagesPage({}: Props) {
 	const { authState } = useAuthContext()
 	const { user } = authState
-	const [conversations, setConversations] = useState<ConversationData[] | null>(null)
+	const [conversations, setConversations] = useState<ConversationData[] | null>(
+		null,
+	)
 	const axiosInstance = useAuthenticatedAxios()
-	const {showToast} = useCommon()
+	const { showToast } = useCommon()
 
 	useEffect(() => {
 		if (user) {
-
 			const getConversation = async () => {
 				if (user) {
 					if (!axiosInstance) {
-						return showToast({ message: 'Session not ready. Please try again later.', status: 'warning' })
-						
+						return showToast({
+							message: 'Session not ready. Please try again later.',
+							status: 'warning',
+						})
 					}
 					const {
-						data: { conversations: {docs : userConversations} },
+						data: {
+							conversations: userConversations,
+						},
 					}: {
-						data: { conversations: {docs: ConversationData[]} }
-					} = await axiosInstance.get(`/conversations`);
-		
+						data: { conversations:  ConversationData[] }
+					} = await axiosInstance.get(`/conversations`)
+
 					setConversations(userConversations)
 					return
 				}
 			}
-			
-			if(axiosInstance){
-			getConversation()
+
+			if (axiosInstance) {
+				getConversation()
 			}
 		}
 	}, [user, axiosInstance])
@@ -79,7 +84,7 @@ export default function MessagesPage({}: Props) {
 												href={`/messages/${val.members.find((x) => x._id !== user?._id)?._id}`}
 												key={Math.random()}
 											>
-												<EachConversation data={val as any} />
+												<EachConversation data={val as any} hasUnread={val?.unread_messages !== 0} />
 												{/* <Divider bg='border_color' _dark={{
 									bg: 'dark_light'
 								}} /> */}
