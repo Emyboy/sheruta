@@ -44,10 +44,10 @@ export default function MessagesPage({}: Props) {
 					}
 					const {
 						data: {
-							conversations: { docs: userConversations },
+							conversations: userConversations,
 						},
 					}: {
-						data: { conversations: { docs: ConversationData[] } }
+						data: { conversations:  ConversationData[] }
 					} = await axiosInstance.get(`/conversations`)
 
 					setConversations(userConversations)
@@ -84,7 +84,7 @@ export default function MessagesPage({}: Props) {
 												href={`/messages/${val.members.find((x) => x._id !== user?._id)?._id}`}
 												key={Math.random()}
 											>
-												<EachConversation data={val as any} />
+												<EachConversation data={val as any} hasUnread={val?.unread_messages !== 0} />
 												{/* <Divider bg='border_color' _dark={{
 									bg: 'dark_light'
 								}} /> */}

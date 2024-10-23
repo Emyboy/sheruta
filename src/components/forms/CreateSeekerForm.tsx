@@ -148,11 +148,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-						location: {
-							lat: place.geometry.location?.lat() ?? 0,
-							lng: place.geometry.location?.lng() ?? 0,
-						},
-					}
+							location: {
+								lat: place.geometry.location?.lat() ?? 0,
+								lng: place.geometry.location?.lng() ?? 0,
+							},
+						}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -218,65 +218,70 @@ const CreateSeekerForm: React.FC = () => {
 
 	const { mutate: postRequest, isPending } = useMutation({
 		mutationFn: async () => {
-
 			if (!axiosInstance) {
 				showToast({
 					message: 'Failed to post request, please try again',
 					status: 'error',
-				});
-				throw new Error('Axios instance not available'); // Abort mutation
+				})
+				throw new Error('Axios instance not available') // Abort mutation
 			}
-	
+
 			// Check if user is logged in
 			if (!user) {
 				showToast({
 					message: 'Failed to post request, please log in first',
 					status: 'error',
-				});
-				throw new Error('User not logged in'); // Abort mutation
+				})
+				throw new Error('User not logged in') // Abort mutation
 			}
-	
+
 			// Prepare final form data
 			const finalFormData = {
 				...formData,
 				rent: Number(formData.rent),
-			};
-	
-			createSeekerRequestDTO.parse(finalFormData);
-	
-			const response = await axiosInstance.post('/flat-share-requests/seeker', finalFormData);
-			return response.data;
+			}
+
+			createSeekerRequestDTO.parse(finalFormData)
+
+			const response = await axiosInstance.post(
+				'/flat-share-requests/seeker',
+				finalFormData,
+			)
+			return response.data
 		},
 		onSuccess: async (data) => {
 			showToast({
 				message: 'Your request has been posted successfully',
 				status: 'success',
-			});
-	
-			await addAnalyticsData('posts', selectedLocationId as string);
-	
+			})
+
+			await addAnalyticsData('posts', selectedLocationId as string)
+
 			// Redirect after 1 second
 			setTimeout(() => {
-				window.location.assign(`/request/seeker/${data?.data?._id || ''}`);
-			}, 1000);
+				window.location.assign(`/request/seeker/${data?.data?._id || ''}`)
+			}, 1000)
 		},
 		onError: (err) => {
 			if (err instanceof ZodError) {
-				setFormErrors(extractErrors(err.issues as ErrorObject[]));
-				console.error('Zod Validation Error:', err.issues);
+				setFormErrors(extractErrors(err.issues as ErrorObject[]))
+				console.error('Zod Validation Error:', err.issues)
 			} else {
 				showToast({
 					message: 'Error, please try again',
 					status: 'error',
-				});
+				})
 			}
 		},
-	});
-	
+	})
+
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault()
 
-		if (formData.description.length < 140 || formData.description.length > 500) {
+		if (
+			formData.description.length < 140 ||
+			formData.description.length > 500
+		) {
 			return showToast({
 				message: 'Description should be between 140 and 500 characters long.',
 				status: 'info',
@@ -287,9 +292,7 @@ const CreateSeekerForm: React.FC = () => {
 	}
 
 	return (
-		<form
-			onSubmit={handleSubmit}
-		>
+		<form onSubmit={handleSubmit}>
 			<Flex mb={4} gap={4}>
 				<FormControl
 					isRequired
