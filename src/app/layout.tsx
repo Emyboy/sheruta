@@ -37,7 +37,7 @@ export default async function RootLayout({
 				/>
 			</head>
 			<body>
-				<Providers options={data.options} user_data={data.user_data}>
+				<Providers options={data?.options} user_data={data?.user_data}>
 					{children}
 				</Providers>
 			</body>
@@ -50,6 +50,7 @@ const fetchDependency = async () => {
 		const { data } = await axiosInstance.get(`/users/dependencies`)
 
 		return data
+
 	} catch (err) {
 		console.log(err)
 	}

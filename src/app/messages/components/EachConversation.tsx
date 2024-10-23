@@ -47,7 +47,11 @@ export default function EachConversation({ active, data, hasUnread }: Props) {
 					</Text>
 				</Flex>
 				{/* {hasUnread && <Box h={3} w={3} rounded={'full'} bg="red" />} */}
-				{hasUnread && <Tag bg='brand' justifyContent={"center"}>{data?.unread_messages}</Tag>}
+				{hasUnread && (
+					<Tag bg="brand" justifyContent={'center'}>
+						{data?.unread_messages}
+					</Tag>
+				)}
 			</Flex>
 		</Flex>
 	)

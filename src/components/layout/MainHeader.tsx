@@ -23,7 +23,7 @@ export default function MainHeader({}: Props) {
 	const pathname = usePathname()
 	const { toggleColorMode } = useColorMode()
 	const { unreadNotifications } = useNotificationContext()
-	const {bubbles} = useHeaderBubbles()
+	const { bubbles } = useHeaderBubbles()
 
 	return (
 		<>

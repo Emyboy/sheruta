@@ -27,7 +27,7 @@ import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 
 type Props = {}
 
-export default function MessageDetails({ }: Props) {
+export default function MessageDetails({}: Props) {
 	const toast = useToast()
 	const [_, paymentActions] = usePayment()
 	const {
@@ -79,10 +79,7 @@ export default function MessageDetails({ }: Props) {
 		const initiateConversation = async () => {
 			if (axiosInstance && message_id && user) {
 				try {
-					await Promise.all([
-						createNewConversation(),
-						getConversation()
-					])
+					await Promise.all([createNewConversation(), getConversation()])
 				} catch (error) {
 					console.error('Error initiating conversation:', error)
 				}
@@ -206,12 +203,12 @@ const MessageSection = ({
 	const { data: messageList, refetch } = useQuery({
 		queryKey: [conversation._id],
 		queryFn: async () => {
-			if (!axiosInstance) return [];
-	
-			let allMessages: DirectMessageData[] = [];
-			let currentPage = 1;
-			let totalPages = 1; // Initialize totalPages to enter the loop
-	
+			if (!axiosInstance) return []
+
+			let allMessages: DirectMessageData[] = []
+			let currentPage = 1
+			let totalPages = 1 // Initialize totalPages to enter the loop
+
 			// Fetch all pages of messages
 			while (currentPage <= totalPages) {
 				const {
@@ -220,18 +217,17 @@ const MessageSection = ({
 					},
 				} = await axiosInstance.get(`/messages/${conversation._id}`, {
 					params: { page: currentPage },
-				});
-	
-				allMessages = [...allMessages, ...docs]; // Collect all messages
-				totalPages = pages; // Update totalPages
-				currentPage++; // Move to the next page
+				})
+
+				allMessages = [...allMessages, ...docs] // Collect all messages
+				totalPages = pages // Update totalPages
+				currentPage++ // Move to the next page
 			}
-	
-			return allMessages.reverse(); // Return the reversed messages
+
+			return allMessages.reverse() // Return the reversed messages
 		},
 		refetchOnWindowFocus: false,
-	});
-	
+	})
 
 	const handleSubmit = async (message: string) => {
 		try {
@@ -283,7 +279,7 @@ const MessageSection = ({
 				<MessageList
 					isLoading={isLoading}
 					conversation={conversation}
-					messages={messageList}
+					// messages={messageList}
 					handleDelete={handleDelete}
 				/>
 				<Flex
