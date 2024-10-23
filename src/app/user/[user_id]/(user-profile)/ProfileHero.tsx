@@ -139,22 +139,26 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 								recipient_id: user_id,
 								sender_details: user
 									? {
-											avatar_url: user.avatar_url,
-											first_name: user.first_name,
-											last_name: user.last_name,
-											id: user._id,
-										}
+										avatar_url: user.avatar_url,
+										first_name: user.first_name,
+										last_name: user.last_name,
+										id: user._id,
+									}
 									: null,
 							}))
 						}
 					>
 						Call Me
 					</Button>
-					<Link href={`/messages/${user_id}`}>
-						<Button>
-							<BiMessageRoundedDetail size={25} />
-						</Button>
-					</Link>
+
+					{(user?._id !== user_id) ?
+						<Link href={`/messages/${user_id}`}>
+							<Button>
+								<BiMessageRoundedDetail size={25} />
+							</Button>
+						</Link>
+						: null}
+						
 					{/* <IconButton
 						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 						aria-label="Bookmark this profile"

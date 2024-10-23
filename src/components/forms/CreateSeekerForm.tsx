@@ -19,6 +19,7 @@ import {
 	PaymentType,
 	SeekerRequestData,
 	LocationObject,
+	FlatShareRequest,
 } from '@/firebase/service/request/request.types'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
@@ -125,6 +126,8 @@ const CreateSeekerForm: React.FC = () => {
 
 	const [formErrors, setFormErrors] = useState<Errors>({})
 
+	const [requestId, setRequestId] = useState<string>('')
+
 	const [autocomplete, setAutocomplete] =
 		useState<google.maps.places.Autocomplete | null>(null)
 
@@ -145,11 +148,11 @@ const CreateSeekerForm: React.FC = () => {
 				formatted_address: place.formatted_address,
 				geometry: place.geometry
 					? {
-							location: {
-								lat: place.geometry.location?.lat() ?? 0,
-								lng: place.geometry.location?.lng() ?? 0,
-							},
-						}
+						location: {
+							lat: place.geometry.location?.lat() ?? 0,
+							lng: place.geometry.location?.lng() ?? 0,
+						},
+					}
 					: undefined,
 			}
 			const locationText = locationObject.formatted_address || ''
@@ -215,56 +218,77 @@ const CreateSeekerForm: React.FC = () => {
 
 	const { mutate: postRequest, isPending } = useMutation({
 		mutationFn: async () => {
+
 			if (!axiosInstance) {
-				return showToast({
+				showToast({
 					message: 'Failed to post request, please try again',
 					status: 'error',
-				})
+				});
+				throw new Error('Axios instance not available'); // Abort mutation
 			}
-
-			if (user) {
-				const finalFormData = {
-					...formData,
-					rent: Number(formData.rent),
-				}
-
-				createSeekerRequestDTO.parse(finalFormData)
-
-				await axiosInstance.post('/flat-share-requests/seeker', finalFormData)
+	
+			// Check if user is logged in
+			if (!user) {
+				showToast({
+					message: 'Failed to post request, please log in first',
+					status: 'error',
+				});
+				throw new Error('User not logged in'); // Abort mutation
 			}
+	
+			// Prepare final form data
+			const finalFormData = {
+				...formData,
+				rent: Number(formData.rent),
+			};
+	
+			createSeekerRequestDTO.parse(finalFormData);
+	
+			const response = await axiosInstance.post('/flat-share-requests/seeker', finalFormData);
+			return response.data;
 		},
-		onSuccess: async () => {
+		onSuccess: async (data) => {
 			showToast({
 				message: 'Your request has been posted successfully',
 				status: 'success',
-			})
-
-			//add analytics
-			await addAnalyticsData('posts', selectedLocationId as string)
-
+			});
+	
+			await addAnalyticsData('posts', selectedLocationId as string);
+	
+			// Redirect after 1 second
 			setTimeout(() => {
-				window.location.assign('/')
-			}, 1000)
+				window.location.assign(`/request/seeker/${data?.data?._id || ''}`);
+			}, 1000);
 		},
 		onError: (err) => {
 			if (err instanceof ZodError) {
-				setFormErrors(extractErrors(err.issues as ErrorObject[]))
-				console.error('Zod Validation Error:', err.issues)
+				setFormErrors(extractErrors(err.issues as ErrorObject[]));
+				console.error('Zod Validation Error:', err.issues);
 			} else {
 				showToast({
 					message: 'Error, please try again',
 					status: 'error',
-				})
+				});
 			}
 		},
-	})
+	});
+	
+	const handleSubmit = (e: FormEvent) => {
+		e.preventDefault()
+
+		if (formData.description.length < 140 || formData.description.length > 500) {
+			return showToast({
+				message: 'Description should be between 140 and 500 characters long.',
+				status: 'info',
+			})
+		}
+
+		postRequest()
+	}
 
 	return (
 		<form
-			onSubmit={(e: FormEvent) => {
-				e.preventDefault()
-				postRequest()
-			}}
+			onSubmit={handleSubmit}
 		>
 			<Flex mb={4} gap={4}>
 				<FormControl
@@ -409,8 +433,8 @@ const CreateSeekerForm: React.FC = () => {
 						value={formData.description}
 						onChange={handleChange}
 						placeholder="I'm looking for a shared flat with AC, Wifi and Gas Cooker"
-						minLength={140}
-						maxLength={500}
+						// minLength={140}
+						// maxLength={500}
 						rows={10}
 					/>
 				</FormControl>

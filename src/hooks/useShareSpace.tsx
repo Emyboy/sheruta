@@ -72,7 +72,7 @@ export default function useShareSpace() {
 				})
 
 				setTimeout(() => {
-					window.location.reload()
+					window.location.assign('/')
 				}, 1000)
 			} else {
 				showToast({

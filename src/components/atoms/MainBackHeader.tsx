@@ -56,10 +56,10 @@ export default function MainBackHeader({
 							<Avatar size={'sm'} src={image_url} />
 						) : null}
 						<Flex flexDir={'column'} flex={1} h="full">
-							<Text isTruncated textTransform={'capitalize'}>
+							<Text textDecoration={"none"} isTruncated textTransform={'capitalize'}>
 								{isLoading ? <Skeleton width={200} height={10} /> : heading}
 							</Text>
-							<Text isTruncated fontSize={'xs'} color="text_muted">
+							<Text textDecoration={"none"} isTruncated fontSize={'xs'} color="text_muted">
 								{isLoading ? <Skeleton width={100} height={10} /> : subHeading}
 							</Text>
 						</Flex>

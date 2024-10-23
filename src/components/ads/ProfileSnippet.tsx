@@ -195,9 +195,10 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 					)
 				})
 			) : (
-				<Box>
-					<Text>Feature your profile here.</Text>
-				</Box>
+				// <Box>
+				// 	<Text>Feature your profile here.</Text>
+				// </Box>
+				null
 			)}
 
 			<Divider />
