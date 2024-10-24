@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import { Providers } from '../configs/Providers'
-import 'react-loading-skeleton/dist/skeleton.css'
-import 'react-horizontal-scrolling-menu/dist/styles.css'
-import 'react-advanced-cropper/dist/style.css'
 import axiosInstance from '@/utils/custom-axios'
+import type { Metadata } from 'next'
+import 'react-advanced-cropper/dist/style.css'
+import 'react-horizontal-scrolling-menu/dist/styles.css'
+import 'react-loading-skeleton/dist/skeleton.css'
+import { Providers } from '../configs/Providers'
+import './globals.css'
 
 export const metadata: Metadata = {
 	title: 'Sheruta NG',
@@ -16,7 +16,10 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode
 }) {
-	const data = await fetchDependency()
+	const { data, notifications } = (await fetchDependency()) || {
+		data: {},
+		notifications: { notifications: [] },
+	}
 
 	return (
 		<html lang="en">
@@ -37,7 +40,11 @@ export default async function RootLayout({
 				/>
 			</head>
 			<body>
-				<Providers options={data.options} user_data={data.user_data}>
+				<Providers
+					options={data.options}
+					user_data={data.user_data}
+					notifications={notifications}
+				>
 					{children}
 				</Providers>
 			</body>
@@ -49,8 +56,15 @@ const fetchDependency = async () => {
 	try {
 		const { data } = await axiosInstance.get(`/users/dependencies`)
 
-		return data
+		let notifications = { notifications: [] }
+		if (data.user_data.user) {
+			const { data } = await axiosInstance.get('/notifications')
+
+			notifications = data.notifications
+		}
+
+		return { data, notifications }
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 	}
 }

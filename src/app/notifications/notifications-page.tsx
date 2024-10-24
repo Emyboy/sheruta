@@ -24,8 +24,7 @@ const ButtonText: Record<NotificationsType['type'], string> = {
 }
 
 export default function NotificationsPage({}: Props) {
-	const { notifications, updateNotification, readAllNotifications } =
-		useNotificationContext()
+	const { notifications, markAsRead } = useNotificationContext()
 
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING} p={DEFAULT_PADDING}>
@@ -44,13 +43,7 @@ export default function NotificationsPage({}: Props) {
 					bgColor={'transparent'}
 					p={0}
 					_hover={{ bgColor: 'transparent' }}
-					onClick={async () =>
-						await readAllNotifications(
-							notifications
-								.filter((notification) => !notification.is_read)
-								.map((notification) => notification.id),
-						)
-					}
+					onClick={async () => await markAsRead()}
 				>
 					Mark all as Read
 				</Button>
@@ -73,7 +66,7 @@ export default function NotificationsPage({}: Props) {
 				)}
 				{notifications.map((notification) => (
 					<Flex
-						key={notification.id}
+						key={notification._id}
 						borderBottom={'1px'}
 						borderColor={'border_color'}
 						flexDir={'column'}
@@ -81,10 +74,10 @@ export default function NotificationsPage({}: Props) {
 						px={`calc(${DEFAULT_PADDING} * 0.5)`}
 						gap={'12px'}
 						_light={{
-							backgroundColor: notification.is_read ? '' : 'brand_lighter',
+							backgroundColor: notification.seen ? '' : 'brand_lighter',
 						}}
 						_dark={{
-							backgroundColor: notification.is_read ? '' : 'brand_darker',
+							backgroundColor: notification.seen ? '' : 'brand_darker',
 							borderColor: 'dark_light',
 						}}
 					>
@@ -103,8 +96,8 @@ export default function NotificationsPage({}: Props) {
 						>
 							<Avatar
 								src={
-									notification.sender_details
-										? notification.sender_details.avatar_url
+									notification.sender
+										? notification.sender.avatar_url
 										: 'https://bit.ly/broken-link'
 								}
 								size={{
@@ -113,16 +106,16 @@ export default function NotificationsPage({}: Props) {
 								}}
 							/>
 							<Text fontWeight={400} fontSize={{ base: 'base', md: 'lg' }}>
-								{notification.sender_details ? (
-									<Link href={`/user/${notification.sender_details.id}`}>
+								{notification.sender ? (
+									<Link href={`/user/${notification.sender._id}`}>
 										<Text
 											textTransform={'capitalize'}
 											fontWeight={'500'}
 											color={'brand'}
 											as={'span'}
 										>
-											{notification.sender_details.last_name}{' '}
-											{notification.sender_details.first_name}
+											{notification.sender.last_name}{' '}
+											{notification.sender.first_name}
 										</Text>
 									</Link>
 								) : (
@@ -137,7 +130,7 @@ export default function NotificationsPage({}: Props) {
 								)}{' '}
 								{notification.message}
 							</Text>
-							<Link href={notification.action_url || ''}>
+							<Link href={'/messages/' + notification.receiver._id || ''}>
 								<Button
 									fontSize={{ base: 'sm', md: 'base' }}
 									fontWeight={400}
@@ -155,12 +148,12 @@ export default function NotificationsPage({}: Props) {
 									py={{ base: '8px', md: '10px' }}
 									px={{ base: '24px', md: '30px' }}
 									rounded={32}
-									onClick={async () => {
-										if (!notification.is_read)
-											await updateNotification(notification.id)
-									}}
+									// onClick={async () => {
+									// 	if (!notification.seen)
+									// 		await updateNotification(notification.id)
+									// }}
 								>
-									{ButtonText[notification.type]}
+									message
 								</Button>
 							</Link>
 						</Flex>

@@ -88,10 +88,9 @@ const EachMessageBobble = forwardRef<HTMLDivElement, Props>(
 				</MenuList>
 			</Menu>
 		)
-	}
+	},
 )
 
 EachMessageBobble.displayName = 'EachMessageBobble'
 
 export default EachMessageBobble
-

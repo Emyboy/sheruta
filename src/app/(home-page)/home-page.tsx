@@ -12,10 +12,10 @@ import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { FlatShareRequest } from '@/firebase/service/request/request.types'
+import { unAuthenticatedAxios } from '@/utils/custom-axios'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-import { unAuthenticatedAxios } from '@/utils/custom-axios'
 
 type Props = {
 	requests: FlatShareRequest[] | undefined

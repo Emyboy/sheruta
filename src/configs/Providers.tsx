@@ -27,10 +27,12 @@ export function Providers({
 	children,
 	user_data,
 	options,
+	notifications,
 }: {
 	children: React.ReactNode
 	user_data: any
 	options: any
+	notifications: any
 }) {
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -49,7 +51,7 @@ export function Providers({
 						<AuthContextProvider user_data={user_data}>
 							<OptionsProvider options={options}>
 								<InspectionsProvider>
-									<NotificationsProvider>
+									<NotificationsProvider userNotifications={notifications}>
 										<BookmarksProvider>
 											<Box
 												bg="white"

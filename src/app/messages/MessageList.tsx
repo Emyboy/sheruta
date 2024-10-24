@@ -15,47 +15,50 @@ type Props = {
 	handleDelete: (message_id: string) => Promise<void>
 }
 
-const MessageList: React.FC<Props> = ({ conversation, messages, handleDelete }) => {
-	const [page, setPage] = useState(1);
-	const [messageList, setMessageList] = useState<DirectMessageData[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [hasMore, setHasMore] = useState(true);
+const MessageList: React.FC<Props> = ({
+	conversation,
+	messages,
+	handleDelete,
+}) => {
+	const [page, setPage] = useState(1)
+	const [messageList, setMessageList] = useState<DirectMessageData[]>([])
+	const [isLoading, setIsLoading] = useState(false)
+	const [hasMore, setHasMore] = useState(true)
 
-	const axiosInstance = useAuthenticatedAxios();
+	const axiosInstance = useAuthenticatedAxios()
 
 	// Ref for intersection observer to detect the top of the list
-	const firstMessageRef = useRef<HTMLDivElement | null>(null);
-	const topObserver = useRef<IntersectionObserver | null>(null);
+	const firstMessageRef = useRef<HTMLDivElement | null>(null)
+	const topObserver = useRef<IntersectionObserver | null>(null)
 
 	// Load initial messages (newest first)
 	useEffect(() => {
 		if (messages) {
-			setMessageList(messages);	
+			setMessageList(messages)
 		}
-	}, [messages]);
+	}, [messages])
 
 	useEffect(() => {
-		const MarkAllMessagesAsRead = async()=>{
+		const MarkAllMessagesAsRead = async () => {
 			try {
-				if(!axiosInstance) return null;
-                await axiosInstance.put(`/messages/${conversation._id}`);
-            } catch (err) {
-                console.error('Error marking all messages as read:', err);
-            }
+				if (!axiosInstance) return null
+				await axiosInstance.put(`/messages/${conversation._id}`)
+			} catch (err) {
+				console.error('Error marking all messages as read:', err)
+			}
 		}
 
-		MarkAllMessagesAsRead();
-
+		MarkAllMessagesAsRead()
 	}, [axiosInstance, conversation?._id])
 
 	const loadOlderMessages = async () => {
-		if (isLoading || !hasMore || !axiosInstance) return;
-		setIsLoading(true);
+		if (isLoading || !hasMore || !axiosInstance) return
+		setIsLoading(true)
 
 		try {
-			let allMessages: DirectMessageData[] = [];
-			let currentPage = page;
-			let totalPages = 1; // Initialize totalPages to enter the loop
+			let allMessages: DirectMessageData[] = []
+			let currentPage = page
+			let totalPages = 1 // Initialize totalPages to enter the loop
 
 			// Fetch all pages of older messages
 			while (currentPage <= totalPages) {
@@ -63,54 +66,58 @@ const MessageList: React.FC<Props> = ({ conversation, messages, handleDelete }) 
 					data: {
 						data: { docs, totalPages: pages },
 					},
-				} = await axiosInstance.get(`/messages/${conversation._id}?page=${currentPage}&limit=10`);
+				} = await axiosInstance.get(
+					`/messages/${conversation._id}?page=${currentPage}&limit=10`,
+				)
 
-				allMessages = [...allMessages, ...docs];
-				totalPages = pages; 
-				currentPage++; 
+				allMessages = [...allMessages, ...docs]
+				totalPages = pages
+				currentPage++
 			}
 
 			if (allMessages.length > 0) {
 				setMessageList((prevMessages) => {
-					const combinedMessages = [...allMessages, ...prevMessages];
+					const combinedMessages = [...allMessages, ...prevMessages]
 
-					const uniqueMessagesMap = new Map(combinedMessages.map((message) => [message._id, message]));
-					return Array.from(uniqueMessagesMap.values()).reverse();
-				});
+					const uniqueMessagesMap = new Map(
+						combinedMessages.map((message) => [message._id, message]),
+					)
+					return Array.from(uniqueMessagesMap.values()).reverse()
+				})
 
-				setPage(currentPage);
+				setPage(currentPage)
 			} else {
-				setHasMore(false);
+				setHasMore(false)
 			}
 		} catch (error) {
-			console.error('Failed to load more messages:', error);
+			console.error('Failed to load more messages:', error)
 		} finally {
-			setIsLoading(false);
+			setIsLoading(false)
 		}
-	};
+	}
 
 	useEffect(() => {
-		if (topObserver.current) topObserver.current.disconnect();
+		if (topObserver.current) topObserver.current.disconnect()
 
 		topObserver.current = new IntersectionObserver((entries) => {
 			if (entries[0].isIntersecting && hasMore) {
-				loadOlderMessages();
+				loadOlderMessages()
 			}
-		});
+		})
 
 		if (firstMessageRef.current) {
-			topObserver.current.observe(firstMessageRef.current);
+			topObserver.current.observe(firstMessageRef.current)
 		}
 
 		return () => {
-			if (topObserver.current) topObserver.current.disconnect();
-		};
-	}, [hasMore, isLoading]);
+			if (topObserver.current) topObserver.current.disconnect()
+		}
+	}, [hasMore, isLoading])
 
 	const setFirstMessageRef = (node: HTMLDivElement | null) => {
-		firstMessageRef.current = node;
-		if (topObserver.current && node) topObserver.current.observe(node);
-	};
+		firstMessageRef.current = node
+		if (topObserver.current && node) topObserver.current.observe(node)
+	}
 
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING} pb={NAV_HEIGHT}>
@@ -122,7 +129,6 @@ const MessageList: React.FC<Props> = ({ conversation, messages, handleDelete }) 
 					ref={index === 0 ? setFirstMessageRef : null} // Assign the first message ref for loading older messages
 				/>
 			))}
-
 			{messageList && messageList.length > 0 ? (
 				<Flex justifyContent={'center'}>
 					<Flex
@@ -146,24 +152,19 @@ const MessageList: React.FC<Props> = ({ conversation, messages, handleDelete }) 
 					</Flex>
 				</Flex>
 			) : null}
-
 			{isLoading && (
 				<Flex justifyContent={'center'} py={4} _dark={{ color: 'text_muted' }}>
-					<Text fontSize={"sm"}>Loading more messages...</Text>
+					<Text fontSize={'sm'}>Loading more messages...</Text>
 				</Flex>
 			)}
-
 			{/* {!hasMore && (
 				<Flex justifyContent={'center'} py={4} _dark={{ color: 'text_muted' }}>
 					<Text fontSize={"sm"}>You have reached the end of the conversation.</Text>
 				</Flex>
 			)} */}
-
 			<div id="end"></div> {/* Target for scrolling to the bottom */}
 		</Flex>
-	);
-};
-
-
+	)
+}
 
 export default MessageList

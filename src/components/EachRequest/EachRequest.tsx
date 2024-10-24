@@ -123,24 +123,6 @@ export default function EachRequest({ request }: Props) {
 					<Link
 						href={canInteract ? `/user/${request.user._id}` : ''}
 						style={{ textDecoration: 'none' }}
-						onClick={async () =>
-							(canInteract || authState.user?._id !== request.user._id) &&
-							(await createNotification({
-								is_read: false,
-								message: NotificationsBodyMessage.profile_view,
-								recipient_id: request.user._id,
-								type: 'profile_view',
-								sender_details: authState.user
-									? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
-									: null,
-								action_url: `/user/${request.user._id}`,
-							}))
-						}
 					>
 						<Avatar
 							src={request.user.avatar_url}
@@ -158,24 +140,6 @@ export default function EachRequest({ request }: Props) {
 								<Link
 									href={`/user/${request.user._id}`}
 									style={{ textDecoration: 'none' }}
-									onClick={async () =>
-										authState.user?._id !== request.user._id &&
-										(await createNotification({
-											is_read: false,
-											message: NotificationsBodyMessage.profile_view,
-											recipient_id: request.user._id,
-											type: 'profile_view',
-											sender_details: authState.user
-												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
-												: null,
-											action_url: `/user/${request.user._id}`,
-										}))
-									}
 								>
 									<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 										<Text
@@ -411,7 +375,7 @@ export default function EachRequest({ request }: Props) {
 					flexDir={'row'}
 					justifyContent={'space-between'}
 				>
-					<Flex gap={DEFAULT_PADDING}>
+					<Flex gap={{ base: 0, sm: DEFAULT_PADDING }}>
 						{!request.user_info?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
@@ -438,19 +402,6 @@ export default function EachRequest({ request }: Props) {
 									onClick={async () => {
 										if (canInteract) {
 											try {
-												// Handle the call
-												await handleCall({
-													number: request.user_info.primary_phone_number,
-													recipient_id: request.user._id,
-													sender_details: authState.user
-														? {
-																avatar_url: authState.user.avatar_url,
-																first_name: authState.user.first_name,
-																last_name: authState.user.last_name,
-																id: authState.user._id,
-															}
-														: null,
-												})
 												await addAnalyticsData('calls', request.location._id)
 											} catch (error) {
 												console.error(
@@ -711,6 +662,8 @@ const EachRequestMedia = ({
 									overflow={'hidden'}
 									cursor={'pointer'}
 									rounded="md"
+									height={'100%'}
+									bgColor={'black'}
 									alignItems={'center'}
 									justifyContent={'center'}
 									onClick={() => handleClick(i)}
@@ -730,6 +683,7 @@ const EachRequestMedia = ({
 									overflow={'hidden'}
 									cursor={'pointer'}
 									rounded="md"
+									bgColor={'black'}
 									bg="dark"
 									onClick={() => handleClick(i)}
 								>
