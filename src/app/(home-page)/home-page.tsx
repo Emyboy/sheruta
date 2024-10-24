@@ -12,10 +12,10 @@ import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { FlatShareRequest } from '@/firebase/service/request/request.types'
+import { unAuthenticatedAxios } from '@/utils/custom-axios'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
-import { unAuthenticatedAxios } from '@/utils/custom-axios'
 
 type Props = {
 	requests: FlatShareRequest[] | undefined
@@ -36,30 +36,6 @@ export default function HomePage({ requests, userProfiles }: Props) {
 	const [processedRequests, setProcessedRequests] = useState<
 		FlatShareRequest[]
 	>([])
-
-	// const axiosAuth = useAuthenticatedAxios()
-
-	// const { data, isLoading, isError, error, refetch } = useQuery({
-	// 	queryKey: ["testing", ],
-	// 	queryFn: () => axiosAuth.get(`/route`),
-	// 	refetchOnWindowFocus: false,
-	// })
-
-	// const {mutate, isPending} = useMutation({
-	// 	mutationFn: (user:User) => axiosAuth.post(`/route`, { ...data }),
-	// 	onSuccess: () =>
-	// 	{
-	// 		// what to do when
-
-	// 		toast({
-	// 			message:"user infor update"
-	// 		})
-
-	// 	},
-	// 	onError:(error)=>{
-	// 		console.log(error)
-	// 	}
-	// })
 
 	useEffect(() => {
 		const processRequests = async () => {
@@ -190,9 +166,9 @@ export default function HomePage({ requests, userProfiles }: Props) {
 							)}
 						</Flex>
 					</Flex>
-					<Flex>
+					{/* <Flex>
 						<MainRightNav />
-					</Flex>
+					</Flex> */}
 				</ThreeColumnLayout>
 				<MobileNavFooter />
 			</MainPageBody>

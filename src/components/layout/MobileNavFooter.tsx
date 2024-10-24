@@ -13,12 +13,14 @@ import {
 	BiSearchAlt,
 } from 'react-icons/bi'
 import MainIconBtn from '../atoms/MainIconBtn'
+import useHeaderBubbles from '@/hooks/useHeaderBubbles'
 
 type Props = {}
 
 export default function MobileNavFooter({}: Props) {
 	const pathname = usePathname()
 	const { unreadNotifications } = useNotificationContext()
+	const { bubbles } = useHeaderBubbles()
 
 	return (
 		<Hide above="lg">
@@ -62,7 +64,7 @@ export default function MobileNavFooter({}: Props) {
 						label="Messages"
 						Icon={BiMessageRoundedDetail}
 						active={pathname.includes('messages')}
-						hasNotification
+						hasNotification={bubbles.messages}
 					/>
 				</Link>
 				<Link href={`/search`}>

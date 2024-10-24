@@ -24,8 +24,6 @@ export default async function page({
 		`/flat-share-requests/${request_id}`,
 	)
 
-	console.log('request: ', requestData)
-
 	if (!requestData) redirect('/')
 
 	return (

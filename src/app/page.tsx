@@ -1,7 +1,7 @@
 import { CACHE_TTL } from '@/constants'
 import { FlatShareRequest } from '@/firebase/service/request/request.types'
-import HomePage from './(home-page)/home-page'
 import axiosInstance from '@/utils/custom-axios'
+import HomePage from './(home-page)/home-page'
 
 export const revalidate = CACHE_TTL?.SHORT
 
@@ -18,10 +18,9 @@ export default async function page({ searchParams }: Props) {
 		data: {
 			data: FlatShareRequest[]
 		}
-	} = await axiosInstance.get(`/flat-share-requests?page=1&limit=10`)
+	} = await axiosInstance.get(
+		`/flat-share-requests?page=${searchParams?.page || 1}&limit=30`,
+	)
 
-	const finalRequests =
-		requests && Object.keys(requests).length > 0 ? requests : undefined
-
-	return <HomePage requests={finalRequests} userProfiles={'[]'} />
+	return <HomePage requests={requests} userProfiles={'[]'} />
 }

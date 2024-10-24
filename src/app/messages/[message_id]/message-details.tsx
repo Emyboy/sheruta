@@ -9,34 +9,25 @@ import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import MainBodyContent from '@/components/layout/MainBodyContent'
 import MessageInput from '../components/MessageInput'
 import MessageList from '../MessageList'
-import MessagesService from '@/firebase/service/messages/messages.firebase'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import MainLeftNav from '@/components/layout/MainLeftNav'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
-import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
 import { useAuthContext } from '@/context/auth.context'
 import moment from 'moment'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
-import { generateConversationID } from '@/firebase/service/conversations/conversation.utils'
 import LoginCard from '@/components/atoms/LoginCard'
 import { BiSolidMessageSquareDetail } from 'react-icons/bi'
 import CreditInfo from '@/components/info/CreditInfo/CreditInfo'
 import { creditTable } from '@/constants'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/firebase'
-import { DBCollectionName } from '@/firebase/service/index.firebase'
 import usePayment from '@/hooks/usePayment'
-import NotificationsService, {
-	NotificationsBodyMessage,
-} from '@/firebase/service/notifications/notifications.firebase'
 import useAuthenticatedAxios from '@/hooks/useAxios'
-import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 import useCommon from '@/hooks/useCommon'
 import { useQuery } from '@tanstack/react-query'
+import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 
 type Props = {}
 
-export default function MessageDetails({ }: Props) {
+export default function MessageDetails({}: Props) {
 	const toast = useToast()
 	const [_, paymentActions] = usePayment()
 	const {
@@ -88,8 +79,7 @@ export default function MessageDetails({ }: Props) {
 		const initiateConversation = async () => {
 			if (axiosInstance && message_id && user) {
 				try {
-					await createNewConversation()
-					await getConversation()
+					await Promise.all([createNewConversation(), getConversation()])
 				} catch (error) {
 					console.error('Error initiating conversation:', error)
 				}
@@ -97,7 +87,6 @@ export default function MessageDetails({ }: Props) {
 		}
 
 		if (user && message_id && axiosInstance) {
-			console.log(axiosInstance)
 			initiateConversation()
 		}
 	}, [user, message_id, axiosInstance])
@@ -145,20 +134,17 @@ export default function MessageDetails({ }: Props) {
 			<MainContainer>
 				<ThreeColumnLayout
 					header={
-						<>
-							<Link href={`/user/${theGuest?._id}`} _hover={{ textDecoration: "none" }}>
-								<MainBackHeader
-									image_url={theGuest?.avatar_url || null}
-									isLoading={loading}
-									heading={theGuest?.first_name || ''}
-									subHeading={
-										theGuest
-											? `Last seen: ${moment(theGuest.last_seen).fromNow()}`
-											: null
-									}
-								/>
-							</Link>
-						</>
+						<MainBackHeader
+							image_url={theGuest?.avatar_url || null}
+							isLoading={loading}
+							heading={theGuest?.first_name || ''}
+							customHeadingRoute={`/user/${theGuest?._id}`}
+							subHeading={
+								theGuest
+									? `Last seen: ${moment(theGuest.last_seen).fromNow()}`
+									: null
+							}
+						/>
 					}
 				>
 					<Flex flexDirection={'column'} w="full">
@@ -214,40 +200,34 @@ const MessageSection = ({
 	const toast = useToast()
 
 	const axiosInstance = useAuthenticatedAxios()
-
-	const router = useRouter()
-
-	// const [messageList, setMessageList] = useState<DirectMessageData[]>([])
-
-	// const getMessages = async () => {
-	// 	if (!axiosInstance) return null
-
-	// 	const {
-	// 		data: {
-	// 			data: { docs: messages },
-	// 		},
-	// 	}: {
-	// 		data: { data: { docs: DirectMessageData[] } }
-	// 	} = await axiosInstance.get(`/messages/${conversation._id}`)
-
-	// 	setMessageList(messages.reverse())
-	// }
-
 	const { data: messageList, refetch } = useQuery({
-		queryKey: ["testing", conversation._id], // Include conversation ID
+		queryKey: [conversation._id],
 		queryFn: async () => {
-			const {
-				data: {
-					data: { docs },
-				},
-			} = await axiosInstance.get(`/messages/${conversation._id}`);
-	
-			return docs.reverse(); // Return the reversed messages
+			if (!axiosInstance) return []
+
+			let allMessages: DirectMessageData[] = []
+			let currentPage = 1
+			let totalPages = 1 // Initialize totalPages to enter the loop
+
+			// Fetch all pages of messages
+			while (currentPage <= totalPages) {
+				const {
+					data: {
+						data: { docs, totalPages: pages },
+					},
+				} = await axiosInstance.get(`/messages/${conversation._id}`, {
+					params: { page: currentPage },
+				})
+
+				allMessages = [...allMessages, ...docs] // Collect all messages
+				totalPages = pages // Update totalPages
+				currentPage++ // Move to the next page
+			}
+
+			return allMessages.reverse() // Return the reversed messages
 		},
 		refetchOnWindowFocus: false,
-		staleTime: 5000, // Data is considered fresh for 5 seconds
-		refetchInterval: 5000, // Refetch every 5 seconds to check for new messages
-	});
+	})
 
 	const handleSubmit = async (message: string) => {
 		try {
@@ -257,7 +237,6 @@ const MessageSection = ({
 					title: 'please log in to message this person',
 				})
 
-			// Ensure axiosInstance is ready before making the request
 			if (!axiosInstance) {
 				toast({
 					title: 'Session not ready. Please try again later.',
@@ -271,35 +250,8 @@ const MessageSection = ({
 					content: message,
 					conversation_id: conversation._id,
 				}),
-				// getMessages()
-				refetch()
+				refetch(),
 			])
-
-
-			// await Promise.all([
-			// 	MessagesService.sendDM({
-			// 		message,
-			// 		conversation_id: conversation._id,
-			// 		recipient_id: guest._id,
-			// 		user_id: user._id,
-			// 	}),
-			// 	NotificationsService.create({
-			// 		collection_name: DBCollectionName.notifications,
-			// 		data: {
-			// 			is_read: false,
-			// 			message: NotificationsBodyMessage.message,
-			// 			recipient_id: guest._id,
-			// 			sender_details: {
-			// 				id: user._id,
-			// 				avatar_url: user.avatar_url,
-			// 				first_name: user.first_name,
-			// 				last_name: user.last_name,
-			// 			},
-			// 			type: 'message',
-			// 			action_url: `/messages/${user._id}`,
-			// 		},
-			// 	}),
-			// ])
 		} catch (error) {
 			console.log(error)
 			toast({ title: 'error, please try again', status: 'error' })
@@ -310,8 +262,7 @@ const MessageSection = ({
 		try {
 			await Promise.all([
 				axiosInstance?.delete(`/messages/${message_id}`),
-				// getMessages(),
-				refetch()
+				refetch(),
 			])
 		} catch (error) {
 			toast({ title: `Error deleting message`, status: 'error' })
@@ -319,7 +270,6 @@ const MessageSection = ({
 	}
 
 	useEffect(() => {
-		// getMessages()
 		refetch()
 	}, [conversation._id])
 
@@ -329,7 +279,7 @@ const MessageSection = ({
 				<MessageList
 					isLoading={isLoading}
 					conversation={conversation}
-					messageList={messageList}
+					// messages={messageList}
 					handleDelete={handleDelete}
 				/>
 				<Flex

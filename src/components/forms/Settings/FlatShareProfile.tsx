@@ -22,6 +22,8 @@ import {
 import React, { useEffect, useState } from 'react'
 
 const FlatShareProfileForm = () => {
+	return
+
 	const [formData, setFormData] = useState<{
 		budget: number
 		occupation: string
@@ -43,7 +45,7 @@ const FlatShareProfileForm = () => {
 		linkedin: '',
 		facebook: '',
 		instagram: '',
-		payment_type: PaymentType.weekly,
+		payment_type: PaymentType.daily,
 	})
 
 	const {
@@ -66,8 +68,8 @@ const FlatShareProfileForm = () => {
 				facebook: flat_share_profile.facebook || '',
 				instagram: flat_share_profile.instagram || '',
 				payment_type:
-					(flat_share_profile?.payment_type as PaymentType) ||
-					PaymentType.weekly,
+					(flat_share_profile?.payment_type as unknown as PaymentType) ||
+					PaymentType.daily,
 			})
 			return
 		}

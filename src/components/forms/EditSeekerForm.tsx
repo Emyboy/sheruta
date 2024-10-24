@@ -239,27 +239,26 @@ const EditSeekerForm: React.FC<{
 			}))
 		}
 	}
-	
+
 	const { mutate: editRequest, isPending } = useMutation({
 		mutationFn: async () => {
-
 			if (!axiosInstance) {
 				showToast({
 					message: 'Failed to post request, please try again',
 					status: 'error',
-				});
-				throw new Error('Axios instance not available'); // Abort mutation
+				})
+				throw new Error('Axios instance not available') // Abort mutation
 			}
-	
+
 			// Check if user is logged in
 			if (!(user?._id && parsedRequestData?.user._id === user._id)) {
 				showToast({
 					message: 'Failed to post request, please log in first',
 					status: 'error',
-				});
-				throw new Error('User not logged in'); // Abort mutation
+				})
+				throw new Error('User not logged in') // Abort mutation
 			}
-	
+
 			// Prepare final form data
 			const finalFormData = {
 				...formData,
@@ -272,36 +271,39 @@ const EditSeekerForm: React.FC<{
 				`/flat-share-requests/seeker/${requestId}`,
 				finalFormData,
 			)
-			return response.data;
+			return response.data
 		},
 		onSuccess: async (data) => {
 			showToast({
 				message: 'Your request has been edited successfully',
 				status: 'success',
-			});
-	
+			})
+
 			// Redirect after 1 second
 			setTimeout(() => {
-				window.location.assign(`/request/seeker/${data?.data?._id || ''}`);
-			}, 1000);
+				window.location.assign(`/request/seeker/${data?.data?._id || ''}`)
+			}, 1000)
 		},
 		onError: (err) => {
 			if (err instanceof ZodError) {
-				setFormErrors(extractErrors(err.issues as ErrorObject[]));
-				console.error('Zod Validation Error:', err.issues);
+				setFormErrors(extractErrors(err.issues as ErrorObject[]))
+				console.error('Zod Validation Error:', err.issues)
 			} else {
 				showToast({
 					message: 'Error, please try again',
 					status: 'error',
-				});
+				})
 			}
 		},
-	});
-	
+	})
+
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault()
 
-		if (formData.description.length < 140 || formData.description.length > 500) {
+		if (
+			formData.description.length < 140 ||
+			formData.description.length > 500
+		) {
 			return showToast({
 				message: 'Description should be between 140 and 500 characters long.',
 				status: 'info',
@@ -312,9 +314,7 @@ const EditSeekerForm: React.FC<{
 	}
 
 	return (
-		<form
-			onSubmit={handleSubmit}
-		>
+		<form onSubmit={handleSubmit}>
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired isInvalid={isRentInvalid} flex="1">
 					<FormLabel requiredIndicator={null} htmlFor="budget">
