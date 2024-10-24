@@ -1,5 +1,8 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore'
 import { z } from 'zod'
+import { AuthUser } from '../auth/auth.types'
+import { FlatShareProfileData } from '../flat-share-profile/flat-share-profile.types'
+import { UserInfo } from '../user-info/user-info.types'
 
 export const NotificationsDTO = z.object({
 	type: z.enum([
@@ -30,6 +33,26 @@ export const NotificationsDTO = z.object({
 })
 
 export type NotificationsType = z.infer<typeof NotificationsDTO>
+
+enum NotificationsTriggerType {
+	DEFAULT = 'default',
+	PROFILE_VIEW = 'profile_view',
+	REQUEST_VIEW = 'request_view',
+	CALL = 'call',
+}
+
+export type NotificationType = {
+	_id: string
+	trigger_type: NotificationsTriggerType
+	seen: boolean
+	message: string
+	sender: AuthUser
+	receiver: AuthUser
+	receiver_flat_share_profile: FlatShareProfileData
+	// receiver_user_settings:USerset
+	receiver_user_info: UserInfo
+	createdAt: Date
+}
 
 export type returnedNotifications = NotificationsType & {
 	createdAt: Timestamp

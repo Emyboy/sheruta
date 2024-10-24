@@ -2,7 +2,16 @@
 
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useOptionsContext } from '@/context/options.context'
-import { Box, Checkbox, Flex, Select, SimpleGrid, Text } from '@chakra-ui/react'
+import {
+	Box,
+	Checkbox,
+	Flex,
+	Radio,
+	RadioGroup,
+	Select,
+	SimpleGrid,
+	Text,
+} from '@chakra-ui/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { IoLocationOutline } from 'react-icons/io5'
@@ -26,10 +35,6 @@ const budgetList = [
 ]
 
 const findApartmentList = [
-	{
-		label: 'By Request',
-		value: 'by-request',
-	},
 	{
 		label: 'Show Flatmates',
 		value: 'show-flatmates',
@@ -71,34 +76,45 @@ export default function SearchPageFilter({}: Props) {
 	const { replace } = useRouter()
 
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
-		options.location_keywords,
+		options.locations,
 	)
 
 	useEffect(() => {
 		if (searchParams.get('state')?.toString()) {
 			setFilteredLocationOptions(
-				options.location_keywords.filter(
+				options.locations.filter(
 					(location) =>
-						location._state_id === searchParams.get('state')?.toString(),
+						location.state ===
+						options.states.find(
+							(state) => state.slug === searchParams.get('state')?.toString(),
+						)?._id,
 				),
 			)
 		} else {
-			setFilteredLocationOptions(options.location_keywords)
+			setFilteredLocationOptions(options.locations)
 		}
-	}, [searchParams.toString(), searchParams.get('state')?.toString()])
+	}, [searchParams.get('state')?.toString()])
 
 	const handleFilterOption = useDebouncedCallback(
-		(e: React.ChangeEvent<HTMLSelectElement>) => {
+		(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 			const params = new URLSearchParams(searchParams)
 
-			const { name, value } = e.target
+			const { name, value, checked } = e.target as HTMLInputElement
 
 			if (name === 'state') params.delete('location')
 
-			if (!value) {
-				params.delete(name)
+			if (checked !== undefined) {
+				if (!checked) {
+					params.delete(name)
+				} else {
+					params.set(name, value)
+				}
 			} else {
-				params.set(name, value)
+				if (!value) {
+					params.delete(name)
+				} else {
+					params.set(name, value)
+				}
 			}
 
 			replace(`${pathname}?${params.toString()}`)
@@ -106,32 +122,32 @@ export default function SearchPageFilter({}: Props) {
 		300,
 	)
 
-	const handleCheckBoxOptions = useDebouncedCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const params = new URLSearchParams(searchParams)
+	// const handleCheckBoxOptions = useDebouncedCallback(
+	// 	(e: React.ChangeEvent<HTMLInputElement>) => {
+	// 		const params = new URLSearchParams(searchParams)
 
-			const { name, checked, value } = e.target
+	// 		const { name, checked, value } = e.target
 
-			const prevBudgetQuery = params.get(name)
+	// 		const prevBudgetQuery = params.get(name)
 
-			if (!checked && prevBudgetQuery?.includes(value)) {
-				const budgets = prevBudgetQuery
-					.split(',')
-					.filter((item) => item != value)
+	// 		if (!checked && prevBudgetQuery?.includes(value)) {
+	// 			const budgets = prevBudgetQuery
+	// 				.split(',')
+	// 				.filter((item) => item != value)
 
-				budgets.length < 1
-					? params.delete(name)
-					: params.set(name, budgets.join(','))
-			} else if (prevBudgetQuery && checked) {
-				params.set(name, `${prevBudgetQuery},${value}`)
-			} else if (checked && !prevBudgetQuery) {
-				params.set(name, value)
-			}
+	// 			budgets.length < 1
+	// 				? params.delete(name)
+	// 				: params.set(name, budgets.join(','))
+	// 		} else if (prevBudgetQuery && checked) {
+	// 			params.set(name, `${prevBudgetQuery},${value}`)
+	// 		} else if (checked && !prevBudgetQuery) {
+	// 			params.set(name, value)
+	// 		}
 
-			replace(`${pathname}?${params.toString()}`)
-		},
-		300,
-	)
+	// 		replace(`${pathname}?${params.toString()}`)
+	// 	},
+	// 	300,
+	// )
 
 	return (
 		<Flex
@@ -184,8 +200,8 @@ export default function SearchPageFilter({}: Props) {
 							{options.states.map((state) => (
 								<option
 									style={{ color: 'black', textTransform: 'capitalize' }}
-									value={state.id}
-									key={state.id}
+									value={state.slug}
+									key={state._id}
 								>
 									{state.name}
 								</option>
@@ -227,13 +243,13 @@ export default function SearchPageFilter({}: Props) {
 							>
 								Filter by city
 							</option>
-							{filteredLocationOptions.map((area) => (
+							{filteredLocationOptions.map((location) => (
 								<option
 									style={{ color: 'black', textTransform: 'capitalize' }}
-									value={area.id}
-									key={area.id}
+									value={location.slug}
+									key={location._id}
 								>
-									{area.name}
+									{location.name}
 								</option>
 							))}
 						</Select>
@@ -264,7 +280,7 @@ export default function SearchPageFilter({}: Props) {
 							fontWeight={'300'}
 							fontSize={{ base: 'xs', md: 'sm' }}
 							value={budget.value}
-							onChange={handleCheckBoxOptions}
+							onChange={handleFilterOption}
 							defaultChecked={searchParams.toString().includes(budget.value)}
 						>
 							{budget.label}
@@ -287,19 +303,19 @@ export default function SearchPageFilter({}: Props) {
 				<SimpleGrid columns={1} spacingY={{ base: '12px', md: '16px' }}>
 					{options.services.map((service) => (
 						<Checkbox
-							key={service.id}
+							key={service._id}
 							textTransform={'capitalize'}
 							_dark={{ color: 'text_muted' }}
 							colorScheme="green"
 							color={'#11171799'}
 							fontWeight={'300'}
 							fontSize={{ base: 'xs', md: 'sm' }}
-							value={service.id}
+							value={service.slug}
 							name="service"
-							onChange={handleCheckBoxOptions}
-							defaultChecked={searchParams.toString().includes(service.id)}
+							onChange={handleFilterOption}
+							defaultChecked={searchParams.toString().includes(service.slug)}
 						>
-							{service.title}
+							{service.name}
 						</Checkbox>
 					))}
 				</SimpleGrid>
@@ -328,7 +344,7 @@ export default function SearchPageFilter({}: Props) {
 							fontSize={{ base: 'xs', md: 'sm' }}
 							value={apartmentType.value}
 							name="apartment"
-							onChange={handleCheckBoxOptions}
+							onChange={handleFilterOption}
 							defaultChecked={searchParams
 								.toString()
 								.includes(apartmentType.value)}
@@ -362,7 +378,7 @@ export default function SearchPageFilter({}: Props) {
 							fontSize={{ base: 'xs', md: 'sm' }}
 							value={paymentType.value}
 							name="payment_type"
-							onChange={handleCheckBoxOptions}
+							onChange={handleFilterOption}
 							defaultChecked={searchParams
 								.toString()
 								.includes(paymentType.value)}

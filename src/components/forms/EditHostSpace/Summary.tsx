@@ -177,7 +177,7 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 
 		try {
 			const res = await axiosInstance.put(
-				'/flat-share-requests/host',
+				`/flat-share-requests/host/${_id}`,
 				cleanedFormData,
 			)
 
@@ -186,7 +186,6 @@ export default function Summary({ formData, setFormData }: HostSpaceFormProps) {
 			revalidatePathOnClient(`/request/host/${_id}`)
 
 			localStorage.removeItem('host_space_form')
-			toast({ status: 'success', title: 'You have successfully added a space' })
 
 			toast({
 				status: 'success',

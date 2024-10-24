@@ -1,14 +1,12 @@
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { useRouter } from 'next/navigation'
+import { revalidatePathOnClient } from '@/utils/actions'
 import { useState } from 'react'
-import useCommon from './useCommon'
 import useAuthenticatedAxios from './useAxios'
+import useCommon from './useCommon'
 
 export default function useShareSpace() {
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
-	const router = useRouter()
 
 	const [isLoading, setIsLoading] = useState(false)
 
@@ -70,6 +68,8 @@ export default function useShareSpace() {
 					message: 'Post has been deleted successfully',
 					status: 'success',
 				})
+
+				revalidatePathOnClient()
 
 				setTimeout(() => {
 					window.location.assign('/')

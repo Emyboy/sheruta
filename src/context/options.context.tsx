@@ -12,7 +12,7 @@ import { useAppContext } from './app.context'
 export type OptionType = {
 	_id: string
 	name: string
-	slug?: string
+	slug: string
 }
 
 export interface OptionsState {
