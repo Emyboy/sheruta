@@ -150,11 +150,15 @@ export default function ProfileHero({ data, userProfile, user_id }: Props) {
 					>
 						Call Me
 					</Button>
-					<Link href={`/messages/${user_id}`}>
-						<Button>
-							<BiMessageRoundedDetail size={25} />
-						</Button>
-					</Link>
+
+					{user?._id !== user_id ? (
+						<Link href={`/messages/${user_id}`}>
+							<Button>
+								<BiMessageRoundedDetail size={25} />
+							</Button>
+						</Link>
+					) : null}
+
 					{/* <IconButton
 						icon={bookmarkId ? <BiSolidBookmark /> : <BiBookmark />}
 						aria-label="Bookmark this profile"

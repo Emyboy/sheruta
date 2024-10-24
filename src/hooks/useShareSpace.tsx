@@ -1,6 +1,5 @@
 import { useAuthContext } from '@/context/auth.context'
 import { revalidatePathOnClient } from '@/utils/actions'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useAuthenticatedAxios from './useAxios'
 import useCommon from './useCommon'
@@ -8,7 +7,6 @@ import useCommon from './useCommon'
 export default function useShareSpace() {
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
-	const router = useRouter()
 
 	const [isLoading, setIsLoading] = useState(false)
 
@@ -72,7 +70,10 @@ export default function useShareSpace() {
 				})
 
 				revalidatePathOnClient()
-				router.refresh()
+
+				setTimeout(() => {
+					window.location.assign('/')
+				}, 1000)
 			} else {
 				showToast({
 					message: 'You are not authorized to delete this post',

@@ -243,19 +243,23 @@ const EditSeekerForm: React.FC<{
 	const { mutate: editRequest, isPending } = useMutation({
 		mutationFn: async () => {
 			if (!axiosInstance) {
-				return showToast({
+				showToast({
 					message: 'Failed to post request, please try again',
 					status: 'error',
 				})
+				throw new Error('Axios instance not available') // Abort mutation
 			}
 
+			// Check if user is logged in
 			if (!(user?._id && parsedRequestData?.user._id === user._id)) {
-				return showToast({
-					message: 'You are not authorized to edit this request',
+				showToast({
+					message: 'Failed to post request, please log in first',
 					status: 'error',
 				})
+				throw new Error('User not logged in') // Abort mutation
 			}
 
+			// Prepare final form data
 			const finalFormData = {
 				...formData,
 				rent: Number(formData.rent),
@@ -263,19 +267,21 @@ const EditSeekerForm: React.FC<{
 
 			createSeekerRequestDTO.parse(finalFormData)
 
-			await axiosInstance.put(
+			const response = await await axiosInstance.put(
 				`/flat-share-requests/seeker/${requestId}`,
 				finalFormData,
 			)
+			return response.data
 		},
-		onSuccess: async () => {
+		onSuccess: async (data) => {
 			showToast({
 				message: 'Your request has been edited successfully',
 				status: 'success',
 			})
 
+			// Redirect after 1 second
 			setTimeout(() => {
-				window.location.assign('/')
+				window.location.assign(`/request/seeker/${data?.data?._id || ''}`)
 			}, 1000)
 		},
 		onError: (err) => {
@@ -291,13 +297,24 @@ const EditSeekerForm: React.FC<{
 		},
 	})
 
+	const handleSubmit = (e: FormEvent) => {
+		e.preventDefault()
+
+		if (
+			formData.description.length < 140 ||
+			formData.description.length > 500
+		) {
+			return showToast({
+				message: 'Description should be between 140 and 500 characters long.',
+				status: 'info',
+			})
+		}
+
+		editRequest()
+	}
+
 	return (
-		<form
-			onSubmit={(e: FormEvent) => {
-				e.preventDefault()
-				editRequest()
-			}}
-		>
+		<form onSubmit={handleSubmit}>
 			<Flex mb={4} gap={4}>
 				<FormControl isRequired isInvalid={isRentInvalid} flex="1">
 					<FormLabel requiredIndicator={null} htmlFor="budget">
