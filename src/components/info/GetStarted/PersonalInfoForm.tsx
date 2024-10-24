@@ -66,6 +66,8 @@ export default function PersonalInfoForm({ done }: Props) {
 
 	const { mutate } = useMutation({
 		mutationFn: async () => {
+			if (!axiosInstance) return null
+
 			if (user) {
 				setIsLoading(true)
 				await Promise.all([

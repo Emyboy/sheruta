@@ -93,12 +93,12 @@ const InterestsForm = () => {
 				})
 			}
 
-			await FlatShareProfileService.update({
-				data: {
-					interests: selectedInterests.map((interest) => interest._id),
-				},
-				document_id: flat_share_profile?._user_id,
-			})
+			// await FlatShareProfileService.update({
+			// 	data: {
+			// 		interests: selectedInterests.map((interest) => interest._ref),
+			// 	},
+			// 	document_id: flat_share_profile?._user_id,
+			// })
 
 			setIsLoading(false)
 

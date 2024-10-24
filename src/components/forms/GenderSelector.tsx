@@ -21,6 +21,8 @@ export default function GenderSelect({ done }: { done?: () => void }) {
 
 	const { mutate } = useMutation({
 		mutationFn: async () => {
+			if (!axiosInstance) return null
+
 			if (user) {
 				setIsLoading(true)
 				await axiosInstance.put('/user-info', {

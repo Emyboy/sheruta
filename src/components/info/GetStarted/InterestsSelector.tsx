@@ -43,6 +43,8 @@ export default function InterestsSelector({ done }: { done?: () => void }) {
 
 	const { mutate } = useMutation({
 		mutationFn: async () => {
+			if (!axiosInstance) return null
+
 			if (user) {
 				setLoading(true)
 

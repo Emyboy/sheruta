@@ -93,12 +93,12 @@ const HabitsForm = () => {
 				})
 			}
 
-			await FlatShareProfileService.update({
-				data: {
-					habits: selectedHabits.map((habit) => habit._id),
-				},
-				document_id: flat_share_profile?._user_id,
-			})
+			// await FlatShareProfileService.update({
+			// 	data: {
+			// 		habits: selectedHabits.map((habit) => habit._ref),
+			// 	},
+			// 	document_id: flat_share_profile?._user_id,
+			// })
 
 			setIsLoading(false)
 
