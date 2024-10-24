@@ -45,7 +45,7 @@ const FlatShareProfileForm = () => {
 		linkedin: '',
 		facebook: '',
 		instagram: '',
-		payment_type: PaymentType.daily,
+		payment_type: PaymentType.monthly,
 	})
 
 	const {
@@ -67,9 +67,9 @@ const FlatShareProfileForm = () => {
 				linkedin: flat_share_profile.linkedin || '',
 				facebook: flat_share_profile.facebook || '',
 				instagram: flat_share_profile.instagram || '',
-				payment_type:
-					(flat_share_profile?.payment_type as unknown as PaymentType) ||
-					PaymentType.daily,
+				payment_type: flat_share_profile.payment_type
+					? (flat_share_profile.payment_type[0] as PaymentType)
+					: PaymentType.monthly,
 			})
 			return
 		}

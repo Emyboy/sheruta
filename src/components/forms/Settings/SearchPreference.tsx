@@ -23,13 +23,13 @@ const SearchPreferenceForm = () => {
 	const [formData, setFormData] = useState<{
 		gender_preference: string
 		age_preference: string
-		location_keyword: DocumentReference | null
-		state: DocumentReference | null
+		location: string | null
+		state: string | null
 		seeking: boolean
 	}>({
 		gender_preference: '',
 		age_preference: '',
-		location_keyword: null,
+		location: null,
 		state: null,
 		seeking: false,
 	})
@@ -42,7 +42,7 @@ const SearchPreferenceForm = () => {
 	} = useAuthContext()
 	const { showToast } = useCommon()
 	const {
-		optionsState: { states, location_keywords },
+		optionsState: { states, locations: location_keywords },
 	} = useOptionsContext()
 
 	const [locations, setLocations] = useState<any[]>([])
@@ -97,6 +97,7 @@ const SearchPreferenceForm = () => {
 	// 			} catch (error) {
 	// 				console.error('Error fetching state/location:', error)
 	// 			}
+
 	// 		}
 	// 	}
 
@@ -150,12 +151,12 @@ const SearchPreferenceForm = () => {
 				})
 			}
 
-			await FlatShareProfileService.update({
-				data: {
-					...formData,
-				},
-				document_id: flat_share_profile?._user_id,
-			})
+			// await FlatShareProfileService.update({
+			// 	data: {
+			// 		...formData,
+			// 	},
+			// 	document_id: flat_share_profile?._user_id,
+			// })
 
 			setIsLoading(false)
 
@@ -249,7 +250,7 @@ const SearchPreferenceForm = () => {
 									bgColor={colorMode}
 								>
 									{locations.map((data, index: number) => (
-										<option key={index} value={data.id}>
+										<option key={index} value={data._id}>
 											{data.name}
 										</option>
 									))}
