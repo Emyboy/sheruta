@@ -166,9 +166,9 @@ export default function HomePage({ requests, userProfiles }: Props) {
 							)}
 						</Flex>
 					</Flex>
-					<Flex>
+					{/* <Flex>
 						<MainRightNav />
-					</Flex>
+					</Flex> */}
 				</ThreeColumnLayout>
 				<MobileNavFooter />
 			</MainPageBody>

@@ -37,6 +37,8 @@ export default function HabitsSelector({ done }: { done?: () => void }) {
 
 	const { mutate } = useMutation({
 		mutationFn: async () => {
+			if (!axiosInstance) return null
+
 			if (user) {
 				setLoading(true)
 

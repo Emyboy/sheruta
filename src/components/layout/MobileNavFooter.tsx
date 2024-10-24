@@ -17,7 +17,7 @@ import useHeaderBubbles from '@/hooks/useHeaderBubbles'
 
 type Props = {}
 
-export default function MobileNavFooter({ }: Props) {
+export default function MobileNavFooter({}: Props) {
 	const pathname = usePathname()
 	const { unreadNotifications } = useNotificationContext()
 	const { bubbles } = useHeaderBubbles()

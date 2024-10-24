@@ -26,10 +26,10 @@ export default function useAnalytics() {
 
 			//update if location exists
 			if (locationExists) {
-				return await AnalyticsService.updateData({
-					[type]: 1,
-					location_keyword_id,
-				})
+				// return await AnalyticsService.updateData({
+				// 	[type]: 1,
+				// 	location_keyword_id,
+				// })
 			} else {
 				return await AnalyticsService.addData({
 					[type]: 1,

@@ -66,6 +66,8 @@ export default function PersonalInfoForm({ done }: Props) {
 
 	const { mutate } = useMutation({
 		mutationFn: async () => {
+			if (!axiosInstance) return null
+
 			if (user) {
 				setIsLoading(true)
 				await Promise.all([
@@ -108,9 +110,9 @@ export default function PersonalInfoForm({ done }: Props) {
 					age_preference,
 					done_kyc: true,
 				},
+				// @ts-ignore
 				user_info: {
 					...user_info,
-					// @ts-ignore
 					done_kyc: true,
 				},
 			})

@@ -128,6 +128,12 @@ export default function UploadMedia({
 				title: 'please login to upload your space ',
 			})
 
+		if (!axiosInstance)
+			return toast({
+				status: 'error',
+				title: 'please try again later',
+			})
+
 		setLoading(true)
 
 		try {
