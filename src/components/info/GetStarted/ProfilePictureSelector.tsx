@@ -61,6 +61,8 @@ export default function ProfilePictureSelector({
 	const uploadImage = async () => {
 		setLoading(true)
 
+		if (!axiosInstance) return null
+
 		if (!user || !croppedImage) {
 			return null
 		}

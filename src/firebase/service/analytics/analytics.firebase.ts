@@ -41,45 +41,46 @@ export default class AnalyticsService extends SherutaDB {
 		})
 	}
 
-	static async updateData(data: {
-		calls?: number
-		messages?: number
-		posts?: number
-		location_keyword_id: string
-	}): Promise<DocumentData | undefined> {
-		//get data by location_keyword
-		const initialCounts = await this.getDataByLocationKeyword(
-			data.location_keyword_id,
-		)
+	// static async updateData(data: {
+	// 	calls?: number
+	// 	messages?: number
+	// 	posts?: number
+	// 	location_keyword_id: string
+	// }): Promise<DocumentData | undefined> {
 
-		if (!initialCounts) return undefined
+	// 	//get data by location_keyword
+	// 	const initialCounts = await this.getDataByLocationKeyword(
+	// 		data.location_keyword_id,
+	// 	)
 
-		const locRef = doc(
-			db,
-			`/location_keywords/${initialCounts._location_keyword_ref.id}`,
-		)
+	// 	if (!initialCounts) return undefined
 
-		const newData = {
-			calls: data?.calls
-				? initialCounts.calls + data.calls
-				: initialCounts.calls,
-			messages: data?.messages
-				? initialCounts.messages + data.messages
-				: initialCounts.messages,
-			posts: data?.posts
-				? initialCounts.posts + data.posts
-				: initialCounts.posts,
-			_location_keyword_ref: locRef,
-		}
+	// 	const locRef = doc(
+	// 		db,
+	// 		`/location_keywords/${initialCounts._location_keyword_ref.id}`,
+	// 	)
 
-		return await this.update({
-			collection_name: DBCollectionName.analytics,
-			document_id: initialCounts.id,
-			data: {
-				...newData,
-			},
-		})
-	}
+	// 	const newData = {
+	// 		calls: data?.calls
+	// 			? initialCounts.calls + data.calls
+	// 			: initialCounts.calls,
+	// 		messages: data?.messages
+	// 			? initialCounts.messages + data.messages
+	// 			: initialCounts.messages,
+	// 		posts: data?.posts
+	// 			? initialCounts.posts + data.posts
+	// 			: initialCounts.posts,
+	// 		_location_keyword_ref: locRef,
+	// 	}
+
+	// 	return await this.update({
+	// 		collection_name: DBCollectionName.analytics,
+	// 		document_id: initialCounts.id,
+	// 		data: {
+	// 			...newData,
+	// 		},
+	// 	})
+	// }
 
 	static async getSingleData(
 		document_id: string,

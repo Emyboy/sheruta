@@ -2,9 +2,8 @@
 
 import Spinner from '@/components/atoms/Spinner'
 import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
+import { OptionType, useOptionsContext } from '@/context/options.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { InterestData } from '@/firebase/service/options/options.types'
 import useCommon from '@/hooks/useCommon'
 import {
 	Box,
@@ -30,13 +29,13 @@ const InterestsForm = () => {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
-	const [interestsList, setInterestsList] = useState<InterestData[]>([])
-	const [selectedInterests, setSelectedInterests] = useState<InterestData[]>([])
+	const [interestsList, setInterestsList] = useState<OptionType[]>([])
+	const [selectedInterests, setSelectedInterests] = useState<OptionType[]>([])
 
-	const handleSelect = (interest: InterestData) => {
-		setSelectedInterests((prev: InterestData[]) =>
-			prev.some((h) => h.id === interest.id)
-				? prev.filter((h) => h.id !== interest.id)
+	const handleSelect = (interest: OptionType) => {
+		setSelectedInterests((prev: OptionType[]) =>
+			prev.some((h) => h._id === interest._id)
+				? prev.filter((h) => h._id !== interest._id)
 				: [...prev, interest],
 		)
 	}
@@ -52,7 +51,7 @@ const InterestsForm = () => {
 	const getAllInterests = async () => {
 		try {
 			setIsInterestsLoading(true)
-			const documents: InterestData[] = []
+			const documents: OptionType[] = []
 			let refs = flat_share_profile?.interests as any[]
 
 			if (refs && refs.length > 0) {
@@ -65,7 +64,7 @@ const InterestsForm = () => {
 							...docSnapshot.data(),
 							_ref: docSnapshot.ref,
 							id: docSnapshot.id,
-						} as InterestData)
+						} as OptionType)
 					} catch (error) {
 						console.error('Error getting document:', error)
 					}
@@ -94,12 +93,12 @@ const InterestsForm = () => {
 				})
 			}
 
-			await FlatShareProfileService.update({
-				data: {
-					interests: selectedInterests.map((interest) => interest._ref),
-				},
-				document_id: flat_share_profile?._user_id,
-			})
+			// await FlatShareProfileService.update({
+			// 	data: {
+			// 		interests: selectedInterests.map((interest) => interest._ref),
+			// 	},
+			// 	document_id: flat_share_profile?._user_id,
+			// })
 
 			setIsLoading(false)
 
@@ -135,16 +134,16 @@ const InterestsForm = () => {
 						<>
 							{interestsList.map((interest) => (
 								<WrapItem
-									key={interest.id}
+									key={interest._id}
 									justifyContent={'flex-start'}
 									gap="0"
 									p="2"
 								>
 									<EachOption
-										label={interest.title}
+										label={interest.name}
 										onClick={() => handleSelect(interest)}
 										isActive={selectedInterests.some(
-											(h) => h.id === interest.id,
+											(h) => h._id === interest._id,
 										)}
 									/>
 								</WrapItem>

@@ -27,6 +27,8 @@ export default function LocationKeywordForm({ done }: { done: () => void }) {
 
 	const { mutate } = useMutation({
 		mutationFn: async () => {
+			if (!axiosInstance) return null
+
 			if (user) {
 				setIsLoading(true)
 
