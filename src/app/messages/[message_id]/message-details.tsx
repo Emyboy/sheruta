@@ -77,7 +77,9 @@ export default function MessageDetails({}: Props) {
 
 	useEffect(() => {
 		const initiateConversation = async () => {
-			if (axiosInstance && message_id && user) {
+			if (message_id && user) {
+				// if (user && message_id && axiosInstance) {
+
 				try {
 					await Promise.all([createNewConversation(), getConversation()])
 				} catch (error) {
@@ -86,7 +88,8 @@ export default function MessageDetails({}: Props) {
 			}
 		}
 
-		if (user && message_id && axiosInstance) {
+		// if (user && message_id && axiosInstance) {
+		if (user && message_id) {
 			initiateConversation()
 		}
 	}, [user, message_id, axiosInstance])

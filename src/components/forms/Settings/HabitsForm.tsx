@@ -8,11 +8,11 @@ import useCommon from '@/hooks/useCommon'
 import {
 	Box,
 	Button,
+	Flex,
+	Text,
 	VStack,
 	Wrap,
 	WrapItem,
-	Text,
-	Flex,
 } from '@chakra-ui/react'
 import { getDoc } from 'firebase/firestore'
 import React, { useEffect, useState } from 'react'

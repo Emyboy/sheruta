@@ -211,9 +211,11 @@ const BookmarkList = () => {
 							{...refProp}
 							style={{ transition: 'opacity 0.3s ease-in-out' }}
 						>
-							<EachRequest
-								request={bookmark._object_ref as unknown as FlatShareRequest}
-							/>
+							{/* <EachRequest
+								request={
+									bookmark._object_ref as unknown as HostRequestDataDetails
+								}
+							/> */}
 						</Box>
 					)
 				} else if (bookmarkType === BookmarkType.profiles) {
