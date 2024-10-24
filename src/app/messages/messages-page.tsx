@@ -53,9 +53,8 @@ export default function MessagesPage({}: Props) {
 				}
 			}
 
-			if (axiosInstance) {
-				getConversation()
-			}
+			// axiosInstance &&
+			getConversation()
 		}
 	}, [user, axiosInstance])
 

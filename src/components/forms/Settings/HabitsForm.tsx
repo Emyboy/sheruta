@@ -2,18 +2,17 @@
 
 import Spinner from '@/components/atoms/Spinner'
 import { useAuthContext } from '@/context/auth.context'
-import { useOptionsContext } from '@/context/options.context'
+import { OptionType, useOptionsContext } from '@/context/options.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { HabitData } from '@/firebase/service/options/options.types'
 import useCommon from '@/hooks/useCommon'
 import {
 	Box,
 	Button,
+	Flex,
+	Text,
 	VStack,
 	Wrap,
 	WrapItem,
-	Text,
-	Flex,
 } from '@chakra-ui/react'
 import { getDoc } from 'firebase/firestore'
 import React, { useEffect, useState } from 'react'
@@ -30,13 +29,13 @@ const HabitsForm = () => {
 		authState: { flat_share_profile },
 	} = useAuthContext()
 
-	const [habitsList, setHabitsList] = useState<HabitData[]>([])
-	const [selectedHabits, setSelectedHabits] = useState<HabitData[]>([])
+	const [habitsList, setHabitsList] = useState<OptionType[]>([])
+	const [selectedHabits, setSelectedHabits] = useState<OptionType[]>([])
 
-	const handleSelect = (habit: HabitData) => {
-		setSelectedHabits((prev: HabitData[]) =>
-			prev.some((h) => h.id === habit.id)
-				? prev.filter((h) => h.id !== habit.id)
+	const handleSelect = (habit: OptionType) => {
+		setSelectedHabits((prev: OptionType[]) =>
+			prev.some((h) => h._id === habit._id)
+				? prev.filter((h) => h._id !== habit._id)
 				: [...prev, habit],
 		)
 	}
@@ -52,7 +51,7 @@ const HabitsForm = () => {
 	const getAllHabits = async () => {
 		try {
 			setIsHabitsLoading(true)
-			const documents: HabitData[] = []
+			const documents: OptionType[] = []
 			let refs = flat_share_profile?.habits as any[]
 
 			if (refs && refs.length > 0) {
@@ -65,7 +64,7 @@ const HabitsForm = () => {
 							...docSnapshot.data(),
 							_ref: docSnapshot.ref,
 							id: docSnapshot.id,
-						} as HabitData)
+						} as OptionType)
 					} catch (error) {
 						console.error('Error getting document:', error)
 					}
@@ -96,7 +95,7 @@ const HabitsForm = () => {
 
 			await FlatShareProfileService.update({
 				data: {
-					habits: selectedHabits.map((habit) => habit._ref),
+					habits: selectedHabits.map((habit) => habit._id),
 				},
 				document_id: flat_share_profile?._user_id,
 			})
@@ -135,15 +134,15 @@ const HabitsForm = () => {
 						<>
 							{habitsList.map((habit) => (
 								<WrapItem
-									key={habit.id}
+									key={habit._id}
 									justifyContent={'flex-start'}
 									gap="0"
 									p="2"
 								>
 									<EachOption
-										label={habit.title}
+										label={habit.name}
 										onClick={() => handleSelect(habit)}
-										isActive={selectedHabits.some((h) => h.id === habit.id)}
+										isActive={selectedHabits.some((h) => h._id === habit._id)}
 									/>
 								</WrapItem>
 							))}

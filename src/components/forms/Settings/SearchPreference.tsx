@@ -23,13 +23,13 @@ const SearchPreferenceForm = () => {
 	const [formData, setFormData] = useState<{
 		gender_preference: string
 		age_preference: string
-		location_keyword: DocumentReference | null
-		state: DocumentReference | null
+		location: string | null
+		state: string | null
 		seeking: boolean
 	}>({
 		gender_preference: '',
 		age_preference: '',
-		location_keyword: null,
+		location: null,
 		state: null,
 		seeking: false,
 	})
@@ -42,7 +42,7 @@ const SearchPreferenceForm = () => {
 	} = useAuthContext()
 	const { showToast } = useCommon()
 	const {
-		optionsState: { states, location_keywords },
+		optionsState: { states, locations: location_keyword },
 	} = useOptionsContext()
 
 	const [locations, setLocations] = useState<any[]>([])
@@ -51,7 +51,7 @@ const SearchPreferenceForm = () => {
 	const [selectedState, setSelectedState] = useState<string | null>(null)
 
 	const getLocations = (stateId: string): string[] => {
-		return location_keywords.filter((item) => item._state_id === stateId)
+		return locations.filter((item) => item._state_id === stateId)
 	}
 
 	useEffect(() => {
@@ -61,47 +61,47 @@ const SearchPreferenceForm = () => {
 		}
 	}, [states, selectedState])
 
-	useEffect(() => {
-		const fetchLocationAndState = async () => {
-			if (flat_share_profile) {
-				const stateRef = flat_share_profile.state
-				const locationRef = flat_share_profile.location_keyword
+	// useEffect(() => {
+	// 	const fetchLocationAndState = async () => {
+	// 		if (flat_share_profile) {
+	// 			const stateRef = flat_share_profile.state
+	// 			const locationRef = flat_share_profile.location_keyword
 
-				try {
-					const stateData = await getDoc(stateRef)
-					const locationData = await getDoc(locationRef)
+	// 			// try {
+	// 			// 	const stateData = await getDoc(stateRef)
+	// 			// 	const locationData = await getDoc(locationRef)
 
-					if (stateData.exists() && locationData.exists()) {
-						const state = {
-							...(stateData?.data() || {}),
-							id: stateData.id,
-						} as StateData
-						const location_keyword = {
-							...(locationData?.data() || {}),
-							id: locationData.id,
-						} as LocationKeywordData
+	// 			// 	if (stateData.exists() && locationData.exists()) {
+	// 			// 		// const state = {
+	// 			// 		// 	...(stateData?.data() || {}),
+	// 			// 		// 	id: stateData.id,
+	// 			// 		// } as StateData
+	// 			// 		// const location_keyword = {
+	// 			// 		// 	...(locationData?.data() || {}),
+	// 			// 		// 	id: locationData.id,
+	// 			// 		// } as LocationKeywordData
 
-						if (stateDOMRef.current) {
-							stateDOMRef.current.value = state.id
-							setLocations(getLocations(state.id))
-						}
+	// 			// 		if (stateDOMRef.current) {
+	// 			// 			stateDOMRef.current.value = state._id
+	// 			// 			setLocations(getLocations(state._id))
+	// 			// 		}
 
-						setFormData({
-							gender_preference: flat_share_profile?.gender_preference || '',
-							age_preference: flat_share_profile?.age_preference || '',
-							location_keyword: flat_share_profile?.location_keyword || null,
-							state: flat_share_profile?.state || null,
-							seeking: flat_share_profile?.seeking || false,
-						})
-					}
-				} catch (error) {
-					console.error('Error fetching state/location:', error)
-				}
-			}
-		}
+	// 			// 		setFormData({
+	// 			// 			gender_preference: flat_share_profile?.gender_preference || '',
+	// 			// 			age_preference: flat_share_profile?.age_preference || '',
+	// 			// 			location: flat_share_profile?.location_keyword || null,
+	// 			// 			state: flat_share_profile?.state || null,
+	// 			// 			seeking: flat_share_profile?.seeking || false,
+	// 			// 		})
+	// 			// 	}
+	// 			// } catch (error) {
+	// 			// 	console.error('Error fetching state/location:', error)
+	// 			// }
+	// 		}
+	// 	}
 
-		fetchLocationAndState()
-	}, [flat_share_profile])
+	// 	fetchLocationAndState()
+	// }, [flat_share_profile])
 
 	useEffect(() => {
 		if (locationDOMRef.current && locations.length > 0) {
@@ -114,14 +114,14 @@ const SearchPreferenceForm = () => {
 	useEffect(() => {
 		if (locations.length > 0 && selectedLocation) {
 			const locationObj: LocationKeywordData | undefined = locations.find(
-				(loc: LocationKeywordData) => loc.id === selectedLocation,
+				(loc: LocationKeywordData) => loc._id === selectedLocation,
 			)
 
 			if (locationObj) {
 				setFormData((prev) => ({
 					...prev,
-					location_keyword: locationObj._ref,
-					state: locationObj._state_ref,
+					location_keyword: locationObj._id,
+					state: locationObj.state,
 				}))
 			}
 		}
@@ -150,12 +150,12 @@ const SearchPreferenceForm = () => {
 				})
 			}
 
-			await FlatShareProfileService.update({
-				data: {
-					...formData,
-				},
-				document_id: flat_share_profile?._user_id,
-			})
+			// await FlatShareProfileService.update({
+			// 	data: {
+			// 		...formData,
+			// 	},
+			// 	document_id: flat_share_profile?._user_id,
+			// })
 
 			setIsLoading(false)
 
@@ -227,7 +227,7 @@ const SearchPreferenceForm = () => {
 						>
 							{states &&
 								states.map((state, index: number) => (
-									<option key={index} value={state.id}>
+									<option key={index} value={state._id}>
 										{state.name}
 									</option>
 								))}
@@ -249,7 +249,7 @@ const SearchPreferenceForm = () => {
 									bgColor={colorMode}
 								>
 									{locations.map((data, index: number) => (
-										<option key={index} value={data.id}>
+										<option key={index} value={data._id}>
 											{data.name}
 										</option>
 									))}

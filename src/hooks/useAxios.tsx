@@ -2,13 +2,13 @@ import axios, { AxiosInstance } from 'axios'
 import { useSession } from 'next-auth/react'
 import { useMemo } from 'react'
 
-const useAuthenticatedAxios = (): AxiosInstance | null => {
+const useAuthenticatedAxios = (): AxiosInstance => {
 	const { data: session, status } = useSession()
 
 	// Use useMemo to return a stable axios instance only when the session is ready
 	const axiosInstance = useMemo(() => {
 		// If the session is still loading, return null to avoid making requests
-		if (status === 'loading' || !session?.token) return null
+		// if (status === 'loading' || !session?.token) return null
 
 		// Create the axios instance once the session is ready
 		const instance = axios.create({

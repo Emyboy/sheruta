@@ -1,51 +1,50 @@
-'use client';
+'use client'
 
-import { useAuthContext } from "@/context/auth.context";
-import useAuthenticatedAxios from "./useAxios";
-import { useState, useEffect } from "react";
-import { ConversationData } from "@/firebase/service/conversations/conversations.types";
+import { useAuthContext } from '@/context/auth.context'
+import useAuthenticatedAxios from './useAxios'
+import { useState, useEffect } from 'react'
+import { ConversationData } from '@/firebase/service/conversations/conversations.types'
 
 const useHeaderBubbles = () => {
+	const {
+		authState: { user },
+	} = useAuthContext()
 
-    const { authState: { user } } = useAuthContext();
+	const axiosInstance = useAuthenticatedAxios()
 
-    const axiosInstance = useAuthenticatedAxios()
+	const [bubbles, setBubbles] = useState({
+		messages: false,
+		//add others here
+	})
 
-    const [bubbles, setBubbles] = useState({
-        messages: false,
-        //add others here
-    })
+	useEffect(() => {
+		if (user) {
+			const getConversations = async () => {
+				if (user) {
+					if (!axiosInstance) {
+						return null
+					}
 
-    useEffect(() => {
-        if (user) {
-            const getConversations = async () => {
-                if (user) {
+					const {
+						data: { conversations: userConversations },
+					}: {
+						data: { conversations: ConversationData[] }
+					} = await axiosInstance.get(`/conversations`)
 
-                    if (!axiosInstance) {
-                        return null
-                    }
+					setBubbles((prev) => ({
+						...prev,
+						messages: userConversations.some(
+							(conversation) => conversation?.unread_messages !== 0,
+						),
+					}))
+				}
+			}
 
-                    const {
-                        data: {
-                            conversations: userConversations,
-                        },
-                    }: {
-                        data: { conversations: ConversationData[] }
-                    } = await axiosInstance.get(`/conversations`)
+			getConversations()
+		}
+	}, [user, axiosInstance])
 
-                    setBubbles((prev) => ({
-                        ...prev,
-                        messages: userConversations.some(conversation => conversation?.unread_messages !== 0)
-                    }))
-                }
-            }
-
-            getConversations()
-        }
-    }, [user, axiosInstance])
-
-
-    return {bubbles}
+	return { bubbles }
 }
 
-export default useHeaderBubbles;
+export default useHeaderBubbles

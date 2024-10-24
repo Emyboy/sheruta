@@ -108,9 +108,9 @@ export default function PersonalInfoForm({ done }: Props) {
 					age_preference,
 					done_kyc: true,
 				},
+				// @ts-ignore
 				user_info: {
 					...user_info,
-					// @ts-ignore
 					done_kyc: true,
 				},
 			})

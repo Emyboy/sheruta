@@ -56,7 +56,7 @@ export default class AnalyticsService extends SherutaDB {
 
 		const locRef = doc(
 			db,
-			`/location_keywords/${initialCounts._location_keyword_ref.id}`,
+			`/location_keywords/${initialCounts._location_keyword_ref._id}`,
 		)
 
 		const newData = {
