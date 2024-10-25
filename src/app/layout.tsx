@@ -41,8 +41,8 @@ export default async function RootLayout({
 			</head>
 			<body>
 				<Providers
-					options={data.options}
-					user_data={data.user_data}
+					options={data?.options}
+					user_data={data?.user_data}
 					notifications={notifications}
 				>
 					{children}

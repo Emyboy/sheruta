@@ -22,6 +22,8 @@ import {
 import React, { useEffect, useState } from 'react'
 
 const FlatShareProfileForm = () => {
+	return
+
 	const [formData, setFormData] = useState<{
 		budget: number
 		occupation: string

@@ -282,7 +282,7 @@ const MessageSection = ({
 				<MessageList
 					isLoading={isLoading}
 					conversation={conversation}
-					messages={messageList}
+					// messages={messageList}
 					handleDelete={handleDelete}
 				/>
 				<Flex

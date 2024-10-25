@@ -7,17 +7,18 @@ import { DirectMessageData } from '@/firebase/service/messages/messages.types'
 import EachMessageBobble from './components/EachMessageBobble/EachMessageBobble'
 import { HiOutlineInformationCircle } from 'react-icons/hi2'
 import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useQuery } from '@tanstack/react-query'
 
 type Props = {
 	isLoading?: boolean
 	conversation: ConversationData
-	messages: DirectMessageData[] | undefined
+	// messages: DirectMessageData[] | undefined
 	handleDelete: (message_id: string) => Promise<void>
 }
 
 const MessageList: React.FC<Props> = ({
 	conversation,
-	messages,
+	// messages,
 	handleDelete,
 }) => {
 	const [page, setPage] = useState(1)
@@ -31,7 +32,36 @@ const MessageList: React.FC<Props> = ({
 	const firstMessageRef = useRef<HTMLDivElement | null>(null)
 	const topObserver = useRef<IntersectionObserver | null>(null)
 
-	// Load initial messages (newest first)
+	const { data: messages } = useQuery({
+		queryKey: [conversation._id],
+		queryFn: async () => {
+			if (!axiosInstance) return []
+
+			let allMessages: DirectMessageData[] = []
+			let currentPage = 1
+			let totalPages = 1 // Initialize totalPages to enter the loop
+
+			// Fetch all pages of messages
+			while (currentPage <= totalPages) {
+				const {
+					data: {
+						data: { docs, totalPages: pages },
+					},
+				} = await axiosInstance.get(`/messages/${conversation._id}`, {
+					params: { page: currentPage },
+				})
+
+				allMessages = [...allMessages, ...docs] // Collect all messages
+				totalPages = pages // Update totalPages
+				currentPage++ // Move to the next page
+			}
+
+			return allMessages.reverse() // Return the reversed messages
+		},
+		refetchOnWindowFocus: false,
+		refetchInterval: 2000,
+	})
+
 	useEffect(() => {
 		if (messages) {
 			setMessageList(messages)

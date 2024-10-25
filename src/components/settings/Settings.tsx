@@ -72,7 +72,7 @@ const Settings = () => {
 				Settings
 			</Heading>
 			<Stack spacing={4}>
-				{user_info && user_info._user_id ? (
+				{/* {user_info && user_info._user_id ? (
 					<>
 						<Text color={'dark-light'} fontSize="lg" fontWeight="bold">
 							Personal Information
@@ -127,7 +127,7 @@ const Settings = () => {
 							label="Update Privacy Settings"
 						/>
 					</>
-				) : null}
+				) : null} */}
 
 				<Text fontSize="lg" fontWeight="bold">
 					Display mode

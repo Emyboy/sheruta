@@ -9,7 +9,10 @@ import {
 } from '@/firebase/service/bookmarks/bookmarks.types'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import {
+	FlatShareRequest,
+	HostRequestDataDetails,
+} from '@/firebase/service/request/request.types'
 import {
 	resolveArrayOfReferences,
 	resolveSingleObjectReferences,

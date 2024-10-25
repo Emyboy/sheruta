@@ -14,7 +14,7 @@ import {
 	Text,
 	useColorMode,
 } from '@chakra-ui/react'
-import { useOptionsContext } from '@/context/options.context'
+import { OptionType, useOptionsContext } from '@/context/options.context'
 import { DocumentReference, getDoc } from 'firebase/firestore'
 import { LocationKeywordData } from '@/firebase/service/options/location-keywords/location-keywords.types'
 import { StateData } from '@/firebase/service/options/states/states.types'
@@ -42,7 +42,7 @@ const SearchPreferenceForm = () => {
 	} = useAuthContext()
 	const { showToast } = useCommon()
 	const {
-		optionsState: { states, locations: location_keyword },
+		optionsState: { states, locations: location_keywords },
 	} = useOptionsContext()
 
 	const [locations, setLocations] = useState<any[]>([])
@@ -50,8 +50,8 @@ const SearchPreferenceForm = () => {
 	const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 	const [selectedState, setSelectedState] = useState<string | null>(null)
 
-	const getLocations = (stateId: string): string[] => {
-		return locations.filter((item) => item._state_id === stateId)
+	const getLocations = (stateId: string): OptionType[] => {
+		return location_keywords.filter((item) => item._id === stateId)
 	}
 
 	useEffect(() => {
@@ -67,36 +67,37 @@ const SearchPreferenceForm = () => {
 	// 			const stateRef = flat_share_profile.state
 	// 			const locationRef = flat_share_profile.location_keyword
 
-	// 			// try {
-	// 			// 	const stateData = await getDoc(stateRef)
-	// 			// 	const locationData = await getDoc(locationRef)
+	// 			try {
+	// 				const stateData = await getDoc(stateRef)
+	// 				const locationData = await getDoc(locationRef)
 
-	// 			// 	if (stateData.exists() && locationData.exists()) {
-	// 			// 		// const state = {
-	// 			// 		// 	...(stateData?.data() || {}),
-	// 			// 		// 	id: stateData.id,
-	// 			// 		// } as StateData
-	// 			// 		// const location_keyword = {
-	// 			// 		// 	...(locationData?.data() || {}),
-	// 			// 		// 	id: locationData.id,
-	// 			// 		// } as LocationKeywordData
+	// 				if (stateData.exists() && locationData.exists()) {
+	// 					const state = {
+	// 						...(stateData?.data() || {}),
+	// 						id: stateData.id,
+	// 					} as StateData
+	// 					const location_keyword = {
+	// 						...(locationData?.data() || {}),
+	// 						id: locationData.id,
+	// 					} as LocationKeywordData
 
-	// 			// 		if (stateDOMRef.current) {
-	// 			// 			stateDOMRef.current.value = state._id
-	// 			// 			setLocations(getLocations(state._id))
-	// 			// 		}
+	// 					if (stateDOMRef.current) {
+	// 						stateDOMRef.current.value = state.id
+	// 						setLocations(getLocations(state.id))
+	// 					}
 
-	// 			// 		setFormData({
-	// 			// 			gender_preference: flat_share_profile?.gender_preference || '',
-	// 			// 			age_preference: flat_share_profile?.age_preference || '',
-	// 			// 			location: flat_share_profile?.location_keyword || null,
-	// 			// 			state: flat_share_profile?.state || null,
-	// 			// 			seeking: flat_share_profile?.seeking || false,
-	// 			// 		})
-	// 			// 	}
-	// 			// } catch (error) {
-	// 			// 	console.error('Error fetching state/location:', error)
-	// 			// }
+	// 					setFormData({
+	// 						gender_preference: flat_share_profile?.gender_preference || '',
+	// 						age_preference: flat_share_profile?.age_preference || '',
+	// 						location_keyword: flat_share_profile?.location_keyword || null,
+	// 						state: flat_share_profile?.state || null,
+	// 						seeking: flat_share_profile?.seeking || false,
+	// 					})
+	// 				}
+	// 			} catch (error) {
+	// 				console.error('Error fetching state/location:', error)
+	// 			}
+
 	// 		}
 	// 	}
 
@@ -111,21 +112,21 @@ const SearchPreferenceForm = () => {
 		}
 	}, [locations])
 
-	useEffect(() => {
-		if (locations.length > 0 && selectedLocation) {
-			const locationObj: LocationKeywordData | undefined = locations.find(
-				(loc: LocationKeywordData) => loc._id === selectedLocation,
-			)
+	// useEffect(() => {
+	// 	if (locations.length > 0 && selectedLocation) {
+	// 		const locationObj: LocationKeywordData | undefined = locations.find(
+	// 			(loc: LocationKeywordData) => loc._id === selectedLocation,
+	// 		)
 
-			if (locationObj) {
-				setFormData((prev) => ({
-					...prev,
-					location_keyword: locationObj._id,
-					state: locationObj.state,
-				}))
-			}
-		}
-	}, [locations, selectedLocation])
+	// 		if (locationObj) {
+	// 			setFormData((prev) => ({
+	// 				...prev,
+	// 				location_keyword: locationObj._ref,
+	// 				state: locationObj._state_ref,
+	// 			}))
+	// 		}
+	// 	}
+	// }, [locations, selectedLocation])
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 

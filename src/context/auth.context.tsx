@@ -79,6 +79,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 		// } else {
 		// 	return Promise.reject('User not found')
 		// }
+
+		if (!signin) return null
+
 		const { data } = await signin.get(`/users/dependencies`)
 		// console.log(data)
 		// @ts-ignore
