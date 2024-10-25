@@ -17,11 +17,11 @@ export interface LocationObject {
 }
 
 export enum PaymentType {
-	monthly = 'monthly',
-	annually = 'annually',
-	quarterly = 'quarterly',
-	biannually = 'biannually',
 	daily = 'daily',
+	monthly = 'monthly',
+	quarterly = 'quarterly',
+	annually = 'annually',
+	biannually = 'biannually',
 }
 
 export type AvailabilityStatus = 'available' | 'unavailable' | 'reserved'
