@@ -2,7 +2,6 @@
 
 import { NotificationType } from '@/firebase/service/notifications/notifications.types'
 import axiosInstance from '@/utils/custom-axios'
-import { AxiosResponse } from 'axios'
 import {
 	createContext,
 	ReactNode,
@@ -15,7 +14,7 @@ interface NotificationContextType {
 	notifications: NotificationType[]
 	unreadNotifications: boolean
 	// updateNotification: (id: string) => Promise<void>
-	markAsRead: () => Promise<AxiosResponse<any, any>>
+	markAsRead: () => Promise<void>
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -39,8 +38,22 @@ export const NotificationsProvider: React.FC<{
 		)
 	}, [notifications])
 
-	const markAsRead = async () =>
-		await axiosInstance.put('/notifications/mark-all-as-seen')
+	const markAsRead = async () => {
+		const previousNotifications = notifications
+
+		try {
+			setNotifications(
+				previousNotifications.map((notification) => ({
+					...notification,
+					seen: true,
+				})),
+			)
+
+			await axiosInstance.put('/notifications/mark-all-as-seen')
+		} catch (error) {
+			setNotifications(previousNotifications)
+		}
+	}
 
 	return (
 		<NotificationContext.Provider
