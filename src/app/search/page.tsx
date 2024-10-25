@@ -21,11 +21,9 @@ export default async function page({ searchParams }: Props) {
 		data: {
 			data: FlatShareRequest[]
 		}
-	} = await axiosInstance.get(
-		`/flat-share-requests?${Object.entries(searchParams || {})
-			.map(([key, value]) => `${key}=${value}`)
-			.join('&')}`,
-	)
+	} = await axiosInstance.get(`/flat-share-requests/search`, {
+		params: searchParams,
+	})
 
 	return (
 		<Flex justifyContent={'center'}>

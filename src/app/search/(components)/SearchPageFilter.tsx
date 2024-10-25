@@ -2,16 +2,7 @@
 
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useOptionsContext } from '@/context/options.context'
-import {
-	Box,
-	Checkbox,
-	Flex,
-	Radio,
-	RadioGroup,
-	Select,
-	SimpleGrid,
-	Text,
-} from '@chakra-ui/react'
+import { Box, Checkbox, Flex, Select, SimpleGrid, Text } from '@chakra-ui/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { IoLocationOutline } from 'react-icons/io5'
@@ -47,8 +38,8 @@ const findApartmentList = [
 
 const paymentTypeList = [
 	{
-		label: 'Weekly',
-		value: 'weekly',
+		label: 'Daily',
+		value: 'daily',
 	},
 	{
 		label: 'Monthly',
@@ -64,7 +55,7 @@ const paymentTypeList = [
 	},
 	{
 		label: 'Bi Annually',
-		value: 'bi-annually',
+		value: 'biannually',
 	},
 ]
 
@@ -79,41 +70,40 @@ export default function SearchPageFilter({}: Props) {
 		options.locations,
 	)
 
-	useEffect(() => {
-		if (searchParams.get('state')?.toString()) {
-			setFilteredLocationOptions(
-				options.locations.filter(
-					(location) =>
-						location.state ===
-						options.states.find(
-							(state) => state.slug === searchParams.get('state')?.toString(),
-						)?._id,
-				),
-			)
-		} else {
-			setFilteredLocationOptions(options.locations)
-		}
-	}, [searchParams.get('state')?.toString()])
+	const [searchFilterData, setSearchFilterData] = useState({
+		state: searchParams.get('state')?.toString() || '',
+		location: searchParams.get('location')?.toString() || '',
+		budget: searchParams.get('budget')?.toString() || '',
+		service: searchParams.get('service')?.toString() || '',
+		payment_type: searchParams.get('payment_type')?.toString() || '',
+	})
 
 	const handleFilterOption = useDebouncedCallback(
 		(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 			const params = new URLSearchParams(searchParams)
+			const { name, value, checked, type } = e.target as HTMLInputElement
 
-			const { name, value, checked } = e.target as HTMLInputElement
+			if (name === 'state') {
+				params.delete('location')
+				setSearchFilterData((prev) => ({ ...prev, location: '' }))
+			}
 
-			if (name === 'state') params.delete('location')
-
-			if (checked !== undefined) {
-				if (!checked) {
+			if (type === 'checkbox') {
+				// If this checkbox was previously checked, uncheck it
+				if (searchFilterData[name as keyof typeof searchFilterData] === value) {
 					params.delete(name)
+					setSearchFilterData((prev) => ({ ...prev, [name]: '' }))
 				} else {
 					params.set(name, value)
+					setSearchFilterData((prev) => ({ ...prev, [name]: value }))
 				}
 			} else {
 				if (!value) {
 					params.delete(name)
+					setSearchFilterData((prev) => ({ ...prev, [name]: '' }))
 				} else {
 					params.set(name, value)
+					setSearchFilterData((prev) => ({ ...prev, [name]: value }))
 				}
 			}
 
@@ -149,6 +139,22 @@ export default function SearchPageFilter({}: Props) {
 	// 	300,
 	// )
 
+	useEffect(() => {
+		if (searchParams.get('state')?.toString()) {
+			setFilteredLocationOptions(
+				options.locations.filter(
+					(location) =>
+						location.state ===
+						options.states.find(
+							(state) => state.slug === searchParams.get('state')?.toString(),
+						)?._id,
+				),
+			)
+		} else {
+			setFilteredLocationOptions(options.locations)
+		}
+	}, [options.locations, options.states, searchParams])
+
 	return (
 		<Flex
 			flexDir={'column'}
@@ -183,7 +189,7 @@ export default function SearchPageFilter({}: Props) {
 							}}
 							bgColor={'white'}
 							onChange={handleFilterOption}
-							defaultValue={searchParams.get('state')?.toString() || ''}
+							defaultValue={searchFilterData.state}
 							name="state"
 							border={0}
 							_dark={{ borderColor: 'dark_light' }}
@@ -229,7 +235,7 @@ export default function SearchPageFilter({}: Props) {
 							}}
 							bgColor={'white'}
 							onChange={handleFilterOption}
-							defaultValue={searchParams.get('location')?.toString() || ''}
+							defaultValue={searchFilterData.location}
 							name="location"
 							border={0}
 							_dark={{ borderColor: 'dark_light' }}
@@ -281,7 +287,7 @@ export default function SearchPageFilter({}: Props) {
 							fontSize={{ base: 'xs', md: 'sm' }}
 							value={budget.value}
 							onChange={handleFilterOption}
-							defaultChecked={searchParams.toString().includes(budget.value)}
+							isChecked={searchFilterData.budget === budget.value}
 						>
 							{budget.label}
 						</Checkbox>
@@ -313,7 +319,7 @@ export default function SearchPageFilter({}: Props) {
 							value={service.slug}
 							name="service"
 							onChange={handleFilterOption}
-							defaultChecked={searchParams.toString().includes(service.slug)}
+							isChecked={searchFilterData.service === service.slug}
 						>
 							{service.name}
 						</Checkbox>
@@ -321,7 +327,7 @@ export default function SearchPageFilter({}: Props) {
 				</SimpleGrid>
 			</Flex>
 
-			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
+			{/* <Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
 					as={'h3'}
 					fontWeight={'normal'}
@@ -345,7 +351,7 @@ export default function SearchPageFilter({}: Props) {
 							value={apartmentType.value}
 							name="apartment"
 							onChange={handleFilterOption}
-							defaultChecked={searchParams
+							isChecked={searchParams
 								.toString()
 								.includes(apartmentType.value)}
 						>
@@ -353,7 +359,7 @@ export default function SearchPageFilter({}: Props) {
 						</Checkbox>
 					))}
 				</SimpleGrid>
-			</Flex>
+			</Flex> */}
 
 			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
@@ -379,9 +385,7 @@ export default function SearchPageFilter({}: Props) {
 							value={paymentType.value}
 							name="payment_type"
 							onChange={handleFilterOption}
-							defaultChecked={searchParams
-								.toString()
-								.includes(paymentType.value)}
+							isChecked={searchFilterData.payment_type === paymentType.value}
 						>
 							{paymentType.label}
 						</Checkbox>

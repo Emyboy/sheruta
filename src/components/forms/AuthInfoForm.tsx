@@ -1,23 +1,18 @@
+import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
+import useAuthenticatedAxios from '@/hooks/useAxios'
 import {
 	Button,
 	Flex,
 	Input,
+	Select,
 	Text,
 	Textarea,
 	VStack,
-	Select,
 } from '@chakra-ui/react'
-import React, { useState } from 'react'
-import { DEFAULT_PADDING } from '@/configs/theme'
-import CurrencyInput from 'react-currency-input-field'
-import { useAuthContext } from '@/context/auth.context'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import AuthService from '@/firebase/service/auth/auth.firebase'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
-import { PaymentType } from '@/firebase/service/request/request.types'
-import useAuthenticatedAxios from '@/hooks/useAxios'
 import { useMutation } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import CurrencyInput from 'react-currency-input-field'
 
 export default function AuthInfoForm({ done }: { done: () => void }) {
 	const {
