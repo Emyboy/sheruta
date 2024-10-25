@@ -20,7 +20,7 @@ const useHeaderBubbles = () => {
     useEffect(() => {
         const getConversations = async () => {
             try {
-                if (!(axiosInstance && user)) {
+                if (!user) {
                     return null
                 }
 
