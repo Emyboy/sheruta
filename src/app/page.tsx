@@ -1,8 +1,6 @@
 import { CACHE_TTL } from '@/constants'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
+import axiosInstance from '@/utils/custom-axios'
 import HomePage from './(home-page)/home-page'
 
 export const revalidate = CACHE_TTL?.SHORT
@@ -14,18 +12,15 @@ type Props = {
 }
 
 export default async function page({ searchParams }: Props) {
-	const [requests, userProfiles] = await Promise.all([
-		SherutaDB.getAll({
-			collection_name: DBCollectionName.flatShareRequests,
-			_limit: 30,
-		}),
-		getAllProfileSnippetDocs(searchParams || {}),
-	])
-
-	return (
-		<HomePage
-			requests={requests ? JSON.stringify(requests) : '[]'}
-			userProfiles={userProfiles ? JSON.stringify(userProfiles) : '[]'}
-		/>
+	const {
+		data: { data: requests },
+	}: {
+		data: {
+			data: FlatShareRequest[]
+		}
+	} = await axiosInstance.get(
+		`/flat-share-requests?page=${searchParams?.page || 1}&limit=30`,
 	)
+
+	return <HomePage requests={requests} userProfiles={'[]'} />
 }

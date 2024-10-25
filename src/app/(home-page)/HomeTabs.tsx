@@ -30,6 +30,8 @@ export default function HomeTabs() {
 
 	const { authState } = useAuthContext()
 
+	// console.log('from homeTabs.......', authState)
+
 	if (!authState.user) return null
 
 	return (

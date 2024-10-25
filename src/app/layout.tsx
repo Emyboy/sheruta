@@ -1,20 +1,26 @@
+import axiosInstance from '@/utils/custom-axios'
 import type { Metadata } from 'next'
-import './globals.css'
-import { Providers } from '../configs/Providers'
-import 'react-loading-skeleton/dist/skeleton.css'
-import 'react-horizontal-scrolling-menu/dist/styles.css'
 import 'react-advanced-cropper/dist/style.css'
+import 'react-horizontal-scrolling-menu/dist/styles.css'
+import 'react-loading-skeleton/dist/skeleton.css'
+import { Providers } from '../configs/Providers'
+import './globals.css'
 
 export const metadata: Metadata = {
 	title: 'Sheruta NG',
 	description: 'Flat or space for share in lagos, abuja, lekki and more',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: {
 	children: React.ReactNode
 }) {
+	const { data, notifications } = (await fetchDependency()) || {
+		data: {},
+		notifications: { notifications: [] },
+	}
+
 	return (
 		<html lang="en">
 			<head>
@@ -34,8 +40,31 @@ export default function RootLayout({
 				/>
 			</head>
 			<body>
-				<Providers>{children}</Providers>
+				<Providers
+					options={data?.options}
+					user_data={data?.user_data}
+					notifications={notifications}
+				>
+					{children}
+				</Providers>
 			</body>
 		</html>
 	)
+}
+
+const fetchDependency = async () => {
+	try {
+		const { data } = await axiosInstance.get(`/users/dependencies`)
+
+		let notifications = { notifications: [] }
+		if (data.user_data.user) {
+			const { data } = await axiosInstance.get('/notifications')
+
+			notifications = data.notifications
+		}
+
+		return { data, notifications }
+	} catch (err) {
+		console.error(err)
+	}
 }

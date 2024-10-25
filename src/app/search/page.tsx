@@ -2,8 +2,8 @@ import MainContainer from '@/components/layout/MainContainer'
 import MainHeader from '@/components/layout/MainHeader'
 import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import SearchApartmentService from '@/firebase/service/search/search.firebase'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
+import axiosInstance from '@/utils/custom-axios'
 import { Flex } from '@chakra-ui/react'
 import SearchPageFilter from './(components)/SearchPageFilter'
 import SearchPage from './search-page'
@@ -15,10 +15,15 @@ type Props = {
 }
 
 export default async function page({ searchParams }: Props) {
-	const requests: HostRequestDataDetails[] =
-		await SearchApartmentService.searchQuery({
-			queryObj: searchParams,
-		})
+	const {
+		data: { data: requests },
+	}: {
+		data: {
+			data: FlatShareRequest[]
+		}
+	} = await axiosInstance.get(`/flat-share-requests/search`, {
+		params: searchParams,
+	})
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -33,7 +38,7 @@ export default async function page({ searchParams }: Props) {
 								? 'flatmates'
 								: 'apartment'
 						}
-						requests={JSON.stringify(requests)}
+						requests={requests}
 					/>
 				</ThreeColumnLayout>
 				<MobileNavFooter />

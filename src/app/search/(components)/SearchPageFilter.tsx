@@ -27,10 +27,6 @@ const budgetList = [
 
 const findApartmentList = [
 	{
-		label: 'By Request',
-		value: 'by-request',
-	},
-	{
 		label: 'Show Flatmates',
 		value: 'show-flatmates',
 	},
@@ -42,8 +38,8 @@ const findApartmentList = [
 
 const paymentTypeList = [
 	{
-		label: 'Weekly',
-		value: 'weekly',
+		label: 'Daily',
+		value: 'daily',
 	},
 	{
 		label: 'Monthly',
@@ -59,7 +55,7 @@ const paymentTypeList = [
 	},
 	{
 		label: 'Bi Annually',
-		value: 'bi-annually',
+		value: 'biannually',
 	},
 ]
 
@@ -71,67 +67,93 @@ export default function SearchPageFilter({}: Props) {
 	const { replace } = useRouter()
 
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
-		options.location_keywords,
+		options.locations,
 	)
+
+	const [searchFilterData, setSearchFilterData] = useState({
+		state: searchParams.get('state')?.toString() || '',
+		location: searchParams.get('location')?.toString() || '',
+		budget: searchParams.get('budget')?.toString() || '',
+		service: searchParams.get('service')?.toString() || '',
+		payment_type: searchParams.get('payment_type')?.toString() || '',
+	})
+
+	const handleFilterOption = useDebouncedCallback(
+		(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+			const params = new URLSearchParams(searchParams)
+			const { name, value, checked, type } = e.target as HTMLInputElement
+
+			if (name === 'state') {
+				params.delete('location')
+				setSearchFilterData((prev) => ({ ...prev, location: '' }))
+			}
+
+			if (type === 'checkbox') {
+				// If this checkbox was previously checked, uncheck it
+				if (searchFilterData[name as keyof typeof searchFilterData] === value) {
+					params.delete(name)
+					setSearchFilterData((prev) => ({ ...prev, [name]: '' }))
+				} else {
+					params.set(name, value)
+					setSearchFilterData((prev) => ({ ...prev, [name]: value }))
+				}
+			} else {
+				if (!value) {
+					params.delete(name)
+					setSearchFilterData((prev) => ({ ...prev, [name]: '' }))
+				} else {
+					params.set(name, value)
+					setSearchFilterData((prev) => ({ ...prev, [name]: value }))
+				}
+			}
+
+			replace(`${pathname}?${params.toString()}`)
+		},
+		300,
+	)
+
+	// const handleCheckBoxOptions = useDebouncedCallback(
+	// 	(e: React.ChangeEvent<HTMLInputElement>) => {
+	// 		const params = new URLSearchParams(searchParams)
+
+	// 		const { name, checked, value } = e.target
+
+	// 		const prevBudgetQuery = params.get(name)
+
+	// 		if (!checked && prevBudgetQuery?.includes(value)) {
+	// 			const budgets = prevBudgetQuery
+	// 				.split(',')
+	// 				.filter((item) => item != value)
+
+	// 			budgets.length < 1
+	// 				? params.delete(name)
+	// 				: params.set(name, budgets.join(','))
+	// 		} else if (prevBudgetQuery && checked) {
+	// 			params.set(name, `${prevBudgetQuery},${value}`)
+	// 		} else if (checked && !prevBudgetQuery) {
+	// 			params.set(name, value)
+	// 		}
+
+	// 		replace(`${pathname}?${params.toString()}`)
+	// 	},
+	// 	300,
+	// )
 
 	useEffect(() => {
 		if (searchParams.get('state')?.toString()) {
 			setFilteredLocationOptions(
-				options.location_keywords.filter(
+				options.locations.filter(
 					(location) =>
-						location._state_id === searchParams.get('state')?.toString(),
+						location.state ===
+						options.states.find(
+							(state) => state.slug === searchParams.get('state')?.toString(),
+						)?._id,
 				),
 			)
 		} else {
-			setFilteredLocationOptions(options.location_keywords)
+			setFilteredLocationOptions(options.locations)
 		}
-	}, [searchParams.toString(), searchParams.get('state')?.toString()])
-
-	const handleFilterOption = useDebouncedCallback(
-		(e: React.ChangeEvent<HTMLSelectElement>) => {
-			const params = new URLSearchParams(searchParams)
-
-			const { name, value } = e.target
-
-			if (name === 'state') params.delete('location')
-
-			if (!value) {
-				params.delete(name)
-			} else {
-				params.set(name, value)
-			}
-
-			replace(`${pathname}?${params.toString()}`)
-		},
-		300,
-	)
-
-	const handleCheckBoxOptions = useDebouncedCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const params = new URLSearchParams(searchParams)
-
-			const { name, checked, value } = e.target
-
-			const prevBudgetQuery = params.get(name)
-
-			if (!checked && prevBudgetQuery?.includes(value)) {
-				const budgets = prevBudgetQuery
-					.split(',')
-					.filter((item) => item != value)
-
-				budgets.length < 1
-					? params.delete(name)
-					: params.set(name, budgets.join(','))
-			} else if (prevBudgetQuery && checked) {
-				params.set(name, `${prevBudgetQuery},${value}`)
-			} else if (checked && !prevBudgetQuery) {
-				params.set(name, value)
-			}
-
-			replace(`${pathname}?${params.toString()}`)
-		},
-		300,
-	)
+	}, [options.locations, options.states, searchParams])
 
 	return (
 		<Flex
@@ -167,7 +189,7 @@ export default function SearchPageFilter({}: Props) {
 							}}
 							bgColor={'white'}
 							onChange={handleFilterOption}
-							defaultValue={searchParams.get('state')?.toString() || ''}
+							defaultValue={searchFilterData.state}
 							name="state"
 							border={0}
 							_dark={{ borderColor: 'dark_light' }}
@@ -184,8 +206,8 @@ export default function SearchPageFilter({}: Props) {
 							{options.states.map((state) => (
 								<option
 									style={{ color: 'black', textTransform: 'capitalize' }}
-									value={state.id}
-									key={state.id}
+									value={state.slug}
+									key={state._id}
 								>
 									{state.name}
 								</option>
@@ -213,7 +235,7 @@ export default function SearchPageFilter({}: Props) {
 							}}
 							bgColor={'white'}
 							onChange={handleFilterOption}
-							defaultValue={searchParams.get('location')?.toString() || ''}
+							defaultValue={searchFilterData.location}
 							name="location"
 							border={0}
 							_dark={{ borderColor: 'dark_light' }}
@@ -227,13 +249,13 @@ export default function SearchPageFilter({}: Props) {
 							>
 								Filter by city
 							</option>
-							{filteredLocationOptions.map((area) => (
+							{filteredLocationOptions.map((location) => (
 								<option
 									style={{ color: 'black', textTransform: 'capitalize' }}
-									value={area.id}
-									key={area.id}
+									value={location.slug}
+									key={location._id}
 								>
-									{area.name}
+									{location.name}
 								</option>
 							))}
 						</Select>
@@ -264,8 +286,8 @@ export default function SearchPageFilter({}: Props) {
 							fontWeight={'300'}
 							fontSize={{ base: 'xs', md: 'sm' }}
 							value={budget.value}
-							onChange={handleCheckBoxOptions}
-							defaultChecked={searchParams.toString().includes(budget.value)}
+							onChange={handleFilterOption}
+							isChecked={searchFilterData.budget === budget.value}
 						>
 							{budget.label}
 						</Checkbox>
@@ -287,25 +309,25 @@ export default function SearchPageFilter({}: Props) {
 				<SimpleGrid columns={1} spacingY={{ base: '12px', md: '16px' }}>
 					{options.services.map((service) => (
 						<Checkbox
-							key={service.id}
+							key={service._id}
 							textTransform={'capitalize'}
 							_dark={{ color: 'text_muted' }}
 							colorScheme="green"
 							color={'#11171799'}
 							fontWeight={'300'}
 							fontSize={{ base: 'xs', md: 'sm' }}
-							value={service.id}
+							value={service.slug}
 							name="service"
-							onChange={handleCheckBoxOptions}
-							defaultChecked={searchParams.toString().includes(service.id)}
+							onChange={handleFilterOption}
+							isChecked={searchFilterData.service === service.slug}
 						>
-							{service.title}
+							{service.name}
 						</Checkbox>
 					))}
 				</SimpleGrid>
 			</Flex>
 
-			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
+			{/* <Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
 					as={'h3'}
 					fontWeight={'normal'}
@@ -328,8 +350,8 @@ export default function SearchPageFilter({}: Props) {
 							fontSize={{ base: 'xs', md: 'sm' }}
 							value={apartmentType.value}
 							name="apartment"
-							onChange={handleCheckBoxOptions}
-							defaultChecked={searchParams
+							onChange={handleFilterOption}
+							isChecked={searchParams
 								.toString()
 								.includes(apartmentType.value)}
 						>
@@ -337,7 +359,7 @@ export default function SearchPageFilter({}: Props) {
 						</Checkbox>
 					))}
 				</SimpleGrid>
-			</Flex>
+			</Flex> */}
 
 			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
@@ -362,10 +384,8 @@ export default function SearchPageFilter({}: Props) {
 							fontSize={{ base: 'xs', md: 'sm' }}
 							value={paymentType.value}
 							name="payment_type"
-							onChange={handleCheckBoxOptions}
-							defaultChecked={searchParams
-								.toString()
-								.includes(paymentType.value)}
+							onChange={handleFilterOption}
+							isChecked={searchFilterData.payment_type === paymentType.value}
 						>
 							{paymentType.label}
 						</Checkbox>

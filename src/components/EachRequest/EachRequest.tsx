@@ -4,7 +4,7 @@ import CloseIcon from '@/assets/svg/close-icon-dark'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import { FlatShareRequest } from '@/firebase/service/request/request.types'
 import useCommon from '@/hooks/useCommon'
 import useHandleBookmark from '@/hooks/useHandleBookmark'
 import useShareSpace from '@/hooks/useShareSpace'
@@ -52,7 +52,7 @@ import MainTooltip from '../atoms/MainTooltip'
 import useAnalytics from '@/hooks/useAnalytics'
 import { AnalyticsDataDetails } from '@/firebase/service/analytics/analytics.types'
 
-type Props = { request: HostRequestDataDetails }
+type Props = { request: FlatShareRequest }
 
 export default function EachRequest({ request }: Props) {
 	const router = useRouter()
@@ -61,7 +61,7 @@ export default function EachRequest({ request }: Props) {
 	const { authState } = useAuthContext()
 
 	const { bookmarkId, isBookmarkLoading, toggleSaveApartment } =
-		useHandleBookmark(request.id || request.uuid, request._user_ref._id)
+		useHandleBookmark(request._id, request.user._id)
 	const { copyShareUrl, handleDeletePost, isLoading } = useShareSpace()
 	const { addAnalyticsData, getAnalyticsData } = useAnalytics()
 
@@ -69,24 +69,24 @@ export default function EachRequest({ request }: Props) {
 		AnalyticsDataDetails | undefined
 	>(undefined)
 
-	useEffect(() => {
-		const fetchAnalyticsData = async () => {
-			try {
-				const data = await getAnalyticsData(request._location_keyword_ref.id)
-				setAnalyticsData(data)
-			} catch (error) {
-				console.error('Error fetching analytics data:', error)
-			}
-		}
+	// useEffect(() => {
+	// 	const fetchAnalyticsData = async () => {
+	// 		try {
+	// 			const data = await getAnalyticsData(request.location._id)
+	// 			setAnalyticsData(data)
+	// 		} catch (error) {
+	// 			console.error('Error fetching analytics data:', error)
+	// 		}
+	// 	}
 
-		fetchAnalyticsData()
-	}, [])
+	// 	fetchAnalyticsData()
+	// }, [])
 
 	const deletePost = async (): Promise<void> => {
 		try {
 			await handleDeletePost({
-				requestId: request.id || request.uuid,
-				userId: request._user_ref._id,
+				requestId: request._id,
+				userId: request.user._id,
 			})
 		} catch (err) {
 			showToast({
@@ -121,29 +121,11 @@ export default function EachRequest({ request }: Props) {
 			<Flex flexDirection={'column'} gap={DEFAULT_PADDING}>
 				<Flex gap={5} alignItems={'center'}>
 					<Link
-						href={canInteract ? `/user/${request._user_ref._id}` : ''}
+						href={canInteract ? `/user/${request.user._id}` : ''}
 						style={{ textDecoration: 'none' }}
-						onClick={async () =>
-							(canInteract || authState.user?._id !== request._user_ref._id) &&
-							(await createNotification({
-								is_read: false,
-								message: NotificationsBodyMessage.profile_view,
-								recipient_id: request._user_ref._id,
-								type: 'profile_view',
-								sender_details: authState.user
-									? {
-											avatar_url: authState.user.avatar_url,
-											first_name: authState.user.first_name,
-											last_name: authState.user.last_name,
-											id: authState.user._id,
-										}
-									: null,
-								action_url: `/user/${request._user_ref._id}`,
-							}))
-						}
 					>
 						<Avatar
-							src={request._user_ref.avatar_url}
+							src={request.user.avatar_url}
 							size={{
 								md: 'md',
 								base: 'md',
@@ -156,36 +138,17 @@ export default function EachRequest({ request }: Props) {
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
 							{canInteract ? (
 								<Link
-									href={`/user/${request._user_ref._id}`}
+									href={`/user/${request.user._id}`}
 									style={{ textDecoration: 'none' }}
-									onClick={async () =>
-										authState.user?._id !== request._user_ref._id &&
-										(await createNotification({
-											is_read: false,
-											message: NotificationsBodyMessage.profile_view,
-											recipient_id: request._user_ref._id,
-											type: 'profile_view',
-											sender_details: authState.user
-												? {
-														avatar_url: authState.user.avatar_url,
-														first_name: authState.user.first_name,
-														last_name: authState.user.last_name,
-														id: authState.user._id,
-													}
-												: null,
-											action_url: `/user/${request._user_ref._id}`,
-										}))
-									}
 								>
 									<Flex alignItems={'center'} gap={{ base: '4px', md: '8px' }}>
 										<Text
 											textTransform={'capitalize'}
 											fontSize={{ base: 'base', md: 'lg' }}
 										>
-											{request._user_ref.last_name}{' '}
-											{request._user_ref.first_name}
+											{request.user.last_name} {request.user.first_name}
 										</Text>
-										{request._user_info_ref?.is_verified && (
+										{request.user_info?.is_verified && (
 											<LuBadgeCheck fill="#00bc73" />
 										)}
 									</Flex>
@@ -241,7 +204,7 @@ export default function EachRequest({ request }: Props) {
 												bgColor="none"
 												onClick={() =>
 													copyShareUrl(
-														`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`,
+														`/request/${request.seeking ? 'seeker' : 'host'}/${request._id}`,
 														request.seeking
 															? 'Looking for apartment'
 															: 'New apartment',
@@ -265,7 +228,7 @@ export default function EachRequest({ request }: Props) {
 													Share
 												</Text>
 											</Button>
-											{authState.user?._id === request._user_ref._id && (
+											{authState.user?._id === request.user._id && (
 												<>
 													<Button
 														variant="ghost"
@@ -280,7 +243,7 @@ export default function EachRequest({ request }: Props) {
 														}}
 														onClick={() => {
 															router.push(
-																`request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}/edit`,
+																`request/${request.seeking ? 'seeker' : 'host'}/${request._id}/edit`,
 															)
 														}}
 														width="100%"
@@ -334,7 +297,7 @@ export default function EachRequest({ request }: Props) {
 				</Flex>
 
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request._id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex flexDirection={'column'}>
@@ -349,7 +312,7 @@ export default function EachRequest({ request }: Props) {
 								<BiLocationPlus size={'16px'} />
 							</Box>
 							<Truncate
-								text={request._location_keyword_ref.name}
+								text={request.location.name}
 								max={70}
 								showReadMore={false}
 							/>
@@ -358,7 +321,7 @@ export default function EachRequest({ request }: Props) {
 					</Flex>
 				</Link>
 				<Link
-					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request.id || request.uuid}`}
+					href={`/request/${request.seeking ? 'seeker' : 'host'}/${request._id}`}
 					style={{ textDecoration: 'none' }}
 				>
 					<Flex justifyContent={'space-between'} flexWrap={'wrap'} gap={'8px'}>
@@ -373,19 +336,19 @@ export default function EachRequest({ request }: Props) {
 								rounded="md"
 								textTransform={'capitalize'}
 							>
-								{request._service_ref.title}
+								{request.service.name}
 							</Badge>
-							{request._category_ref && (
+							{request.category && (
 								<Badge
 									colorScheme="orange"
 									rounded="md"
 									textTransform={'capitalize'}
 								>
-									{request._category_ref.title}
+									{request.category.name}
 								</Badge>
 							)}
 						</Flex>
-						{request._property_type_ref && (
+						{request.property_type && (
 							<Badge
 								border="1px"
 								borderColor={'border-color'}
@@ -396,15 +359,15 @@ export default function EachRequest({ request }: Props) {
 								}}
 								textTransform={'capitalize'}
 							>
-								{request._property_type_ref.title}
+								{request.property_type.name}
 							</Badge>
 						)}
 					</Flex>
 				</Link>
-				{request.images_urls && (
+				{request.image_urls && request.image_urls.length > 0 && (
 					<EachRequestMedia
 						video={request.video_url}
-						images={request.images_urls}
+						images={request.image_urls}
 					/>
 				)}
 				<Flex
@@ -412,13 +375,12 @@ export default function EachRequest({ request }: Props) {
 					flexDir={'row'}
 					justifyContent={'space-between'}
 				>
-					<Flex gap={DEFAULT_PADDING}>
-						{!request._user_info_ref?.hide_phone ? (
+					<Flex gap={{ base: 0, sm: DEFAULT_PADDING }}>
+						{!request.user_info?.hide_phone ? (
 							<MainTooltip label="Call me" placement="top">
 								<Button
 									isDisabled={
-										!canInteract ||
-										authState.user?._id === request._user_ref._id
+										!canInteract || authState.user?._id === request.user._id
 									}
 									px={0}
 									bg="none"
@@ -440,23 +402,7 @@ export default function EachRequest({ request }: Props) {
 									onClick={async () => {
 										if (canInteract) {
 											try {
-												// Handle the call
-												await handleCall({
-													number: request._user_info_ref.primary_phone_number,
-													recipient_id: request._user_ref._id,
-													sender_details: authState.user
-														? {
-																avatar_url: authState.user.avatar_url,
-																first_name: authState.user.first_name,
-																last_name: authState.user.last_name,
-																id: authState.user._id,
-															}
-														: null,
-												})
-												await addAnalyticsData(
-													'calls',
-													request._location_keyword_ref.id,
-												)
+												await addAnalyticsData('calls', request.location._id)
 											} catch (error) {
 												console.error(
 													'Error during call or analytics update:',
@@ -475,7 +421,7 @@ export default function EachRequest({ request }: Props) {
 						<MainTooltip label="Ask questions" placement="top">
 							<Button
 								isDisabled={
-									!canInteract || authState.user?._id === request._user_ref._id
+									!canInteract || authState.user?._id === request.user._id
 								}
 								onClick={async () => {
 									if (canInteract) {
@@ -483,13 +429,11 @@ export default function EachRequest({ request }: Props) {
 											// Handle the redirect
 											const res = await addAnalyticsData(
 												'messages',
-												request._location_keyword_ref.id,
+												request.location._id,
 											)
 
 											if (res)
-												window.location.assign(
-													`/messages/${request._user_ref._id}`,
-												)
+												window.location.assign(`/messages/${request.user._id}`)
 										} catch (error) {
 											console.error(
 												'Error during messaging or analytics update:',
@@ -564,7 +508,7 @@ export default function EachRequest({ request }: Props) {
 						alignItems="center"
 					>
 						<Text fontSize={{ base: 'base', md: 'lg' }} fontWeight={'bold'}>
-							₦{request.budget.toLocaleString()}
+							₦{request.rent.toLocaleString()}
 						</Text>{' '}
 						<Text
 							textTransform={'capitalize'}
@@ -718,6 +662,8 @@ const EachRequestMedia = ({
 									overflow={'hidden'}
 									cursor={'pointer'}
 									rounded="md"
+									height={'100%'}
+									bgColor={'black'}
 									alignItems={'center'}
 									justifyContent={'center'}
 									onClick={() => handleClick(i)}
@@ -737,6 +683,7 @@ const EachRequestMedia = ({
 									overflow={'hidden'}
 									cursor={'pointer'}
 									rounded="md"
+									bgColor={'black'}
 									bg="dark"
 									onClick={() => handleClick(i)}
 								>

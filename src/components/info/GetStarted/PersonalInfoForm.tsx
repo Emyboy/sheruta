@@ -1,5 +1,10 @@
 'use client'
+
 import { DEFAULT_PADDING } from '@/configs/theme'
+import { useAuthContext } from '@/context/auth.context'
+import { useOptionsContext } from '@/context/options.context'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import useCommon from '@/hooks/useCommon'
 import {
 	Button,
 	Divider,
@@ -7,28 +12,32 @@ import {
 	Input,
 	InputGroup,
 	InputLeftAddon,
+	Select,
 	Text,
 	VStack,
 } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
-import { Select } from '@chakra-ui/react'
-import { industries } from '@/constants'
-import useCommon from '@/hooks/useCommon'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { useAuthContext } from '@/context/auth.context'
-import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
 
 type Props = {
-	done?: () => void
+	done: () => void
 }
 
 export default function PersonalInfoForm({ done }: Props) {
 	const { showToast } = useCommon()
-	const { getAuthDependencies } = useAuthContext()
+
 	const {
-		authState: { user, flat_share_profile },
+		authState: { user, user_info, flat_share_profile },
+		setAuthState,
 	} = useAuthContext()
+	const {
+		optionsState: { work_industries },
+	} = useOptionsContext()
+
+	const axiosInstance = useAuthenticatedAxios()
+
 	const [isLoading, setIsLoading] = useState(false)
+
 	const [occupation, setOccupation] = useState(
 		flat_share_profile?.occupation || '',
 	)
@@ -55,13 +64,39 @@ export default function PersonalInfoForm({ done }: Props) {
 	const [twitter, setTwitter] = useState(flat_share_profile?.twitter || '')
 	const [linkedin, setLinkedin] = useState(flat_share_profile?.linkedin || '')
 
-	const handleSubmit = async (e: any) => {
-		e.preventDefault()
-		try {
-			setIsLoading(true)
-			await FlatShareProfileService.update({
-				document_id: user?._id as string,
-				data: {
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			if (!axiosInstance) return null
+
+			if (user) {
+				setIsLoading(true)
+				await Promise.all([
+					axiosInstance.put('/flat-share-profile', {
+						occupation,
+						employment_status,
+						work_industry,
+						religion,
+						tiktok,
+						facebook,
+						instagram,
+						twitter,
+						linkedin,
+						gender_preference,
+						age_preference: {
+							min: age_preference.split(' ')[0],
+							max: age_preference.split(' ')[2],
+						},
+					}),
+
+					axiosInstance.post('/user-info/kyc/complete'),
+				])
+			}
+		},
+		onSuccess: () => {
+			setAuthState({
+				// @ts-ignore
+				flat_share_profile: {
+					...flat_share_profile,
 					occupation,
 					employment_status,
 					work_industry,
@@ -73,46 +108,27 @@ export default function PersonalInfoForm({ done }: Props) {
 					linkedin,
 					gender_preference,
 					age_preference,
+					done_kyc: true,
+				},
+				// @ts-ignore
+				user_info: {
+					...user_info,
+					done_kyc: true,
 				},
 			})
-			await saveProfileDocs(
-				{
-					occupation,
-					employment_status,
-					work_industry,
-					religion,
-					tiktok,
-					facebook,
-					instagram,
-					twitter,
-					linkedin,
-					gender_preference,
-					age_preference,
-					is_verified: false,
-				},
-				user?._id as string,
-			)
-			if (user) {
-				await FlatShareProfileService.update({
-					data: {
-						done_kyc: true,
-					},
-					document_id: user._id,
-				})
-			}
-			// await getAuthDependencies()
+
 			setIsLoading(false)
-			if (done) {
-				done()
-			}
-		} catch (error) {
+			done()
+		},
+		onError: (err) => {
+			setIsLoading(false)
+			console.error(err)
 			showToast({
 				message: 'Error, please try again',
 				status: 'error',
 			})
-		}
-		setIsLoading(false)
-	}
+		},
+	})
 
 	return (
 		<>
@@ -140,7 +156,12 @@ export default function PersonalInfoForm({ done }: Props) {
 				>
 					{`Let you're potential match know more about you`}
 				</Text>
-				<form onSubmit={handleSubmit}>
+				<form
+					onSubmit={(e) => {
+						e.preventDefault()
+						mutate()
+					}}
+				>
 					<VStack mt={'60px'} w={'full'} spacing={DEFAULT_PADDING}>
 						<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
 							<Flex
@@ -183,11 +204,11 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setEmploymentStatus(e.target.value)}
 									value={employment_status}
 								>
+									<option value={''}>None</option>
 									<option value="employed">Employed</option>
 									<option value="unemployed">Unemployed</option>
-									<option value="self employed">Self employed</option>
+									<option value="self_employed">Self employed</option>
 									<option value="student">Student</option>
-									<option value="corps member">{`Corps member (NYSC)`}</option>
 								</Select>
 							</Flex>
 						</Flex>
@@ -208,9 +229,9 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setWorkIndustry(e.target.value)}
 									value={work_industry}
 								>
-									{industries.map((industry) => (
-										<option key={industry} value={industry.toLowerCase()}>
-											{industry}
+									{work_industries.map((industry: any) => (
+										<option key={industry._id} value={industry._id}>
+											{industry.name}
 										</option>
 									))}
 								</Select>
@@ -233,7 +254,9 @@ export default function PersonalInfoForm({ done }: Props) {
 								>
 									<option value="christian">Christian</option>
 									<option value="muslim">Muslim</option>
-									<option value="others">Others</option>
+									<option value="traditional">Traditional</option>
+									<option value="atheist">Atheist</option>
+									<option value="other">Others</option>
 								</Select>
 							</Flex>
 						</Flex>
@@ -254,9 +277,8 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setGenderPreference(e.target.value)}
 									value={gender_preference}
 								>
-									<option value="Males only">Male only</option>
-									<option value="Females only">Female only</option>
-									<option value="Both genders">Both genders</option>
+									<option value="male">Male only</option>
+									<option value="female">Female only</option>
 								</Select>
 							</Flex>
 							<Flex
@@ -275,11 +297,10 @@ export default function PersonalInfoForm({ done }: Props) {
 									onChange={(e) => setAgePreference(e.target.value)}
 									value={age_preference}
 								>
-									<option value="18 - 23 yrs">18 - 23 yrs</option>
-									<option value="24 - 29 yrs">25 - 29 yrs</option>
-									<option value="30 - 35 yrs">30 - 35 yrs</option>
-									<option value="Above 35 yrs">Above 35 yrs</option>
-									<option value="Any age">Any age</option>
+									<option value="18 - 23">18 - 23 yrs</option>
+									<option value="24 - 29">24 - 29 yrs</option>
+									<option value="30 - 35">30 - 35 yrs</option>
+									<option value="35 - 1000">Above 35 yrs</option>
 								</Select>
 							</Flex>
 						</Flex>

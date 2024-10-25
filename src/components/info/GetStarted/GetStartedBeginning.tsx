@@ -7,9 +7,9 @@ export default function GetStartedBeginning({ done }: { done: () => void }) {
 		authState: { user, user_info, flat_share_profile },
 	} = useAuthContext()
 
-	if (!user || !user_info || !flat_share_profile) {
-		return null
-	}
+	// if (!user || !user_info || !flat_share_profile) {
+	// 	return null
+	// }
 
 	return (
 		<Flex flexDir={'column'} justifyContent={'center'} alignItems={'center'}>

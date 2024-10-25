@@ -42,7 +42,7 @@ const EachOption = ({ label }: { label: string }) => {
 			justifyContent={'center'}
 		>
 			<BiSolidMegaphone size={60} />
-			<Text fontSize={'x-large'}>{label}</Text>
+			<Text fontSize={{ base: 'base', md: 'lg', xl: 'xl' }}>{label}</Text>
 		</Flex>
 	)
 }

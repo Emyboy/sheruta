@@ -31,17 +31,13 @@ export default function Summary({
 }: HostSpaceFormProps) {
 	const { optionsState: options } = useOptionsContext()
 
-	const [houseRules, setHouseRules] = useState<string[]>(
-		formData.house_rules ? formData.house_rules : [''],
-	)
-
 	const { isLoaded } = useJsApiLoader({
 		googleMapsApiKey: GOOGLE_PLACES_API_KEY as string,
 		libraries,
 	})
 
 	const [filteredLocationOptions, setFilteredLocationOptions] = useState(
-		options.location_keywords,
+		options.locations,
 	)
 
 	const [autocomplete, setAutocomplete] =
@@ -90,12 +86,15 @@ export default function Summary({
 		}
 	}
 
-	const addHouseRule = () => setHouseRules((prev) => [...prev, ''])
+	const addHouseRule = () =>
+		setFormData((prev) => ({
+			...prev,
+			house_rules: [...formData.house_rules, ''],
+		}))
 
 	const removeHouseRule = (i: number) => {
-		const updatedRules = houseRules.filter((_, idx) => idx !== i)
+		const updatedRules = formData.house_rules.filter((_, idx) => idx !== i)
 
-		setHouseRules(updatedRules)
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
 		localStorage.setItem(
 			'host_space_form',
@@ -112,9 +111,8 @@ export default function Summary({
 	) => {
 		const { value } = e.target
 
-		const updatedRules = [...houseRules]
+		const updatedRules = [...formData.house_rules]
 		updatedRules[idx] = value
-		setHouseRules(updatedRules)
 
 		setFormData((prev) => ({ ...prev, house_rules: updatedRules }))
 		localStorage.setItem(
@@ -132,11 +130,12 @@ export default function Summary({
 		>,
 	) => {
 		if (
-			e.target.name === 'budget' ||
+			e.target.name === 'rent' ||
 			e.target.name === 'service_charge' ||
 			e.target.name === 'bathrooms' ||
 			e.target.name === 'toilets' ||
-			e.target.name === 'living_rooms'
+			e.target.name === 'living_rooms' ||
+			e.target.name === 'bedrooms'
 		) {
 			setFormData((prev) => ({
 				...prev,
@@ -169,76 +168,17 @@ export default function Summary({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		const selectedCategory = options.categories.find(
-			(category) => category.id === formData.category,
-		)
-		if (selectedCategory) {
-			setFormData((prev) => ({
-				...prev,
-				_category_ref: selectedCategory._ref,
-			}))
-		}
-
-		const selectedService = options.services.find(
-			(service) => service.id === formData.service,
-		)
-		if (selectedService) {
-			setFormData((prev) => ({
-				...prev,
-				_service_ref: selectedService._ref,
-			}))
-		}
-
-		const selectedLocation = filteredLocationOptions.find(
-			(location) => location.id === formData.area,
-		)
-		if (selectedLocation) {
-			setFormData((prev) => ({
-				...prev,
-				_location_keyword_ref: selectedLocation._ref,
-			}))
-		}
-
-		const selectedState = options.states.find(
-			(state) => state.id === formData.state,
-		)
-		if (selectedState) {
-			setFormData((prev) => ({
-				...prev,
-				_state_ref: selectedState._ref,
-			}))
-		}
-
-		const selectedProperty = options.property_types.find(
-			(property) => property.id === formData.property,
-		)
-		if (selectedProperty) {
-			setFormData((prev) => ({
-				...prev,
-				_property_type_ref: selectedProperty._ref,
-			}))
-		}
-
-		const amenities = formData.pre_amenities.map(
-			(amenity) =>
-				options.amenities.find((item) => item.title === amenity)._ref,
-		)
-		setFormData((prev) => ({
-			...prev,
-			amenities,
-		}))
-
 		next()
 	}
 
 	useEffect(() => {
 		if (formData.state)
 			setFilteredLocationOptions(
-				options.location_keywords.filter(
-					(location) => location._state_id === formData.state,
+				options.locations.filter(
+					(location) => location.state === formData.state,
 				),
 			)
-	}, [formData.state])
+	}, [formData.state, options.locations])
 
 	return (
 		<>
@@ -294,11 +234,11 @@ export default function Summary({
 								required
 								type="text"
 								min={1}
-								value={String(formData.budget)}
-								name="budget"
+								value={String(formData.rent)}
+								name="rent"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Price"
+								placeholder="Rent Value"
 							/>
 						</Flex>
 						<Flex
@@ -346,6 +286,9 @@ export default function Summary({
 								size="md"
 								color={'border_color'}
 							>
+								<option style={{ color: 'black' }} value="daily">
+									Daily
+								</option>
 								<option style={{ color: 'black' }} value="weekly">
 									Weekly
 								</option>
@@ -355,7 +298,7 @@ export default function Summary({
 								<option style={{ color: 'black' }} value="annually">
 									Annually
 								</option>
-								<option style={{ color: 'black' }} value="bi-annually">
+								<option style={{ color: 'black' }} value="biannually">
 									Bi-Annually
 								</option>
 							</Select>
@@ -387,11 +330,11 @@ export default function Summary({
 							>
 								{options.categories.map((category) => (
 									<option
-										key={category.id}
+										key={category._id}
 										style={{ color: 'black' }}
-										value={category.id}
+										value={category._id}
 									>
-										{category.title}
+										{category.name}
 									</option>
 								))}
 							</Select>
@@ -491,11 +434,11 @@ export default function Summary({
 							>
 								{options.services.map((service) => (
 									<option
-										key={service.id}
+										key={service._id}
 										style={{ color: 'black', textTransform: 'capitalize' }}
-										value={service.id}
+										value={service._id}
 									>
-										{service.title}
+										{service.name}
 									</option>
 								))}
 							</Select>
@@ -515,8 +458,8 @@ export default function Summary({
 								_light={{ color: 'dark' }}
 								onChange={handleChange}
 								required
-								value={formData.property}
-								name="property"
+								value={formData.property_type}
+								name="property_type"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
 								placeholder="Property Type"
@@ -525,11 +468,11 @@ export default function Summary({
 							>
 								{options.property_types.map((property) => (
 									<option
-										key={property.id}
+										key={property._id}
 										style={{ color: 'black', textTransform: 'capitalize' }}
-										value={property.id}
+										value={property._id}
 									>
-										{property.title}
+										{property.name}
 									</option>
 								))}
 							</Select>
@@ -549,42 +492,42 @@ export default function Summary({
 							<SimpleGrid columns={[1, 2, 3]} spacingY="8px">
 								{options.amenities.map((amenity) => (
 									<Checkbox
-										key={amenity.id}
+										key={amenity._id}
 										textTransform={'capitalize'}
 										color={'border_color'}
 										colorScheme="green"
 										_light={{ color: 'dark' }}
-										value={amenity.title}
+										value={amenity._id}
 										textColor={'white'}
-										isChecked={formData.amenities.includes(amenity.title)}
+										isChecked={formData.amenities.includes(amenity._id)}
 										onChange={(e) => {
 											const { checked, value } = e.target
 											if (checked) {
-												const pre_amenities = [...formData.pre_amenities, value]
-												setFormData((prev) => ({ ...prev, pre_amenities }))
+												const amenities = [...formData.amenities, value]
+												setFormData((prev) => ({ ...prev, amenities }))
 												localStorage.setItem(
 													'host_space_form',
 													JSON.stringify({
 														...formData,
-														pre_amenities,
+														amenities,
 													}),
 												)
 											} else {
-												const pre_amenities = formData.pre_amenities.filter(
+												const amenities = formData.amenities.filter(
 													(amenity) => amenity !== value,
 												)
-												setFormData((prev) => ({ ...prev, pre_amenities }))
+												setFormData((prev) => ({ ...prev, amenities }))
 												localStorage.setItem(
 													'host_space_form',
 													JSON.stringify({
 														...formData,
-														pre_amenities,
+														amenities,
 													}),
 												)
 											}
 										}}
 									>
-										{amenity.title}
+										{amenity.name}
 									</Checkbox>
 								))}
 							</SimpleGrid>
@@ -611,39 +554,45 @@ export default function Summary({
 								/>
 							</Box>
 						</Flex>
-						{houseRules.map((_, i) => (
-							<Box key={i} pos={'relative'}>
-								<Input
-									onChange={(e) => handleHouseRuleChange(e, i)}
-									minLength={5}
-									value={houseRules[i]}
-									_placeholder={{ color: 'text_muted' }}
-									borderColor={'border_color'}
-									_dark={{ borderColor: 'dark_light' }}
-									placeholder="Enter your rule"
-								/>
-								{houseRules.length > 1 && (
-									<Box
-										cursor={'pointer'}
-										pos={'absolute'}
-										top={'-8px'}
-										right={'-8px'}
-										_dark={{
-											bgColor: 'dark',
-										}}
-										bgColor="white"
-										rounded={'full'}
-									>
-										<BiMinusCircle
-											onClick={() => removeHouseRule(i)}
-											size={'20px'}
-											fill="#00bc73"
-											title="remove house rule"
-										/>
-									</Box>
-								)}
-							</Box>
-						))}
+						{(formData.house_rules.length ? formData.house_rules : ['']).map(
+							(_, i) => (
+								<Box key={i} pos={'relative'}>
+									<Input
+										onChange={(e) => handleHouseRuleChange(e, i)}
+										minLength={5}
+										value={
+											(formData.house_rules.length
+												? formData.house_rules
+												: [''])[i]
+										}
+										_placeholder={{ color: 'text_muted' }}
+										borderColor={'border_color'}
+										_dark={{ borderColor: 'dark_light' }}
+										placeholder="Enter your rule"
+									/>
+									{formData.house_rules.length > 1 && (
+										<Box
+											cursor={'pointer'}
+											pos={'absolute'}
+											top={'-8px'}
+											right={'-8px'}
+											_dark={{
+												bgColor: 'dark',
+											}}
+											bgColor="white"
+											rounded={'full'}
+										>
+											<BiMinusCircle
+												onClick={() => removeHouseRule(i)}
+												size={'20px'}
+												fill="#00bc73"
+												title="remove house rule"
+											/>
+										</Box>
+									)}
+								</Box>
+							),
+						)}
 					</Flex>
 
 					<Flex gap={DEFAULT_PADDING} w="full" flexDir={['column', 'row']}>
@@ -672,8 +621,8 @@ export default function Summary({
 								{options.states.map((state) => (
 									<option
 										style={{ color: 'black', textTransform: 'capitalize' }}
-										value={state.id}
-										key={state.id}
+										value={state._id}
+										key={state._id}
 									>
 										{state.name}
 									</option>
@@ -687,35 +636,35 @@ export default function Summary({
 							gap={3}
 						>
 							<Text color={'text_muted'} fontSize={'base'}>
-								Select an area
+								Select a location
 							</Text>
 							<Select
 								_placeholder={{ color: 'text_muted' }}
 								_light={{ color: 'dark' }}
 								onChange={handleChange}
 								required
-								value={formData.area}
-								name="area"
+								value={formData.location}
+								name="location"
 								borderColor={'border_color'}
 								_dark={{ borderColor: 'dark_light' }}
-								placeholder="Area"
+								placeholder="Location"
 								size="md"
 								color={'border_color'}
 							>
 								{formData.state &&
-									filteredLocationOptions.map((area) => (
+									filteredLocationOptions.map((location) => (
 										<option
 											style={{ color: 'black', textTransform: 'capitalize' }}
-											value={area.id}
-											key={area.id}
+											value={location._id}
+											key={location._id}
 										>
-											{area.name}
+											{location.name}
 										</option>
 									))}
 							</Select>
 						</Flex>
 					</Flex>
-					{formData.area &&
+					{formData.location &&
 						(!isLoaded ? (
 							<Text width={'full'} textAlign={'center'}>
 								Loading google maps
@@ -723,7 +672,13 @@ export default function Summary({
 						) : (
 							<FormControl mt={1}>
 								<FormLabel htmlFor="address">
-									Where in {formData.area}?
+									Where in{' '}
+									{
+										filteredLocationOptions.find(
+											(location) => location._id === formData.location,
+										)?.name
+									}
+									?
 								</FormLabel>
 								<Autocomplete
 									onLoad={handleLoad}

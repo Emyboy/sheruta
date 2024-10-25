@@ -9,7 +9,7 @@ import MainHeader from '@/components/layout/MainHeader'
 
 type Props = {}
 
-export default function page({}: Props) {
+export default async function page({}: Props) {
 	return (
 		<Flex justifyContent={'center'}>
 			<MainContainer>

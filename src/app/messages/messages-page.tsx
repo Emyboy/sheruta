@@ -8,7 +8,6 @@ import MobileNavFooter from '@/components/layout/MobileNavFooter'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { DEFAULT_PADDING, NAV_HEIGHT } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
-import ConversationsService from '@/firebase/service/conversations/conversations.firebase'
 import { ConversationData } from '@/firebase/service/conversations/conversations.types'
 import { Box, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
@@ -19,23 +18,45 @@ import {
 } from 'react-icons/bi'
 import EachConversation from './components/EachConversation'
 import EachConversationLoading from './components/EachConversationLoading'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import useCommon from '@/hooks/useCommon'
 
 type Props = {}
 
 export default function MessagesPage({}: Props) {
 	const { authState } = useAuthContext()
 	const { user } = authState
-	const [conversations, setConversations] = useState<any[] | null>(null)
+	const [conversations, setConversations] = useState<ConversationData[] | null>(
+		null,
+	)
+	const axiosInstance = useAuthenticatedAxios()
+	const { showToast } = useCommon()
 
 	useEffect(() => {
 		if (user) {
-			;(async () => {
-				const conversationsWithParticipantsData =
-					await ConversationsService.forUser(user._id)
-				setConversations(conversationsWithParticipantsData)
-			})()
+			const getConversation = async () => {
+				if (user) {
+					if (!axiosInstance) {
+						return showToast({
+							message: 'Session not ready. Please try again later.',
+							status: 'warning',
+						})
+					}
+					const {
+						data: { conversations: userConversations },
+					}: {
+						data: { conversations: ConversationData[] }
+					} = await axiosInstance.get(`/conversations`)
+
+					setConversations(userConversations)
+					return
+				}
+			}
+
+			// axiosInstance &&
+			getConversation()
 		}
-	}, [user])
+	}, [user, axiosInstance])
 
 	return (
 		<Flex justifyContent={'center'}>
@@ -57,10 +78,13 @@ export default function MessagesPage({}: Props) {
 									conversations.map((val: ConversationData, index: any) => {
 										return (
 											<Link
-												href={`/messages/${val.participants.find((x) => x._id !== user?._id)?._id}`}
+												href={`/messages/${val.members.find((x) => x._id !== user?._id)?._id}`}
 												key={Math.random()}
 											>
-												<EachConversation data={val as any} />
+												<EachConversation
+													data={val as any}
+													hasUnread={val?.unread_messages !== 0}
+												/>
 												{/* <Divider bg='border_color' _dark={{
 									bg: 'dark_light'
 								}} /> */}

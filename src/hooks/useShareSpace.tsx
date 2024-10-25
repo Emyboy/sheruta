@@ -1,15 +1,16 @@
 import { useAuthContext } from '@/context/auth.context'
-import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { useRouter } from 'next/navigation'
+import { revalidatePathOnClient } from '@/utils/actions'
 import { useState } from 'react'
+import useAuthenticatedAxios from './useAxios'
 import useCommon from './useCommon'
 
 export default function useShareSpace() {
 	const { showToast } = useCommon()
 	const { authState } = useAuthContext()
-	const router = useRouter()
 
 	const [isLoading, setIsLoading] = useState(false)
+
+	const axiosInstance = useAuthenticatedAxios()
 
 	const copyShareUrl = async (
 		url: string,
@@ -53,19 +54,26 @@ export default function useShareSpace() {
 	}): Promise<void> => {
 		try {
 			setIsLoading(true)
+			if (!axiosInstance) {
+				return showToast({
+					message: 'Failed to delete the post',
+					status: 'error',
+				})
+			}
 
 			if (authState.user?._id === userId && requestId) {
-				await SherutaDB.delete({
-					collection_name: DBCollectionName.flatShareRequests,
-					document_id: requestId,
-				})
+				await axiosInstance.delete(`/flat-share-requests/${requestId}`)
 
 				showToast({
 					message: 'Post has been deleted successfully',
 					status: 'success',
 				})
 
-				router.refresh()
+				revalidatePathOnClient()
+
+				setTimeout(() => {
+					window.location.assign('/')
+				}, 1000)
 			} else {
 				showToast({
 					message: 'You are not authorized to delete this post',

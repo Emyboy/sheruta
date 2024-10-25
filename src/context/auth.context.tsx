@@ -18,12 +18,17 @@ import AuthService from '@/firebase/service/auth/auth.firebase'
 import { useToast } from '@chakra-ui/react'
 import { useAppContext } from './app.context'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import axiosInstance from '@/utils/custom-axios'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { signOut } from 'next-auth/react'
 
 export interface AuthState {
 	user: AuthUser | null
 	user_info: UserInfo | null
-	user_settings: null
+	user_settings: any
+	wallet: any
 	flat_share_profile: null | FlatShareProfileData
+	notifications: any
 	auth_loading?: boolean
 }
 
@@ -40,30 +45,47 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined)
 
 interface AuthContextProviderProps {
 	children: ReactNode
+	user_data: any
 }
 
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	children,
+	user_data,
 }) => {
+	const signin = useAuthenticatedAxios()
+
 	const toast = useToast()
 	const { setAppState } = useAppContext()
-	const [state, setState] = useState<AuthState>({
-		user: null,
-		user_info: null,
-		user_settings: null,
-		flat_share_profile: null,
-		auth_loading: false,
-	})
+	const [state, setState] = useState<AuthState>(
+		user_data
+			? { ...user_data }
+			: {
+					user: null,
+					user_info: null,
+					user_settings: null,
+					wallet: null,
+					flat_share_profile: null,
+					notifications: [],
+					auth_loading: false,
+				},
+	)
 
 	const getAuthDependencies = async (): Promise<any> => {
-		if (state.user) {
-			console.log('GETTING AUTH DEPENDENCIES')
-			let userData = await AuthService.getUser(state.user._id)
-			setAuthState({ ...userData })
-			return userData
-		} else {
-			return Promise.reject('User not found')
-		}
+		// if (state.user) {
+		// 	console.log('GETTING AUTH DEPENDENCIES')
+		// 	let userData = await AuthService.getUser(state.user._id)
+		// 	setAuthState({ ...userData })
+		// 	return userData
+		// } else {
+		// 	return Promise.reject('User not found')
+		// }
+
+		if (!signin) return null
+
+		const { data } = await signin.get(`/users/dependencies`)
+		// console.log(data)
+		// @ts-ignore
+		setAuthState((prev) => ({ ...prev, ...data.user_data }))
 	}
 
 	const setAuthState = (newState: Partial<AuthState>): void => {
@@ -78,7 +100,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	}
 
 	const logout = async () => {
-		await auth.signOut()
+		signOut()
 		localStorage.clear()
 		sessionStorage.clear()
 		window.location.reload()
@@ -119,17 +141,17 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 			})
 	}
 
-	useEffect(() => {
-		onAuthStateChanged(auth, async (user) => {
-			if (user) {
-				let userData = await AuthService.getUser(user.uid)
-				setAuthState({ ...userData })
-				setAppState({ app_loading: false })
-			} else {
-				setAppState({ app_loading: false })
-			}
-		})
-	}, [])
+	// useEffect(() => {
+	// 	// onAuthStateChanged(auth, async (user) => {
+	// 	// 	if (user) {
+	// 	// 		let userData = await AuthService.getUser(user.uid)
+	// 	// 		setAuthState({ ...userData })
+	// 	// 		setAppState({ app_loading: false })
+	// 	// 	} else {
+	// 	// 		setAppState({ app_loading: false })
+	// 	// 	}
+	// 	// })
+	// }, [])
 
 	return (
 		<AuthContext.Provider

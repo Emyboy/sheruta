@@ -9,7 +9,10 @@ import {
 } from '@/firebase/service/bookmarks/bookmarks.types'
 import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import {
+	FlatShareRequest,
+	HostRequestDataDetails,
+} from '@/firebase/service/request/request.types'
 import {
 	resolveArrayOfReferences,
 	resolveSingleObjectReferences,
@@ -208,11 +211,11 @@ const BookmarkList = () => {
 							{...refProp}
 							style={{ transition: 'opacity 0.3s ease-in-out' }}
 						>
-							<EachRequest
+							{/* <EachRequest
 								request={
 									bookmark._object_ref as unknown as HostRequestDataDetails
 								}
-							/>
+							/> */}
 						</Box>
 					)
 				} else if (bookmarkType === BookmarkType.profiles) {
