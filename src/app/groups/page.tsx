@@ -1,10 +1,7 @@
+import MainBackHeader from '@/components/atoms/MainBackHeader'
 import MainPageBody from '@/components/layout/MainPageBody'
-import MainHeader from '@/components/layout/MainHeader'
 import ThreeColumnLayout from '@/components/layout/ThreeColumnLayout'
 import { Flex } from '@chakra-ui/react'
-import moment from 'moment/moment'
-import MainBackHeader from '@/components/atoms/MainBackHeader'
-import React from 'react'
 
 export default function page() {
 	return (
