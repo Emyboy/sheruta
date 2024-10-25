@@ -113,93 +113,91 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 
 	return (
 		<>
-			{parsedUserProfile.length > 0 ? (
-				parsedUserProfile.map((item, index) => {
-					const ProfileSnippetBio = item?.bio
-					const maxBioLength = 84
+			{parsedUserProfile.length > 0
+				? parsedUserProfile.map((item, index) => {
+						const ProfileSnippetBio = item?.bio
+						const maxBioLength = 84
 
-					return (
-						<Box m={4} key={index}>
-							<Card
-								direction={{ base: 'column', sm: 'row' }}
-								overflow="hidden"
-								variant="outline"
-							>
-								<Image
-									objectFit="cover"
-									maxW={{ base: '100%', sm: '200px' }}
-									w="600px"
-									src={`${item?.avatar_url}`}
-									alt="Profile Image"
-								/>
+						return (
+							<Box m={4} key={index}>
+								<Card
+									direction={{ base: 'column', sm: 'row' }}
+									overflow="hidden"
+									variant="outline"
+								>
+									<Image
+										objectFit="cover"
+										maxW={{ base: '100%', sm: '200px' }}
+										w="600px"
+										src={`${item?.avatar_url}`}
+										alt="Profile Image"
+									/>
 
-								<Stack>
-									<Link
-										href={`/user/${item?.document_id}`}
-										style={{ textDecoration: 'none' }}
-									>
-										<CardBody mb={0} border="none">
-											<Flex justify="space-between" align="center" mb={3}>
-												<Text>{`${item?.first_name} ${item.last_name}`}</Text>
-												<Badge color="text_color" background="border_color">
-													Promoted
-												</Badge>
-											</Flex>
+									<Stack>
+										<Link
+											href={`/user/${item?.document_id}`}
+											style={{ textDecoration: 'none' }}
+										>
+											<CardBody mb={0} border="none">
+												<Flex justify="space-between" align="center" mb={3}>
+													<Text>{`${item?.first_name} ${item.last_name}`}</Text>
+													<Badge color="text_color" background="border_color">
+														Promoted
+													</Badge>
+												</Flex>
 
-											<Flex>
-												<Text color="muted_text" py="2" fontSize="0.8em">
-													{ProfileSnippetBio
-														? ProfileSnippetBio.length > maxBioLength
-															? `${ProfileSnippetBio.substring(0, maxBioLength)}......`
-															: ProfileSnippetBio
-														: 'Hi! I am a user of Sheruta, you should go through my profile and see if we are a match'}
-												</Text>
-											</Flex>
+												<Flex>
+													<Text color="muted_text" py="2" fontSize="0.8em">
+														{ProfileSnippetBio
+															? ProfileSnippetBio.length > maxBioLength
+																? `${ProfileSnippetBio.substring(0, maxBioLength)}......`
+																: ProfileSnippetBio
+															: 'Hi! I am a user of Sheruta, you should go through my profile and see if we are a match'}
+													</Text>
+												</Flex>
 
-											<Flex
-												style={{ fontSize: '10px' }}
-												justify="space-between"
-												align="center"
-											>
-												<Text color="text_muted" fontWeight="700">
-													{`Preferred area: ${item.area} ,${item.state}`}{' '}
-												</Text>
-												<Badge
-													colorScheme="green"
-													rounded="md"
-													textTransform="capitalize"
+												<Flex
+													style={{ fontSize: '10px' }}
+													justify="space-between"
+													align="center"
 												>
-													{item.service_type}
-												</Badge>
-												<Badge
-													colorScheme={item.seeking ? 'orange' : 'teal'}
-													textTransform="capitalize"
-												>
-													{item?.seeking ? 'Seeker' : 'I have a space'}
-												</Badge>
-											</Flex>
-										</CardBody>
-									</Link>
-									<Divider />
-									<Flex justify="space-between" align="center" mb={2}>
-										<Button colorScheme="lueb" color="text_muted">
-											<BiBookmark style={{ fontSize: '1.5em' }} />
-										</Button>
-										<Box mr={2} color="text_muted">
-											{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_type ? item?.payment_type : ''}`}{' '}
-										</Box>
-									</Flex>
-								</Stack>
-							</Card>
-						</Box>
-					)
-				})
-			) : (
-				// <Box>
-				// 	<Text>Feature your profile here.</Text>
-				// </Box>
-				null
-			)}
+													<Text color="text_muted" fontWeight="700">
+														{`Preferred area: ${item.area} ,${item.state}`}{' '}
+													</Text>
+													<Badge
+														colorScheme="green"
+														rounded="md"
+														textTransform="capitalize"
+													>
+														{item.service_type}
+													</Badge>
+													<Badge
+														colorScheme={item.seeking ? 'orange' : 'teal'}
+														textTransform="capitalize"
+													>
+														{item?.seeking ? 'Seeker' : 'I have a space'}
+													</Badge>
+												</Flex>
+											</CardBody>
+										</Link>
+										<Divider />
+										<Flex justify="space-between" align="center" mb={2}>
+											<Button colorScheme="lueb" color="text_muted">
+												<BiBookmark style={{ fontSize: '1.5em' }} />
+											</Button>
+											<Box mr={2} color="text_muted">
+												{`${item.seeking ? 'Budget:' : 'Rent:'} ${item.budget}/${item.payment_type ? item?.payment_type : ''}`}{' '}
+											</Box>
+										</Flex>
+									</Stack>
+								</Card>
+							</Box>
+						)
+					})
+				: // <Box>
+					// 	<Text>Feature your profile here.</Text>
+					// </Box>
+					null}
 
 			<Divider />
 		</>
