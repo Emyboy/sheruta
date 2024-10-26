@@ -41,13 +41,13 @@ export default function MainLeftNav({}: Props) {
 				bse: 'center',
 			}}
 		>
-			<Link href={'/groups'}>
+			{/* <Link href={'/groups'}>
 				<EachNav Icon={BiMessageSquareDetail} label="Chat rooms" />
-			</Link>
+			</Link> */}
 			<Link href={'/inspections'}>
 				<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			</Link>
-			<EachNav Icon={BiWallet} label="Wallet" />
+			{/* <EachNav Icon={BiWallet} label="Wallet" /> */}
 			<Link href={'/settings'}>
 				<EachNav Icon={BiWrench} label="Settings" />
 			</Link>
