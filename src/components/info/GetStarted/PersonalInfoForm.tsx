@@ -108,12 +108,10 @@ export default function PersonalInfoForm({ done }: Props) {
 					linkedin,
 					gender_preference,
 					age_preference,
-					done_kyc: true,
 				},
 				// @ts-ignore
 				user_info: {
 					...user_info,
-					done_kyc: true,
 				},
 			})
 

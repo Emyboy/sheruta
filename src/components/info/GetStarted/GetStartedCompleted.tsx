@@ -1,3 +1,4 @@
+import { useAuthContext } from '@/context/auth.context'
 import { Flex, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import Confetti from 'react-confetti'
@@ -7,12 +8,24 @@ export default function GetStartedCompleted() {
 	const [height, setHeight] = useState(400)
 	const [run, setRun] = useState(true)
 
+	const {
+		setAuthState,
+		authState: { user_info },
+	} = useAuthContext()
+
 	useEffect(() => {
 		if (typeof window !== undefined) {
 			setHeight(window.innerHeight)
 			setWidth(window.innerWidth)
 			setTimeout(() => {
 				setRun(false)
+				setAuthState({
+					// @ts-ignore
+					user_info: {
+						...user_info,
+						done_kyc: true,
+					},
+				})
 				setTimeout(() => {
 					window.location.reload()
 				}, 2000)
