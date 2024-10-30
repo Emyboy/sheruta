@@ -16,6 +16,7 @@ import { unAuthenticatedAxios } from '@/utils/custom-axios'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
+import PromoteProfile from '@/components/CommunitySignBoards/PromoteProfile'
 
 type Props = {
 	requests: FlatShareRequest[] | undefined
@@ -126,7 +127,7 @@ export default function HomePage({ requests, userProfiles }: Props) {
 					<Flex flexDir={'column'}>
 						<HomeTabs />
 						<JoinTheCommunity />
-						<ProfileSnippet userProfiles={userProfiles} />
+						{userProfiles.lenght > 0 ? <ProfileSnippet userProfiles={userProfiles} /> : <PromoteProfile/>}
 
 						<Flex flexDirection={'column'} gap={0}>
 							{processedRequests.map(

@@ -30,7 +30,7 @@ export default function NotificationsPage({}: Props) {
 	return (
 		<Flex flexDir={'column'} gap={DEFAULT_PADDING} p={DEFAULT_PADDING}>
 			<Flex>
-				<MainBackHeader px={0}/>
+				<MainBackHeader px={0} />
 			</Flex>
 			<Flex alignItems={'center'} justifyContent={'space-between'}>
 				<Text fontSize={{ base: 'base', md: 'lg' }} fontWeight={500}>
