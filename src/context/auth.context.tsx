@@ -71,20 +71,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 	)
 
 	const getAuthDependencies = async (): Promise<any> => {
-		// if (state.user) {
-		// 	console.log('GETTING AUTH DEPENDENCIES')
-		// 	let userData = await AuthService.getUser(state.user._id)
-		// 	setAuthState({ ...userData })
-		// 	return userData
-		// } else {
-		// 	return Promise.reject('User not found')
-		// }
-
 		if (!signin) return null
 
 		const { data } = await signin.get(`/users/dependencies`)
-		// console.log(data)
-		// @ts-ignore
 		setAuthState((prev) => ({ ...prev, ...data.user_data }))
 	}
 
