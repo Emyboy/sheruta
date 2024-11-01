@@ -29,11 +29,14 @@ import {
 import { Timestamp } from 'firebase/firestore'
 import React, { useState, useEffect } from 'react'
 import { ImageSelector } from './imageSelector'
+import { cp } from 'fs'
 interface Props {
-	profileOwnerId: string
+	profileOwnerId?: string
+	buttonBgColor?: string
+	buttonColor?: string
 }
 
-export const UpdateProfilePopup = ({ profileOwnerId }: Props) => {
+export const UpdateProfilePopup = ({ profileOwnerId, buttonBgColor , buttonColor}: Props) => {
 	const { colorMode } = useColorMode()
 
 	const [_, paymentActions] = usePayment()
@@ -169,7 +172,7 @@ export const UpdateProfilePopup = ({ profileOwnerId }: Props) => {
 	return (
 		<>
 			{profileOwner && (
-				<Button onClick={onOpen}>Promote profile on feeds</Button>
+				<Button onClick={onOpen} bg={buttonBgColor} color={buttonColor}>Promote profile</Button>
 			)}
 
 			<Modal

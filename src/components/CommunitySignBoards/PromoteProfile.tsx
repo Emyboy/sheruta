@@ -3,6 +3,7 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { Button, Flex, Text, Image, flexbox } from '@chakra-ui/react'
 import React from 'react'
+import { UpdateProfilePopup } from '@/app/user/[user_id]/(user-profile)/promoteProfileModal/updateProfileSnippet'
 
 
 type Props = {}
@@ -12,6 +13,7 @@ export default function PromoteProfile({}: Props) {
 	const { authState } = useAuthContext()
     const firebaseImageUrl =
   "https://firebasestorage.googleapis.com/v0/b/sheruta-1368d.appspot.com/o/new-sheruta-images%2FSheruta%20corpers%20community.jpg?alt=media&token=2f071aa7-a8c1-4165-a72f-01baf0de4c3b";
+  const user_id = authState.user?._id;
 
 	return (
 		<>
@@ -53,14 +55,15 @@ export default function PromoteProfile({}: Props) {
                        justifyContent={'center'}
                        alignItems={'center'} 
                        >
-                       <Button
+                       {/* <Button
 							colorScheme=""
 							px={30}
 							bg="dark_lighter"
 							color={'dark'}
 						>
 							Promote profile
-						</Button>
+						</Button> */}
+                        <UpdateProfilePopup profileOwnerId={user_id} buttonBgColor={"dark_lighter"} buttonColor={'dark'}/>
                        </Flex>
                         </Flex>
 						
