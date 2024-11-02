@@ -65,7 +65,7 @@ export const CreditOptions = () => {
 			if (reference) {
 				await paymentActions.incrementCredit({
 					amount: Number(credit),
-					user_id: authState.user?._id as string,
+					transaction_id: reference,
 				})
 			}
 		})()

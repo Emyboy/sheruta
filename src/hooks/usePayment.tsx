@@ -4,7 +4,9 @@ import { useAuthContext } from '@/context/auth.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
 import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { ToastId, useToast } from '@chakra-ui/react'
+import { AxiosResponse } from 'axios'
 import { useState } from 'react'
+import useAuthenticatedAxios from './useAxios'
 
 interface PaymentState {
 	isLoading: boolean
@@ -17,8 +19,8 @@ interface PaymentActions {
 	}) => Promise<boolean | ToastId>
 	incrementCredit: (params: {
 		amount: number
-		user_id: string
-	}) => Promise<boolean | ToastId>
+		transaction_id: string
+	}) => Promise<ToastId | AxiosResponse<any, any>>
 }
 
 type PaymentHook = () => [PaymentState, PaymentActions]
@@ -29,6 +31,8 @@ const usePayment: PaymentHook = () => {
 	const [paymentState, setPaymentState] = useState<PaymentState>({
 		isLoading: false,
 	})
+
+	const axiosInstance = useAuthenticatedAxios()
 
 	const decrementCredit = async ({
 		amount,
@@ -66,27 +70,27 @@ const usePayment: PaymentHook = () => {
 
 	const incrementCredit = async ({
 		amount,
-		user_id,
+		transaction_id,
 	}: {
 		amount: number
-		user_id: string
+		transaction_id: string
 	}) => {
-		if (!authState.flat_share_profile)
+		if (!authState.flat_share_profile || !authState.wallet)
 			return toast({ title: 'Error, please login and again', status: 'error' })
 
 		try {
 			setPaymentState({ isLoading: true })
-			let result = await FlatShareProfileService.incrementCredit({
-				collection_name: DBCollectionName.flatShareProfile,
-				newCredit: amount,
-				document_id: user_id,
+			let result = await axiosInstance.post('/transactions/validate', {
+				amount,
+				type: 'credit',
+				transaction_id,
 			})
 			setPaymentState({ isLoading: false })
 			if (result) {
 				setAuthState({
-					flat_share_profile: {
-						...authState.flat_share_profile,
-						credits: authState.flat_share_profile.credits + amount,
+					wallet: {
+						...authState.wallet,
+						total_credit: authState.wallet.total_credit + amount,
 					},
 				})
 			}

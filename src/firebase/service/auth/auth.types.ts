@@ -34,3 +34,10 @@ export interface AuthUser {
 	avatar_url: string
 	last_seen: Timestamp
 }
+
+export interface WalletType {
+	_id: string
+	total_credit: number
+	total_deposit: number
+	user: string
+}

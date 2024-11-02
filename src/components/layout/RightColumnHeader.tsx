@@ -10,7 +10,7 @@ import { formatPrice } from '@/utils/index.utils'
 
 export default function RightColumnHeader() {
 	const { authState } = useAuthContext()
-	const { user, flat_share_profile } = authState
+	const { user, wallet } = authState
 	const { setAppState } = useAppContext()
 
 	if (user) {
@@ -31,7 +31,7 @@ export default function RightColumnHeader() {
 							<Text color="gold" as="span">
 								<FaCoins />
 							</Text>
-							{formatPrice(flat_share_profile?.credits || 0)}
+							{formatPrice(wallet?.total_credit || 0)}
 						</Text>
 					</Flex>
 					<Avatar src={user.avatar_url} />

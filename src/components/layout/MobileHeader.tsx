@@ -30,7 +30,7 @@ type Props = {}
 export default function MobileHeader({}: Props) {
 	const { colorMode } = useColorMode()
 	const { authState, loginWithGoogle } = useAuthContext()
-	const { user, flat_share_profile } = authState
+	const { user, wallet } = authState
 	const { setAppState } = useAppContext()
 
 	const pathname = usePathname()
@@ -111,7 +111,7 @@ export default function MobileHeader({}: Props) {
 									<Text color="gold" as="span">
 										<FaCoins />
 									</Text>
-									{formatPrice(flat_share_profile?.credits || 0)}
+									{formatPrice(wallet?.total_credit || 0)}
 								</Text>
 							)}
 						</Flex>
