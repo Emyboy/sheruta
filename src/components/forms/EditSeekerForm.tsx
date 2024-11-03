@@ -267,7 +267,7 @@ const EditSeekerForm: React.FC<{
 
 			createSeekerRequestDTO.parse(finalFormData)
 
-			const response = await await axiosInstance.put(
+			const response = await axiosInstance.put(
 				`/flat-share-requests/seeker/${requestId}`,
 				finalFormData,
 			)

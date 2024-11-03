@@ -26,8 +26,10 @@ import {
 } from '@chakra-ui/react'
 import axios from 'axios'
 import { Timestamp } from 'firebase/firestore'
-import React, { useEffect, useState } from 'react'
+import React, { FormEvent, useEffect, useState } from 'react'
 import { NINResponseDTO } from '../types'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useMutation } from '@tanstack/react-query'
 
 const doesGenderMatch = (NINGender: string, dbGender: string): boolean => {
 	if (NINGender === 'm' && dbGender === 'male') {
@@ -52,16 +54,18 @@ const UpdateNameForm = ({
 }) => {
 	const [firstName, setFirstName] = useState('')
 	const [lastName, setLastName] = useState('')
+	const axiosInstance = useAuthenticatedAxios()
 
 	const {
+		getAuthDependencies,
 		authState: {
 			user,
-			user_info,
-			user_settings,
-			auth_loading,
-			flat_share_profile,
+			// user_info,
+			// user_settings,
+			// auth_loading,
+			// flat_share_profile,
 		},
-		setAuthState,
+		// setAuthState,
 	} = useAuthContext()
 	const { showToast } = useCommon()
 
@@ -72,52 +76,95 @@ const UpdateNameForm = ({
 		}
 	}, [user])
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
-		try {
-			setLoading(true)
+	const { mutate: handleSubmit, isPending } = useMutation({
+		mutationFn: async () => {
+			if (!axiosInstance) {
+				showToast({
+					message: 'Failed to update',
+					status: 'error',
+				})
+				throw new Error('Axios instance not available') // Abort mutation
+			}
 
-			await UserService.update({
-				document_id: user?._id as string,
-				data: { last_name: lastName, first_name: firstName },
+			await axiosInstance.put('/users', {
+				first_name: firstName,
+				last_name: lastName,
 			})
-
+		},
+		onSuccess: async () => {
 			showToast({
 				message: 'Your name has been updated',
 				status: 'success',
 			})
-			setAuthState({
-				user: {
-					...user,
-					last_name: lastName,
-					first_name: firstName,
-					_id: user?._id as string,
-					last_seen: user?.last_seen as Timestamp,
-					email: user?.email as string,
-					providerId: user?.providerId as string,
-					avatar_url: user?.avatar_url as string,
-					email_verified: user?.email_verified || false,
-				},
-				user_info,
-				user_settings,
-				flat_share_profile,
-				auth_loading,
-			})
-
 			setShowNameUpdate(false)
 			setError(null)
-			setLoading(false)
-		} catch (err: any) {
+			getAuthDependencies()
+		},
+		onError: (err) => {
 			showToast({
 				status: 'error',
 				message: 'Your name was not updated',
 			})
-			setLoading(false)
-		}
-	}
+		},
+	})
+
+	// const handleSubmit = async (e: React.FormEvent) => {
+	// 	e.preventDefault()
+	// 	try {
+
+	// 		if(!axiosInstance) return null
+
+	// 		setLoading(true)
+
+	// 		await
+
+	// 		await UserService.update({
+	// 			document_id: user?._id as string,
+	// 			data: { last_name: lastName, first_name: firstName },
+	// 		})
+
+	// 		showToast({
+	// 			message: 'Your name has been updated',
+	// 			status: 'success',
+	// 		})
+	// 		setAuthState({
+	// 			user: {
+	// 				...user,
+	// 				last_name: lastName,
+	// 				first_name: firstName,
+	// 				_id: user?._id as string,
+	// 				last_seen: user?.last_seen as Timestamp,
+	// 				email: user?.email as string,
+	// 				providerId: user?.providerId as string,
+	// 				avatar_url: user?.avatar_url as string,
+	// 				email_verified: user?.email_verified || false,
+	// 			},
+	// 			user_info,
+	// 			user_settings,
+	// 			flat_share_profile,
+	// 			auth_loading,
+	// 		})
+
+	// 		setShowNameUpdate(false)
+	// 		setError(null)
+	// 	} catch (err: any) {
+	// 		showToast({
+	// 			status: 'error',
+	// 			message: 'Your name was not updated',
+	// 		})
+	// 	} finally {
+	// 		setLoading(false)
+	// 	}
+	// }
 
 	return (
-		<form id="update_name" onSubmit={handleSubmit}>
+		<form
+			id="update_name"
+			onSubmit={(e: FormEvent) => {
+				e.preventDefault()
+				handleSubmit()
+			}}
+		>
 			<VStack spacing={4}>
 				<FormControl id="first-name">
 					<FormLabel>First Name</FormLabel>
@@ -141,9 +188,9 @@ const UpdateNameForm = ({
 				<Button
 					mt={3}
 					mb={5}
-					isLoading={loading}
+					isLoading={isPending}
+					isDisabled={isPending}
 					colorScheme="green"
-					onClick={handleSubmit}
 					width="full"
 				>
 					Update Name
@@ -181,6 +228,7 @@ const VerifyNIN = ({
 	const modalBg = useColorModeValue('white', '#1a1a1a')
 
 	const [error, setError] = useState<string | null>(null)
+	const axiosInstance = useAuthenticatedAxios()
 
 	useEffect(() => {
 		if (Object.keys(user || {}).length > 0 && user) {
@@ -212,12 +260,12 @@ const VerifyNIN = ({
 				return
 			}
 
-			if (!hasEnoughCredits) {
-				return showToast({
-					status: 'info',
-					message: "You don't have enough credits",
-				})
-			}
+			// if (!hasEnoughCredits) {
+			// 	return showToast({
+			// 		status: 'info',
+			// 		message: "You don't have enough credits",
+			// 	})
+			// }
 
 			const response = await axios.post('/api/verify-nin', {
 				nin,
@@ -235,10 +283,10 @@ const VerifyNIN = ({
 
 				if (verificationAttempts >= 4) {
 					//initiate debit whether NIN belongs to the user or not
-					await paymentActions.decrementCredit({
-						amount: creditTable.VERIFICATION,
-						user_id: user?._id as string,
-					})
+					// await paymentActions.decrementCredit({
+					// 	amount: creditTable.VERIFICATION,
+					// 	user_id: user?._id as string,
+					// })
 
 					setVerificationAttempts(0)
 				}
@@ -254,22 +302,30 @@ const VerifyNIN = ({
 
 				if (lastNameMatches && genderMatches) {
 					//TODO: Handle scenarios where there can be an existing NIN on the database already
-					await UserInfoService.update({
-						data: {
-							is_verified: true,
-							date_of_birth: data.birthdate,
-							nin,
-							nin_data: { ...data },
-						},
-						document_id: userId,
+					// await UserInfoService.update({
+					// 	data: {
+					// 		is_verified: true,
+					// 		date_of_birth: data.birthdate,
+					// 		nin,
+					// 		nin_data: { ...data },
+					// 	},
+					// 	document_id: userId,
+					// })
+
+					await axiosInstance.put('/user-info', {
+						gender: data.gender,
+						is_verified: true,
+						date_of_birth: data.birthdate,
+						nin,
+						nin_data: { ...data },
 					})
+
 					showToast({
 						message: 'Your account has been verified successfully.',
 						status: 'success',
 					})
 					setError(null)
 					onClose()
-					setLoading(false)
 
 					window.location.replace('/')
 				} else {
@@ -285,8 +341,6 @@ const VerifyNIN = ({
 						message: 'NIN verification failed',
 						status: 'error',
 					})
-
-					setLoading(false)
 				}
 			} else {
 				setError(
@@ -297,7 +351,6 @@ const VerifyNIN = ({
 					message: 'NIN verification failed',
 					status: 'error',
 				})
-				setLoading(false)
 			}
 		} catch (err: any) {
 			console.error('Error verifying NIN:', err)
@@ -305,6 +358,7 @@ const VerifyNIN = ({
 				status: 'error',
 				message: 'NIN verification error, please try again',
 			})
+		} finally {
 			setLoading(false)
 		}
 	}

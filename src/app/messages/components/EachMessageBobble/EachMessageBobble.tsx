@@ -15,6 +15,7 @@ import React from 'react'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { BiCopy, BiTrash } from 'react-icons/bi'
 import { forwardRef } from 'react'
+import moment from 'moment'
 
 type Props = {
 	message: DirectMessageData
@@ -66,7 +67,7 @@ const EachMessageBobble = forwardRef<HTMLDivElement, Props>(
 							>
 								{message.content}
 							</Text>
-							<Flex justifyContent={'flex-end'} color={'text_muted'}></Flex>
+							<Flex justifyContent={'flex-end'} color={'text_muted'}><Text fontSize={"sm"}>{moment(message?.updatedAt).fromNow()}</Text></Flex>
 						</Flex>
 					</Flex>
 				</MenuButton>
