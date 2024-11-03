@@ -15,6 +15,7 @@ type Props = {
 	isLoading?: boolean
 	backRoute?: string
 	customHeadingRoute?: string
+	px?: number | string
 }
 
 export default function MainBackHeader({
@@ -24,16 +25,11 @@ export default function MainBackHeader({
 	image_url,
 	backRoute,
 	customHeadingRoute,
+	px = DEFAULT_PADDING,
 }: Props) {
 	const router = useRouter()
 	return (
-		<Flex
-			h="full"
-			w="full"
-			maxW={'99%'}
-			px={DEFAULT_PADDING}
-			gap={DEFAULT_PADDING}
-		>
+		<Flex h="full" w="full" maxW={'99%'} px={px} gap={DEFAULT_PADDING}>
 			<MainIconBtn
 				Icon={BiChevronLeft}
 				label="Go back"

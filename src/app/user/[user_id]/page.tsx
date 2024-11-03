@@ -13,6 +13,7 @@ import { DBCollectionName } from '@/firebase/service/index.firebase'
 import { Box, Flex } from '@chakra-ui/react'
 import axios from 'axios'
 import { serverSession } from '@/utils/auth'
+import axiosInstance from '@/utils/custom-axios'
 
 export const revalidate = CACHE_TTL.LONG
 
@@ -24,11 +25,17 @@ export default async function page(props: any) {
 	const fullURL = `${backendURL}/users/${user_id}`
 
 	try {
-		const response = await axios.get(fullURL, {
+		const response = await axiosInstance.get(fullURL, {
 			// timeout: 5000,
 		})
 		const data = response.data
 		const { user } = data
+
+		const authRes = await axiosInstance.get(`${backendURL}/users/dependencies`)
+
+		const userAuth = authRes.data
+
+		console.log(userAuth)
 
 		// console.log('This is the user...............',user)
 		// const {user, flat_share_profile, user_info} = user

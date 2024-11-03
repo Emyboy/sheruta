@@ -1,25 +1,34 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
-import { Flex, Text } from '@chakra-ui/react'
+import { Flex, Text, Box } from '@chakra-ui/react'
 import Link from 'next/link'
 import React from 'react'
 import { BiSolidMegaphone } from 'react-icons/bi'
+import { RiVideoUploadLine } from 'react-icons/ri'
+import { PiUploadSimpleBold } from 'react-icons/pi'
+
+import MainBackHeader from './MainBackHeader'
 
 type Props = {}
 
 export default function MainPostOptions({}: Props) {
 	return (
-		<Flex gap={DEFAULT_PADDING}>
-			<Link href={`/request/host`} style={{ width: '50%' }}>
-				<EachOption label="Post available space" />
-			</Link>
-			<Link href={`/request/seeker`} style={{ width: '50%' }}>
-				<EachOption label="Request a space" />
-			</Link>
-		</Flex>
+		<Box>
+			<Flex mb={5}>
+				<MainBackHeader px={0} />
+			</Flex>
+			<Flex gap={DEFAULT_PADDING}>
+				<Link href={`/request/host`} style={{ width: '50%' }}>
+					<EachOption Icon={RiVideoUploadLine} label="Post vacant space" />
+				</Link>
+				<Link href={`/request/seeker`} style={{ width: '50%' }}>
+					<EachOption Icon={PiUploadSimpleBold} label="Request a space" />
+				</Link>
+			</Flex>
+		</Box>
 	)
 }
 
-const EachOption = ({ label }: { label: string }) => {
+const EachOption = ({ label, Icon }: { label: string; Icon: any }) => {
 	return (
 		<Flex
 			flexDir={'column'}
@@ -32,8 +41,8 @@ const EachOption = ({ label }: { label: string }) => {
 			}}
 			_hover={{
 				_dark: {
-					color: 'white',
-					borderColor: 'white',
+					color: '#00bc73',
+					borderColor: '#00bc73',
 				},
 			}}
 			rounded={'md'}
@@ -41,7 +50,7 @@ const EachOption = ({ label }: { label: string }) => {
 			gap={DEFAULT_PADDING}
 			justifyContent={'center'}
 		>
-			<BiSolidMegaphone size={60} />
+			<Icon size={30} />
 			<Text fontSize={{ base: 'base', md: 'lg', xl: 'xl' }}>{label}</Text>
 		</Flex>
 	)
