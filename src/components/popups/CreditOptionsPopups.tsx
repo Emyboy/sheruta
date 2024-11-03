@@ -60,13 +60,15 @@ export const CreditOptions = () => {
 		phone: authState.user_info?.primary_phone_number as any,
 	}
 
-	const onSuccess = (reference: any) => {
+	const onSuccess = ({ reference }: any) => {
 		;(async () => {
 			if (reference) {
-				await paymentActions.incrementCredit({
-					amount: Number(credit),
-					transaction_id: reference,
-				})
+				setTimeout(async () => {
+					await paymentActions.incrementCredit({
+						amount: Number(credit),
+						transaction_id: reference,
+					})
+				}, 6000)
 			}
 		})()
 	}

@@ -16,10 +16,7 @@ export default function CreditInfo({ credit, onUse }: Props) {
 	const { authState, setAuthState } = useAuthContext()
 	const [ready, setReady] = useState(false)
 
-	if (
-		authState.flat_share_profile &&
-		Number(authState.flat_share_profile?.credits) < credit
-	) {
+	if (authState.wallet && Number(authState.wallet.total_credit) < credit) {
 		if (ready) {
 			return (
 				<Box p={DEFAULT_PADDING}>

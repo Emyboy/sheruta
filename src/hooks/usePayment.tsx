@@ -7,6 +7,7 @@ import { ToastId, useToast } from '@chakra-ui/react'
 import { AxiosResponse } from 'axios'
 import { useState } from 'react'
 import useAuthenticatedAxios from './useAxios'
+import { useRouter } from 'next/navigation'
 
 interface PaymentState {
 	isLoading: boolean
@@ -26,6 +27,8 @@ interface PaymentActions {
 type PaymentHook = () => [PaymentState, PaymentActions]
 
 const usePayment: PaymentHook = () => {
+	const router = useRouter()
+
 	const toast = useToast()
 	const { authState, setAuthState } = useAuthContext()
 	const [paymentState, setPaymentState] = useState<PaymentState>({
@@ -53,12 +56,7 @@ const usePayment: PaymentHook = () => {
 			})
 			setPaymentState({ isLoading: false })
 			if (result) {
-				setAuthState({
-					flat_share_profile: {
-						...authState.flat_share_profile,
-						credits: authState.flat_share_profile?.credits - amount,
-					},
-				})
+				router.refresh()
 			}
 			return result
 		} catch (error) {
@@ -86,14 +84,7 @@ const usePayment: PaymentHook = () => {
 				transaction_id,
 			})
 			setPaymentState({ isLoading: false })
-			if (result) {
-				setAuthState({
-					wallet: {
-						...authState.wallet,
-						total_credit: authState.wallet.total_credit + amount,
-					},
-				})
-			}
+			router.refresh()
 			return result
 		} catch (error) {
 			toast({ title: 'Error, please try again', status: 'error' })
