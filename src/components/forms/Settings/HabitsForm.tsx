@@ -41,7 +41,7 @@ const HabitsForm = () => {
 	}
 
 	useEffect(() => {
-		if (habits && flat_share_profile && flat_share_profile._user_id) {
+		if (habits && flat_share_profile ) {
 			getAllHabits()
 			setHabitsList(habits)
 			return
@@ -52,7 +52,8 @@ const HabitsForm = () => {
 		try {
 			setIsHabitsLoading(true)
 			const documents: OptionType[] = []
-			let refs = flat_share_profile?.habits as any[]
+			let refs = flat_share_profile?.habits
+			console.log('Refs:..................', refs)
 
 			if (refs && refs.length > 0) {
 				for (const ref of refs) {

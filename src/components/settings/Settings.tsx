@@ -128,7 +128,29 @@ const Settings = () => {
 						/>
 					</>
 				) : null} */}
-
+                   <>
+						<Text color={'dark-light'} fontSize="lg" fontWeight="bold">
+							Personal Information
+						</Text>
+						<SettingOption
+							color={textColor}
+							href="/settings/personal-info"
+							icon={BiSolidUserCircle}
+							label="Personal Info"
+						/>
+						<SettingOption
+							color={textColor}
+							href="/settings/flat-share-profile"
+							icon={BiBuildings}
+							label="Flat share profile"
+						/>
+							<SettingOption
+							color={textColor}
+							href="/settings/update-habits"
+							icon={BiLike}
+							label="Habits"
+						/>
+						</>
 				<Text fontSize="lg" fontWeight="bold">
 					Display mode
 				</Text>

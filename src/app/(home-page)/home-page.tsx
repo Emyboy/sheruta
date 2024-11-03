@@ -127,7 +127,11 @@ export default function HomePage({ requests, userProfiles }: Props) {
 					<Flex flexDir={'column'}>
 						<HomeTabs />
 						<JoinTheCommunity />
-						{userProfiles.lenght > 0 ? <ProfileSnippet userProfiles={userProfiles} /> : <PromoteProfile/>}
+						{userProfiles.lenght > 0 ? (
+							<ProfileSnippet userProfiles={userProfiles} />
+						) : (
+							<PromoteProfile />
+						)}
 
 						<Flex flexDirection={'column'} gap={0}>
 							{processedRequests.map(

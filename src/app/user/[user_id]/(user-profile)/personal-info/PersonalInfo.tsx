@@ -49,8 +49,6 @@ export default function PersonalInfo({ userProfile }: Props) {
 	const socials: Socials = userProfile.flatShareProfile.socials
 	const habits: Habits[] = userProfile.flatShareProfile.habits
 
-	console.log('Work industry', _userFlatshareProfile?.work_industry)
-
 	const instagramUrl = `https://instagram.com/${socials?.instagram}`
 	const facebookUrl = `https://facebook.com/${socials?.facebook}`
 	const twitterUrl = `https://x.com/${socials?.twitter}`

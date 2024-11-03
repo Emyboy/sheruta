@@ -26,38 +26,42 @@ export default function UserProfilePage({ userInfos, user_id }: Props) {
 	const userProfile = JSON.parse(userInfos)
 	const { authState } = useAuthContext()
 
-	let userAuth;
+	let userAuth
 	const getUserAuth = () => {
 		const { user } = authState
-		userAuth = user;
+		userAuth = user
 	}
-	getUserAuth();
+	getUserAuth()
 
 	const { user } = userProfile
 	const data = user
 
 	return (
 		<Flex flexDir={'column'}>
-    {userAuth ? (
-      <>
-        <MainSection>
-          <ProfileHero data={data} userProfile={userProfile} user_id={user_id} />
-        </MainSection>
-        <MainSection heading="About me">
-          <ProfileAboutMe userProfile={userProfile} />
-        </MainSection>
-        <PersonalInfo userProfile={userProfile} />
-        <UpdateProfilePopup profileOwnerId={user_id} />
-        <MainSection heading="My Postings" borderBottom={0}>
-          {/* <EachRequest request={request} />
+			{userAuth ? (
+				<>
+					<MainSection>
+						<ProfileHero
+							data={data}
+							userProfile={userProfile}
+							user_id={user_id}
+						/>
+					</MainSection>
+					<MainSection heading="About me">
+						<ProfileAboutMe userProfile={userProfile} />
+					</MainSection>
+					<PersonalInfo userProfile={userProfile} />
+					<UpdateProfilePopup profileOwnerId={user_id} />
+					<MainSection heading="My Postings" borderBottom={0}>
+						{/* <EachRequest request={request} />
           <EachRequest />
           <EachRequest /> */}
-        </MainSection>
-		<MobileNavFooter />
-      </>
-    ) : (
-      <LoginCard Icon={BiSolidMessageSquareDetail} />
-    )}
-    
-  </Flex>)
+					</MainSection>
+					<MobileNavFooter />
+				</>
+			) : (
+				<LoginCard Icon={BiSolidMessageSquareDetail} />
+			)}
+		</Flex>
+	)
 }

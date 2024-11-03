@@ -36,7 +36,11 @@ interface Props {
 	buttonColor?: string
 }
 
-export const UpdateProfilePopup = ({ profileOwnerId, buttonBgColor , buttonColor}: Props) => {
+export const UpdateProfilePopup = ({
+	profileOwnerId,
+	buttonBgColor,
+	buttonColor,
+}: Props) => {
 	const { colorMode } = useColorMode()
 
 	const [_, paymentActions] = usePayment()
@@ -172,7 +176,9 @@ export const UpdateProfilePopup = ({ profileOwnerId, buttonBgColor , buttonColor
 	return (
 		<>
 			{profileOwner && (
-				<Button onClick={onOpen} bg={buttonBgColor} color={buttonColor}>Promote profile</Button>
+				<Button onClick={onOpen} bg={buttonBgColor} color={buttonColor}>
+					Promote profile
+				</Button>
 			)}
 
 			<Modal

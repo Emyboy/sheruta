@@ -20,9 +20,34 @@ import {
 	useColorMode,
 } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
+import useAuthenticatedAxios from '@/hooks/useAxios'
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
+
 
 const FlatShareProfileForm = () => {
-	return
+
+	const axiosAuth = useAuthenticatedAxios();
+	
+
+	const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+	// const fullURL = `${backendURL}/users/${user_id}`
+	const {data, isPending, isError} = useQuery({
+		queryKey: ['userData'],
+		queryFn: ()=> axiosAuth.get('/users/dependencies'),
+		refetchOnWindowFocus: false
+		
+
+	})
+
+	useEffect(() => {
+		if (data) {
+		  console.log(data.data);
+		}
+	  }, [data]);
+
+
+	
 
 	const [formData, setFormData] = useState<{
 		budget: number
@@ -50,13 +75,16 @@ const FlatShareProfileForm = () => {
 
 	const {
 		authState: { flat_share_profile },
-	} = useAuthContext()
+	} = useAuthContext() 
 	const { colorMode } = useColorMode()
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const { showToast } = useCommon()
 
+	
+
 	useEffect(() => {
-		if (flat_share_profile && flat_share_profile._user_id) {
+		if (flat_share_profile) {
+			
 			setFormData({
 				budget: flat_share_profile.budget || 0,
 				occupation: flat_share_profile.occupation || '',
@@ -86,6 +114,8 @@ const FlatShareProfileForm = () => {
 			[name]: value,
 		}))
 	}
+
+	
 
 	const handleSubmit = async (e: React.FormEvent): Promise<any> => {
 		try {

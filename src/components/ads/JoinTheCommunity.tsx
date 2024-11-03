@@ -32,7 +32,11 @@ export default function JoinTheCommunity({}: Props) {
 						alignItems={'center'}
 						flexDir={'column'}
 					>
-						<Text fontWeight={'bold'} fontSize={'xx-large'}  m={{ base: 6, md: 0 }}>
+						<Text
+							fontWeight={'bold'}
+							fontSize={'xx-large'}
+							m={{ base: 6, md: 0 }}
+						>
 							Join the community today
 						</Text>
 						<Button

@@ -21,7 +21,6 @@ import EachConversationLoading from './components/EachConversationLoading'
 import useAuthenticatedAxios from '@/hooks/useAxios'
 import useCommon from '@/hooks/useCommon'
 
-
 type Props = {}
 
 export default function MessagesPage({}: Props) {
