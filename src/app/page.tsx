@@ -28,5 +28,5 @@ export default async function page({ searchParams }: Props) {
 
 	console.log(promotedProfiles)
 
-	return <HomePage requests={requests} userProfiles={'[]'} />
+	return <HomePage requests={requests} userProfiles={promotedProfiles} />
 }

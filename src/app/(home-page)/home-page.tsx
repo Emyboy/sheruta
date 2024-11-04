@@ -16,10 +16,11 @@ import { unAuthenticatedAxios } from '@/utils/custom-axios'
 import { Box, Flex, Spinner, Text } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import HomeTabs from './HomeTabs'
+import { PromotedUserProfiles } from '@/firebase/service/userProfile/user-profile-types'
 
 type Props = {
 	requests: FlatShareRequest[] | undefined
-	userProfiles: any
+	userProfiles: PromotedUserProfiles[]
 }
 
 export default function HomePage({ requests, userProfiles }: Props) {
