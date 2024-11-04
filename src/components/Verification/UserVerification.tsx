@@ -92,10 +92,12 @@ const UserVerification = () => {
 					/>
 					<VerificationCard
 						onOpen={
-							!isVerified && hasEnoughCredits
-								? onOpen
-								: !hasEnoughCredits
-									? () =>
+							!isVerified
+								? // && hasEnoughCredits
+									onOpen
+								: !true
+									? // !hasEnoughCredits
+										() =>
 											showToast({
 												message: "You don't have enough credits.",
 												status: 'info',
