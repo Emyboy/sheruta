@@ -22,5 +22,11 @@ export default async function page({ searchParams }: Props) {
 		`/flat-share-requests?page=${searchParams?.page || 1}&limit=30`,
 	)
 
+	const {
+		data: { data: promotedProfiles },
+	} = await axiosInstance.get('/promotions/all')
+
+	console.log(promotedProfiles)
+
 	return <HomePage requests={requests} userProfiles={'[]'} />
 }

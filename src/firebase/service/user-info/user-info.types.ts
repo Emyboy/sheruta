@@ -3,6 +3,7 @@ import { DocumentReference } from 'firebase/firestore'
 
 export interface UserInfo {
 	id: string
+	_id: string
 	user_id: string
 	_user_id: string
 	gender?: 'male' | 'female' | null
@@ -19,6 +20,7 @@ export interface UserInfo {
 }
 
 export interface UserInfoDTO {
+	_id: string
 	_user_id: string
 	_user_ref: DocumentReference
 	gender: 'male' | 'female' | null
