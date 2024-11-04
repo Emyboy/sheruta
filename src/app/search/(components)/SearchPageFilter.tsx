@@ -9,7 +9,6 @@ import { IoLocationOutline } from 'react-icons/io5'
 import { useDebouncedCallback } from 'use-debounce'
 
 type Props = {}
-
 const budgetList = [
 	{
 		label: 'N100,000 - N500,000',
