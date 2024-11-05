@@ -18,6 +18,8 @@ export const truncateText = (text: string, maxChars?: number) =>
 export const resolveArrayOfReferences = async (
 	objArray: Record<any, any>[],
 ) => {
+	if(!objArray) throw Error("Obj param must not be empty")
+
 	const resolvedObjects = await Promise.all(
 		objArray.map(async (item) => {
 			// Resolve all fields that are DocumentReferences in the current item
@@ -41,6 +43,9 @@ export const resolveArrayOfReferences = async (
 }
 
 export const resolveSingleObjectReferences = async (obj: Record<any, any>) => {
+
+	if(!obj) throw Error("Obj param must not be empty")
+
 	const refFields = Object.entries(obj).filter(
 		([, value]) => value instanceof DocumentReference,
 	)
@@ -209,6 +214,8 @@ export function getTimeDifferenceInHours(timestamp?: Timestamp) {
 
 // Helper function to recursively resolve DocumentReference objects
 export async function resolveDocumentReferences(docData: any): Promise<any> {
+	if(!docData) throw Error("data param must not be empty")
+
 	const refFields = Object.entries(docData).filter(
 		([key, value]) =>
 			value instanceof DocumentReference ||
