@@ -54,7 +54,7 @@ export default function HomePage({ requests, userProfiles }: Props) {
 			if (flatShareRequests.length > 0) {
 				const updatedRequests = await Promise.all(
 					flatShareRequests.map(async (request: HostRequestDataDetails) =>
-						request.user_info?.hide_profile ? null : { ...request },
+						request._user_info_ref?.hide_profile ? null : { ...request },
 					),
 				)
 				const filteredRequests = updatedRequests.filter(Boolean)

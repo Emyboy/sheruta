@@ -75,6 +75,7 @@ export default function MessageList({ isLoading, conversation }: Props) {
 				<Flex justifyContent={'center'}>
 					<Flex
 						w={'70%'}
+						p={2}
 						alignItems={'center'}
 						gap={3}
 						justifyContent={'center'}
@@ -87,7 +88,7 @@ export default function MessageList({ isLoading, conversation }: Props) {
 							color: 'text_muted',
 						}}
 						mt="5"
-						fontSize={'sm'}
+						fontSize={'xs'}
 					>
 						<HiOutlineInformationCircle size={17} />
 						<Text>Tap on any message to see more options</Text>

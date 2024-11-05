@@ -2,6 +2,7 @@ import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import MessagesService from '@/firebase/service/messages/messages.firebase'
 import { DirectMessageData } from '@/firebase/service/messages/messages.types'
+import { convertTimestampToTime } from '@/utils/index.utils'
 import {
 	Button,
 	Divider,
@@ -22,6 +23,7 @@ type Props = {
 }
 
 export default function EachMessageBobble({ message }: Props) {
+	console.log(message)
 	const toast = useToast()
 	const { authState } = useAuthContext()
 	const user = authState.user
@@ -80,7 +82,7 @@ export default function EachMessageBobble({ message }: Props) {
 							>
 								{message.message_text}
 							</Text>
-							<Flex justifyContent={'flex-end'} color={'text_muted'}></Flex>
+							<Flex justifyContent={'flex-end'} color={'text_muted'}><Text fontSize={"xs"}>{convertTimestampToTime(message?.createdAt)}</Text></Flex>
 						</Flex>
 					</Flex>
 				</MenuButton>
