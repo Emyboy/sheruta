@@ -722,7 +722,12 @@ const EachRequestMedia = ({
 									justifyContent={'center'}
 									onClick={() => handleClick(i)}
 								>
-									<video src={media.url} width={'100%'} height={'100%'} />
+									<video
+										src={media.url}
+										width={'100%'}
+										height={'100%'}
+										className="w-full h-full object-center object-cover"
+									/>
 									<Box pos="absolute" zIndex={0}>
 										<BiPlayCircle
 											size={'80px'}
@@ -738,12 +743,14 @@ const EachRequestMedia = ({
 									cursor={'pointer'}
 									rounded="md"
 									bg="dark"
+									h={'full'}
 									onClick={() => handleClick(i)}
 								>
 									<Image
 										src={media.url}
 										alt="image of the shared space"
 										position={'relative'}
+										className="w-full h-full object-center object-cover"
 									/>
 								</Box>
 							)}
