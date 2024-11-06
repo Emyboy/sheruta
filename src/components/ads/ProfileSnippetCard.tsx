@@ -19,7 +19,6 @@ import {
 import { BiBookmark } from 'react-icons/bi'
 
 export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
-	console.log(item)
 	const { authState } = useAuthContext()
 
 	return (
