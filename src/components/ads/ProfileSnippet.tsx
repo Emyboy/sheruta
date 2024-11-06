@@ -1,3 +1,4 @@
+import { UserProfile } from '@/firebase/service/userProfile/user-profile-types'
 import { Box, Button, Divider, Text } from '@chakra-ui/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
@@ -5,23 +6,7 @@ import { TbCircleLetterX } from 'react-icons/tb'
 import ProfileSnippetCard from './ProfileSnippetCard'
 
 type Props = {
-	userProfiles: any
-}
-
-interface UserProfile {
-	state: any
-	seeking: boolean
-	document_id: string
-	bio: string
-	budget: number
-	payment_type: string
-	location_keyword: any
-	service_type: string
-	_user_ref: {
-		avatar_url: string
-		last_name: string
-		first_name: string
-	}
+	userProfiles: string
 }
 
 const ProfileSnippet = ({ userProfiles }: Props) => {

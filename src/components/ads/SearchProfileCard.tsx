@@ -1,6 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
+import { UserProfile } from '@/firebase/service/userProfile/user-profile-types'
 import { createNotification } from '@/utils/actions'
 import {
 	Badge,
@@ -16,23 +17,6 @@ import {
 	Text,
 } from '@chakra-ui/react'
 import { BiBookmark } from 'react-icons/bi'
-
-export interface UserProfile {
-	_user_id: string
-	state: { name: string }
-	seeking: boolean
-	document_id: string
-	bio: string
-	budget: number
-	payment_type: string
-	location_keyword: { name: string }
-	service_type: string
-	_user_ref: {
-		avatar_url: string
-		last_name: string
-		first_name: string
-	}
-}
 
 export default function SearchProfileCard({
 	profile,
