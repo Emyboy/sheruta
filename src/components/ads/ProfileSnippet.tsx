@@ -43,7 +43,7 @@ const ProfileSnippet = ({ userProfiles }: Props) => {
 			) : (
 				<Box>
 					<Text w={'100%'} textAlign={'center'} fontWeight={600} my={4}>
-						No profiles found
+						No promoted profiles found
 					</Text>
 				</Box>
 			)}
