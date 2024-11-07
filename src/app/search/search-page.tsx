@@ -1,11 +1,10 @@
 'use client'
 
-import SearchProfileCard, {
-	UserProfile,
-} from '@/components/ads/SearchProfileCard'
+import SearchProfileCard from '@/components/ads/SearchProfileCard'
 import EachRequest from '@/components/EachRequest/EachRequest'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import { UserProfile } from '@/firebase/service/userProfile/user-profile-types'
 import { Flex } from '@chakra-ui/react'
 import ListOfFilters from './(components)/ListOfFilters'
 import NoApartment from './(components)/NoApartment'

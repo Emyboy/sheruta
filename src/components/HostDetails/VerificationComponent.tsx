@@ -2,64 +2,50 @@
 
 import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
-import { useNotificationContext } from '@/context/notifications.context'
+import { AuthUser } from '@/firebase/service/auth/auth.types'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
+import { StateData } from '@/firebase/service/options/states/states.types'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
+import UserService from '@/firebase/service/user/user.firebase'
 import useCommon from '@/hooks/useCommon'
-import { createNotification } from '@/utils/actions'
+import usePayment from '@/hooks/usePayment'
+import { calculateAge, convertRefToData } from '@/utils/index.utils'
 import {
 	Box,
 	Button,
 	Circle,
 	Flex,
+	Heading,
 	HStack,
 	Icon,
-	Text,
-	useColorModeValue,
 	Image,
 	Table,
-	Tr,
-	Td,
 	Tbody,
-	Heading,
+	Td,
+	Text,
+	Tr,
+	useColorModeValue,
 	VStack,
-	IconButton,
-	Alert,
-	AlertIcon,
-	Code,
 } from '@chakra-ui/react'
+import { jsPDF } from 'jspdf'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import {
-	BiBadgeCheck,
 	BiSolidIdCard,
 	BiSolidInfoCircle,
 	BiSolidLock,
-	BiSolidStar,
 	BiSolidTimer,
-	BiStar,
 } from 'react-icons/bi'
-import {
-	BsExclamationTriangle,
-	BsInfoCircle,
-	BsQuestionCircle,
-} from 'react-icons/bs'
+import { BsExclamationTriangle } from 'react-icons/bs'
 import { FaSadTear } from 'react-icons/fa'
 import { FaQuestion } from 'react-icons/fa6'
+import { HiExternalLink } from 'react-icons/hi'
 import { IconType } from 'react-icons/lib'
 import { NINResponseDTO } from '../types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
-import { AuthUser } from '@/firebase/service/auth/auth.types'
-import UserService from '@/firebase/service/user/user.firebase'
-import { calculateAge, convertRefToData } from '@/utils/index.utils'
-import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { StateData } from '@/firebase/service/options/states/states.types'
-import { HiExternalLink } from 'react-icons/hi'
-import usePayment from '@/hooks/usePayment'
-import { jsPDF } from 'jspdf'
 
 type ButtonProps = {
 	active: boolean
@@ -513,7 +499,7 @@ export default function VerificationComponent({
 	}
 
 	if (
-		request.user_info.is_verified === false ||
+		request._user_info_ref.is_verified === false ||
 		Object.keys(hostNinData || {}).length === 0
 	) {
 		return (
