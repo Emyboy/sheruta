@@ -54,3 +54,52 @@ interface FieldMatches {
 	firstname: boolean
 	dob: boolean
 }
+
+export type PremblyNINVerificationResponse = {
+    birthcountry: string;
+    birthdate: string;
+    birthlga: string;
+    birthstate: string;
+    centralID: string;
+    educationallevel: string;
+    email: string;
+    employmentstatus: string;
+    firstname: string;
+    gender: string;
+    heigth: string;
+    maritalstatus: string;
+    middlename: string;
+    nin: string;
+    nok_address1: string;
+    nok_address2: string;
+    nok_firstname: string;
+    nok_lga: string;
+    nok_middlename: string;
+    nok_postalcode: string;
+    nok_state: string;
+    nok_surname: string;
+    nok_town: string;
+    ospokenlang: string;
+    pfirstname: string;
+    photo: string;
+    pmiddlename: string;
+    profession: string;
+    psurname: string;
+    religion: string;
+    residence_address: string;
+    residence_lga: string;
+    residence_state: string;
+    residence_town: string;
+    residencestatus: string;
+    self_origin_lga: string;
+    self_origin_place: string;
+    self_origin_state: string;
+    signature: string;
+    spoken_language: string;
+    surname: string;
+    telephoneno: string;
+    title: string;
+    trackingId: string;
+    userid: string;
+    vnin: string;
+}

@@ -34,18 +34,37 @@ import {
 import { jsPDF } from 'jspdf'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import {
+import { BsExclamationTriangle } from 'react-icons/bs'
+	BiBadgeCheck,
 	BiSolidIdCard,
 	BiSolidInfoCircle,
 	BiSolidLock,
+	BiSolidStar,
 	BiSolidTimer,
+	BiStar,
 } from 'react-icons/bi'
-import { BsExclamationTriangle } from 'react-icons/bs'
+import {
+	BsExclamationTriangle,
+	BsInfoCircle,
+	BsQuestionCircle,
+} from 'react-icons/bs'
 import { FaSadTear } from 'react-icons/fa'
 import { FaQuestion } from 'react-icons/fa6'
 import { HiExternalLink } from 'react-icons/hi'
 import { IconType } from 'react-icons/lib'
 import { NINResponseDTO } from '../types'
+import { NINResponseDTO, PremblyNINVerificationResponse } from '../types'
+import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
+import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
+import { AuthUser } from '@/firebase/service/auth/auth.types'
+import UserService from '@/firebase/service/user/user.firebase'
+import { calculateAge, convertRefToData } from '@/utils/index.utils'
+import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
+import { StateData } from '@/firebase/service/options/states/states.types'
+import { HiExternalLink } from 'react-icons/hi'
+import usePayment from '@/hooks/usePayment'
+import { jsPDF } from 'jspdf'
 
 type ButtonProps = {
 	active: boolean
@@ -64,7 +83,7 @@ interface AlertBoxProps {
 
 interface UserProfileProps {
 	hostUserInfo: UserInfoDTO | undefined
-	hostNinData: NINResponseDTO | undefined
+	hostNinData: PremblyNINVerificationResponse | undefined
 	hostUserData: AuthUser | undefined
 	hostFlatShare: FlatShareProfileData | undefined
 	stateData: StateData | undefined
@@ -193,7 +212,7 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 								>
 									{premiumData.includes(key) ? (
 										<>
-											<Icon color="brand" as={BiSolidInfoCircle} boxSize={4} />{' '}
+											<Icon color="brand" as={BiBadgeCheck} boxSize={4} />{' '}
 										</>
 									) : null}{' '}
 									{data[key]}
@@ -218,15 +237,15 @@ const UserProfile = ({
 }: UserProfileProps) => {
 	// Personal Information
 	const personalInfo = {
-		Surname: hostNinData?.lastname || 'N/A',
+		Surname: hostNinData?.surname || 'N/A',
 		'First Name': hostNinData?.firstname || 'N/A',
 		'Middle Name': hostNinData?.middlename || 'N/A',
 		Gender: hostNinData?.gender === 'm' ? 'Male' : 'Female',
 		Age: hostNinData?.birthdate ? calculateAge(hostNinData.birthdate) : 'N/A',
 		'Contact Number': hostUserInfo?.primary_phone_number || 'N/A',
-		'Govt Registered Phone Number': hostNinData?.phone || 'N/A',
-		'Marital Status': hostNinData?.maritalStatus || 'N/A',
-		'Govt Registered Address': hostNinData?.residence?.address1 || 'N/A',
+		'Govt Registered Phone Number': hostNinData?.telephoneno || 'N/A',
+		'Marital Status': hostNinData?.maritalstatus || 'N/A',
+		'Govt Registered Address': hostNinData?.residence_address || 'N/A',
 		Religion: hostFlatShare?.religion || 'N/A',
 		'State Of Origin': stateData?.name || 'N/A',
 	}
@@ -297,11 +316,11 @@ const UserProfile = ({
 	// Next of Kin Information
 	const nextOfKin = {
 		'Name of NOK':
-			`${hostNinData?.nextOfKin?.lastname || ''} ${hostNinData?.nextOfKin?.firstname || ''}`.trim() ||
+			`${hostNinData?.nok_surname || ''} ${hostNinData?.nok_firstname || ''}`.trim() ||
 			'N/A',
-		'State of NOK': hostNinData?.nextOfKin?.state,
-		'Town of NOK': hostNinData?.nextOfKin?.town,
-		'Address of NOK': hostNinData?.nextOfKin?.address1 || 'N/A',
+		'State of NOK': hostNinData?.nok_state,
+		'Town of NOK': hostNinData?.nok_town,
+		'Address of NOK': hostNinData?.nok_address1 || hostNinData?.nok_address2 || 'N/A',
 	}
 
 	return (
@@ -328,6 +347,7 @@ const UserProfile = ({
 				fontWeight="normal"
 			>
 				Fields with the icon <Icon color="brand" as={BiSolidInfoCircle} /> are
+				Fields with the icon <Icon color="brand" as={BiBadgeCheck} /> are
 				NIMC verified
 			</Text>
 			<InfoSection title="Personal Information" data={personalInfo} />
@@ -342,9 +362,11 @@ export default function VerificationComponent({
 	request,
 	hostNinData,
 }: {
-	request: HostRequestDataDetails
-	hostNinData: NINResponseDTO | undefined
+	request: HostRequestDataDetails & {user_info: UserInfoDTO}
+	hostNinData: PremblyNINVerificationResponse | undefined
 }) {
+	console.log(request);
+
 	const {
 		authState: { user, user_info, flat_share_profile },
 	} = useAuthContext()

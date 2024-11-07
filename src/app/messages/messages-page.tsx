@@ -33,6 +33,7 @@ export default function MessagesPage({}: Props) {
 				const conversationsWithParticipantsData =
 					await ConversationsService.forUser(user._id)
 				setConversations(conversationsWithParticipantsData)
+				console.log(conversationsWithParticipantsData)
 			})()
 		}
 	}, [user])

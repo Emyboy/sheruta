@@ -2,22 +2,23 @@ import { NextResponse } from 'next/server'
 import axios from 'axios'
 
 export async function POST(req: Request) {
-	const { nin, lastname } = await req.json()
+	const { nin } = await req.json()
 
-	if (!nin || !lastname) {
+	if (!nin) {
 		return NextResponse.json({ error: 'NIN is required' }, { status: 400 })
 	}
 
 	try {
 		const response = await axios.post(
-			`https://vapi.verifyme.ng/v1/verifications/identities/nin/${nin}`,
+			// `https://vapi.verifyme.ng/v1/verifications/identities/nin/${nin}`,
+			`https://api.prembly.com/identitypass/verification/vnin`,
 			{
-				lastname,
+				number_nin: nin,
 			},
 			{
 				headers: {
-					Authorization: `Bearer ${process.env.VERIFY_ME_API_KEY}`,
-					'Content-Type': 'application/json',
+					'x-api-key': process.env.PREMBLY_APP_KEY,
+					'app-id': process.env.PREMBLY_APP_ID,
 				},
 			},
 		)

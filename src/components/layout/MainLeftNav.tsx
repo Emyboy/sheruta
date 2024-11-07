@@ -7,6 +7,7 @@ import { Divider, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+	BiBarChart,
 	BiBookmark,
 	BiCalendarAlt,
 	BiCheckShield,
@@ -37,13 +38,17 @@ export default function MainLeftNav({}: Props) {
 				bse: 'center',
 			}}
 		>
-			<Link href={'/groups'}>
+			{/* <Link href={'/groups'}>
 				<EachNav Icon={BiMessageSquareDetail} label="Chat rooms" />
+			</Link> */}
+			<Link href={'/trending-locations'}>
+				<EachNav Icon={BiBarChart} label="Trending Locations" />
 			</Link>
+
 			<Link href={'/inspections'}>
 				<EachNav Icon={BiCalendarAlt} label="Inspections" />
 			</Link>
-			<EachNav Icon={BiWallet} label="Wallet" />
+			{/* <EachNav Icon={BiWallet} label="Wallet" /> */}
 			<Link href={'/settings'}>
 				<EachNav Icon={BiWrench} label="Settings" />
 			</Link>
