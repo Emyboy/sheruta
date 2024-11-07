@@ -23,7 +23,6 @@ type Props = {
 }
 
 export default function EachMessageBobble({ message }: Props) {
-	console.log(message)
 	const toast = useToast()
 	const { authState } = useAuthContext()
 	const user = authState.user
@@ -82,7 +81,11 @@ export default function EachMessageBobble({ message }: Props) {
 							>
 								{message.message_text}
 							</Text>
-							<Flex justifyContent={'flex-end'} color={'text_muted'}><Text fontSize={"xs"}>{convertTimestampToTime(message?.createdAt)}</Text></Flex>
+							<Flex justifyContent={'flex-end'} color={'text_muted'}>
+								<Text fontSize={'xs'}>
+									{convertTimestampToTime(message?.createdAt)}
+								</Text>
+							</Flex>
 						</Flex>
 					</Flex>
 				</MenuButton>

@@ -27,7 +27,7 @@ import {
 import axios from 'axios'
 import { Timestamp } from 'firebase/firestore'
 import React, { useEffect, useState } from 'react'
-import { NINResponseDTO } from '../types'
+import { NINResponseDTO, PremblyNINVerificationResponse } from '../types'
 
 const doesGenderMatch = (NINGender: string, dbGender: string): boolean => {
 	if (NINGender === 'm' && dbGender === 'male') {
@@ -220,17 +220,15 @@ const VerifyNIN = ({
 			}
 
 			const response = await axios.post('/api/verify-nin', {
-				nin,
-				lastname,
-				userId,
-				gender,
+				nin
 			})
 
 			if (
-				response.data.status == 'success' &&
-				response?.data?.data &&
-				Object.keys(response.data.data || {}).length > 0
+				response?.data?.status && Boolean(response?.data?.status) &&
+				response?.data?.nin_data &&
+				Object.keys(response.data.nin_data || {}).length > 0
 			) {
+
 				setVerificationAttempts(verificationAttempts + 1)
 
 				if (verificationAttempts >= 4) {
@@ -243,13 +241,13 @@ const VerifyNIN = ({
 					setVerificationAttempts(0)
 				}
 
-				const data: NINResponseDTO = response.data.data
+				const data: PremblyNINVerificationResponse = response.data.nin_data
 
 				//check if lastname and gender matches
-				const lastNameMatches: boolean = data?.lastname == lastname
+				const lastNameMatches: boolean = data?.surname == lastname
 				const genderMatches: boolean = doesGenderMatch(
 					data.gender,
-					gender as string,
+					gender!,
 				)
 
 				if (lastNameMatches && genderMatches) {
