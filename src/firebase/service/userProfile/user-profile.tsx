@@ -8,6 +8,7 @@ import {
 	doc,
 	getDoc,
 	getDocs,
+	limit,
 	query,
 	serverTimestamp,
 	setDoc,
@@ -106,24 +107,35 @@ export const getAllProfileSnippetDocs = async (searchParams: {
 			q = query(
 				collection(db, DBCollectionName.userProfile),
 				where('age_preference', '==', searchParams.age_preference),
+				where('is_promoted', '==', true),
+				limit(_limit),
 			)
 		} else if (searchParams.employment_status) {
 			q = query(
 				collection(db, DBCollectionName.userProfile),
 				where('employment_status', '==', searchParams.employment_status),
+				where('is_promoted', '==', true),
+				limit(_limit),
 			)
 		} else if (searchParams.gender_preference) {
 			q = query(
 				collection(db, DBCollectionName.userProfile),
 				where('gender_preference', '==', searchParams.gender_preference),
+				where('is_promoted', '==', true),
+				limit(_limit),
 			)
 		} else if (searchParams.work_industry) {
 			q = query(
 				collection(db, DBCollectionName.userProfile),
 				where('work_industry', '==', searchParams.work_industry),
+				where('is_promoted', '==', true),
+				limit(_limit),
 			)
 		} else {
-			q = collection(db, DBCollectionName.userProfileSnippet)
+			q = query(
+				collection(db, DBCollectionName.userProfile),
+				where('is_promoted', '==', true),
+			)
 		}
 
 		const profileDataSnapshot = await getDocs(q)
@@ -138,7 +150,7 @@ export const getAllProfileSnippetDocs = async (searchParams: {
 
 		return profileDataArray
 	} catch (e) {
-		console.log('Error while trying to retrieve profile collection: ', e)
+		console.error('Error while trying to retrieve profile collection: ', e)
 	}
 }
 
@@ -149,24 +161,5 @@ export const deleteProfileSnippet = async (user_id: string): Promise<void> => {
 		return docSnap
 	} catch (error) {
 		console.log(error)
-	}
-}
-
-export const saveProfileSnippetDocs = async (
-	profileData: Record<string, any>,
-	user_id: string,
-): Promise<void> => {
-	try {
-		const docRef = doc(db, DBCollectionName.userProfileSnippet, user_id)
-
-		await setDoc(
-			docRef,
-			{
-				...profileData,
-			},
-			{ merge: true },
-		)
-	} catch (error) {
-		console.log('Error saving user profile data', error)
 	}
 }

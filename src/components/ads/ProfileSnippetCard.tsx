@@ -1,6 +1,7 @@
 import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
+import { UserProfile } from '@/firebase/service/userProfile/user-profile-types'
 import { createNotification } from '@/utils/actions'
 import {
 	Badge,
@@ -15,25 +16,7 @@ import {
 	Stack,
 	Text,
 } from '@chakra-ui/react'
-import { Timestamp } from 'firebase/firestore'
 import { BiBookmark } from 'react-icons/bi'
-
-interface UserProfile {
-	state: { name: string }
-	seeking: boolean
-	document_id: string
-	bio: string
-	budget: number
-	payment_type: string
-	location_keyword: { name: string }
-	service_type: string
-	_user_ref: {
-		avatar_url: string
-		last_name: string
-		first_name: string
-	}
-	promotion_expiry_date?: Timestamp
-}
 
 export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 	const { authState } = useAuthContext()
@@ -56,14 +39,14 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 
 				<Stack w={'100%'}>
 					<Link
-						href={`/user/${item.document_id}`}
+						href={`/user/${item._user_ref._id}`}
 						style={{ textDecoration: 'none' }}
 						onClick={async () =>
-							authState.user?._id !== item.document_id &&
+							authState.user?._id !== item._user_ref._id &&
 							(await createNotification({
 								is_read: false,
 								message: NotificationsBodyMessage.profile_view,
-								recipient_id: item.document_id,
+								recipient_id: item._user_ref._id,
 								type: 'profile_view',
 								sender_details: authState.user
 									? {
@@ -73,18 +56,17 @@ export default function ProfileSnippetCard({ item }: { item: UserProfile }) {
 											id: authState.user._id,
 										}
 									: null,
-								action_url: `/user/${item.document_id}`,
+								action_url: `/user/${item._user_ref._id}`,
 							}))
 						}
 					>
 						<CardBody mb={0} border="none">
 							<Flex justify="space-between" align="center" mb={3}>
 								<Text>{`${item._user_ref.first_name} ${item._user_ref.last_name}`}</Text>
-								{item.promotion_expiry_date && (
-									<Badge color="text_color" background="border_color">
-										Promoted
-									</Badge>
-								)}
+
+								<Badge color="text_color" background="border_color">
+									Promoted
+								</Badge>
 							</Flex>
 
 							<Flex>

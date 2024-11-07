@@ -6,10 +6,7 @@ import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
 import { useOptionsContext } from '@/context/options.context'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import {
-	saveProfileDocs,
-	saveProfileSnippetDocs,
-} from '@/firebase/service/userProfile/user-profile'
+import { saveProfileDocs } from '@/firebase/service/userProfile/user-profile'
 import usePayment from '@/hooks/usePayment'
 import {
 	Box,
@@ -65,29 +62,15 @@ export const UpdateProfilePopup = () => {
 
 		if (!flat_share_profile || !user) return
 
-		const profileData = {
-			bio,
-			service_type: _service,
-			first_name: user.first_name,
-			last_name: user.last_name,
-			seeking: flat_share_profile.seeking,
-			payment_type: flat_share_profile.payment_type || null,
-			budget: flat_share_profile.budget,
-			avatar_url: user.avatar_url,
-			state: flat_share_profile.state,
-			location_keyword: flat_share_profile.location_keyword,
-			_user_ref: flat_share_profile._user_ref,
-			document_id: flat_share_profile._user_id,
-			promotion_expiry_date: Timestamp.fromDate(
-				new Date(new Date().setDate(new Date().getDate() + noOfDays)),
-			),
-		}
-
 		await Promise.all([
 			saveProfileDocs(
 				{
 					bio,
 					service_type: _service,
+					is_promoted: true,
+					promotion_expiry_date: Timestamp.fromDate(
+						new Date(new Date().setDate(new Date().getDate() + noOfDays)),
+					),
 				},
 				flat_share_profile._user_id,
 			),
@@ -99,7 +82,6 @@ export const UpdateProfilePopup = () => {
 				amount: promotionOption,
 				user_id: user._id,
 			}),
-			saveProfileSnippetDocs(profileData, flat_share_profile._user_id),
 		])
 
 		await getAuthDependencies()
