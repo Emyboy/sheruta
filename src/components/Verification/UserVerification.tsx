@@ -95,15 +95,15 @@ const UserVerification = () => {
 								? onOpen
 								: !hasEnoughCredits
 									? () =>
-										showToast({
-											message: "You don't have enough credits.",
-											status: 'info',
-										})
+											showToast({
+												message: "You don't have enough credits.",
+												status: 'info',
+											})
 									: () =>
-										showToast({
-											message: 'Your account has been verified already',
-											status: 'info',
-										})
+											showToast({
+												message: 'Your account has been verified already',
+												status: 'info',
+											})
 						}
 						icon={BiIdCard}
 						text="Verify NIN"
@@ -115,7 +115,7 @@ const UserVerification = () => {
 				hasEnoughCredits={hasEnoughCredits}
 				isOpen={isOpen}
 				onClose={onClose}
-			// onOpen={onOpen}
+				// onOpen={onOpen}
 			/>
 		</Flex>
 	)

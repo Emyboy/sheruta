@@ -1,6 +1,9 @@
 import ApartmentDetails from '@/components/HostDetails/ApartmentDetails'
 import MediaCarousel from '@/components/HostDetails/MediaCarousel'
-import { NINResponseDTO, PremblyNINVerificationResponse } from '@/components/types'
+import {
+	NINResponseDTO,
+	PremblyNINVerificationResponse,
+} from '@/components/types'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import DiscussionService from '@/firebase/service/discussions/discussions.firebase'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'

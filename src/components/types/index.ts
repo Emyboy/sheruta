@@ -103,6 +103,6 @@ export type PremblyNINVerificationResponse = {
 	userid: string
 	vnin: string
 	verification?: Record<string, any>
-	session?: Record<string, any>,
+	session?: Record<string, any>
 	endpoint_name?: string
 }

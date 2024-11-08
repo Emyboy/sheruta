@@ -185,7 +185,7 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 						return (
 							<Tr
 								key={key}
-							// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
+								// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
 							>
 								<Td
 									ps={0}
@@ -360,7 +360,6 @@ export default function VerificationComponent({
 	request: HostRequestDataDetails & { user_info: UserInfoDTO }
 	hostNinData: PremblyNINVerificationResponse | undefined
 }) {
-
 	const {
 		authState: { user, user_info, flat_share_profile },
 	} = useAuthContext()

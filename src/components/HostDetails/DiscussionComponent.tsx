@@ -1,5 +1,6 @@
 'use client'
 
+import { DEFAULT_PADDING } from '@/configs/theme'
 import { useAuthContext } from '@/context/auth.context'
 import { db } from '@/firebase'
 import DiscussionService from '@/firebase/service/discussions/discussions.firebase'
@@ -41,7 +42,7 @@ const NoDiscussion = () => {
 			flexDir={'column'}
 			justifyContent={'center'}
 			width="100%"
-			minH="100dvh"
+			minH="70dvh"
 		>
 			<Flex alignItems={'center'} flexDir={'column'} gap="10px">
 				<Circle
@@ -135,11 +136,11 @@ const DiscussionComponent = ({
 						recipient_id: hostId,
 						sender_details: user
 							? {
-									id: user._id,
-									first_name: user.first_name,
-									last_name: user.last_name,
-									avatar_url: user.avatar_url,
-								}
+								id: user._id,
+								first_name: user.first_name,
+								last_name: user.last_name,
+								avatar_url: user.avatar_url,
+							}
 							: null,
 						action_url: `${pathname}?tab=Discussion`,
 					},
@@ -170,7 +171,7 @@ const DiscussionComponent = ({
 		discussions.filter((comment) => comment.reply_to === commentId) || []
 
 	return (
-		<Box gap={4} width="100%" overflowY={'scroll'} pos={'relative'}>
+		<Box gap={4} p={DEFAULT_PADDING} width="100%" overflowY={'scroll'} pos={'relative'}>
 			<Box overflowY={'scroll'} minH={'50dvh'}>
 				<VStack align="start" spacing={2} w="100%">
 					{!discussions?.length ? (
@@ -197,74 +198,80 @@ const DiscussionComponent = ({
 							}
 						})
 					)}
-				</VStack>
-			</Box>
 
-			<Box
-				bg={{
-					_dark: 'dark',
-					_light: '#fff',
-				}}
-				pos={'fixed'}
-				right={0}
-				bottom={0}
-				left={{ base: 0, lg: '50%' }}
-				borderRadius="md"
-				boxShadow="md"
-				mx="auto"
-				as="form"
-				onSubmit={handleNewComment}
-			>
-				<InputGroup>
-					<Input
-						placeholder="Type message here"
-						// bg="#f9f9f9"
-						border="1px solid #ddd"
-						borderRadius="md"
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-							const inputValue = e.target.value
-
-							if (isReplying) {
-								// If input is cleared, don't prepend the userHandle
-								if (inputValue.trim() === '') {
-									setMessage('')
-								} else if (userHandle && !inputValue.startsWith(userHandle)) {
-									// If the message doesn't already start with userHandle, prepend it
-									setMessage(`${userHandle} ${inputValue}`)
-								} else {
-									// If the userHandle is already there, just update the message
-									setMessage(inputValue)
-								}
-							} else {
-								setMessage(inputValue)
-								//user is not replying to any comment
-								setNestLevel(1)
-							}
+					<Box
+						bg={{
+							_dark: 'dark',
+							_light: '#fff',
 						}}
-						value={
-							isReplying
-								? userHandle && message.startsWith(userHandle)
-									? message
-									: `${userHandle} ${message}`
-								: message
-						}
-						disabled={isLoading}
-						_placeholder={{ color: 'gray.400' }}
-					/>
-					<InputRightElement py={5}>
-						<IconButton
-							onClick={handleNewComment}
-							disabled={message.trim() === '' || isLoading}
-							isLoading={isLoading}
-							aria-label="Send message"
-							icon={<BiSend />}
-							bg="black"
-							color="white"
-							borderRadius="md"
-							_hover={{ bg: 'gray.700' }}
-						/>
-					</InputRightElement>
-				</InputGroup>
+						width={"full"}
+						left={{ base: 0, lg: '50%' }}
+						borderRadius="md"
+						boxShadow="md"
+						px={DEFAULT_PADDING}
+						mt={5}
+						as="form"
+						onSubmit={handleNewComment}
+					>
+						<Flex
+							alignItems={'center'}
+							flex={1}
+							// px={DEFAULT_PADDING}
+						>
+							<Input
+								placeholder="Type message here"
+								// bg="#f9f9f9"
+								border="1px solid #ddd"
+								borderRadius="md"
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+									const inputValue = e.target.value
+
+									if (isReplying) {
+										// If input is cleared, don't prepend the userHandle
+										if (inputValue.trim() === '') {
+											setMessage('')
+										} else if (
+											userHandle &&
+											!inputValue.startsWith(userHandle)
+										) {
+											// If the message doesn't already start with userHandle, prepend it
+											setMessage(`${userHandle} ${inputValue}`)
+										} else {
+											// If the userHandle is already there, just update the message
+											setMessage(inputValue)
+										}
+									} else {
+										setMessage(inputValue)
+										//user is not replying to any comment
+										setNestLevel(1)
+									}
+								}}
+								value={
+									isReplying
+										? userHandle && message.startsWith(userHandle)
+											? message
+											: `${userHandle} ${message}`
+										: message
+								}
+								disabled={isLoading}
+								_placeholder={{ color: 'gray.400' }}
+							/>
+
+							<IconButton
+								onClick={handleNewComment}
+								disabled={message.trim() === '' || isLoading}
+								isLoading={isLoading}
+								aria-label="Send message"
+								icon={<BiSend />}
+								variant={'ghost'}
+								color={'border_color'}
+								_dark={{ color: 'dark_lighter' }}
+								borderRadius="md"
+								_hover={{ bg: 'gray.700' }}
+							/>
+						</Flex>
+					</Box>
+				</VStack>
 			</Box>
 		</Box>
 	)
@@ -299,7 +306,7 @@ const CommentComponent = ({
 	return (
 		<>
 			{/* First Comment -> NEST LEVEL 1 */}
-			<Box width="100%" borderRadius="md">
+			<Box width="full" borderRadius="md">
 				<Flex flexDirection={'column'}>
 					<Flex gap={'10px'}>
 						<Avatar
@@ -380,11 +387,11 @@ const CommentComponent = ({
 								.sort((a: any, b: any) => {
 									const timestampA = new Date(
 										a.timestamp.seconds * 1000 +
-											a.timestamp.nanoseconds / 1000000,
+										a.timestamp.nanoseconds / 1000000,
 									)
 									const timestampB = new Date(
 										b.timestamp.seconds * 1000 +
-											b.timestamp.nanoseconds / 1000000,
+										b.timestamp.nanoseconds / 1000000,
 									)
 									return timestampA.getTime() - timestampB.getTime() // Ascending order
 								})

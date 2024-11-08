@@ -205,10 +205,12 @@ const VerifyNIN = ({
 	}, [user_info])
 
 	const isNinInUse = async (submittedNIN: string): Promise<boolean> => {
-		const result: UserInfoDTO[] | null = await SherutaDB.getAll({ collection_name: "user_info" });
+		const result: UserInfoDTO[] | null = await SherutaDB.getAll({
+			collection_name: 'user_info',
+		})
 
-		return result?.some((doc) => doc?.nin === submittedNIN) || false;
-	};
+		return result?.some((doc) => doc?.nin === submittedNIN) || false
+	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		try {
@@ -243,7 +245,6 @@ const VerifyNIN = ({
 				response?.data?.nin_data &&
 				Object.keys(response.data.nin_data || {}).length > 0
 			) {
-
 				await paymentActions.decrementCredit({
 					amount: creditTable.VERIFICATION,
 					user_id: user?._id as string,
