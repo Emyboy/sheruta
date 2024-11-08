@@ -45,10 +45,10 @@ export default function EachMessageBobble({ message }: Props) {
 			<Menu>
 				<MenuButton
 					cursor={'auto'}
-					// as={Button}
-					// size={'xs'}
-					// bg="none"
-					// color="dark_lighter"
+				// as={Button}
+				// size={'xs'}
+				// bg="none"
+				// color="dark_lighter"
 				>
 					<Flex
 						justifyContent={'space-between'}
@@ -73,7 +73,7 @@ export default function EachMessageBobble({ message }: Props) {
 							p={DEFAULT_PADDING}
 							bg={isUserOwn ? 'dark_light' : 'dark'}
 							flexDirection={'column'}
-							// gap={DEFAULT_PADDING}
+						// gap={DEFAULT_PADDING}
 						>
 							<Text
 								textAlign={message.message_text.length > 20 ? 'justify' : 'end'}
@@ -83,7 +83,7 @@ export default function EachMessageBobble({ message }: Props) {
 							</Text>
 							<Flex justifyContent={'flex-end'} color={'text_muted'}>
 								<Text fontSize={'xs'}>
-									{convertTimestampToTime(message?.createdAt)}
+									{(message?.createdAt?.seconds && message?.createdAt?.nanoseconds) ? convertTimestampToTime(message?.createdAt) : null}
 								</Text>
 							</Flex>
 						</Flex>

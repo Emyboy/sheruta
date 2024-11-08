@@ -2,39 +2,36 @@
 
 import { creditTable } from '@/constants'
 import { useAuthContext } from '@/context/auth.context'
-import { AuthUser } from '@/firebase/service/auth/auth.types'
-import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
-import { FlatShareProfileData } from '@/firebase/service/flat-share-profile/flat-share-profile.types'
+import { useNotificationContext } from '@/context/notifications.context'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { StateData } from '@/firebase/service/options/states/states.types'
+import { NotificationsBodyMessage } from '@/firebase/service/notifications/notifications.firebase'
 import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
-import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
-import UserService from '@/firebase/service/user/user.firebase'
 import useCommon from '@/hooks/useCommon'
-import usePayment from '@/hooks/usePayment'
-import { calculateAge, convertRefToData } from '@/utils/index.utils'
+import { createNotification } from '@/utils/actions'
 import {
 	Box,
 	Button,
 	Circle,
 	Flex,
-	Heading,
 	HStack,
 	Icon,
+	Text,
+	useColorModeValue,
 	Image,
 	Table,
-	Tbody,
-	Td,
-	Text,
 	Tr,
-	useColorModeValue,
+	Td,
+	Tbody,
+	Heading,
 	VStack,
+	IconButton,
+	Alert,
+	AlertIcon,
+	Code,
 } from '@chakra-ui/react'
-import { jsPDF } from 'jspdf'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { BsExclamationTriangle } from 'react-icons/bs'
+import {
 	BiBadgeCheck,
 	BiSolidIdCard,
 	BiSolidInfoCircle,
@@ -50,9 +47,7 @@ import {
 } from 'react-icons/bs'
 import { FaSadTear } from 'react-icons/fa'
 import { FaQuestion } from 'react-icons/fa6'
-import { HiExternalLink } from 'react-icons/hi'
 import { IconType } from 'react-icons/lib'
-import { NINResponseDTO } from '../types'
 import { NINResponseDTO, PremblyNINVerificationResponse } from '../types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
@@ -190,7 +185,7 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 						return (
 							<Tr
 								key={key}
-								// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
+							// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
 							>
 								<Td
 									ps={0}
@@ -320,7 +315,8 @@ const UserProfile = ({
 			'N/A',
 		'State of NOK': hostNinData?.nok_state,
 		'Town of NOK': hostNinData?.nok_town,
-		'Address of NOK': hostNinData?.nok_address1 || hostNinData?.nok_address2 || 'N/A',
+		'Address of NOK':
+			hostNinData?.nok_address1 || hostNinData?.nok_address2 || 'N/A',
 	}
 
 	return (
@@ -346,9 +342,8 @@ const UserProfile = ({
 				w="full"
 				fontWeight="normal"
 			>
-				Fields with the icon <Icon color="brand" as={BiSolidInfoCircle} /> are
-				Fields with the icon <Icon color="brand" as={BiBadgeCheck} /> are
-				NIMC verified
+				Fields with the icon <Icon color="brand" as={BiBadgeCheck} /> are NIMC
+				verified
 			</Text>
 			<InfoSection title="Personal Information" data={personalInfo} />
 			<InfoSection title="Occupation" data={occupation} />
@@ -362,10 +357,10 @@ export default function VerificationComponent({
 	request,
 	hostNinData,
 }: {
-	request: HostRequestDataDetails & {user_info: UserInfoDTO}
+	request: HostRequestDataDetails & { user_info: UserInfoDTO }
 	hostNinData: PremblyNINVerificationResponse | undefined
 }) {
-	console.log(request);
+	console.log(request)
 
 	const {
 		authState: { user, user_info, flat_share_profile },
@@ -521,7 +516,7 @@ export default function VerificationComponent({
 	}
 
 	if (
-		request._user_info_ref.is_verified === false ||
+		request.user_info.is_verified === false ||
 		Object.keys(hostNinData || {}).length === 0
 	) {
 		return (
