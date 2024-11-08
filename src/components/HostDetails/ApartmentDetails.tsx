@@ -8,6 +8,8 @@ import { useState } from 'react'
 import { PremblyNINVerificationResponse } from '../types'
 import VerificationComponent from './VerificationComponent'
 import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
+import DiscussionComponent from './DiscussionComponent'
+import { DEFAULT_PADDING } from '@/configs/theme'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -32,13 +34,13 @@ export default function ApartmentDetails({
 
 	const parsedRequest: HostRequestDataDetails = JSON.parse(request)
 
-	// const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
+	const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
 
 	return (
 		<>
 			<Flex
 				minH="70px"
-				maxH="70px"
+				// maxH="70px"
 				minW="100%"
 				borderBottom="1px"
 				borderColor="brand_darker"
@@ -57,6 +59,7 @@ export default function ApartmentDetails({
 					alignSelf="end"
 					w="100%"
 					mx={{ base: '16px', md: 0 }}
+					padding={DEFAULT_PADDING}
 				>
 					{mini_nav_items.map((item, i) => (
 						<Flex
@@ -64,7 +67,7 @@ export default function ApartmentDetails({
 							alignItems="center"
 							flexDirection="column"
 							justifyContent="space-between"
-							height={{ base: '48px', md: '58px' }}
+							height={{ base: '28px', md: '38px' }}
 							cursor="pointer"
 							w="auto"
 							onClick={() => setActiveTab(item)}
@@ -95,19 +98,21 @@ export default function ApartmentDetails({
 			{activeTab === 'Apartment Summary' && (
 				<ApartmentSummary request={parsedRequest} />
 			)}
-			{/* {activeTab === 'Discussion' && (
+			{activeTab === 'Discussion' && (
 				<DiscussionComponent
 					requestId={parsedRequest.id}
 					discussions={parsedDiscussions}
 					hostId={parsedRequest._user_ref._id}
 				/>
-			)} */}
+			)}
 			{activeTab === 'Verification' && (
 				<VerificationComponent
-					request={parsedRequest as HostRequestDataDetails & { user_info: UserInfoDTO }}
+					request={
+						parsedRequest as HostRequestDataDetails & { user_info: UserInfoDTO }
+					}
 					hostNinData={hostNinData}
 				/>
-			)} 
+			)}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>
 	)
