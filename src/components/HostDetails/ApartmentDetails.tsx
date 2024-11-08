@@ -5,7 +5,9 @@ import { HostRequestDataDetails } from '@/firebase/service/request/request.types
 import { Flex, Text } from '@chakra-ui/react'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { NINResponseDTO } from '../types'
+import { PremblyNINVerificationResponse } from '../types'
+import VerificationComponent from './VerificationComponent'
+import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
 
 const mini_nav_items = [
 	'Apartment Summary',
@@ -21,7 +23,7 @@ export default function ApartmentDetails({
 }: {
 	request: string
 	discussions: string | undefined
-	hostNinData: NINResponseDTO | undefined
+	hostNinData: PremblyNINVerificationResponse | undefined
 }) {
 	const params = useSearchParams()
 	const [activeTab, setActiveTab] = useState(
@@ -30,7 +32,7 @@ export default function ApartmentDetails({
 
 	const parsedRequest: HostRequestDataDetails = JSON.parse(request)
 
-	const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
+	// const parsedDiscussions = discussions ? JSON.parse(discussions) : undefined
 
 	return (
 		<>
@@ -99,13 +101,13 @@ export default function ApartmentDetails({
 					discussions={parsedDiscussions}
 					hostId={parsedRequest._user_ref._id}
 				/>
-			)}
+			)} */}
 			{activeTab === 'Verification' && (
 				<VerificationComponent
-					request={parsedRequest}
+					request={parsedRequest as HostRequestDataDetails & { user_info: UserInfoDTO }}
 					hostNinData={hostNinData}
 				/>
-			)} */}
+			)} 
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>
 	)

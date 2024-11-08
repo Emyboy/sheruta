@@ -1,6 +1,6 @@
 import ApartmentDetails from '@/components/HostDetails/ApartmentDetails'
 import MediaCarousel from '@/components/HostDetails/MediaCarousel'
-import { NINResponseDTO } from '@/components/types'
+import { NINResponseDTO, PremblyNINVerificationResponse } from '@/components/types'
 import { DEFAULT_PADDING } from '@/configs/theme'
 import DiscussionService from '@/firebase/service/discussions/discussions.firebase'
 import FlatShareProfileService from '@/firebase/service/flat-share-profile/flat-share-profile.firebase'
@@ -32,7 +32,7 @@ export default async function page({
 	])
 
 	let finalRequest: DocumentData | null = requestData
-	let hostNinData: NINResponseDTO | undefined = undefined
+	let hostNinData: PremblyNINVerificationResponse | undefined = undefined
 
 	if (finalRequest && finalRequest._user_ref && finalRequest._user_ref._id) {
 		const userId = finalRequest._user_ref._id

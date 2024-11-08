@@ -48,7 +48,7 @@ import {
 import { FaSadTear } from 'react-icons/fa'
 import { FaQuestion } from 'react-icons/fa6'
 import { IconType } from 'react-icons/lib'
-import { NINResponseDTO, PremblyNINVerificationResponse } from '../types'
+import { PremblyNINVerificationResponse } from '../types'
 import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
 import { AuthUser } from '@/firebase/service/auth/auth.types'
@@ -360,7 +360,6 @@ export default function VerificationComponent({
 	request: HostRequestDataDetails & { user_info: UserInfoDTO }
 	hostNinData: PremblyNINVerificationResponse | undefined
 }) {
-	console.log(request)
 
 	const {
 		authState: { user, user_info, flat_share_profile },
