@@ -185,7 +185,7 @@ const InfoSection = ({ title, data }: { title: string; data: any }) => {
 						return (
 							<Tr
 								key={key}
-								// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
+							// bgColor={ (premiumData.includes(key)) ? '#02cb3b0f' : '#fff'}
 							>
 								<Td
 									ps={0}

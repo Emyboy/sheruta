@@ -1,7 +1,5 @@
 import { CACHE_TTL } from '@/constants'
 import SherutaDB, { DBCollectionName } from '@/firebase/service/index.firebase'
-import { HostRequestDataDetails } from '@/firebase/service/request/request.types'
-import UserInfoService from '@/firebase/service/user-info/user-info.firebase'
 import { getAllProfileSnippetDocs } from '@/firebase/service/userProfile/user-profile'
 import HomePage from './(home-page)/home-page'
 

@@ -25,20 +25,20 @@ const budgetList = [
 	},
 ]
 
-const findApartmentList = [
-	{
-		label: 'By Request',
-		value: 'by-request',
-	},
-	{
-		label: 'Show Flatmates',
-		value: 'show-flatmates',
-	},
-	{
-		label: 'Available Spaces',
-		value: 'available-spaces',
-	},
-]
+// const findApartmentList = [
+// 	{
+// 		label: 'By Request',
+// 		value: 'by-request',
+// 	},
+// 	{
+// 		label: 'Show Flatmates',
+// 		value: 'show-flatmates',
+// 	},
+// 	{
+// 		label: 'Available Spaces',
+// 		value: 'available-spaces',
+// 	},
+// ]
 
 const paymentTypeList = [
 	{
@@ -305,7 +305,7 @@ export default function SearchPageFilter({}: Props) {
 				</SimpleGrid>
 			</Flex>
 
-			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
+			{/* <Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text
 					as={'h3'}
 					fontWeight={'normal'}
@@ -337,7 +337,7 @@ export default function SearchPageFilter({}: Props) {
 						</Checkbox>
 					))}
 				</SimpleGrid>
-			</Flex>
+			</Flex> */}
 
 			<Flex gap={{ base: '14px', md: '20px' }} flexDir={'column'}>
 				<Text

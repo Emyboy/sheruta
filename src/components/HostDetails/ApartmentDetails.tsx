@@ -5,8 +5,6 @@ import { HostRequestDataDetails } from '@/firebase/service/request/request.types
 import { Flex, Text } from '@chakra-ui/react'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import DiscussionComponent from './DiscussionComponent'
-import VerificationComponent from './VerificationComponent'
 import { NINResponseDTO } from '../types'
 
 const mini_nav_items = [
@@ -95,7 +93,7 @@ export default function ApartmentDetails({
 			{activeTab === 'Apartment Summary' && (
 				<ApartmentSummary request={parsedRequest} />
 			)}
-			{activeTab === 'Discussion' && (
+			{/* {activeTab === 'Discussion' && (
 				<DiscussionComponent
 					requestId={parsedRequest.id}
 					discussions={parsedDiscussions}
@@ -107,7 +105,7 @@ export default function ApartmentDetails({
 					request={parsedRequest}
 					hostNinData={hostNinData}
 				/>
-			)}
+			)} */}
 			{activeTab === 'Pay Details' && <Text>Pay Details coming soon</Text>}
 		</>
 	)
