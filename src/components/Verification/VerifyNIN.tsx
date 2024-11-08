@@ -27,7 +27,9 @@ import {
 import axios from 'axios'
 import { Timestamp } from 'firebase/firestore'
 import React, { useEffect, useState } from 'react'
-import { NINResponseDTO, PremblyNINVerificationResponse } from '../types'
+import { PremblyNINVerificationResponse } from '../types'
+import SherutaDB from '@/firebase/service/index.firebase'
+import { UserInfoDTO } from '@/firebase/service/user-info/user-info.types'
 
 const doesGenderMatch = (NINGender: string, dbGender: string): boolean => {
 	if (NINGender === 'm' && dbGender === 'male') {
@@ -170,7 +172,6 @@ const VerifyNIN = ({
 	const [userId, setUserId] = useState<string>('')
 	const { showToast } = useCommon()
 	const [loading, setLoading] = useState<boolean>(false)
-	const [verificationAttempts, setVerificationAttempts] = useState<number>(0)
 	const [showNameUpdate, setShowNameUpdate] = useState<boolean>(false)
 	const modalContentColor = useColorModeValue('#fff', '#2D3748')
 	const {
@@ -203,6 +204,12 @@ const VerifyNIN = ({
 		}
 	}, [user_info])
 
+	const isNinInUse = async (submittedNIN: string): Promise<boolean> => {
+		const result: UserInfoDTO[] | null = await SherutaDB.getAll({ collection_name: "user_info" });
+
+		return result?.some((doc) => doc?.nin === submittedNIN) || false;
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		try {
 			setLoading(true)
@@ -210,6 +217,13 @@ const VerifyNIN = ({
 
 			if (nin.length !== 11 || isNaN(Number(nin))) {
 				return
+			}
+
+			if (await isNinInUse(nin)) {
+				return showToast({
+					status: 'error',
+					message: 'This NIN is already in use',
+				})
 			}
 
 			if (!hasEnoughCredits) {
@@ -220,72 +234,44 @@ const VerifyNIN = ({
 			}
 
 			const response = await axios.post('/api/verify-nin', {
-				nin
+				nin,
 			})
 
 			if (
-				response?.data?.status && Boolean(response?.data?.status) &&
+				response?.data?.status &&
+				Boolean(response?.data?.status) &&
 				response?.data?.nin_data &&
 				Object.keys(response.data.nin_data || {}).length > 0
 			) {
 
-				setVerificationAttempts(verificationAttempts + 1)
-
-				if (verificationAttempts >= 4) {
-					//initiate debit whether NIN belongs to the user or not
-					await paymentActions.decrementCredit({
-						amount: creditTable.VERIFICATION,
-						user_id: user?._id as string,
-					})
-
-					setVerificationAttempts(0)
-				}
+				await paymentActions.decrementCredit({
+					amount: creditTable.VERIFICATION,
+					user_id: user?._id as string,
+				})
 
 				const data: PremblyNINVerificationResponse = response.data.nin_data
 
 				//check if lastname and gender matches
-				const lastNameMatches: boolean = data?.surname == lastname
-				const genderMatches: boolean = doesGenderMatch(
-					data.gender,
-					gender!,
-				)
+				// const lastNameMatches: boolean = data?.surname == lastname
+				// const genderMatches: boolean = doesGenderMatch(data.gender, gender!)
+				await UserInfoService.update({
+					data: {
+						is_verified: true,
+						date_of_birth: data.birthdate,
+						nin,
+						nin_data: { ...data },
+					},
+					document_id: userId,
+				})
+				showToast({
+					message: 'Your account has been verified successfully.',
+					status: 'success',
+				})
+				setError(null)
+				onClose()
+				setLoading(false)
 
-				if (lastNameMatches && genderMatches) {
-					//TODO: Handle scenarios where there can be an existing NIN on the database already
-					await UserInfoService.update({
-						data: {
-							is_verified: true,
-							date_of_birth: data.birthdate,
-							nin,
-							nin_data: { ...data },
-						},
-						document_id: userId,
-					})
-					showToast({
-						message: 'Your account has been verified successfully.',
-						status: 'success',
-					})
-					setError(null)
-					onClose()
-					setLoading(false)
-
-					window.location.replace('/')
-				} else {
-					//Only show the form if the lastname does not match with the one in the database
-					if (!lastNameMatches) {
-						setError(
-							'Your NIN verification failed because of an identity error. Please update your name and try again.',
-						)
-						setShowNameUpdate(true)
-					}
-
-					showToast({
-						message: 'NIN verification failed',
-						status: 'error',
-					})
-
-					setLoading(false)
-				}
+				window.location.replace('/')
 			} else {
 				setError(
 					'Your NIN verification failed because there was no response from the server. Please reload this page.',

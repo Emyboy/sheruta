@@ -315,7 +315,8 @@ const UserProfile = ({
 			'N/A',
 		'State of NOK': hostNinData?.nok_state,
 		'Town of NOK': hostNinData?.nok_town,
-		'Address of NOK': hostNinData?.nok_address1 || hostNinData?.nok_address2 || 'N/A',
+		'Address of NOK':
+			hostNinData?.nok_address1 || hostNinData?.nok_address2 || 'N/A',
 	}
 
 	return (
@@ -341,8 +342,8 @@ const UserProfile = ({
 				w="full"
 				fontWeight="normal"
 			>
-				Fields with the icon <Icon color="brand" as={BiBadgeCheck} /> are
-				NIMC verified
+				Fields with the icon <Icon color="brand" as={BiBadgeCheck} /> are NIMC
+				verified
 			</Text>
 			<InfoSection title="Personal Information" data={personalInfo} />
 			<InfoSection title="Occupation" data={occupation} />
@@ -356,10 +357,10 @@ export default function VerificationComponent({
 	request,
 	hostNinData,
 }: {
-	request: HostRequestDataDetails & {user_info: UserInfoDTO}
+	request: HostRequestDataDetails & { user_info: UserInfoDTO }
 	hostNinData: PremblyNINVerificationResponse | undefined
 }) {
-	console.log(request);
+	console.log(request)
 
 	const {
 		authState: { user, user_info, flat_share_profile },

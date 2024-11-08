@@ -1,4 +1,7 @@
-import { NINResponseDTO, PremblyNINVerificationResponse } from '@/components/types'
+import {
+	NINResponseDTO,
+	PremblyNINVerificationResponse,
+} from '@/components/types'
 import { DocumentReference } from 'firebase/firestore'
 
 export interface UserInfo {
